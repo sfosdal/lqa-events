@@ -8,8 +8,10 @@
     'Climate Pledge Arena': '--v-cpa',
     'McCaw Hall': '--v-mccaw',
     'Seattle Center': '--v-seactr',
+    'Cornish Playhouse': '--v-cornish',
+    'The Vera Project': '--v-vera',
   };
-  var EXTRA_VARS = ['--v-cpa', '--v-mccaw', '--v-seactr'];
+  var EXTRA_VARS = ['--v-cpa', '--v-mccaw', '--v-seactr', '--v-cornish', '--v-vera'];
 
   var state = { events: [], byDate: {}, venues: [], filter: '', month: null };
 

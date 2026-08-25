@@ -10,11 +10,15 @@
  */
 import { writeFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
+import { parseScCards, parseScDetailDate, mapDiceEvents } from './sources.mjs';
 
 const JSON_OUT = new URL('../site/events.json', import.meta.url);
 const ICS_OUT = new URL('../site/events.ics', import.meta.url);
-const WINDOW_DAYS = 90;
-const MAX_EVENTS = 300; // sanity cap, not a display cap
+// A full year: Cornish Playhouse and McCaw Hall announce whole seasons ahead.
+const WINDOW_DAYS = 365;
+const MAX_EVENTS = 500; // sanity cap, not a display cap
+
+const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
 function decodeEntities(s) {
   return String(s)
@@ -63,10 +67,49 @@ async function mccawHallRss() {
   }).filter((e) => e.title && /^\d{4}-\d{2}-\d{2}$/.test(e.date));
 }
 
+// --- Seattle Center's own calendar (server-rendered, filtered by venue category).
+//     The listing's date headers omit the year and include past events, so each
+//     card's real date comes from its detail page. ---
+async function seattleCenterCat({ cats, label }) {
+  const res = await fetch(`https://www.seattlecenter.com/events/event-calendar?cats=${cats}`, {
+    headers: { 'user-agent': BROWSER_UA },
+  });
+  if (!res.ok) { console.error(`Seattle Center cats=${cats} HTTP ${res.status}`); return []; }
+  const cards = parseScCards(await res.text());
+  const events = [];
+  for (const card of cards) {
+    try {
+      const detail = await fetch(card.url, { headers: { 'user-agent': BROWSER_UA } });
+      if (!detail.ok) { console.error(`Seattle Center detail HTTP ${detail.status}: ${card.url}`); continue; }
+      const date = parseScDetailDate(await detail.text());
+      if (!date) { console.error(`No date found on ${card.url}`); continue; }
+      events.push({ venue: label, title: card.title, date, time: card.time, url: card.url });
+    } catch (err) {
+      console.error(`Seattle Center detail failed (${card.url}):`, err.message);
+    }
+  }
+  return events;
+}
+
+// --- The Vera Project: DICE ticketing API (the publishable widget key from
+//     theveraproject.org/events — the same call their own embed makes) ---
+async function veraProjectDice() {
+  const params = new URLSearchParams({ 'page[size]': '100' });
+  params.append('filter[venues][]', 'The Vera Project');
+  const res = await fetch(`https://events-api.dice.fm/v1/events?${params}`, {
+    headers: { 'x-api-key': 'zVXg21HmAF43lbgnB79QM5CUzcHYG0Gx5M6DjHdD' },
+  });
+  if (!res.ok) { console.error('DICE (Vera Project) HTTP', res.status); return []; }
+  return mapDiceEvents(await res.json(), 'The Vera Project');
+}
+
 const sources = [
   () => ticketmasterVenue({ keyword: 'Climate Pledge Arena', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/' }),
   mccawHallRss,
   () => ticketmasterVenue({ keyword: 'Seattle Center', venueMatch: 'seattle center', label: 'Seattle Center', fallbackUrl: 'https://www.seattlecenter.com/events/event-calendar' }),
+  () => seattleCenterCat({ cats: 173, label: 'Cornish Playhouse' }),
+  () => seattleCenterCat({ cats: 93, label: 'Cornish Playhouse' }), // Dingwall Courtyard
+  veraProjectDice,
 ];
 
 let all = [];
