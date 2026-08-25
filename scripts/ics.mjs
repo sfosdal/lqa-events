@@ -89,7 +89,13 @@ function eventLines(e, dtstamp) {
   if (e.time) {
     const [h, m] = e.time.split(':');
     lines.push(`DTSTART;TZID=${TZID}:${dateDigits(e.date)}T${pad(h)}${pad(m)}00`);
-    lines.push(`DTEND;TZID=${TZID}:${addHours(e.date, e.time, DEFAULT_DURATION_H)}`);
+    if (e.end && e.end > e.time) {
+      // real same-day end time from the source beats the default duration
+      const [eh, em] = e.end.split(':');
+      lines.push(`DTEND;TZID=${TZID}:${dateDigits(e.date)}T${pad(eh)}${pad(em)}00`);
+    } else {
+      lines.push(`DTEND;TZID=${TZID}:${addHours(e.date, e.time, DEFAULT_DURATION_H)}`);
+    }
   } else {
     lines.push(`DTSTART;VALUE=DATE:${dateDigits(e.date)}`);
     lines.push(`DTEND;VALUE=DATE:${addHours(e.date, '00:00', 24).slice(0, 8)}`);

@@ -11,7 +11,7 @@ the data every ~6 hours and deploys straight to GitHub Pages (no data commits).
 | Path | What |
 |---|---|
 | `/lqa-events/` | Calendar UI — month grid, agenda, venue filters, subscribe |
-| `/lqa-events/events.json` | JSON feed: `{ generated, events: [{venue,title,date,time,url}] }` |
+| `/lqa-events/events.json` | JSON feed: `{ generated, events: [{venue,title,date,time,url}] }` — plus optional per-event `end` (same-day local end time), `age21`, `soldOut`, `free` |
 | `/lqa-events/events.ics` | iCalendar feed — subscribable in Google/Apple Calendar |
 | `/lqa-events/embed.js` | Drop-in widget for other sites |
 

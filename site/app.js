@@ -73,6 +73,32 @@
     return list.filter(function (e) { return e.venue === state.filter; });
   }
 
+  // Estimated end: the source's real end time, else start + 3h. '' if unknown
+  // or the estimate crosses midnight.
+  function endEstimate(e) {
+    if (e.end) return e.end;
+    if (!e.time) return '';
+    var h = Number(e.time.split(':')[0]) + 3;
+    return h >= 24 ? '' : pad(h) + ':' + e.time.split(':')[1] + ':00';
+  }
+  function badgesFor(e) {
+    var out = [];
+    if (e.age21) out.push(['b-21', '21+']);
+    var end = endEstimate(e);
+    if (end && end <= '16:00:00') out.push(['b-day', 'day']);
+    if (e.soldOut) out.push(['b-sold', 'sold out']);
+    if (e.free) out.push(['b-free', 'free']);
+    return out;
+  }
+  function appendBadges(el, e) {
+    badgesFor(e).forEach(function (b) {
+      var s = document.createElement('span');
+      s.className = 'badge ' + b[0];
+      s.textContent = b[1];
+      el.appendChild(s);
+    });
+  }
+
   // ---- venue chips ----
   function renderChips() {
     var nav = document.querySelector('.filters');
@@ -207,6 +233,7 @@
         venue.textContent = e.venue;
         venue.style.setProperty('--dot', venueColor(e.venue));
         row.appendChild(time); row.appendChild(a); row.appendChild(venue);
+        appendBadges(row, e);
         wrap.appendChild(row);
       });
       li.appendChild(wrap);

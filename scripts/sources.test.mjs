@@ -4,10 +4,11 @@ import { parseScCards, parseScDetailDate, parseScVenueCats, parseClockTime, mapD
 
 // --- Seattle Center calendar HTML (event cards; dates live on detail pages) ---
 
-function card(time, href, title) {
+function card(time, href, title, free) {
   return `<div class="event-list__time">\n${time} </div>
     <div class="event-list__details"><h2 class="event-list__title">
-    <a href="${href}"    >\n\t\t${title}\n\t</a></h2></div>`;
+    <a href="${href}"    >\n\t\t${title}\n\t</a></h2>
+    <div class="event-list__price"><span>${free ? ' Free Event' : '$25'}</span></div></div>`;
 }
 
 test('parses listing cards with absolute URLs and 24h times', () => {
@@ -19,8 +20,16 @@ test('parses listing cards with absolute URLs and 24h times', () => {
     title: 'Gypsy: A Musical Fable',
     time: '20:00:00',
     url: 'https://www.seattlecenter.com/events/event-calendar/gypsy',
+    free: false,
   });
   assert.equal(cards[1].time, '14:00:00');
+});
+
+test('free events are flagged from the price span', () => {
+  const html = card('11:00 a.m.', 'e/1', 'Lawn Festival', true) + card('8:00 p.m.', 'e/2', 'Paid Show', false);
+  const cards = parseScCards(html);
+  assert.equal(cards[0].free, true);
+  assert.equal(cards[1].free, false);
 });
 
 test('HTML entities in titles are decoded', () => {
@@ -71,9 +80,12 @@ const diceData = {
   data: [
     {
       name: 'Cool Show',
-      date: '2026-08-26T03:00:00Z', // 2026-08-25 20:00 in Los Angeles
+      date: '2026-08-26T03:00:00Z',     // 2026-08-25 20:00 in Los Angeles
+      date_end: '2026-08-26T06:00:00Z', // 23:00 same local day
       timezone: 'America/Los_Angeles',
       status: 'on-sale',
+      sold_out: true,
+      age_limit: 'This is a 21+ event.',
       url: 'https://link.dice.fm/abc',
     },
     {
@@ -86,7 +98,7 @@ const diceData = {
   ],
 };
 
-test('DICE UTC instants become local Seattle date/time', () => {
+test('DICE UTC instants become local Seattle date/time with end, 21+, sold-out', () => {
   const evs = mapDiceEvents(diceData, 'The Vera Project');
   assert.equal(evs.length, 1); // cancelled filtered out
   assert.deepEqual(evs[0], {
@@ -94,6 +106,29 @@ test('DICE UTC instants become local Seattle date/time', () => {
     title: 'Cool Show',
     date: '2026-08-25',
     time: '20:00:00',
+    end: '23:00:00',
+    age21: true,
+    soldOut: true,
     url: 'https://link.dice.fm/abc',
   });
+});
+
+test('all-ages DICE events carry no age21/soldOut/end extras', () => {
+  const evs = mapDiceEvents({ data: [{
+    name: 'Teen Show', date: '2026-08-26T03:00:00Z', timezone: 'America/Los_Angeles',
+    status: 'on-sale', sold_out: false, age_limit: 'This is an All Ages event. ',
+    url: 'x',
+  }] }, 'The Vera Project');
+  assert.equal(evs[0].age21, undefined);
+  assert.equal(evs[0].soldOut, undefined);
+  assert.equal(evs[0].end, undefined);
+});
+
+test('an end past local midnight is dropped (overnight shows fall back to estimates)', () => {
+  const evs = mapDiceEvents({ data: [{
+    name: 'Late Show', date: '2026-08-26T05:00:00Z', date_end: '2026-08-26T09:00:00Z', // 22:00 → 02:00 next day
+    timezone: 'America/Los_Angeles', status: 'on-sale', url: 'x',
+  }] }, 'The Vera Project');
+  assert.equal(evs[0].time, '22:00:00');
+  assert.equal(evs[0].end, undefined);
 });

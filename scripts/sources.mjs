@@ -37,12 +37,17 @@ export function parseClockTime(s) {
  * parseScDetailDate. Returns [{ title, time, url }].
  */
 export function parseScCards(html) {
-  const cardRe = /event-list__time">\s*([^<]*?)\s*<[\s\S]{0,800}?event-list__title">\s*<a href="([^"]+)"[^>]*>\s*([\s\S]*?)\s*<\/a>/g;
-  return [...html.matchAll(cardRe)].map((m) => ({
-    title: decodeEntities(m[3]),
-    time: parseClockTime(m[1]),
-    url: new URL(m[2], 'https://www.seattlecenter.com/').href,
-  }));
+  return String(html).split(/event-list__time">/).slice(1).map((seg) => {
+    const time = seg.match(/^\s*([^<]*?)\s*</);
+    const a = seg.match(/event-list__title">\s*<a href="([^"]+)"[^>]*>\s*([\s\S]*?)\s*<\/a>/);
+    if (!a) return null;
+    return {
+      title: decodeEntities(a[2]),
+      time: parseClockTime(time ? time[1] : ''),
+      url: new URL(a[1], 'https://www.seattlecenter.com/').href,
+      free: /event-list__price">[\s\S]{0,120}?Free Event/.test(seg),
+    };
+  }).filter(Boolean);
 }
 
 /**
@@ -75,15 +80,24 @@ export function parseScDetailDate(html) {
  * each UTC instant to its venue-local date and time.
  */
 export function mapDiceEvents(data, venueLabel) {
+  const fmt = (iso, tz) => new Intl.DateTimeFormat('sv-SE', {
+    timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }).format(new Date(iso)); // sv-SE → "2026-08-25 20:00:00"
   return (data?.data || [])
     .filter((e) => e.name && e.date && e.status !== 'cancelled' && e.status !== 'postponed')
     .map((e) => {
-      const local = new Intl.DateTimeFormat('sv-SE', {
-        timeZone: e.timezone || 'America/Los_Angeles',
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
-      }).format(new Date(e.date)); // sv-SE → "2026-08-25 20:00:00"
-      const [date, time] = local.split(' ');
-      return { venue: venueLabel, title: e.name, date, time, url: e.url || '' };
+      const tz = e.timezone || 'America/Los_Angeles';
+      const [date, time] = fmt(e.date, tz).split(' ');
+      const ev = { venue: venueLabel, title: e.name, date, time, url: e.url || '' };
+      if (e.date_end) {
+        // keep the end only when the show wraps up the same local day —
+        // overnight ends would make "done by" logic lie
+        const [endDate, endTime] = fmt(e.date_end, tz).split(' ');
+        if (endDate === date && endTime > time) ev.end = endTime;
+      }
+      if (/\b21\s*(\+|and (over|up))|\b21\+/i.test(String(e.age_limit || ''))) ev.age21 = true;
+      if (e.sold_out) ev.soldOut = true;
+      return ev;
     });
 }

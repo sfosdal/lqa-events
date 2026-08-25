@@ -40,13 +40,17 @@ async function ticketmasterVenue({ keyword, venueMatch, label, fallbackUrl }) {
   const data = await res.json();
   return (data?._embedded?.events || [])
     .filter((e) => (e._embedded?.venues?.[0]?.name || '').toLowerCase().includes(venueMatch))
-    .map((e) => ({
-      venue: label,
-      title: e.name,
-      date: e.dates?.start?.localDate || '',
-      time: e.dates?.start?.localTime || '',
-      url: e.url || fallbackUrl,
-    }));
+    .map((e) => {
+      const ev = {
+        venue: label,
+        title: e.name,
+        date: e.dates?.start?.localDate || '',
+        time: e.dates?.start?.localTime || '',
+        url: e.url || fallbackUrl,
+      };
+      if (e.ageRestrictions?.legalAgeEnforced) ev.age21 = true;
+      return ev;
+    });
 }
 
 // --- McCaw Hall: the venue's own RSS feed (full calendar, incl. opera/ballet) ---
@@ -110,7 +114,9 @@ async function seattleCenterSweep(existingVenues) {
         if (!detail.ok) { console.error(`Seattle Center detail HTTP ${detail.status}: ${card.url}`); return; }
         const date = parseScDetailDate(await detail.text());
         if (!date) { console.error(`No date found on ${card.url}`); return; }
-        events.push({ venue: card.venue, title: card.title, date, time: card.time, url: card.url });
+        const ev = { venue: card.venue, title: card.title, date, time: card.time, url: card.url };
+        if (card.free) ev.free = true;
+        events.push(ev);
       } catch (err) {
         console.error(`Seattle Center detail failed (${card.url}):`, err.message);
       }

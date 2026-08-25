@@ -162,6 +162,25 @@ button.cal-day:hover { background: var(--gold-soft); }
   letter-spacing: .06em; color: var(--dot, var(--ink-soft));
 }
 
+/* ---- event badges + legend ---- */
+.badge {
+  font-family: var(--mono); font-size: .62rem; text-transform: uppercase;
+  letter-spacing: .08em; border-radius: 3px; padding: .18em .5em;
+  border: 1px solid currentColor; align-self: center; white-space: nowrap;
+}
+.b-21 { color: var(--v-vera); }
+.b-day { color: var(--gold); }
+.b-sold { color: var(--mist); background: var(--ink); border-color: var(--ink); }
+.b-free { color: var(--v-cornish); }
+@media (prefers-color-scheme: dark) {
+  .b-sold { color: var(--sky); background: var(--ink); border-color: var(--ink); }
+}
+.legend {
+  display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; align-items: center;
+  color: var(--ink-soft); font-size: .82rem; margin: -0.25rem 0 1.2rem;
+}
+.legend .badge { margin-right: .45rem; }
+
 /* ---- share / embed ---- */
 .share { margin-top: 3rem; }
 .share-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1.5rem; }
