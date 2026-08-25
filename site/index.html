@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lower Queen Anne Events — around Seattle Center</title>
+<meta name="description" content="What's on around Seattle Center — Climate Pledge Arena, McCaw Hall, and Seattle Center grounds. Calendar, iCal feed, and embeddable widget.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,500;10..72,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="alternate" type="text/calendar" href="events.ics" title="Lower Queen Anne Events">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-text">
+    <p class="eyebrow">Lower Queen Anne · Seattle</p>
+    <h1>Events around<br>Seattle Center</h1>
+    <p class="sub">Climate Pledge Arena, McCaw Hall, and the Seattle Center grounds —
+      refreshed every six hours. <span id="updated"></span></p>
+  </div>
+  <div class="masthead-actions">
+    <button id="subscribeBtn" class="btn-gold" type="button" aria-expanded="false">Add to your calendar</button>
+    <div id="subscribePop" class="pop" hidden>
+      <p>Subscribe in your calendar app and new events show up on their own.</p>
+      <p class="pop-row"><a id="webcalLink" href="#">Open in calendar app</a></p>
+      <p class="pop-row"><a id="gcalLink" href="#" target="_blank" rel="noopener">Add to Google Calendar</a></p>
+      <p class="pop-row feed-url"><code id="icsUrl"></code>
+        <button id="copyIcs" type="button">Copy</button></p>
+    </div>
+  </div>
+</header>
+
+<nav class="filters" aria-label="Filter by venue">
+  <button class="chip is-on" data-venue="" type="button">All venues</button>
+  <!-- venue chips injected by app.js -->
+</nav>
+
+<section class="cal" aria-label="Month calendar">
+  <div class="cal-head">
+    <button id="calPrev" type="button" aria-label="Previous month">‹</button>
+    <h2 id="calTitle">…</h2>
+    <button id="calNext" type="button" aria-label="Next month">›</button>
+  </div>
+  <div class="cal-dow" aria-hidden="true">
+    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+  </div>
+  <div id="calGrid" class="cal-grid"></div>
+</section>
+
+<section class="agenda" aria-label="Upcoming events">
+  <h2 class="section-title">Coming up</h2>
+  <ol id="agenda"><li class="empty">Loading events…</li></ol>
+</section>
+
+<section class="share" id="embed">
+  <h2 class="section-title">Put this on your site</h2>
+  <div class="share-cols">
+    <div>
+      <h3>Events widget</h3>
+      <p>Drop these two lines into any page and the next events render in place.
+        Style it with the <code>lqa-ev-</code> CSS classes.</p>
+<pre><code>&lt;div id="lqa-events"&gt;&lt;/div&gt;
+&lt;script src="https://fosdal.net/lqa-events/embed.js" data-max="8" defer&gt;&lt;/script&gt;</code></pre>
+    </div>
+    <div>
+      <h3>Data feeds</h3>
+      <p>The raw data behind this page, fetchable from anywhere (CORS is open):</p>
+      <ul class="feed-list">
+        <li><code>events.json</code> — <a href="events.json">JSON feed</a></li>
+        <li><code>events.ics</code> — <a href="events.ics">iCalendar feed</a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Sources: Ticketmaster Discovery API and venue calendars. Listings link to the
+    venue or ticket page — check there for the final word.
+    A <a href="https://fosdal.net/">fosdal.net</a> project.</p>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
