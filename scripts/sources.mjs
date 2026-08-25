@@ -46,6 +46,21 @@ export function parseScCards(html) {
 }
 
 /**
+ * Discover the venue filter categories on the calendar page: the checkboxes
+ * under the "Facility/Venue" fieldset (the "Event Type" fieldset above it is
+ * ignored). Returns [{ id, label }].
+ */
+export function parseScVenueCats(html) {
+  const at = String(html).search(/fieldset__legend[^>]*>[^<]*Facility\/Venue|>\s*Facility\/Venue\s*</);
+  if (at === -1) return [];
+  const cats = [];
+  const re = /name="cats" value="(\d+)"[^>]*>\s*<label[^>]*>\s*([^<]+?)\s*<\/label>/g;
+  re.lastIndex = at;
+  for (let m; (m = re.exec(html)); ) cats.push({ id: m[1], label: decodeEntities(m[2]) });
+  return cats;
+}
+
+/**
  * Pull the first full "Month D, YYYY" date out of an event detail page.
  * Returns 'YYYY-MM-DD', or '' if none is found.
  */

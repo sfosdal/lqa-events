@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseScCards, parseScDetailDate, parseClockTime, mapDiceEvents } from './sources.mjs';
+import { parseScCards, parseScDetailDate, parseScVenueCats, parseClockTime, mapDiceEvents } from './sources.mjs';
 
 // --- Seattle Center calendar HTML (event cards; dates live on detail pages) ---
 
@@ -43,6 +43,26 @@ test('detail page yields the first full date as YYYY-MM-DD', () => {
 
 test('detail page with no full date yields empty string', () => {
   assert.equal(parseScDetailDate('<p>© 2026 Seattle Center</p>'), '');
+});
+
+test('venue categories come from the Facility/Venue fieldset only', () => {
+  const html = `
+    <span class="fieldset__legend-text">Event Type</span>
+    <input name="cats" value="195"><label for="edit-checkboxes-195">Arts</label>
+    <input name="cats" value="45"><label for="edit-checkboxes-45">Concerts</label>
+    <span class="fieldset__legend-text">Facility/Venue</span>
+    <input name="cats" value="128"><label for="edit-checkboxes-128">Armory Food &amp; Event Hall</label>
+    <input name="cats" value="105"><label for="edit-checkboxes-105">Climate Pledge Arena</label>`;
+  assert.deepEqual(parseScVenueCats(html), [
+    { id: '128', label: 'Armory Food & Event Hall' },
+    { id: '105', label: 'Climate Pledge Arena' },
+  ]);
+});
+
+test('no Facility/Venue fieldset yields no categories (not the type list)', () => {
+  const html = `<span class="fieldset__legend-text">Event Type</span>
+    <input name="cats" value="195"><label>Arts</label>`;
+  assert.deepEqual(parseScVenueCats(html), []);
 });
 
 // --- DICE API mapping ---

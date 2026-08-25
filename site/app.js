@@ -2,8 +2,9 @@
 (function () {
   'use strict';
 
-  // Venue hue assignment: known venues get stable colors, any future source
-  // falls back through the palette in first-seen order.
+  // Venue hue assignment: marquee venues keep curated colors; every other
+  // venue gets a hue hashed from its name, so colors stay stable no matter
+  // which venues the feed contains on a given day.
   var VENUE_VARS = {
     'Climate Pledge Arena': '--v-cpa',
     'McCaw Hall': '--v-mccaw',
@@ -11,7 +12,12 @@
     'Cornish Playhouse': '--v-cornish',
     'The Vera Project': '--v-vera',
   };
-  var EXTRA_VARS = ['--v-cpa', '--v-mccaw', '--v-seactr', '--v-cornish', '--v-vera'];
+  function venueColor(v) {
+    if (VENUE_VARS[v]) return 'var(' + VENUE_VARS[v] + ')';
+    var h = 0;
+    for (var i = 0; i < v.length; i++) h = (h * 31 + v.charCodeAt(i)) % 360;
+    return 'hsl(' + h + ', 42%, 52%)';
+  }
 
   var state = { events: [], byDate: {}, venues: [], filter: '', month: null };
 
@@ -34,10 +40,6 @@
     h = h % 12 || 12;
     return h + ':' + m + ' ' + ap;
   }
-  function venueVar(v) {
-    if (!VENUE_VARS[v]) VENUE_VARS[v] = EXTRA_VARS[Object.keys(VENUE_VARS).length % EXTRA_VARS.length];
-    return VENUE_VARS[v];
-  }
 
   // ---- data ----
   function load() {
@@ -52,7 +54,7 @@
           (state.byDate[e.date] = state.byDate[e.date] || []).push(e);
           vs[e.venue] = true;
         });
-        state.venues = Object.keys(vs);
+        state.venues = Object.keys(vs).sort();
         if (!Array.isArray(data) && data.generated) {
           var age = Math.round((Date.now() - new Date(data.generated)) / 36e5);
           $('updated').textContent = 'Updated ' + (age < 1 ? 'under an hour' : 'about ' + age + 'h') + ' ago.';
@@ -84,7 +86,7 @@
       b.className = 'chip';
       b.dataset.venue = v;
       b.textContent = v;
-      b.style.setProperty('--dot', 'var(' + venueVar(v) + ')');
+      b.style.setProperty('--dot', venueColor(v));
       nav.appendChild(b);
     });
     nav.addEventListener('click', function (e) {
@@ -145,7 +147,7 @@
         ticks.className = 'ticks';
         evs.slice(0, 6).forEach(function (e) {
           var t = document.createElement('i');
-          t.style.setProperty('--dot', 'var(' + venueVar(e.venue) + ')');
+          t.style.setProperty('--dot', venueColor(e.venue));
           ticks.appendChild(t);
         });
         cell.appendChild(ticks);
@@ -207,7 +209,7 @@
         var venue = document.createElement('span');
         venue.className = 'venue';
         venue.textContent = e.venue;
-        venue.style.setProperty('--dot', 'var(' + venueVar(e.venue) + ')');
+        venue.style.setProperty('--dot', venueColor(e.venue));
         row.appendChild(time); row.appendChild(a); row.appendChild(venue);
         wrap.appendChild(row);
       });

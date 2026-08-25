@@ -10,7 +10,7 @@
  */
 import { writeFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
-import { parseScCards, parseScDetailDate, mapDiceEvents } from './sources.mjs';
+import { parseScCards, parseScDetailDate, parseScVenueCats, mapDiceEvents } from './sources.mjs';
 
 const JSON_OUT = new URL('../site/events.json', import.meta.url);
 const ICS_OUT = new URL('../site/events.ics', import.meta.url);
@@ -67,27 +67,56 @@ async function mccawHallRss() {
   }).filter((e) => e.title && /^\d{4}-\d{2}-\d{2}$/.test(e.date));
 }
 
-// --- Seattle Center's own calendar (server-rendered, filtered by venue category).
-//     The listing's date headers omit the year and include past events, so each
-//     card's real date comes from its detail page. ---
-async function seattleCenterCat({ cats, label }) {
-  const res = await fetch(`https://www.seattlecenter.com/events/event-calendar?cats=${cats}`, {
-    headers: { 'user-agent': BROWSER_UA },
+// --- Seattle Center's own calendar: sweep EVERY venue category the filter
+//     offers (discovered at runtime, nothing hardcoded). Venues already
+//     covered by a dedicated source above are skipped so the same show isn't
+//     listed twice under slightly different titles. The listing's date
+//     headers omit the year and include past events, so each card's real
+//     date comes from its detail page (fetched once per unique event). ---
+const SC_CAL = 'https://www.seattlecenter.com/events/event-calendar';
+
+async function seattleCenterSweep(existingVenues) {
+  const res = await fetch(SC_CAL, { headers: { 'user-agent': BROWSER_UA } });
+  if (!res.ok) { console.error(`Seattle Center calendar HTTP ${res.status}`); return []; }
+  const cats = parseScVenueCats(await res.text());
+  if (!cats.length) { console.error('Seattle Center: no venue categories found — page layout changed?'); return []; }
+
+  const covered = (label) => existingVenues.some((v) => {
+    const a = v.toLowerCase(), b = label.toLowerCase();
+    return a.includes(b) || b.includes(a);
   });
-  if (!res.ok) { console.error(`Seattle Center cats=${cats} HTTP ${res.status}`); return []; }
-  const cards = parseScCards(await res.text());
-  const events = [];
-  for (const card of cards) {
+
+  const byUrl = new Map();
+  for (const cat of cats) {
+    if (covered(cat.label)) { console.log(`Seattle Center: skipping ${cat.label} (dedicated source)`); continue; }
     try {
-      const detail = await fetch(card.url, { headers: { 'user-agent': BROWSER_UA } });
-      if (!detail.ok) { console.error(`Seattle Center detail HTTP ${detail.status}: ${card.url}`); continue; }
-      const date = parseScDetailDate(await detail.text());
-      if (!date) { console.error(`No date found on ${card.url}`); continue; }
-      events.push({ venue: label, title: card.title, date, time: card.time, url: card.url });
+      const r = await fetch(`${SC_CAL}?cats=${cat.id}`, { headers: { 'user-agent': BROWSER_UA } });
+      if (!r.ok) { console.error(`Seattle Center cats=${cat.id} HTTP ${r.status}`); continue; }
+      for (const card of parseScCards(await r.text())) {
+        if (!byUrl.has(card.url)) byUrl.set(card.url, { ...card, venue: cat.label });
+      }
     } catch (err) {
-      console.error(`Seattle Center detail failed (${card.url}):`, err.message);
+      console.error(`Seattle Center ${cat.label} failed:`, err.message);
     }
   }
+
+  const cards = [...byUrl.values()];
+  const events = [];
+  const POOL = 6;
+  for (let i = 0; i < cards.length; i += POOL) {
+    await Promise.all(cards.slice(i, i + POOL).map(async (card) => {
+      try {
+        const detail = await fetch(card.url, { headers: { 'user-agent': BROWSER_UA } });
+        if (!detail.ok) { console.error(`Seattle Center detail HTTP ${detail.status}: ${card.url}`); return; }
+        const date = parseScDetailDate(await detail.text());
+        if (!date) { console.error(`No date found on ${card.url}`); return; }
+        events.push({ venue: card.venue, title: card.title, date, time: card.time, url: card.url });
+      } catch (err) {
+        console.error(`Seattle Center detail failed (${card.url}):`, err.message);
+      }
+    }));
+  }
+  console.log(`Seattle Center sweep: ${events.length} events from ${cards.length} cards`);
   return events;
 }
 
@@ -103,12 +132,10 @@ async function veraProjectDice() {
   return mapDiceEvents(await res.json(), 'The Vera Project');
 }
 
+// Dedicated per-venue sources run first (better times and ticket links)...
 const sources = [
   () => ticketmasterVenue({ keyword: 'Climate Pledge Arena', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/' }),
   mccawHallRss,
-  () => ticketmasterVenue({ keyword: 'Seattle Center', venueMatch: 'seattle center', label: 'Seattle Center', fallbackUrl: 'https://www.seattlecenter.com/events/event-calendar' }),
-  () => seattleCenterCat({ cats: 173, label: 'Cornish Playhouse' }),
-  () => seattleCenterCat({ cats: 93, label: 'Cornish Playhouse' }), // Dingwall Courtyard
   veraProjectDice,
 ];
 
@@ -117,6 +144,10 @@ for (const src of sources) {
   try { all = all.concat(await src()); }
   catch (err) { console.error('Source failed:', err.message); }
 }
+
+// ...then the campus-wide sweep fills in every other venue.
+try { all = all.concat(await seattleCenterSweep([...new Set(all.map((e) => e.venue))])); }
+catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 
 // window, de-dupe, sort
 const today = new Date().toISOString().slice(0, 10);

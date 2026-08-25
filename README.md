@@ -28,9 +28,12 @@ Options via data-attributes: `data-max`, `data-venue`, `data-target`,
 ## Layout
 
 - `scripts/fetch-events.mjs` — aggregates sources into `site/events.json` +
-  `site/events.ics`. Sources: Ticketmaster Discovery API (Climate Pledge
-  Arena, Seattle Center — needs `TICKETMASTER_API_KEY`, skipped without it)
-  and McCaw Hall's RSS feed. 90-day window, de-duped.
+  `site/events.ics`. Dedicated sources first: Ticketmaster Discovery API
+  (Climate Pledge Arena — needs `TICKETMASTER_API_KEY`, skipped without it),
+  McCaw Hall's RSS feed, and The Vera Project via the DICE API. Then a
+  campus-wide sweep of seattlecenter.com's calendar covers every venue
+  category its filter lists (discovered at runtime; venues already covered
+  by a dedicated source are skipped). 365-day window, de-duped.
 - `scripts/ics.mjs` — RFC 5545 generation (stable UIDs, PST/PDT VTIMEZONE,
   all-day vs timed events). Tests: `node --test scripts/ics.test.mjs`.
 - `site/` — the static site; generated feed files land here (gitignored).
