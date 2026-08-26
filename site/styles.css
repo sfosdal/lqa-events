@@ -59,7 +59,7 @@ h1 {
   align-items: flex-end;
 }
 .updated {
-  font-family: var(--display); font-weight: 700; font-size: .75rem;
+  font-family: var(--display); font-weight: 700; font-size: 1.5rem;
   text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
   margin: 0 0 .5rem; min-height: 1em;
 }
