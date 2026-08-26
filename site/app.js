@@ -195,6 +195,14 @@
     p.hidden = !p.hidden;
     this.setAttribute('aria-expanded', String(!p.hidden));
   });
+  // clicking anywhere outside the bar/panel closes the panel, same as the button
+  document.addEventListener('click', function (e) {
+    var p = $('filterPanel');
+    if (!p.hidden && !e.target.closest('#filterPanel') && !e.target.closest('.filterbar')) {
+      p.hidden = true;
+      $('filterToggle').setAttribute('aria-expanded', 'false');
+    }
+  });
   function clearAllFilters() {
     state.venuesOn = {};
     state.badges = {};
