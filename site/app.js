@@ -109,7 +109,9 @@
     return out;
   }
   function appendBadges(el, e) {
-    badgesFor(e).forEach(function (b) {
+    var bs = badgesFor(e);
+    if (bs.length) el.classList.add('tint-' + bs[0][0].slice(2)); // b-21 → tint-21
+    bs.forEach(function (b) {
       var s = document.createElement('span');
       s.className = 'badge ' + b[0];
       s.textContent = b[1];

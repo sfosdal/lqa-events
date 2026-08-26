@@ -172,7 +172,12 @@ button.cal-day:hover { background: var(--gold-soft); }
   letter-spacing: .1em; color: var(--ink-soft);
 }
 .day-events { display: grid; gap: .6rem; align-content: start; }
-.ev { display: flex; flex-wrap: wrap; gap: .3rem .8rem; align-items: baseline; }
+.ev { display: flex; flex-wrap: wrap; gap: .3rem .8rem; align-items: baseline; padding: .3em .55em; border-radius: 6px; }
+/* tagged events get a whisper of their first badge's color behind the row */
+.ev.tint-21 { background: color-mix(in srgb, var(--v-vera) 10%, transparent); }
+.ev.tint-day { background: color-mix(in srgb, var(--gold) 10%, transparent); }
+.ev.tint-sold { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.ev.tint-free { background: color-mix(in srgb, var(--v-cornish) 10%, transparent); }
 .ev a { font-weight: 600; text-decoration-color: var(--line); }
 .ev a:hover { text-decoration-color: var(--gold); }
 .ev .time { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); min-width: 5.5rem; }
