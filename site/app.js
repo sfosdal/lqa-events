@@ -19,7 +19,7 @@
     return 'hsl(' + h + ', 42%, 52%)';
   }
 
-  var state = { events: [], byDate: {}, venues: [], filter: '', badges: {}, month: null, showPast: false };
+  var state = { events: [], byDate: {}, venues: [], venuesOn: {}, badges: {}, month: null, showPast: false };
 
   function slugify(s) {
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -82,10 +82,15 @@
   function activeBadges() {
     return Object.keys(state.badges).filter(function (k) { return state.badges[k]; });
   }
+  function activeVenues() {
+    return Object.keys(state.venuesOn).filter(function (k) { return state.venuesOn[k]; });
+  }
+  // Venues OR together; badges AND on top.
   function filtered(list) {
     var keys = activeBadges();
+    var venues = activeVenues();
     return list.filter(function (e) {
-      if (state.filter && e.venue !== state.filter) return false;
+      if (venues.length && venues.indexOf(e.venue) === -1) return false;
       for (var i = 0; i < keys.length; i++) if (!BADGE_PREDS[keys[i]](e)) return false;
       return true;
     });
@@ -132,9 +137,15 @@
     nav.addEventListener('click', function (e) {
       var chip = e.target.closest('.chip');
       if (!chip) return;
-      state.filter = chip.dataset.venue;
+      var v = chip.dataset.venue;
+      if (!v) {
+        state.venuesOn = {}; // "All venues" clears the selection
+      } else {
+        state.venuesOn[v] = !state.venuesOn[v];
+      }
+      var any = activeVenues().length > 0;
       nav.querySelectorAll('.chip').forEach(function (c) {
-        c.classList.toggle('is-on', c === chip);
+        c.classList.toggle('is-on', c.dataset.venue ? !!state.venuesOn[c.dataset.venue] : !any);
       });
       renderCal(); renderAgenda(); updateSubscribe();
     });
@@ -309,15 +320,16 @@
   var BADGE_NAMES = { '21plus': '21+', 'day': 'daytime', 'soldout': 'sold-out', 'free': 'free' };
   function updateSubscribe() {
     var keys = activeBadges();
+    var venues = activeVenues();
     var file = 'events.ics';
     var note = 'Covers every venue and event.';
-    if (state.filter && !keys.length) {
-      file = 'events-venue-' + slugify(state.filter) + '.ics';
-      note = 'Only ' + state.filter + ' events.';
-    } else if (!state.filter && keys.length === 1) {
+    if (venues.length === 1 && !keys.length) {
+      file = 'events-venue-' + slugify(venues[0]) + '.ics';
+      note = 'Only ' + venues[0] + ' events.';
+    } else if (!venues.length && keys.length === 1) {
       file = 'events-' + keys[0] + '.ics';
       note = 'Only ' + BADGE_NAMES[keys[0]] + ' events.';
-    } else if (state.filter || keys.length) {
+    } else if (venues.length || keys.length) {
       note = 'Combined filters have no dedicated feed — this is the full calendar.';
     }
     var icsHref = new URL(file, location.href).href;
