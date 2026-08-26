@@ -353,16 +353,27 @@
   function updateSubscribe() {
     var keys = activeBadges();
     var venues = activeVenues();
-    var file = 'events.ics';
-    var note = 'Covers every venue and event.';
+    // A dedicated feed exists for exactly one venue or one badge.
+    var filteredFile = null, filteredNote = '';
     if (venues.length === 1 && !keys.length) {
-      file = 'events-venue-' + slugify(venues[0]) + '.ics';
-      note = 'Only ' + venues[0] + ' events.';
+      filteredFile = 'events-venue-' + slugify(venues[0]) + '.ics';
+      filteredNote = 'Only ' + venues[0] + ' events.';
     } else if (!venues.length && keys.length === 1) {
-      file = 'events-' + keys[0] + '.ics';
-      note = 'Only ' + BADGE_NAMES[keys[0]] + ' events.';
+      filteredFile = 'events-' + keys[0] + '.ics';
+      filteredNote = 'Only ' + BADGE_NAMES[keys[0]] + ' events.';
+    }
+    $('subFilterRow').hidden = !filteredFile;
+    var useFilter = filteredFile && $('subUseFilter').checked;
+    var file = useFilter ? filteredFile : 'events.ics';
+    var note;
+    if (useFilter) {
+      note = filteredNote;
     } else if (venues.length || keys.length) {
-      note = 'Combined filters have no dedicated feed — this is the full calendar.';
+      note = filteredFile
+        ? 'The full calendar — every venue and event.'
+        : 'Combined filters have no dedicated feed — this is the full calendar.';
+    } else {
+      note = 'Covers every venue and event.';
     }
     var icsHref = new URL(file, location.href).href;
     $('subNote').textContent = note;
@@ -370,6 +381,7 @@
     $('webcalLink').href = icsHref.replace(/^https?:/, 'webcal:');
     $('gcalLink').href = 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(icsHref.replace(/^https?:/, 'webcal:'));
   }
+  $('subUseFilter').addEventListener('change', updateSubscribe);
   updateSubscribe();
   $('subscribeBtn').addEventListener('click', function () {
     var pop = $('subscribePop');

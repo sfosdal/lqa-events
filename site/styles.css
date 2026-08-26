@@ -227,6 +227,8 @@ button.cal-day:hover { background: var(--gold-soft); }
 .legend .badge:hover { filter: brightness(1.15); }
 .legend .badge.is-on { box-shadow: 0 0 0 2px var(--gold); }
 .pop-note { color: var(--ink-soft); font-size: .85em; }
+.pop-filter { display: flex; gap: .5em; align-items: center; cursor: pointer; font-weight: 600; }
+.pop-filter input { accent-color: var(--gold); }
 
 /* ---- share / embed ---- */
 .share { margin-top: 3rem; }
