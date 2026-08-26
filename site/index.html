@@ -43,8 +43,12 @@
       <circle cx="16" cy="6" r="2.2"/><circle cx="8" cy="12" r="2.2"/><circle cx="16" cy="18" r="2.2"/>
     </svg>
   </button>
+  <button id="clearAll" class="filter-icon clear-icon" type="button" disabled aria-label="Clear all filters" title="Clear all filters">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+      <path d="M6 6l12 12M18 6L6 18"/>
+    </svg>
+  </button>
   <div id="presets" class="presets"><!-- marquee venue pills injected by app.js --></div>
-  <button id="clearAll" class="chip clear-chip" type="button" disabled>Clear all</button>
 </nav>
 <div id="filterPanel" class="filter-panel" hidden>
   <div class="fp-group">
@@ -66,7 +70,7 @@
 </div>
 
 <section class="agenda" aria-label="Upcoming events">
-  <h2 class="section-title">Coming up</h2>
+  <h2 class="section-title">Coming up in LQA</h2>
   <div class="agenda-layout">
     <ol id="agenda"><li class="empty">Loading events…</li></ol>
     <aside class="cal-side" aria-label="Month calendar">
