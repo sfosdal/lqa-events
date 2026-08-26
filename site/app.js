@@ -156,7 +156,23 @@
     pv.innerHTML = '';
     state.venues.forEach(function (v) { pv.appendChild(venueChip(v)); });
     syncFilters();
+    fitPresets();
   }
+  // Keep the bar to one line: drop preset pills (lowest priority first) until
+  // icon + presets + Clear all fit. Every venue is still in the panel.
+  function fitPresets() {
+    var wrap = $('presets');
+    var pills = [].slice.call(wrap.children);
+    pills.forEach(function (p) { p.style.display = ''; });
+    for (var i = pills.length - 1; i >= 0 && wrap.scrollWidth > wrap.clientWidth; i--) {
+      pills[i].style.display = 'none';
+    }
+  }
+  var fitTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(fitTimer);
+    fitTimer = setTimeout(fitPresets, 100);
+  });
   // One venue or badge can be represented by several buttons (preset pill,
   // panel chip) — sync the on-state everywhere.
   function syncFilters() {
