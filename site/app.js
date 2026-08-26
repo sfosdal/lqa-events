@@ -202,6 +202,13 @@
     state.venues.forEach(function (v) { pv.appendChild(venueChip(v)); });
     var pt = $('panelTeams');
     pt.innerHTML = '';
+    var allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = 'chip';
+    allBtn.dataset.teamAll = '1';
+    allBtn.textContent = 'All';
+    allBtn.title = 'Hide every team’s games';
+    pt.appendChild(allBtn);
     TEAMS.forEach(function (t) {
       var b = document.createElement('button');
       b.type = 'button';
@@ -243,6 +250,11 @@
       c.classList.toggle('is-on', !!state.teamsOff[c.dataset.team]);
       c.setAttribute('aria-pressed', String(!!state.teamsOff[c.dataset.team]));
     });
+    var everyTeam = TEAMS.every(function (t) { return !!state.teamsOff[t.slug]; });
+    document.querySelectorAll('[data-team-all]').forEach(function (c) {
+      c.classList.toggle('is-on', everyTeam);
+      c.setAttribute('aria-pressed', String(everyTeam));
+    });
     var any = activeVenues().length > 0 || activeBadges().length > 0 || activeTeams().length > 0;
     $('filterToggle').classList.toggle('is-on', any);
     $('clearAll').disabled = !any;
@@ -269,7 +281,15 @@
     var b = e.target.closest('[data-badge]');
     if (b) { state.badges[b.dataset.badge] = !state.badges[b.dataset.badge]; applyFilters(); return; }
     var t = e.target.closest('[data-team]');
-    if (t) { state.teamsOff[t.dataset.team] = !state.teamsOff[t.dataset.team]; applyFilters(); }
+    if (t) { state.teamsOff[t.dataset.team] = !state.teamsOff[t.dataset.team]; applyFilters(); return; }
+    // "All" toggles the whole team list: hide every team, or un-hide them all.
+    var ta = e.target.closest('[data-team-all]');
+    if (ta) {
+      var allOn = TEAMS.every(function (tm) { return !!state.teamsOff[tm.slug]; });
+      state.teamsOff = {};
+      if (!allOn) TEAMS.forEach(function (tm) { state.teamsOff[tm.slug] = true; });
+      applyFilters();
+    }
   });
   $('filterToggle').addEventListener('click', function () {
     var p = $('filterPanel');
