@@ -144,6 +144,14 @@ button.cal-day:hover { background: var(--gold-soft); }
   border-top: 1px solid var(--line); padding: 1rem 0;
 }
 .day-row.is-today .date-rail .dnum { color: var(--gold); }
+.day-row.is-past { opacity: .5; }
+.past-toggle { padding: .6rem 0 1rem; }
+.past-toggle button {
+  font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
+  padding: .5em .95em; background: var(--mist); color: var(--ink-soft);
+  border: 1px dashed var(--line);
+}
+.past-toggle button:hover { color: var(--ink); border-color: var(--ink-soft); }
 .date-rail { text-align: center; }
 .date-rail .dnum {
   font-family: var(--display); font-weight: 700; font-size: 2.6rem; line-height: 1; display: block;
@@ -179,7 +187,11 @@ button.cal-day:hover { background: var(--gold-soft); }
   display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; align-items: center;
   color: var(--ink-soft); font-size: .82rem; margin: -0.25rem 0 1.2rem;
 }
-.legend .badge { margin-right: .45rem; }
+.legend .badge { margin-right: .45rem; cursor: pointer; background: none; }
+.legend .b-sold { background: var(--ink); }
+.legend .badge:hover { filter: brightness(1.15); }
+.legend .badge.is-on { box-shadow: 0 0 0 2px var(--gold); }
+.pop-note { color: var(--ink-soft); font-size: .85em; }
 
 /* ---- share / embed ---- */
 .share { margin-top: 3rem; }

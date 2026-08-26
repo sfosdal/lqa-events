@@ -19,7 +19,11 @@
     return 'hsl(' + h + ', 42%, 52%)';
   }
 
-  var state = { events: [], byDate: {}, venues: [], filter: '', month: null };
+  var state = { events: [], byDate: {}, venues: [], filter: '', badges: {}, month: null, showPast: false };
+
+  function slugify(s) {
+    return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
 
   var $ = function (id) { return document.getElementById(id); };
   var pad = function (n) { return (n < 10 ? '0' : '') + n; };
@@ -68,9 +72,23 @@
       });
   }
 
+  // Predicates mirror scripts/badges.mjs — keep the two in sync.
+  var BADGE_PREDS = {
+    '21plus': function (e) { return !!e.age21; },
+    'day': function (e) { var end = endEstimate(e); return !!end && end <= '16:00:00'; },
+    'soldout': function (e) { return !!e.soldOut; },
+    'free': function (e) { return !!e.free; },
+  };
+  function activeBadges() {
+    return Object.keys(state.badges).filter(function (k) { return state.badges[k]; });
+  }
   function filtered(list) {
-    if (!state.filter) return list;
-    return list.filter(function (e) { return e.venue === state.filter; });
+    var keys = activeBadges();
+    return list.filter(function (e) {
+      if (state.filter && e.venue !== state.filter) return false;
+      for (var i = 0; i < keys.length; i++) if (!BADGE_PREDS[keys[i]](e)) return false;
+      return true;
+    });
   }
 
   // Estimated end: the source's real end time, else start + 3h. '' if unknown
@@ -118,9 +136,20 @@
       nav.querySelectorAll('.chip').forEach(function (c) {
         c.classList.toggle('is-on', c === chip);
       });
-      renderCal(); renderAgenda();
+      renderCal(); renderAgenda(); updateSubscribe();
     });
   }
+
+  // ---- badge filters (the legend doubles as the control) ----
+  document.querySelectorAll('.legend .badge').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var k = btn.dataset.badge;
+      state.badges[k] = !state.badges[k];
+      btn.classList.toggle('is-on', state.badges[k]);
+      btn.setAttribute('aria-pressed', String(!!state.badges[k]));
+      renderCal(); renderAgenda(); updateSubscribe();
+    });
+  });
 
   // ---- month grid ----
   function monthBounds() {
@@ -139,7 +168,7 @@
     if (!m) return;
     $('calTitle').textContent = m.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     var bounds = monthBounds();
-    $('calPrev').disabled = !bounds || sameMonth(m, new Date(bounds.min.getFullYear(), bounds.min.getMonth(), 1)) || m <= new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    $('calPrev').disabled = !bounds || sameMonth(m, new Date(bounds.min.getFullYear(), bounds.min.getMonth(), 1));
     $('calNext').disabled = !bounds || sameMonth(m, new Date(bounds.max.getFullYear(), bounds.max.getMonth(), 1));
 
     var grid = $('calGrid');
@@ -187,6 +216,10 @@
   $('calGrid').addEventListener('click', function (e) {
     var cell = e.target.closest('button.cal-day');
     if (!cell || !cell.dataset.date) return;
+    if (cell.dataset.date < todayStr() && !state.showPast) {
+      state.showPast = true;
+      renderAgenda();
+    }
     var row = document.querySelector('.day-row[data-date="' + cell.dataset.date + '"]');
     if (row) row.scrollIntoView({ block: 'start' });
   });
@@ -198,12 +231,34 @@
     var dates = Object.keys(state.byDate).sort();
     var today = todayStr();
     var shown = 0;
+    var pastCount = 0;
     dates.forEach(function (date) {
+      if (date < today) {
+        pastCount += filtered(state.byDate[date]).length;
+      }
+    });
+    if (pastCount) {
+      var tli = document.createElement('li');
+      tli.className = 'past-toggle';
+      var tb = document.createElement('button');
+      tb.type = 'button';
+      tb.textContent = state.showPast
+        ? 'Hide the ' + pastCount + ' past events'
+        : 'Show ' + pastCount + ' past events';
+      tb.addEventListener('click', function () {
+        state.showPast = !state.showPast;
+        renderAgenda();
+      });
+      tli.appendChild(tb);
+      ol.appendChild(tli);
+    }
+    dates.forEach(function (date) {
+      if (date < today && !state.showPast) return;
       var evs = filtered(state.byDate[date]);
       if (!evs.length) return;
       shown += evs.length;
       var li = document.createElement('li');
-      li.className = 'day-row' + (date === today ? ' is-today' : '');
+      li.className = 'day-row' + (date === today ? ' is-today' : '') + (date < today ? ' is-past' : '');
       li.dataset.date = date;
       var d = parseDate(date);
 
@@ -248,10 +303,29 @@
   }
 
   // ---- subscribe popover ----
-  var icsHref = new URL('events.ics', location.href).href;
-  $('icsUrl').textContent = icsHref;
-  $('webcalLink').href = icsHref.replace(/^https?:/, 'webcal:');
-  $('gcalLink').href = 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(icsHref.replace(/^https?:/, 'webcal:'));
+  // The feed follows the active filter where a pre-built file exists: one
+  // venue, or one badge. Combined filters fall back to the full feed.
+  var BADGE_NAMES = { '21plus': '21+', 'day': 'daytime', 'soldout': 'sold-out', 'free': 'free' };
+  function updateSubscribe() {
+    var keys = activeBadges();
+    var file = 'events.ics';
+    var note = 'Covers every venue and event.';
+    if (state.filter && !keys.length) {
+      file = 'events-venue-' + slugify(state.filter) + '.ics';
+      note = 'Only ' + state.filter + ' events.';
+    } else if (!state.filter && keys.length === 1) {
+      file = 'events-' + keys[0] + '.ics';
+      note = 'Only ' + BADGE_NAMES[keys[0]] + ' events.';
+    } else if (state.filter || keys.length) {
+      note = 'Combined filters have no dedicated feed — this is the full calendar.';
+    }
+    var icsHref = new URL(file, location.href).href;
+    $('subNote').textContent = note;
+    $('icsUrl').textContent = icsHref;
+    $('webcalLink').href = icsHref.replace(/^https?:/, 'webcal:');
+    $('gcalLink').href = 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(icsHref.replace(/^https?:/, 'webcal:'));
+  }
+  updateSubscribe();
   $('subscribeBtn').addEventListener('click', function () {
     var pop = $('subscribePop');
     var open = pop.hidden;
@@ -266,7 +340,7 @@
   });
   $('copyIcs').addEventListener('click', function () {
     var btn = this;
-    navigator.clipboard.writeText(icsHref).then(function () {
+    navigator.clipboard.writeText($('icsUrl').textContent).then(function () {
       btn.textContent = 'Copied';
       setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
     });

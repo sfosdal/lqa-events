@@ -23,6 +23,7 @@
     <button id="subscribeBtn" class="btn-gold" type="button" aria-expanded="false">Add to your calendar</button>
     <div id="subscribePop" class="pop" hidden>
       <p>Subscribe in your calendar app and new events show up on their own.</p>
+      <p class="pop-note" id="subNote"></p>
       <p class="pop-row"><a id="webcalLink" href="#">Open in calendar app</a></p>
       <p class="pop-row"><a id="gcalLink" href="#" target="_blank" rel="noopener">Add to Google Calendar</a></p>
       <p class="pop-row feed-url"><code id="icsUrl"></code>
@@ -50,11 +51,11 @@
 
 <section class="agenda" aria-label="Upcoming events">
   <h2 class="section-title">Coming up</h2>
-  <p class="legend" aria-label="What the tags mean">
-    <span class="badge b-21">21+</span> door-restricted, no minors
-    <span class="badge b-day">day</span> wraps up by 4 p.m.
-    <span class="badge b-sold">sold out</span> full house guaranteed
-    <span class="badge b-free">free</span> open to walk-ups
+  <p class="legend" aria-label="Filter by tag">
+    <button type="button" class="badge b-21" data-badge="21plus" aria-pressed="false">21+</button> door-restricted, no minors
+    <button type="button" class="badge b-day" data-badge="day" aria-pressed="false">day</button> wraps up by 4 p.m.
+    <button type="button" class="badge b-sold" data-badge="soldout" aria-pressed="false">sold out</button> full house guaranteed
+    <button type="button" class="badge b-free" data-badge="free" aria-pressed="false">free</button> open to walk-ups
   </p>
   <ol id="agenda"><li class="empty">Loading events…</li></ol>
 </section>

@@ -11,12 +11,17 @@
 import { writeFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
 import { parseScCards, parseScDetailDate, parseScVenueCats, mapDiceEvents } from './sources.mjs';
+import { mergeWithArchive } from './merge.mjs';
+import { slugify, BADGE_FEEDS } from './badges.mjs';
 
 const JSON_OUT = new URL('../site/events.json', import.meta.url);
 const ICS_OUT = new URL('../site/events.ics', import.meta.url);
-// A full year: Cornish Playhouse and McCaw Hall announce whole seasons ahead.
+// A full year each way: venues announce whole seasons ahead, and past events
+// are kept for a year (carried forward from the previously published feed —
+// see mergeWithArchive).
 const WINDOW_DAYS = 365;
-const MAX_EVENTS = 500; // sanity cap, not a display cap
+const FEED_URL = process.env.FEED_URL || 'https://fosdal.net/lqa-events/events.json';
+const MAX_EVENTS = 1200; // sanity cap, not a display cap
 
 const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
@@ -158,13 +163,40 @@ catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 // window, de-dupe, sort
 const today = new Date().toISOString().slice(0, 10);
 const horizon = new Date(Date.now() + WINDOW_DAYS * 86400e3).toISOString().slice(0, 10);
+const cutoff = new Date(Date.now() - WINDOW_DAYS * 86400e3).toISOString().slice(0, 10);
 const seen = new Set();
-const merged = all
-  .filter((e) => e.date && e.date >= today && e.date <= horizon)
-  .filter((e) => { const k = `${e.venue}|${e.title}|${e.date}`; if (seen.has(k)) return false; seen.add(k); return true; })
-  .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')))
-  .slice(0, MAX_EVENTS);
+const fresh = all
+  .filter((e) => e.date && e.date >= cutoff && e.date <= horizon)
+  .filter((e) => { const k = `${e.venue}|${e.title}|${e.date}`; if (seen.has(k)) return false; seen.add(k); return true; });
+
+// carry past events forward from the previously published feed
+let archived = [];
+try {
+  const r = await fetch(FEED_URL);
+  if (r.ok) { const d = await r.json(); archived = Array.isArray(d) ? d : (d.events || []); }
+  else console.error(`Archive fetch HTTP ${r.status} — past events not carried this run`);
+} catch (err) { console.error('Archive fetch failed:', err.message); }
+
+const merged = mergeWithArchive(fresh, archived, today, cutoff).slice(-MAX_EVENTS);
 
 writeFileSync(JSON_OUT, JSON.stringify({ generated: new Date().toISOString(), events: merged }, null, 2) + '\n');
 writeFileSync(ICS_OUT, buildIcs(merged));
-console.log(`Wrote ${merged.length} events to events.json and events.ics`);
+
+// Filtered subscribe feeds, one per venue and one per badge, so the site's
+// filter chips can offer a matching calendar subscription.
+const siteDir = new URL('../site/', import.meta.url);
+let nFeeds = 0;
+for (const venue of new Set(merged.map((e) => e.venue))) {
+  const evs = merged.filter((e) => e.venue === venue);
+  writeFileSync(new URL(`events-venue-${slugify(venue)}.ics`, siteDir),
+    buildIcs(evs, new Date(), { calname: `LQA Events — ${venue}` }));
+  nFeeds++;
+}
+for (const [slug, [label, pred]] of Object.entries(BADGE_FEEDS)) {
+  writeFileSync(new URL(`events-${slug}.ics`, siteDir),
+    buildIcs(merged.filter(pred), new Date(), { calname: `LQA Events — ${label}` }));
+  nFeeds++;
+}
+
+const nPast = merged.filter((e) => e.date < today).length;
+console.log(`Wrote ${merged.length} events (${nPast} past, ${merged.length - nPast} upcoming) + ${nFeeds} filtered feeds`);

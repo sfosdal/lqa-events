@@ -107,7 +107,7 @@ function eventLines(e, dtstamp) {
   return lines;
 }
 
-export function buildIcs(events, now = new Date()) {
+export function buildIcs(events, now = new Date(), { calname = 'Lower Queen Anne Events' } = {}) {
   const dtstamp =
     `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}` +
     `T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
@@ -117,7 +117,7 @@ export function buildIcs(events, now = new Date()) {
     'PRODID:-//fosdal.net//lqa-events//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:Lower Queen Anne Events',
+    `X-WR-CALNAME:${escapeText(calname)}`,
     'X-WR-CALDESC:Upcoming events around Seattle Center — Climate Pledge Arena\\, McCaw Hall\\, Seattle Center',
     `X-WR-TIMEZONE:${TZID}`,
     'REFRESH-INTERVAL;VALUE=DURATION:PT6H',

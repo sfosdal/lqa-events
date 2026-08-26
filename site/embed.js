@@ -46,6 +46,10 @@
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (data) {
         var list = Array.isArray(data) ? data : (data.events || []);
+        var t = new Date();
+        var today = t.getFullYear() + '-' +
+          ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2);
+        list = list.filter(function (e) { return e.date >= today; }); // the feed keeps a year of history
         if (venue) list = list.filter(function (e) { return e.venue === venue; });
         if (!list.length) return;
         var ul = document.createElement('ul');
