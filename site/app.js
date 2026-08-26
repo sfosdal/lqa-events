@@ -60,8 +60,10 @@
         });
         state.venues = Object.keys(vs).sort();
         if (!Array.isArray(data) && data.generated) {
-          var age = Math.round((Date.now() - new Date(data.generated)) / 36e5);
-          $('updated').textContent = 'Updated ' + (age < 1 ? 'under an hour' : 'about ' + age + 'h') + ' ago';
+          var gen = new Date(data.generated);
+          $('updated').textContent = 'Updated ' +
+            gen.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' · ' +
+            gen.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         }
         var now = new Date();
         state.month = new Date(now.getFullYear(), now.getMonth(), 1);
