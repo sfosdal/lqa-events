@@ -133,7 +133,7 @@
 
   // ---- filter bar: preset pills + full panel ----
   // The marquee venues get a spot in the bar; everything lives in the panel.
-  var PRESET_VENUES = ['Climate Pledge Arena', 'McCaw Hall', 'The Vera Project', 'Cornish Playhouse'];
+  var PRESET_VENUES = ['Climate Pledge Arena', 'T-Mobile Park', 'Lumen Field', 'McCaw Hall', 'The Vera Project', 'Cornish Playhouse'];
 
   function venueChip(v) {
     var b = document.createElement('button');
