@@ -54,9 +54,14 @@ h1 {
 .sub { color: var(--ink-soft); max-width: 34rem; margin: .8rem 0 0; }
 #updated { font-family: var(--mono); font-size: .85em; }
 
-.masthead-actions { position: relative; text-align: right; }
+.masthead-actions {
+  position: relative; text-align: right; align-self: stretch;
+  display: flex; flex-direction: column; justify-content: space-between;
+  align-items: flex-end;
+}
 .updated {
-  font-family: var(--mono); font-size: .75rem; color: var(--ink-soft);
+  font-family: var(--display); font-weight: 700; font-size: .75rem;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
   margin: 0 0 .5rem; min-height: 1em;
 }
 .btn-gold {
