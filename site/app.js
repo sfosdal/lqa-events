@@ -61,7 +61,11 @@
         state.venues = Object.keys(vs).sort();
         var now = new Date();
         state.month = new Date(now.getFullYear(), now.getMonth(), 1);
-        renderChips(); renderCal(); renderAgenda();
+        // forget saved venues that no longer appear in the feed
+        Object.keys(state.venuesOn).forEach(function (v) {
+          if (state.venues.indexOf(v) === -1) delete state.venuesOn[v];
+        });
+        renderFilters(); renderCal(); renderAgenda(); updateSubscribe();
       })
       .catch(function (err) {
         $('agenda').innerHTML = '';
@@ -122,44 +126,72 @@
     });
   }
 
-  // ---- venue chips ----
-  function renderChips() {
-    var nav = document.querySelector('.filters');
-    state.venues.forEach(function (v) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip';
-      b.dataset.venue = v;
-      b.textContent = v;
-      b.style.setProperty('--dot', venueColor(v));
-      nav.appendChild(b);
-    });
-    nav.addEventListener('click', function (e) {
-      var chip = e.target.closest('.chip');
-      if (!chip) return;
-      var v = chip.dataset.venue;
-      if (!v) {
-        state.venuesOn = {}; // "All venues" clears the selection
-      } else {
-        state.venuesOn[v] = !state.venuesOn[v];
-      }
-      var any = activeVenues().length > 0;
-      nav.querySelectorAll('.chip').forEach(function (c) {
-        c.classList.toggle('is-on', c.dataset.venue ? !!state.venuesOn[c.dataset.venue] : !any);
-      });
-      renderCal(); renderAgenda(); updateSubscribe();
-    });
-  }
+  // ---- filter bar: preset pills + full panel ----
+  // The marquee venues get a spot in the bar; everything lives in the panel.
+  var PRESET_VENUES = ['Climate Pledge Arena', 'McCaw Hall', 'The Vera Project', 'Cornish Playhouse'];
 
-  // ---- badge filters (the legend doubles as the control) ----
-  document.querySelectorAll('.legend .badge').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var k = btn.dataset.badge;
-      state.badges[k] = !state.badges[k];
-      btn.classList.toggle('is-on', state.badges[k]);
-      btn.setAttribute('aria-pressed', String(!!state.badges[k]));
-      renderCal(); renderAgenda(); updateSubscribe();
+  function venueChip(v) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.dataset.venue = v;
+    b.textContent = v;
+    b.style.setProperty('--dot', venueColor(v));
+    return b;
+  }
+  function renderFilters() {
+    var presets = $('presets');
+    presets.innerHTML = '';
+    PRESET_VENUES.forEach(function (v) {
+      if (state.venues.indexOf(v) !== -1) presets.appendChild(venueChip(v));
     });
+    var pv = $('panelVenues');
+    pv.innerHTML = '';
+    state.venues.forEach(function (v) { pv.appendChild(venueChip(v)); });
+    syncFilters();
+  }
+  // One venue or badge can be represented by several buttons (preset pill,
+  // panel chip, legend badge) — sync the on-state everywhere.
+  function syncFilters() {
+    document.querySelectorAll('[data-venue]').forEach(function (c) {
+      c.classList.toggle('is-on', !!state.venuesOn[c.dataset.venue]);
+    });
+    document.querySelectorAll('[data-badge]').forEach(function (c) {
+      c.classList.toggle('is-on', !!state.badges[c.dataset.badge]);
+      c.setAttribute('aria-pressed', String(!!state.badges[c.dataset.badge]));
+    });
+    $('filterToggle').classList.toggle('is-on', activeVenues().length > 0 || activeBadges().length > 0);
+  }
+  // Filter choices persist per-browser (no login — just localStorage).
+  function saveFilters() {
+    try {
+      localStorage.setItem('lqa-filters', JSON.stringify({ venues: activeVenues(), badges: activeBadges() }));
+    } catch (e) { /* private mode etc. — filters just won't persist */ }
+  }
+  function loadFilters() {
+    try {
+      var s = JSON.parse(localStorage.getItem('lqa-filters') || '{}');
+      (s.venues || []).forEach(function (v) { state.venuesOn[v] = true; });
+      (s.badges || []).forEach(function (k) { if (BADGE_PREDS[k]) state.badges[k] = true; });
+    } catch (e) { /* unreadable storage — start unfiltered */ }
+  }
+  function applyFilters() { syncFilters(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
+
+  document.addEventListener('click', function (e) {
+    var v = e.target.closest('[data-venue]');
+    if (v) { state.venuesOn[v.dataset.venue] = !state.venuesOn[v.dataset.venue]; applyFilters(); return; }
+    var b = e.target.closest('[data-badge]');
+    if (b) { state.badges[b.dataset.badge] = !state.badges[b.dataset.badge]; applyFilters(); }
+  });
+  $('filterToggle').addEventListener('click', function () {
+    var p = $('filterPanel');
+    p.hidden = !p.hidden;
+    this.setAttribute('aria-expanded', String(!p.hidden));
+  });
+  $('clearFilters').addEventListener('click', function () {
+    state.venuesOn = {};
+    state.badges = {};
+    applyFilters();
   });
 
   // ---- month grid ----
@@ -359,5 +391,6 @@
     });
   });
 
+  loadFilters();
   load();
 })();

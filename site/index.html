@@ -32,10 +32,33 @@
   </div>
 </header>
 
-<nav class="filters" aria-label="Filter by venue">
-  <button class="chip is-on" data-venue="" type="button">All venues</button>
-  <!-- venue chips injected by app.js -->
+<nav class="filterbar" aria-label="Filters">
+  <button id="filterToggle" class="filter-icon" type="button" aria-expanded="false" aria-label="All filters">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M4 6h9M19 6h1M4 12h1M11 12h9M4 18h9M19 18h1"/>
+      <circle cx="16" cy="6" r="2.2"/><circle cx="8" cy="12" r="2.2"/><circle cx="16" cy="18" r="2.2"/>
+    </svg>
+  </button>
+  <div id="presets" class="presets"><!-- marquee venue pills injected by app.js --></div>
 </nav>
+<div id="filterPanel" class="filter-panel" hidden>
+  <div class="fp-group">
+    <h3>Venues</h3>
+    <div id="panelVenues" class="chip-row"><!-- every venue, injected by app.js --></div>
+  </div>
+  <div class="fp-group">
+    <h3>Event type</h3>
+    <div class="chip-row">
+      <button type="button" class="badge b-21" data-badge="21plus" aria-pressed="false">21+</button>
+      <button type="button" class="badge b-day" data-badge="day" aria-pressed="false">day</button>
+      <button type="button" class="badge b-sold" data-badge="soldout" aria-pressed="false">sold out</button>
+      <button type="button" class="badge b-free" data-badge="free" aria-pressed="false">free</button>
+    </div>
+  </div>
+  <div class="fp-group">
+    <button id="clearFilters" class="chip" type="button">Clear all filters</button>
+  </div>
+</div>
 
 <section class="agenda" aria-label="Upcoming events">
   <h2 class="section-title">Coming up</h2>
