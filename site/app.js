@@ -99,9 +99,23 @@
         state.venues = Object.keys(vs).sort(venueOrder(vs));
         if (!Array.isArray(data) && data.generated) {
           var gen = new Date(data.generated);
-          $('updated').textContent = 'Updated ' +
-            gen.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' · ' +
-            gen.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+          // Relative stamp, re-rendered every minute so it never goes stale
+          // while the tab sits open.
+          var stamp = function () {
+            var mins = Math.round((Date.now() - gen.getTime()) / 60000);
+            var txt;
+            if (mins < 1) txt = 'just now';
+            else if (mins < 60) txt = mins + ' minute' + (mins === 1 ? '' : 's') + ' ago';
+            else if (mins < 48 * 60) {
+              var h = Math.round(mins / 60);
+              txt = h + ' hour' + (h === 1 ? '' : 's') + ' ago';
+            } else {
+              txt = Math.round(mins / 1440) + ' days ago';
+            }
+            $('updated').textContent = 'Updated ' + txt;
+          };
+          stamp();
+          setInterval(stamp, 60000);
         }
         var now = new Date();
         state.month = new Date(now.getFullYear(), now.getMonth(), 1);
