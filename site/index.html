@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,500;10..72,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=__V__">
 <link rel="alternate" type="text/calendar" href="events.ics" title="Lower Queen Anne Events">
 </head>
 <body>
@@ -20,6 +20,7 @@
     <h1>Events around<br>Seattle Center</h1>
   </div>
   <div class="masthead-actions">
+    <p class="updated" id="updated" aria-live="polite"></p>
     <button id="subscribeBtn" class="btn-gold" type="button" aria-expanded="false">Add to your calendar</button>
     <div id="subscribePop" class="pop" hidden>
       <p>Subscribe in your calendar app and new events show up on their own.</p>
@@ -111,6 +112,6 @@
     A <a href="https://fosdal.net/">fosdal.net</a> project.</p>
 </footer>
 
-<script src="app.js" defer></script>
+<script src="app.js?v=__V__" defer></script>
 </body>
 </html>

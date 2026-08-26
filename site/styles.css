@@ -54,7 +54,11 @@ h1 {
 .sub { color: var(--ink-soft); max-width: 34rem; margin: .8rem 0 0; }
 #updated { font-family: var(--mono); font-size: .85em; }
 
-.masthead-actions { position: relative; }
+.masthead-actions { position: relative; text-align: right; }
+.updated {
+  font-family: var(--mono); font-size: .75rem; color: var(--ink-soft);
+  margin: 0 0 .5rem; min-height: 1em;
+}
 .btn-gold {
   font: 600 1rem/1 var(--body); color: #fff; background: var(--gold);
   border: 0; border-radius: 6px; padding: .8em 1.2em; cursor: pointer;
