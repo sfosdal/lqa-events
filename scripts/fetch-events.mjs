@@ -164,6 +164,17 @@ for (const src of sources) {
 try { all = all.concat(await seattleCenterSweep([...new Set(all.map((e) => e.venue))])); }
 catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 
+// Collapse the campus's micro-locations (courtyards, lawns, festival stages —
+// whatever sub-spots the sweep discovers) into one "Seattle Center" venue.
+// A dozen filter chips for the same lawn helps nobody; only venues with an
+// identity of their own keep their name.
+const CANONICAL_VENUES = new Set([
+  'Climate Pledge Arena', 'T-Mobile Park', 'Lumen Field',
+  'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
+]);
+const normalizeVenue = (e) => (CANONICAL_VENUES.has(e.venue) ? e : { ...e, venue: 'Seattle Center' });
+all = all.map(normalizeVenue);
+
 // window, de-dupe, sort
 const today = new Date().toISOString().slice(0, 10);
 const horizon = new Date(Date.now() + WINDOW_DAYS * 86400e3).toISOString().slice(0, 10);
@@ -177,7 +188,9 @@ const fresh = all
 let archived = [];
 try {
   const r = await fetch(FEED_URL);
-  if (r.ok) { const d = await r.json(); archived = Array.isArray(d) ? d : (d.events || []); }
+  // normalized too, so past events published under old micro-venue names
+  // don't resurrect their filter chips
+  if (r.ok) { const d = await r.json(); archived = (Array.isArray(d) ? d : (d.events || [])).map(normalizeVenue); }
   else console.error(`Archive fetch HTTP ${r.status} — past events not carried this run`);
 } catch (err) { console.error('Archive fetch failed:', err.message); }
 

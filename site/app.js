@@ -21,9 +21,10 @@
 
   // Venue list order = usefulness to an LQA bar owner: the campus venues that
   // actually walk a crowd past the bar come first, the SoDo stadiums last
-  // (huge, but a bus ride away — staffing signal, not foot traffic). Venues
-  // without a hand-set rank are the smaller Seattle Center campus rooms; they
-  // slot in between, busiest first.
+  // (huge, but a bus ride away — staffing signal, not foot traffic). The feed
+  // collapses campus micro-locations into "Seattle Center", so these seven are
+  // normally the whole list; anything unexpected slots in before the stadiums,
+  // busiest first.
   var VENUE_RANK = {
     'Climate Pledge Arena': 0, // 17k people, right across the street
     'McCaw Hall': 1,           // pre-show dinner-and-drinks crowd
@@ -161,7 +162,7 @@
   // The marquee venues get a spot in the bar; everything lives in the panel.
   // Same bar-owner order as VENUE_RANK, so when the bar runs out of room the
   // least relevant pills are the ones that drop.
-  var PRESET_VENUES = ['Climate Pledge Arena', 'McCaw Hall', 'Cornish Playhouse', 'The Vera Project', 'T-Mobile Park', 'Lumen Field'];
+  var PRESET_VENUES = ['Climate Pledge Arena', 'McCaw Hall', 'Seattle Center', 'Cornish Playhouse', 'The Vera Project', 'T-Mobile Park', 'Lumen Field'];
 
   function venueChip(v) {
     var b = document.createElement('button');
