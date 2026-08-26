@@ -137,8 +137,8 @@ h1 {
 }
 .cal-side { position: sticky; top: 1rem; }
 @media (max-width: 760px) {
-  .agenda-layout { display: block; }
-  .cal-side { position: static; max-width: 22rem; margin-bottom: 1.5rem; }
+  .agenda-layout { display: flex; flex-direction: column; }
+  .cal-side { order: -1; position: static; width: 100%; max-width: 24rem; margin: 0 auto 1.5rem; }
 }
 
 /* ---- mini month calendar ---- */
@@ -254,8 +254,34 @@ button.cal-day:hover { background: var(--gold-soft); }
 footer { margin-top: 3.5rem; border-top: 1px solid var(--line); padding-top: 1rem; }
 footer p { color: var(--ink-soft); font-size: .85rem; }
 
-@media (max-width: 540px) {
-  .day-row { grid-template-columns: 3.6rem 1fr; }
-  .date-rail .dnum { font-size: 2rem; }
-  .ev .time { min-width: 0; }
+/* ---- small screens: tighter header, horizontal date headers, stacked rows ---- */
+@media (max-width: 640px) {
+  body { padding: 0 1rem 2.5rem; }
+  .masthead { padding: 1.6rem 0 .8rem; gap: 1.1rem; }
+  h1 { font-size: clamp(2.4rem, 11vw, 3.2rem); }
+  .masthead-actions {
+    align-self: auto; width: 100%; text-align: left;
+    flex-direction: column; align-items: stretch; gap: .2rem;
+  }
+  .updated { font-size: 1.05rem; margin: 0 0 .4rem; }
+  .btn-gold { width: 100%; }
+  .pop { left: 0; right: 0; width: auto; }
+  .section-title { font-size: 1.6rem; margin-top: 1.8rem; }
+
+  /* day groups: date reads across the top instead of down a rail */
+  .day-row { display: block; padding: .85rem 0; }
+  .date-rail {
+    display: flex; align-items: baseline; gap: .55rem;
+    text-align: left; margin-bottom: .5rem;
+  }
+  .date-rail .dnum { display: inline; font-size: 1.7rem; }
+  .date-rail .dmeta { white-space: nowrap; }
+
+  /* event rows: title first, then one meta line */
+  .ev { display: block; padding: .5em .6em; }
+  .ev a { display: block; margin-bottom: .2rem; }
+  .ev .time, .ev .venue, .ev .badge {
+    display: inline-block; vertical-align: baseline; margin-right: .6rem; min-width: 0;
+  }
+  .day-events { gap: .5rem; }
 }
