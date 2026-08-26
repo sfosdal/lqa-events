@@ -19,6 +19,30 @@
     return 'hsl(' + h + ', 42%, 52%)';
   }
 
+  // Venue list order = usefulness to an LQA bar owner: the campus venues that
+  // actually walk a crowd past the bar come first, the SoDo stadiums last
+  // (huge, but a bus ride away — staffing signal, not foot traffic). Venues
+  // without a hand-set rank are the smaller Seattle Center campus rooms; they
+  // slot in between, busiest first.
+  var VENUE_RANK = {
+    'Climate Pledge Arena': 0, // 17k people, right across the street
+    'McCaw Hall': 1,           // pre-show dinner-and-drinks crowd
+    'Seattle Center': 2,       // festivals and grounds events
+    'Cornish Playhouse': 3,
+    'The Vera Project': 4,     // all-ages — least bar crossover of the campus
+    'T-Mobile Park': 90,
+    'Lumen Field': 91,
+  };
+  function venueOrder(counts) {
+    return function (a, b) {
+      var ra = VENUE_RANK[a] != null ? VENUE_RANK[a] : 50;
+      var rb = VENUE_RANK[b] != null ? VENUE_RANK[b] : 50;
+      if (ra !== rb) return ra - rb;
+      if (counts[a] !== counts[b]) return counts[b] - counts[a];
+      return a < b ? -1 : 1;
+    };
+  }
+
   var state = { events: [], byDate: {}, venues: [], venuesOn: {}, badges: {}, month: null, showPast: false };
 
   function slugify(s) {
@@ -56,9 +80,9 @@
         var vs = {};
         list.forEach(function (e) {
           (state.byDate[e.date] = state.byDate[e.date] || []).push(e);
-          vs[e.venue] = true;
+          vs[e.venue] = (vs[e.venue] || 0) + 1;
         });
-        state.venues = Object.keys(vs).sort();
+        state.venues = Object.keys(vs).sort(venueOrder(vs));
         if (!Array.isArray(data) && data.generated) {
           var gen = new Date(data.generated);
           $('updated').textContent = 'Updated ' +
@@ -135,7 +159,9 @@
 
   // ---- filter bar: preset pills + full panel ----
   // The marquee venues get a spot in the bar; everything lives in the panel.
-  var PRESET_VENUES = ['Climate Pledge Arena', 'T-Mobile Park', 'Lumen Field', 'McCaw Hall', 'The Vera Project', 'Cornish Playhouse'];
+  // Same bar-owner order as VENUE_RANK, so when the bar runs out of room the
+  // least relevant pills are the ones that drop.
+  var PRESET_VENUES = ['Climate Pledge Arena', 'McCaw Hall', 'Cornish Playhouse', 'The Vera Project', 'T-Mobile Park', 'Lumen Field'];
 
   function venueChip(v) {
     var b = document.createElement('button');
