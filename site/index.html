@@ -37,18 +37,6 @@
   <!-- venue chips injected by app.js -->
 </nav>
 
-<section class="cal" aria-label="Month calendar">
-  <div class="cal-head">
-    <button id="calPrev" type="button" aria-label="Previous month">‹</button>
-    <h2 id="calTitle">…</h2>
-    <button id="calNext" type="button" aria-label="Next month">›</button>
-  </div>
-  <div class="cal-dow" aria-hidden="true">
-    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-  </div>
-  <div id="calGrid" class="cal-grid"></div>
-</section>
-
 <section class="agenda" aria-label="Upcoming events">
   <h2 class="section-title">Coming up</h2>
   <p class="legend" aria-label="Filter by tag">
@@ -57,7 +45,22 @@
     <button type="button" class="badge b-sold" data-badge="soldout" aria-pressed="false">sold out</button> full house guaranteed
     <button type="button" class="badge b-free" data-badge="free" aria-pressed="false">free</button> open to walk-ups
   </p>
-  <ol id="agenda"><li class="empty">Loading events…</li></ol>
+  <div class="agenda-layout">
+    <ol id="agenda"><li class="empty">Loading events…</li></ol>
+    <aside class="cal-side" aria-label="Month calendar">
+      <div class="cal">
+        <div class="cal-head">
+          <button id="calPrev" type="button" aria-label="Previous month">‹</button>
+          <h2 id="calTitle">…</h2>
+          <button id="calNext" type="button" aria-label="Next month">›</button>
+        </div>
+        <div class="cal-dow" aria-hidden="true">
+          <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+        </div>
+        <div id="calGrid" class="cal-grid"></div>
+      </div>
+    </aside>
+  </div>
 </section>
 
 <section class="share" id="embed">
