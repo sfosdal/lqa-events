@@ -110,11 +110,11 @@
   }
   function badgesFor(e) {
     var out = [];
-    if (e.age21) out.push(['b-21', '21+']);
+    if (e.age21) out.push(['b-21', '21+', 'Door-restricted, no minors']);
     var end = endEstimate(e);
-    if (end && end <= '16:00:00') out.push(['b-day', 'day']);
-    if (e.soldOut) out.push(['b-sold', 'sold out']);
-    if (e.free) out.push(['b-free', 'free']);
+    if (end && end <= '16:00:00') out.push(['b-day', 'day', 'Wraps up by 4 p.m.']);
+    if (e.soldOut) out.push(['b-sold', 'sold out', 'Full house guaranteed']);
+    if (e.free) out.push(['b-free', 'free', 'Open to walk-ups']);
     return out;
   }
   function appendBadges(el, e) {
@@ -122,6 +122,7 @@
       var s = document.createElement('span');
       s.className = 'badge ' + b[0];
       s.textContent = b[1];
+      s.title = b[2];
       el.appendChild(s);
     });
   }
@@ -151,7 +152,7 @@
     syncFilters();
   }
   // One venue or badge can be represented by several buttons (preset pill,
-  // panel chip, legend badge) — sync the on-state everywhere.
+  // panel chip) — sync the on-state everywhere.
   function syncFilters() {
     document.querySelectorAll('[data-venue]').forEach(function (c) {
       c.classList.toggle('is-on', !!state.venuesOn[c.dataset.venue]);
@@ -160,7 +161,9 @@
       c.classList.toggle('is-on', !!state.badges[c.dataset.badge]);
       c.setAttribute('aria-pressed', String(!!state.badges[c.dataset.badge]));
     });
-    $('filterToggle').classList.toggle('is-on', activeVenues().length > 0 || activeBadges().length > 0);
+    var any = activeVenues().length > 0 || activeBadges().length > 0;
+    $('filterToggle').classList.toggle('is-on', any);
+    $('clearAll').disabled = !any;
   }
   // Filter choices persist per-browser (no login — just localStorage).
   function saveFilters() {
@@ -188,11 +191,13 @@
     p.hidden = !p.hidden;
     this.setAttribute('aria-expanded', String(!p.hidden));
   });
-  $('clearFilters').addEventListener('click', function () {
+  function clearAllFilters() {
     state.venuesOn = {};
     state.badges = {};
     applyFilters();
-  });
+  }
+  $('clearFilters').addEventListener('click', clearAllFilters);
+  $('clearAll').addEventListener('click', clearAllFilters);
 
   // ---- month grid ----
   function monthBounds() {

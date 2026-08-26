@@ -43,6 +43,7 @@
     </svg>
   </button>
   <div id="presets" class="presets"><!-- marquee venue pills injected by app.js --></div>
+  <button id="clearAll" class="chip clear-chip" type="button" disabled>Clear all</button>
 </nav>
 <div id="filterPanel" class="filter-panel" hidden>
   <div class="fp-group">
@@ -52,10 +53,10 @@
   <div class="fp-group">
     <h3>Event type</h3>
     <div class="chip-row">
-      <button type="button" class="badge b-21" data-badge="21plus" aria-pressed="false">21+</button>
-      <button type="button" class="badge b-day" data-badge="day" aria-pressed="false">day</button>
-      <button type="button" class="badge b-sold" data-badge="soldout" aria-pressed="false">sold out</button>
-      <button type="button" class="badge b-free" data-badge="free" aria-pressed="false">free</button>
+      <button type="button" class="badge b-21" data-badge="21plus" aria-pressed="false" title="Door-restricted, no minors">21+</button>
+      <button type="button" class="badge b-day" data-badge="day" aria-pressed="false" title="Wraps up by 4 p.m.">day</button>
+      <button type="button" class="badge b-sold" data-badge="soldout" aria-pressed="false" title="Full house guaranteed">sold out</button>
+      <button type="button" class="badge b-free" data-badge="free" aria-pressed="false" title="Open to walk-ups">free</button>
     </div>
   </div>
   <div class="fp-group">
@@ -65,12 +66,6 @@
 
 <section class="agenda" aria-label="Upcoming events">
   <h2 class="section-title">Coming up</h2>
-  <p class="legend" aria-label="Filter by tag">
-    <button type="button" class="badge b-21" data-badge="21plus" aria-pressed="false">21+</button> door-restricted, no minors
-    <button type="button" class="badge b-day" data-badge="day" aria-pressed="false">day</button> wraps up by 4 p.m.
-    <button type="button" class="badge b-sold" data-badge="soldout" aria-pressed="false">sold out</button> full house guaranteed
-    <button type="button" class="badge b-free" data-badge="free" aria-pressed="false">free</button> open to walk-ups
-  </p>
   <div class="agenda-layout">
     <ol id="agenda"><li class="empty">Loading events…</li></ol>
     <aside class="cal-side" aria-label="Month calendar">
