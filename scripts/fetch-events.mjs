@@ -12,7 +12,7 @@ import { writeFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
 import { parseScCards, parseScDetailDate, parseScVenueCats, mapDiceEvents } from './sources.mjs';
 import { mergeWithArchive } from './merge.mjs';
-import { slugify, BADGE_FEEDS } from './badges.mjs';
+import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
 
 const JSON_OUT = new URL('../site/events.json', import.meta.url);
 const ICS_OUT = new URL('../site/events.ics', import.meta.url);
@@ -212,6 +212,12 @@ for (const venue of new Set(merged.map((e) => e.venue))) {
 for (const [slug, [label, pred]] of Object.entries(BADGE_FEEDS)) {
   writeFileSync(new URL(`events-${slug}.ics`, siteDir),
     buildIcs(merged.filter(pred), new Date(), { calname: `LQA Events — ${label}` }));
+  nFeeds++;
+}
+// Exclusion feeds, one per local team: everything except that team's games.
+for (const t of TEAMS) {
+  writeFileSync(new URL(`events-no-${t.slug}.ics`, siteDir),
+    buildIcs(merged.filter((e) => !t.re.test(e.title || '')), new Date(), { calname: `LQA Events — no ${t.label}` }));
   nFeeds++;
 }
 

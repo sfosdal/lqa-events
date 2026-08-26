@@ -44,7 +44,20 @@
     };
   }
 
-  var state = { events: [], byDate: {}, venues: [], venuesOn: {}, badges: {}, month: null, showPast: false };
+  // Local pro teams — an exclusion filter ("hide Mariners games"), matched on
+  // the title no matter what the venue. Mirrors TEAMS in scripts/badges.mjs.
+  var TEAMS = [
+    { slug: 'mariners', label: 'Mariners', re: /mariners/i },
+    { slug: 'storm', label: 'Storm', re: /seattle storm/i },
+    { slug: 'seahawks', label: 'Seahawks', re: /seahawks/i },
+    { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i },
+    { slug: 'sounders', label: 'Sounders', re: /sounders/i },
+    { slug: 'kraken', label: 'Kraken', re: /kraken/i },
+  ];
+  var TEAM_BY_SLUG = {};
+  TEAMS.forEach(function (t) { TEAM_BY_SLUG[t.slug] = t; });
+
+  var state = { events: [], byDate: {}, venues: [], venuesOn: {}, badges: {}, teamsOff: {}, month: null, showPast: false };
 
   function slugify(s) {
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -120,13 +133,18 @@
   function activeVenues() {
     return Object.keys(state.venuesOn).filter(function (k) { return state.venuesOn[k]; });
   }
-  // Venues OR together; badges AND on top.
+  function activeTeams() {
+    return Object.keys(state.teamsOff).filter(function (k) { return state.teamsOff[k]; });
+  }
+  // Venues OR together; badges AND on top; hidden teams drop out last.
   function filtered(list) {
     var keys = activeBadges();
     var venues = activeVenues();
+    var teams = activeTeams();
     return list.filter(function (e) {
       if (venues.length && venues.indexOf(e.venue) === -1) return false;
       for (var i = 0; i < keys.length; i++) if (!BADGE_PREDS[keys[i]](e)) return false;
+      for (var j = 0; j < teams.length; j++) if (TEAM_BY_SLUG[teams[j]].re.test(e.title || '')) return false;
       return true;
     });
   }
@@ -182,6 +200,17 @@
     var pv = $('panelVenues');
     pv.innerHTML = '';
     state.venues.forEach(function (v) { pv.appendChild(venueChip(v)); });
+    var pt = $('panelTeams');
+    pt.innerHTML = '';
+    TEAMS.forEach(function (t) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.dataset.team = t.slug;
+      b.textContent = t.label;
+      b.title = 'Hide ' + t.label + ' games';
+      pt.appendChild(b);
+    });
     syncFilters();
     fitPresets();
   }
@@ -210,14 +239,18 @@
       c.classList.toggle('is-on', !!state.badges[c.dataset.badge]);
       c.setAttribute('aria-pressed', String(!!state.badges[c.dataset.badge]));
     });
-    var any = activeVenues().length > 0 || activeBadges().length > 0;
+    document.querySelectorAll('[data-team]').forEach(function (c) {
+      c.classList.toggle('is-on', !!state.teamsOff[c.dataset.team]);
+      c.setAttribute('aria-pressed', String(!!state.teamsOff[c.dataset.team]));
+    });
+    var any = activeVenues().length > 0 || activeBadges().length > 0 || activeTeams().length > 0;
     $('filterToggle').classList.toggle('is-on', any);
     $('clearAll').disabled = !any;
   }
   // Filter choices persist per-browser (no login — just localStorage).
   function saveFilters() {
     try {
-      localStorage.setItem('lqa-filters', JSON.stringify({ venues: activeVenues(), badges: activeBadges() }));
+      localStorage.setItem('lqa-filters', JSON.stringify({ venues: activeVenues(), badges: activeBadges(), teams: activeTeams() }));
     } catch (e) { /* private mode etc. — filters just won't persist */ }
   }
   function loadFilters() {
@@ -225,6 +258,7 @@
       var s = JSON.parse(localStorage.getItem('lqa-filters') || '{}');
       (s.venues || []).forEach(function (v) { state.venuesOn[v] = true; });
       (s.badges || []).forEach(function (k) { if (BADGE_PREDS[k]) state.badges[k] = true; });
+      (s.teams || []).forEach(function (k) { if (TEAM_BY_SLUG[k]) state.teamsOff[k] = true; });
     } catch (e) { /* unreadable storage — start unfiltered */ }
   }
   function applyFilters() { syncFilters(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
@@ -233,7 +267,9 @@
     var v = e.target.closest('[data-venue]');
     if (v) { state.venuesOn[v.dataset.venue] = !state.venuesOn[v.dataset.venue]; applyFilters(); return; }
     var b = e.target.closest('[data-badge]');
-    if (b) { state.badges[b.dataset.badge] = !state.badges[b.dataset.badge]; applyFilters(); }
+    if (b) { state.badges[b.dataset.badge] = !state.badges[b.dataset.badge]; applyFilters(); return; }
+    var t = e.target.closest('[data-team]');
+    if (t) { state.teamsOff[t.dataset.team] = !state.teamsOff[t.dataset.team]; applyFilters(); }
   });
   $('filterToggle').addEventListener('click', function () {
     var p = $('filterPanel');
@@ -251,6 +287,7 @@
   function clearAllFilters() {
     state.venuesOn = {};
     state.badges = {};
+    state.teamsOff = {};
     applyFilters();
   }
   $('clearFilters').addEventListener('click', clearAllFilters);
@@ -415,14 +452,18 @@
   function updateSubscribe() {
     var keys = activeBadges();
     var venues = activeVenues();
-    // A dedicated feed exists for exactly one venue or one badge.
+    var teams = activeTeams();
+    // A dedicated feed exists for exactly one venue, one badge, or one hidden team.
     var filteredFile = null, filteredNote = '';
-    if (venues.length === 1 && !keys.length) {
+    if (venues.length === 1 && !keys.length && !teams.length) {
       filteredFile = 'events-venue-' + slugify(venues[0]) + '.ics';
       filteredNote = 'Only ' + venues[0] + ' events.';
-    } else if (!venues.length && keys.length === 1) {
+    } else if (!venues.length && keys.length === 1 && !teams.length) {
       filteredFile = 'events-' + keys[0] + '.ics';
       filteredNote = 'Only ' + BADGE_NAMES[keys[0]] + ' events.';
+    } else if (!venues.length && !keys.length && teams.length === 1) {
+      filteredFile = 'events-no-' + teams[0] + '.ics';
+      filteredNote = 'Everything except ' + TEAM_BY_SLUG[teams[0]].label + ' games.';
     }
     $('subFilterRow').hidden = !filteredFile;
     var useFilter = filteredFile && $('subUseFilter').checked;
@@ -430,7 +471,7 @@
     var note;
     if (useFilter) {
       note = filteredNote;
-    } else if (venues.length || keys.length) {
+    } else if (venues.length || keys.length || teams.length) {
       note = filteredFile
         ? 'The full calendar — every venue and event.'
         : 'Combined filters have no dedicated feed — this is the full calendar.';

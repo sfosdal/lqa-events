@@ -21,6 +21,18 @@ export function isDay(e) {
   return !!end && end <= '16:00:00';
 }
 
+// Local pro teams, matched on the event title no matter what the venue.
+// Storm and Reign need the fuller name — bare "storm"/"reign" shows up in
+// concert titles.
+export const TEAMS = [
+  { slug: 'mariners', label: 'Mariners', re: /mariners/i },
+  { slug: 'storm', label: 'Storm', re: /seattle storm/i },
+  { slug: 'seahawks', label: 'Seahawks', re: /seahawks/i },
+  { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i },
+  { slug: 'sounders', label: 'Sounders', re: /sounders/i },
+  { slug: 'kraken', label: 'Kraken', re: /kraken/i },
+];
+
 // key → [label for the calendar name, predicate]
 export const BADGE_FEEDS = {
   '21plus': ['21+', (e) => !!e.age21],

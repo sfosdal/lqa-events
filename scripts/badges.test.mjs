@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { slugify, endEstimate, isDay, BADGE_FEEDS } from './badges.mjs';
+import { slugify, endEstimate, isDay, BADGE_FEEDS, TEAMS } from './badges.mjs';
 
 test('slugify matches the browser-side rule', () => {
   assert.equal(slugify('The Vera Project'), 'the-vera-project');
@@ -20,6 +20,19 @@ test('isDay means done by 4pm', () => {
   assert.equal(isDay({ time: '14:00:00', end: '15:00:00' }), true);
   assert.equal(isDay({ time: '14:00:00' }), false);         // est. end 17:00
   assert.equal(isDay({ time: '' }), false);                 // all-day: unknown
+});
+
+test('team matchers hit real game titles, not concerts', () => {
+  const match = (title) => TEAMS.filter((t) => t.re.test(title)).map((t) => t.slug);
+  assert.deepEqual(match('Seattle Kraken vs. Vancouver Canucks'), ['kraken']);
+  assert.deepEqual(match('Seattle Mariners vs. Houston Astros'), ['mariners']);
+  assert.deepEqual(match('Seattle Storm vs. Las Vegas Aces'), ['storm']);
+  assert.deepEqual(match('Seattle Reign FC vs. Portland Thorns'), ['reign']);
+  assert.deepEqual(match('Seattle Sounders FC vs. LAFC'), ['sounders']);
+  assert.deepEqual(match('Seattle Seahawks vs. San Francisco 49ers'), ['seahawks']);
+  // bare "storm"/"reign" in a show title must not match
+  assert.deepEqual(match('Storm Large: Holiday Ordeal'), []);
+  assert.deepEqual(match('Purple Reign — The Prince Tribute Show'), []);
 });
 
 test('badge predicates', () => {

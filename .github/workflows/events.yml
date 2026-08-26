@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: '22'
       - name: Test
-        run: node --test scripts/ics.test.mjs
+        run: node --test scripts/*.test.mjs
       - name: Fetch & aggregate events
         env:
           TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
