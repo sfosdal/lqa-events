@@ -109,9 +109,7 @@
     return out;
   }
   function appendBadges(el, e) {
-    var bs = badgesFor(e);
-    if (bs.length) el.classList.add('tint-' + bs[0][0].slice(2)); // b-21 → tint-21
-    bs.forEach(function (b) {
+    badgesFor(e).forEach(function (b) {
       var s = document.createElement('span');
       s.className = 'badge ' + b[0];
       s.textContent = b[1];
@@ -277,6 +275,7 @@
       evs.forEach(function (e) {
         var row = document.createElement('div');
         row.className = 'ev';
+        row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' 9%, transparent)';
         var time = document.createElement('span');
         time.className = 'time';
         time.textContent = fmtTime(e.time);
