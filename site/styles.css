@@ -183,9 +183,12 @@ button.cal-day:hover { background: var(--gold-soft); }
 }
 .cal-day.is-out { color: var(--line); }
 .cal-day .num-mo { font-size: .82em; letter-spacing: .03em; }
-/* stepped month boundary */
-.cal-day.mo-top { border-top: 2px solid var(--ink-soft); }
-.cal-day.mo-left { border-left: 2px solid var(--ink-soft); }
+/* month differentiation: the later month is outlined, the earlier one muted */
+.cal-day.mo-t { border-top: 2px solid var(--ink-soft); }
+.cal-day.mo-b { border-bottom: 2px solid var(--ink-soft); }
+.cal-day.mo-l { border-left: 2px solid var(--ink-soft); }
+.cal-day.mo-r { border-right: 2px solid var(--ink-soft); }
+.cal-day.mo-fade { color: var(--ink-soft); }
 .ticks { display: flex; flex-wrap: wrap; gap: 2px; margin-top: .2rem; }
 .ticks i { width: .28rem; height: .28rem; border-radius: 1px; background: var(--dot, var(--ink-soft)); }
 

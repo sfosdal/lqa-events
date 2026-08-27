@@ -379,10 +379,21 @@
       // month-grid views dim their neighbors' spill-over days
       if (!rolling && d.getMonth() !== m.getMonth()) cell.className += ' is-out';
       if (key === today) cell.className += ' is-today';
-      // bolder stepped line along the month boundary: heavier top edge on a
-      // month's first week, heavier left edge where the 1st lands mid-row
-      if (i >= 7 && d.getDate() <= 7) cell.className += ' mo-top';
-      if (d.getDate() === 1 && i % 7 !== 0) cell.className += ' mo-left';
+      // Month differentiation: the later month's days are outlined all the
+      // way around their region, the earlier month's day numbers go muted.
+      var primaryYm = rolling ? now.getFullYear() * 12 + now.getMonth() : m.getFullYear() * 12 + m.getMonth();
+      var cellYm = d.getFullYear() * 12 + d.getMonth();
+      if (cellYm > primaryYm) {
+        var nb = function (days) {
+          var n = new Date(d); n.setDate(d.getDate() + days); return n.getMonth() !== d.getMonth();
+        };
+        if (i < 7 || nb(-7)) cell.className += ' mo-t';
+        if (i >= cells - 7 || nb(7)) cell.className += ' mo-b';
+        if (i % 7 === 0 || nb(-1)) cell.className += ' mo-l';
+        if (i % 7 === 6 || nb(1)) cell.className += ' mo-r';
+      } else if (rolling && end.getMonth() !== start.getMonth()) {
+        cell.className += ' mo-fade';
+      }
       var num = document.createElement('span');
       num.className = 'num';
       // the spill-over month announces itself on its 1st
