@@ -151,12 +151,21 @@ h1 {
   background: color-mix(in srgb, var(--dot, var(--ink)) 22%, var(--mist));
 }
 /* excluded mirrors included's weight, but everything goes red: ring,
-   tinted fill, and a thick full-strength strike through the label */
+   tinted fill, a thick strike through the label, and a corner-to-corner
+   slash across the whole pill so the state reads at any size */
 .chip.is-ex {
   font-weight: 700; border-color: var(--ex);
   box-shadow: inset 0 0 0 1px var(--ex);
   background: color-mix(in srgb, var(--ex) 16%, var(--mist));
   text-decoration: line-through var(--ex); text-decoration-thickness: .16em;
+}
+.chip.is-ex, .chip-row .badge.is-ex { position: relative; }
+.chip.is-ex::after, .chip-row .badge.is-ex::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(to top right,
+    transparent calc(50% - .09em), var(--ex) 0,
+    var(--ex) calc(50% + .09em), transparent 0);
 }
 .fp-legend {
   font-family: var(--mono); font-size: .68rem; color: var(--ink-soft);
