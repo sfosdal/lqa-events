@@ -30,6 +30,7 @@ test('team matchers hit real game titles, not concerts', () => {
   assert.deepEqual(match('Seattle Reign FC vs. Portland Thorns'), ['reign']);
   assert.deepEqual(match('Seattle Sounders FC vs. LAFC'), ['sounders']);
   assert.deepEqual(match('Seattle Seahawks vs. San Francisco 49ers'), ['seahawks']);
+  assert.deepEqual(match('Washington Huskies vs. Oregon Ducks'), ['huskies']);
   // bare "storm"/"reign" in a show title must not match
   assert.deepEqual(match('Storm Large: Holiday Ordeal'), []);
   assert.deepEqual(match('Purple Reign — The Prince Tribute Show'), []);

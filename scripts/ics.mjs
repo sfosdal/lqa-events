@@ -100,8 +100,9 @@ function eventLines(e, dtstamp) {
     lines.push(`DTSTART;VALUE=DATE:${dateDigits(e.date)}`);
     lines.push(`DTEND;VALUE=DATE:${addHours(e.date, '00:00', 24).slice(0, 8)}`);
   }
-  lines.push(`SUMMARY:${escapeText(e.title)}`);
+  lines.push(`SUMMARY:${escapeText(e.title)}${e.dateTbd ? ' (date TBD)' : ''}`);
   lines.push(`LOCATION:${escapeText(e.venue)}`);
+  if (e.dateTbd) lines.push(`DESCRIPTION:${escapeText('Date not final — the league may still move this game. The feed updates within a few hours of a change.')}`);
   if (e.url) lines.push(`URL:${escapeText(e.url)}`);
   lines.push('END:VEVENT');
   return lines;

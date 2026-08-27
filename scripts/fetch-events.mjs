@@ -55,6 +55,9 @@ async function ticketmasterVenue({ keyword, venueMatch, label, fallbackUrl, excl
         url: e.url || fallbackUrl,
       };
       if (e.ageRestrictions?.legalAgeEnforced) ev.age21 = true;
+      // Flex-scheduled games (NFL weekends especially) carry TM's TBD flag:
+      // the listed date is a placeholder the league may still move.
+      if (e.dates?.start?.dateTBD || e.dates?.start?.dateTBA) ev.dateTbd = true;
       return ev;
     });
 }

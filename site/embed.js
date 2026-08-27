@@ -75,6 +75,7 @@
           if (e.age21) tags.push('21+');
           if (e.soldOut) tags.push('sold out');
           if (e.free) tags.push('free');
+          if (e.dateTbd) tags.push('date tbd');
           tags.forEach(function (t) {
             var b = document.createElement('span');
             b.className = 'lqa-ev-badge';

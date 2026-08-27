@@ -36,6 +36,15 @@ test('timed event gets local DTSTART and a 3h DTEND', () => {
   assert.match(ics, /DTEND;TZID=America\/Los_Angeles:20260828T220000/);
 });
 
+test('a dateTbd event flags its summary and carries a description', () => {
+  const ics = buildIcs([{ ...timed, dateTbd: true }], NOW);
+  assert.match(ics, /SUMMARY:The Strokes - Reality Awaits North America \(date TBD\)/);
+  assert.match(ics, /DESCRIPTION:Date not final/);
+  const plain = buildIcs([timed], NOW);
+  assert.ok(!plain.includes('date TBD'));
+  assert.ok(!plain.includes('DESCRIPTION:'));
+});
+
 test('a real same-day end time overrides the default 3h duration', () => {
   const ics = buildIcs([{ ...timed, end: '22:30:00' }], NOW);
   assert.match(ics, /DTEND;TZID=America\/Los_Angeles:20260828T223000/);

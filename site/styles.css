@@ -129,24 +129,40 @@ h1 {
 .chip-row .b-sold { background: var(--ink); }
 .badge.is-on { box-shadow: 0 0 0 2px var(--gold); }
 .badge.is-ex { box-shadow: 0 0 0 2px var(--ex); text-decoration: line-through; }
+/* filter badges (not the agenda's display badges) get the same state marker
+   as chips: dot when off, + included, × excluded — in the badge's own color */
+.chip-row .badge::before {
+  content: ""; display: inline-grid; place-items: center;
+  width: .7em; height: .7em; margin-right: .35em; vertical-align: -.07em;
+  font-weight: 700; font-size: 1em; line-height: 1;
+  background: radial-gradient(circle closest-side, currentColor 0 70%, transparent 72%);
+}
+.chip-row .badge.is-on::before { content: "+"; background: none; }
+.chip-row .badge.is-ex::before { content: "×"; background: none; color: var(--ex); }
 .chip {
   font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
   padding: .5em .95em; background: var(--mist); color: var(--ink);
   border: 1px solid var(--line);
 }
+/* state marker: neutral dot when off, + when included, × when excluded.
+   Fixed-size box in all three states so the label never shifts; the atomic
+   inline box also keeps is-ex's line-through off the × glyph. */
 .chip::before {
-  content: ""; display: inline-block; width: .55em; height: .55em;
-  border-radius: 50%; margin-right: .45em; background: var(--dot, var(--ink-soft));
+  content: ""; display: inline-grid; place-items: center;
+  width: .7em; height: .7em; margin-right: .4em; vertical-align: -.07em;
+  font-weight: 700; font-size: 1em; line-height: 1;
+  background: radial-gradient(circle closest-side, var(--dot, var(--ink-soft)) 0 70%, transparent 72%);
 }
+.chip.is-on::before { content: "+"; background: none; color: var(--dot, var(--ink)); }
+.chip.is-ex::before { content: "×"; background: none; color: var(--ex); }
 .chip[data-venue=""]::before, #clearFilters::before { display: none; }
 .clear-icon { width: 2.2rem; color: var(--ink-soft); }
 .clear-icon svg { width: .95rem; height: .95rem; }
 .clear-icon:disabled { opacity: .35; cursor: default; }
 .clear-icon:not(:disabled):hover { color: var(--ink); border-color: var(--ink-soft); }
 .chip.is-on { border-color: var(--dot, var(--ink)); box-shadow: inset 0 0 0 1px var(--dot, var(--ink)); }
-/* excluded: red ring + struck-out label, and the venue dot goes red too */
+/* excluded: red ring + struck-out label */
 .chip.is-ex { border-color: var(--ex); box-shadow: inset 0 0 0 1px var(--ex); text-decoration: line-through; }
-.chip.is-ex::before { background: var(--ex); }
 .fp-legend {
   font-family: var(--mono); font-size: .68rem; color: var(--ink-soft);
   margin: 0 0 1rem;
@@ -263,6 +279,7 @@ button.cal-day:hover { background: var(--gold-soft); }
 }
 .b-21 { color: var(--v-vera); }
 .b-day { color: var(--gold); }
+.b-tbd { color: var(--ink-soft); border-style: dashed; }
 .b-sold { color: var(--mist); background: var(--ink); border-color: var(--ink); }
 .b-free { color: var(--v-cornish); }
 @media (prefers-color-scheme: dark) {
