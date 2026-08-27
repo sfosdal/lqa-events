@@ -379,19 +379,21 @@
       // month-grid views dim their neighbors' spill-over days
       if (!rolling && d.getMonth() !== m.getMonth()) cell.className += ' is-out';
       if (key === today) cell.className += ' is-today';
-      // Month differentiation: the later month's days are outlined all the
-      // way around their region, the earlier month's day numbers go muted.
+      // Month differentiation: every month region is outlined all the way
+      // around. Each cell draws its own top/left edge when the neighbor is a
+      // different month (or the grid ends there); the grid's outer bottom and
+      // right edges close the frames — shared boundaries never double up.
+      var nb = function (days) {
+        var n = new Date(d); n.setDate(d.getDate() + days); return n.getMonth() !== d.getMonth();
+      };
+      if (i < 7 || nb(-7)) cell.className += ' mo-t';
+      if (i % 7 === 0 || nb(-1)) cell.className += ' mo-l';
+      if (i >= cells - 7) cell.className += ' mo-b';
+      if (i % 7 === 6) cell.className += ' mo-r';
+      // ...and the earlier month's day numbers go muted.
       var primaryYm = rolling ? now.getFullYear() * 12 + now.getMonth() : m.getFullYear() * 12 + m.getMonth();
-      var cellYm = d.getFullYear() * 12 + d.getMonth();
-      if (cellYm > primaryYm) {
-        var nb = function (days) {
-          var n = new Date(d); n.setDate(d.getDate() + days); return n.getMonth() !== d.getMonth();
-        };
-        if (i < 7 || nb(-7)) cell.className += ' mo-t';
-        if (i >= cells - 7 || nb(7)) cell.className += ' mo-b';
-        if (i % 7 === 0 || nb(-1)) cell.className += ' mo-l';
-        if (i % 7 === 6 || nb(1)) cell.className += ' mo-r';
-      } else if (rolling && end.getMonth() !== start.getMonth()) {
+      if (d.getFullYear() * 12 + d.getMonth() < primaryYm ||
+          (rolling && end.getMonth() !== start.getMonth() && d.getFullYear() * 12 + d.getMonth() === primaryYm)) {
         cell.className += ' mo-fade';
       }
       var num = document.createElement('span');
