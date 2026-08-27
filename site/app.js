@@ -562,10 +562,10 @@
   });
   $('copyIcs').addEventListener('click', function (ev) {
     ev.preventDefault();
-    var el = this;
+    var label = this.querySelector('span');
     navigator.clipboard.writeText(icsHref).then(function () {
-      el.textContent = 'Copied';
-      setTimeout(function () { el.textContent = 'Copy feed link'; }, 1500);
+      label.textContent = 'Copied';
+      setTimeout(function () { label.textContent = 'Copy link'; }, 1500);
     });
   });
 

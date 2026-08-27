@@ -75,7 +75,19 @@ h1 {
   font-size: .92rem;
 }
 .pop p { margin: 0 0 .6rem; }
-.pop-row a { font-weight: 600; }
+.pop-tiles { display: flex; gap: .5rem; margin-bottom: .6rem; }
+.tile {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: .4rem;
+  padding: .75rem .3rem .6rem; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--sky); text-decoration: none;
+}
+.tile svg { width: 26px; height: 26px; color: var(--gold); }
+.tile span {
+  font-family: var(--mono); font-size: .62rem; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--ink-soft); white-space: nowrap;
+}
+.tile:hover { border-color: var(--gold); }
+.tile:hover span { color: var(--ink); }
 /* ---- filter bar: icon + marquee presets, full panel below ---- */
 .filterbar { display: flex; flex-wrap: nowrap; gap: .5rem; align-items: center; margin: .5rem 0 .9rem; }
 .filterbar > * { flex-shrink: 0; }

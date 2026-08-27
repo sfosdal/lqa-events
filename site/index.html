@@ -26,9 +26,31 @@
       <label class="pop-filter" id="subFilterRow" hidden>
         <input type="checkbox" id="subUseFilter" checked> Include my filter choices
       </label>
-      <p class="pop-row"><a id="webcalLink" href="#">Open in calendar app</a></p>
-      <p class="pop-row"><a id="gcalLink" href="#" target="_blank" rel="noopener">Add to Google Calendar</a></p>
-      <p class="pop-row"><a id="copyIcs" href="#">Copy feed link</a></p>
+      <div class="pop-tiles">
+        <a id="webcalLink" class="tile" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="2"/>
+            <path d="M8 3v4M16 3v4M3 9h18"/>
+            <path d="M12 12.5v5M9.5 15h5"/>
+          </svg>
+          <span>Calendar app</span>
+        </a>
+        <a id="gcalLink" class="tile" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="2"/>
+            <path d="M8 3v4M16 3v4M3 9h18"/>
+            <text x="12" y="18" text-anchor="middle" font-size="8.5" font-weight="700" fill="currentColor" stroke="none">G</text>
+          </svg>
+          <span>Google</span>
+        </a>
+        <a id="copyIcs" class="tile" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+          <span>Copy link</span>
+        </a>
+      </div>
       <p class="pop-note">The feed refreshes every few hours; your calendar
         re-checks it on its own schedule.</p>
     </div>
