@@ -379,17 +379,15 @@
       // month-grid views dim their neighbors' spill-over days
       if (!rolling && d.getMonth() !== m.getMonth()) cell.className += ' is-out';
       if (key === today) cell.className += ' is-today';
-      // Month differentiation: every month region is outlined all the way
-      // around. Each cell draws its own top/left edge when the neighbor is a
-      // different month (or the grid ends there); the grid's outer bottom and
-      // right edges close the frames — shared boundaries never double up.
+      // Month differentiation: the card's own border frames the whole
+      // calendar (it follows the rounded corners); cells only draw the
+      // interior month-boundary segments, so each region still reads as
+      // fully enclosed without square corners fighting the card radius.
       var nb = function (days) {
         var n = new Date(d); n.setDate(d.getDate() + days); return n.getMonth() !== d.getMonth();
       };
-      if (i < 7 || nb(-7)) cell.className += ' mo-t';
-      if (i % 7 === 0 || nb(-1)) cell.className += ' mo-l';
-      if (i >= cells - 7) cell.className += ' mo-b';
-      if (i % 7 === 6) cell.className += ' mo-r';
+      if (i >= 7 && nb(-7)) cell.className += ' mo-t';
+      if (i % 7 !== 0 && nb(-1)) cell.className += ' mo-l';
       // ...and the earlier month's day numbers go muted.
       var primaryYm = rolling ? now.getFullYear() * 12 + now.getMonth() : m.getFullYear() * 12 + m.getMonth();
       if (d.getFullYear() * 12 + d.getMonth() < primaryYm ||

@@ -146,7 +146,7 @@ h1 {
 }
 
 /* ---- mini month calendar ---- */
-.cal { background: var(--mist); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.cal { background: var(--mist); border: 2px solid var(--ink-soft); border-radius: 10px; overflow: hidden; }
 .cal-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: .5rem .6rem; border-bottom: 1px solid var(--line);
@@ -183,11 +183,10 @@ button.cal-day:hover { background: var(--gold-soft); }
 }
 .cal-day.is-out { color: var(--line); }
 .cal-day .num-mo { font-size: .82em; letter-spacing: .03em; }
-/* month differentiation: the later month is outlined, the earlier one muted */
+/* month differentiation: interior boundary segments; the card border
+   closes each month's frame at the calendar edge */
 .cal-day.mo-t { border-top: 2px solid var(--ink-soft); }
-.cal-day.mo-b { border-bottom: 2px solid var(--ink-soft); }
 .cal-day.mo-l { border-left: 2px solid var(--ink-soft); }
-.cal-day.mo-r { border-right: 2px solid var(--ink-soft); }
 .cal-day.mo-fade { color: var(--ink-soft); }
 .ticks { display: flex; flex-wrap: wrap; gap: 2px; margin-top: .2rem; }
 .ticks i { width: .28rem; height: .28rem; border-radius: 1px; background: var(--dot, var(--ink-soft)); }
