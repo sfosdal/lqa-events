@@ -379,6 +379,10 @@
       // month-grid views dim their neighbors' spill-over days
       if (!rolling && d.getMonth() !== m.getMonth()) cell.className += ' is-out';
       if (key === today) cell.className += ' is-today';
+      // bolder stepped line along the month boundary: heavier top edge on a
+      // month's first week, heavier left edge where the 1st lands mid-row
+      if (i >= 7 && d.getDate() <= 7) cell.className += ' mo-top';
+      if (d.getDate() === 1 && i % 7 !== 0) cell.className += ' mo-left';
       var num = document.createElement('span');
       num.className = 'num';
       // the spill-over month announces itself on its 1st
