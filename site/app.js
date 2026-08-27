@@ -455,17 +455,25 @@
         var time = document.createElement('span');
         time.className = 'time';
         time.textContent = fmtTime(e.time);
+        // time keeps its own column; everything else stacks left-aligned:
+        // venue, then title, then tags
+        var body = document.createElement('div');
+        body.className = 'ev-body';
+        var venue = document.createElement('span');
+        venue.className = 'venue';
+        venue.textContent = e.venue;
+        venue.style.setProperty('--dot', venueColor(e.venue));
         var a = document.createElement('a');
         a.href = e.url || '#';
         a.target = '_blank';
         a.rel = 'noopener';
         a.textContent = e.title;
-        var venue = document.createElement('span');
-        venue.className = 'venue';
-        venue.textContent = e.venue;
-        venue.style.setProperty('--dot', venueColor(e.venue));
-        row.appendChild(time); row.appendChild(a); row.appendChild(venue);
-        appendBadges(row, e);
+        body.appendChild(venue); body.appendChild(a);
+        var tags = document.createElement('div');
+        tags.className = 'ev-tags';
+        appendBadges(tags, e);
+        if (tags.children.length) body.appendChild(tags);
+        row.appendChild(time); row.appendChild(body);
         wrap.appendChild(row);
       });
       li.appendChild(wrap);

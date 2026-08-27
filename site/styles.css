@@ -215,10 +215,12 @@ button.cal-day:hover { background: var(--gold-soft); }
 }
 .day-events { display: grid; gap: .6rem; align-content: start; }
 /* each row carries a whisper of its venue's color (set inline by app.js) */
-.ev { display: flex; flex-wrap: wrap; gap: .3rem .8rem; align-items: baseline; padding: .3em .55em; border-radius: 6px; }
+.ev { display: flex; gap: .8rem; align-items: flex-start; padding: .45em .55em; border-radius: 6px; }
+.ev-body { display: flex; flex-direction: column; align-items: flex-start; gap: .18rem; min-width: 0; }
+.ev-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
 .ev a { font-weight: 600; text-decoration-color: var(--line); }
 .ev a:hover { text-decoration-color: var(--gold); }
-.ev .time { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); min-width: 5.5rem; }
+.ev .time { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); min-width: 5.5rem; padding-top: .15em; }
 .ev .venue {
   font-family: var(--mono); font-size: .72rem; text-transform: uppercase;
   letter-spacing: .06em; color: var(--dot, var(--ink-soft));
@@ -281,11 +283,9 @@ footer p { color: var(--ink-soft); font-size: .85rem; }
   .date-rail .dnum { display: inline; font-size: 1.7rem; }
   .date-rail .dmeta { white-space: nowrap; }
 
-  /* event rows: title first, then one meta line */
-  .ev { display: block; padding: .5em .6em; }
-  .ev a { display: block; margin-bottom: .2rem; }
-  .ev .time, .ev .venue, .ev .badge {
-    display: inline-block; vertical-align: baseline; margin-right: .6rem; min-width: 0;
-  }
+  /* event rows keep the same time-column + stacked-body layout,
+     just with a narrower time column */
+  .ev { padding: .5em .6em; }
+  .ev .time { min-width: 4.4rem; }
   .day-events { gap: .5rem; }
 }
