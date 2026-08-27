@@ -589,6 +589,24 @@
     });
   });
 
+  // A fresh marquee line every visit ("On stage in LQA" stays as the
+  // no-JS fallback in the HTML).
+  var TITLES = [
+    'On stage in LQA',
+    'Now playing in LQA',
+    'Showtime in LQA',
+    'Curtain up in LQA',
+    'Lights up in LQA',
+    'Doors open in LQA',
+    'Mic check in LQA',
+    'Big nights in LQA',
+    'Full houses in LQA',
+    'On the marquee in LQA',
+    'Game on in LQA',
+    'The lineup in LQA',
+  ];
+  $('agendaTitle').textContent = TITLES[Math.floor(Math.random() * TITLES.length)];
+
   loadFilters();
   load();
 })();
