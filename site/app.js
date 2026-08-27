@@ -342,30 +342,52 @@
   function renderCal() {
     var m = state.month;
     if (!m) return;
-    $('calTitle').textContent = m.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     var bounds = monthBounds();
     $('calPrev').disabled = !bounds || sameMonth(m, new Date(bounds.min.getFullYear(), bounds.min.getMonth(), 1));
     $('calNext').disabled = !bounds || sameMonth(m, new Date(bounds.max.getFullYear(), bounds.max.getMonth(), 1));
 
     var grid = $('calGrid');
     grid.innerHTML = '';
-    var first = new Date(m.getFullYear(), m.getMonth(), 1);
-    var start = new Date(first);
-    start.setDate(1 - first.getDay()); // back up to Sunday
     var today = todayStr();
-    for (var i = 0; i < 42; i++) {
+    var now = new Date();
+    // The current month renders as a rolling window — this week plus the
+    // next four — so the top of the next month is always in view. Arrow
+    // navigation shows classic full months.
+    var rolling = sameMonth(m, now);
+    var start, end;
+    if (rolling) {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 27);
+    } else {
+      start = new Date(m.getFullYear(), m.getMonth(), 1);
+      start.setDate(1 - start.getDay()); // back up to Sunday
+      end = new Date(m.getFullYear(), m.getMonth() + 1, 0);
+    }
+    $('calTitle').textContent = (rolling && end.getMonth() !== start.getMonth())
+      ? start.toLocaleDateString('en-US', { month: 'short' }) + ' – ' +
+        end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      : m.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    var cells = Math.ceil((Math.round((end - start) / 86400e3) + 1) / 7) * 7;
+    for (var i = 0; i < cells; i++) {
       var d = new Date(start);
       d.setDate(start.getDate() + i);
-      if (i === 35 && d.getMonth() !== m.getMonth()) break; // skip empty 6th row
       var key = ymd(d);
       var evs = filtered(state.byDate[key] || []);
       var cell = document.createElement(evs.length ? 'button' : 'div');
       cell.className = 'cal-day';
-      if (d.getMonth() !== m.getMonth()) cell.className += ' is-out';
+      // in the rolling window every day carries equal weight — only the
+      // month-grid views dim their neighbors' spill-over days
+      if (!rolling && d.getMonth() !== m.getMonth()) cell.className += ' is-out';
       if (key === today) cell.className += ' is-today';
       var num = document.createElement('span');
       num.className = 'num';
-      num.textContent = d.getDate();
+      // the spill-over month announces itself on its 1st
+      if (d.getDate() === 1 && d.getMonth() !== m.getMonth()) {
+        num.className += ' num-mo';
+        num.textContent = d.toLocaleDateString('en-US', { month: 'short' });
+      } else {
+        num.textContent = d.getDate();
+      }
       cell.appendChild(num);
       if (evs.length) {
         cell.type = 'button';
