@@ -76,16 +76,6 @@ h1 {
 }
 .pop p { margin: 0 0 .6rem; }
 .pop-row a { font-weight: 600; }
-.feed-url { display: flex; gap: .5rem; align-items: center; margin-bottom: 0 !important; }
-.feed-url code {
-  flex: 1; overflow-x: auto; white-space: nowrap; font-family: var(--mono);
-  font-size: .78rem; background: var(--sky); padding: .4em .6em; border-radius: 4px;
-}
-.feed-url button {
-  font: 600 .85rem/1 var(--body); background: none; color: var(--gold);
-  border: 1px solid var(--gold); border-radius: 4px; padding: .45em .7em; cursor: pointer;
-}
-
 /* ---- filter bar: icon + marquee presets, full panel below ---- */
 .filterbar { display: flex; flex-wrap: nowrap; gap: .5rem; align-items: center; margin: .5rem 0 .9rem; }
 .filterbar > * { flex-shrink: 0; }

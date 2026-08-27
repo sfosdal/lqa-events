@@ -525,41 +525,24 @@
   }
 
   // ---- subscribe popover ----
-  // The feed follows the active filter where a pre-built file exists: one
-  // venue, or one badge. Combined filters fall back to the full feed.
-  var BADGE_NAMES = { '21plus': '21+', 'day': 'daytime', 'soldout': 'sold-out', 'free': 'free' };
+  // The feed follows the active filter where a pre-built file exists: exactly
+  // one venue, one badge, or one hidden team. Combos fall back to the full feed.
+  var icsHref = '';
   function updateSubscribe() {
     var keys = activeBadges();
     var venues = activeVenues();
     var teams = activeTeams();
-    // A dedicated feed exists for exactly one venue, one badge, or one hidden team.
-    var filteredFile = null, filteredNote = '';
+    var filteredFile = null;
     if (venues.length === 1 && !keys.length && !teams.length) {
       filteredFile = 'events-venue-' + slugify(venues[0]) + '.ics';
-      filteredNote = 'Only ' + venues[0] + ' events.';
     } else if (!venues.length && keys.length === 1 && !teams.length) {
       filteredFile = 'events-' + keys[0] + '.ics';
-      filteredNote = 'Only ' + BADGE_NAMES[keys[0]] + ' events.';
     } else if (!venues.length && !keys.length && teams.length === 1) {
       filteredFile = 'events-no-' + teams[0] + '.ics';
-      filteredNote = 'Everything except ' + TEAM_BY_SLUG[teams[0]].label + ' games.';
     }
     $('subFilterRow').hidden = !filteredFile;
-    var useFilter = filteredFile && $('subUseFilter').checked;
-    var file = useFilter ? filteredFile : 'events.ics';
-    var note;
-    if (useFilter) {
-      note = filteredNote;
-    } else if (venues.length || keys.length || teams.length) {
-      note = filteredFile
-        ? 'The full calendar — every venue and event.'
-        : 'Combined filters have no dedicated feed — this is the full calendar.';
-    } else {
-      note = 'Covers every venue and event.';
-    }
-    var icsHref = new URL(file, location.href).href;
-    $('subNote').textContent = note;
-    $('icsUrl').textContent = icsHref;
+    var file = (filteredFile && $('subUseFilter').checked) ? filteredFile : 'events.ics';
+    icsHref = new URL(file, location.href).href;
     $('webcalLink').href = icsHref.replace(/^https?:/, 'webcal:');
     $('gcalLink').href = 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(icsHref.replace(/^https?:/, 'webcal:'));
   }
@@ -577,11 +560,12 @@
       $('subscribeBtn').setAttribute('aria-expanded', 'false');
     }
   });
-  $('copyIcs').addEventListener('click', function () {
-    var btn = this;
-    navigator.clipboard.writeText($('icsUrl').textContent).then(function () {
-      btn.textContent = 'Copied';
-      setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+  $('copyIcs').addEventListener('click', function (ev) {
+    ev.preventDefault();
+    var el = this;
+    navigator.clipboard.writeText(icsHref).then(function () {
+      el.textContent = 'Copied';
+      setTimeout(function () { el.textContent = 'Copy feed link'; }, 1500);
     });
   });
 
