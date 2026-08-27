@@ -550,11 +550,13 @@
       encodeURIComponent(icsHref) + '&name=' + encodeURIComponent('LQA Events');
     if (!$('qrPanel').hidden) renderQr();
   }
-  // QR of the webcal link (scanning it on iOS subscribes directly); the image
-  // is only fetched when the tile is opened.
+  // QR of the webcal link (scanning it on iOS subscribes directly), rendered
+  // locally by the vendored qrcode.js — no third-party service involved.
   function renderQr() {
-    $('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=170x170&margin=8&data=' +
-      encodeURIComponent(icsHref.replace(/^https?:/, 'webcal:'));
+    var qr = qrcode(0, 'L');
+    qr.addData(icsHref.replace(/^https?:/, 'webcal:'));
+    qr.make();
+    $('qrImg').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
   }
   $('qrBtn').addEventListener('click', function (ev) {
     ev.preventDefault();

@@ -68,11 +68,11 @@
         </a>
       </div>
       <div id="qrPanel" class="qr-panel" hidden>
-        <img id="qrImg" alt="QR code for the calendar feed" width="170" height="170">
+        <div id="qrImg" role="img" aria-label="QR code for the calendar feed"></div>
         <p class="pop-note">Scan with your phone to subscribe there.</p>
       </div>
       <p class="pop-note">The feed refreshes every few hours; your calendar
-        re-checks it on its own schedule.</p>
+        refreshes it on its own schedule.</p>
     </div>
   </div>
 </header>
@@ -161,6 +161,7 @@
     A <a href="https://fosdal.net/">fosdal.net</a> project.</p>
 </footer>
 
+<script src="qrcode.js?v=__V__" defer></script>
 <script src="app.js?v=__V__" defer></script>
 </body>
 </html>
