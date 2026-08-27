@@ -8,6 +8,7 @@
   --line: #c9d2da;
   --gold: #e8791d;       /* Space Needle "Galaxy Gold" */
   --gold-soft: #fbe9d8;
+  --ex: #c4372b;         /* excluded-filter strike line */
   /* venue hues (chips, grid ticks, agenda tags) */
   --v-cpa: #0f7c7c;
   --v-mccaw: #7c3a64;
@@ -21,7 +22,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2;
-    --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
+    --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a; --ex: #ff6e60;
     --v-cpa: #35b5b5; --v-mccaw: #c674a8; --v-seactr: #6f9be0;
     --v-cornish: #6fbf68; --v-vera: #e8756b;
   }
@@ -128,7 +129,10 @@ h1 {
 .chip-row .b-sold { background: var(--ink); }
 /* included: bold and bright; excluded: dimmed and struck out */
 .badge.is-on { box-shadow: 0 0 0 2px var(--gold); font-weight: 700; }
-.badge.is-ex { opacity: .5; text-decoration: line-through; }
+.badge.is-ex {
+  color: var(--ink-soft); background: none; font-weight: 700;
+  text-decoration: line-through var(--ex); text-decoration-thickness: .16em;
+}
 .chip {
   font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
   padding: .5em .95em; background: var(--mist); color: var(--ink);
@@ -145,7 +149,11 @@ h1 {
   box-shadow: inset 0 0 0 1px var(--dot, var(--ink));
   background: color-mix(in srgb, var(--dot, var(--ink)) 22%, var(--mist));
 }
-.chip.is-ex { opacity: .5; text-decoration: line-through; }
+/* dim the label, not the element, so the red strike keeps full strength */
+.chip.is-ex {
+  color: var(--ink-soft); font-weight: 700;
+  text-decoration: line-through var(--ex); text-decoration-thickness: .16em;
+}
 .fp-legend {
   font-family: var(--mono); font-size: .68rem; color: var(--ink-soft);
   margin: 0 0 1rem;
