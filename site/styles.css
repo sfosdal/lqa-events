@@ -147,9 +147,12 @@ h1 {
 
 /* ---- mini month calendar ---- */
 .cal { background: var(--mist); border: 2px solid var(--ink-soft); border-radius: 10px; overflow: hidden; }
+/* the lines bracketing the weekday labels match the frame, warmed with a
+   hint of gold */
 .cal-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: .5rem .6rem; border-bottom: 1px solid var(--line);
+  padding: .5rem .6rem;
+  border-bottom: 2px solid color-mix(in srgb, var(--ink-soft) 78%, var(--gold));
 }
 .cal-head h2 {
   font-family: var(--display); font-weight: 700; font-size: 1.1rem;
@@ -161,6 +164,8 @@ h1 {
 }
 .cal-head button:disabled { opacity: .3; cursor: default; }
 .cal-dow, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal-dow { border-bottom: 2px solid color-mix(in srgb, var(--ink-soft) 78%, var(--gold)); }
+.cal-grid > :nth-child(-n+7) { border-top: 0; } /* no hairline doubling the dow line */
 .cal-dow span {
   font-family: var(--mono); font-size: .6rem; text-transform: uppercase;
   color: var(--ink-soft); text-align: center; padding: .35rem 0;

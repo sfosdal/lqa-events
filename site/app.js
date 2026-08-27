@@ -386,7 +386,7 @@
       var nb = function (days) {
         var n = new Date(d); n.setDate(d.getDate() + days); return n.getMonth() !== d.getMonth();
       };
-      if (i < 7 || nb(-7)) cell.className += ' mo-t';
+      if (i >= 7 && nb(-7)) cell.className += ' mo-t';
       if (i % 7 !== 0 && nb(-1)) cell.className += ' mo-l';
       // ...and the earlier month's day numbers go muted.
       var primaryYm = rolling ? now.getFullYear() * 12 + now.getMonth() : m.getFullYear() * 12 + m.getMonth();
