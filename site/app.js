@@ -543,9 +543,26 @@
     $('subFilterRow').hidden = !filteredFile;
     var file = (filteredFile && $('subUseFilter').checked) ? filteredFile : 'events.ics';
     icsHref = new URL(file, location.href).href;
-    $('webcalLink').href = icsHref.replace(/^https?:/, 'webcal:');
-    $('gcalLink').href = 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(icsHref.replace(/^https?:/, 'webcal:'));
+    var webcal = icsHref.replace(/^https?:/, 'webcal:');
+    $('webcalLink').href = webcal;
+    $('gcalLink').href = 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(webcal);
+    $('outlookLink').href = 'https://outlook.live.com/calendar/0/addfromweb?url=' +
+      encodeURIComponent(icsHref) + '&name=' + encodeURIComponent('LQA Events');
+    if (!$('qrPanel').hidden) renderQr();
   }
+  // QR of the webcal link (scanning it on iOS subscribes directly); the image
+  // is only fetched when the tile is opened.
+  function renderQr() {
+    $('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=170x170&margin=8&data=' +
+      encodeURIComponent(icsHref.replace(/^https?:/, 'webcal:'));
+  }
+  $('qrBtn').addEventListener('click', function (ev) {
+    ev.preventDefault();
+    var p = $('qrPanel');
+    p.hidden = !p.hidden;
+    this.setAttribute('aria-expanded', String(!p.hidden));
+    if (!p.hidden) renderQr();
+  });
   $('subUseFilter').addEventListener('change', updateSubscribe);
   updateSubscribe();
   $('subscribeBtn').addEventListener('click', function () {
@@ -553,6 +570,7 @@
     var open = pop.hidden;
     pop.hidden = !open;
     this.setAttribute('aria-expanded', String(open));
+    if (open) { $('qrPanel').hidden = true; $('qrBtn').setAttribute('aria-expanded', 'false'); }
   });
   document.addEventListener('click', function (e) {
     if (!e.target.closest('.masthead-actions')) {
