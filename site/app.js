@@ -11,6 +11,7 @@
     'Seattle Center': '--v-seactr',
     'Cornish Playhouse': '--v-cornish',
     'The Vera Project': '--v-vera',
+    'SIFF Cinema Uptown': '--v-siff',
   };
   function venueColor(v) {
     if (VENUE_VARS[v]) return 'var(' + VENUE_VARS[v] + ')';
@@ -31,6 +32,7 @@
     'Seattle Center': 2,       // festivals and grounds events
     'Cornish Playhouse': 3,
     'The Vera Project': 4,     // all-ages — least bar crossover of the campus
+    'SIFF Cinema Uptown': 5,   // the Queen Anne Ave movie house
     'T-Mobile Park': 90,
     'Lumen Field': 91,
   };
@@ -204,7 +206,7 @@
   // The marquee venues get a spot in the bar; everything lives in the panel.
   // Same bar-owner order as VENUE_RANK, so when the bar runs out of room the
   // least relevant pills are the ones that drop.
-  var PRESET_VENUES = ['Climate Pledge Arena', 'McCaw Hall', 'Seattle Center', 'Cornish Playhouse', 'The Vera Project', 'T-Mobile Park', 'Lumen Field'];
+  var PRESET_VENUES = ['Climate Pledge Arena', 'McCaw Hall', 'Seattle Center', 'Cornish Playhouse', 'The Vera Project', 'SIFF Cinema Uptown', 'T-Mobile Park', 'Lumen Field'];
 
   function venueChip(v) {
     var b = document.createElement('button');

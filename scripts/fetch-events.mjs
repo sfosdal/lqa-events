@@ -10,7 +10,7 @@
  */
 import { writeFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
-import { parseScCards, parseScDetailDate, parseScVenueCats, mapDiceEvents } from './sources.mjs';
+import { parseScCards, parseScDetailDate, parseScVenueCats, mapDiceEvents, parseSiffScreenings } from './sources.mjs';
 import { mergeWithArchive } from './merge.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
 
@@ -147,6 +147,31 @@ async function veraProjectDice() {
   return mapDiceEvents(await res.json(), 'The Vera Project');
 }
 
+// --- SIFF Cinema Uptown (the LQA movie house on Queen Anne Ave): the
+//     calendar page is server-rendered with a JSON blob per showtime, one
+//     page per day — sweep the next few weeks. parseSiffScreenings collapses
+//     a film's multiple daily showtimes to the earliest one. ---
+async function siffUptown() {
+  const DAYS = 28; // cinema schedules rarely publish further out
+  const events = [];
+  const seen = new Set();
+  for (let i = 0; i < DAYS; i++) {
+    const day = new Date(Date.now() + i * 86400e3).toISOString().slice(0, 10);
+    try {
+      const res = await fetch(`https://www.siff.net/calendar?date=${day}`, { headers: { 'user-agent': BROWSER_UA } });
+      if (!res.ok) { console.error(`SIFF calendar ${day} HTTP ${res.status}`); continue; }
+      for (const ev of parseSiffScreenings(await res.text())) {
+        const k = `${ev.title}|${ev.date}`;
+        if (!seen.has(k)) { seen.add(k); events.push({ venue: 'SIFF Cinema Uptown', ...ev }); }
+      }
+    } catch (err) {
+      console.error(`SIFF calendar ${day} failed:`, err.message);
+    }
+  }
+  console.log(`SIFF Uptown: ${events.length} film-days`);
+  return events;
+}
+
 // Dedicated per-venue sources run first (better times and ticket links)...
 const sources = [
   () => ticketmasterVenue({ keyword: 'Climate Pledge Arena', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/' }),
@@ -155,6 +180,7 @@ const sources = [
   () => ticketmasterVenue({ keyword: 'Lumen Field', venueMatch: 'lumen field', label: 'Lumen Field', fallbackUrl: 'https://www.lumenfield.com/events', exclude: /stadium tour/i }),
   mccawHallRss,
   veraProjectDice,
+  siffUptown,
 ];
 
 let all = [];
@@ -174,6 +200,7 @@ catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 const CANONICAL_VENUES = new Set([
   'Climate Pledge Arena', 'T-Mobile Park', 'Lumen Field',
   'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
+  'SIFF Cinema Uptown',
 ]);
 const normalizeVenue = (e) => (CANONICAL_VENUES.has(e.venue) ? e : { ...e, venue: 'Seattle Center' });
 all = all.map(normalizeVenue);

@@ -15,6 +15,7 @@
   --v-seactr: #2b5fa3;
   --v-cornish: #3f7d3a;
   --v-vera: #b3382e;
+  --v-siff: #5b4ea3;
   --display: "Big Shoulders", "Arial Narrow", sans-serif;
   --body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -24,7 +25,7 @@
     --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2;
     --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a; --ex: #ff6e60;
     --v-cpa: #35b5b5; --v-mccaw: #c674a8; --v-seactr: #6f9be0;
-    --v-cornish: #6fbf68; --v-vera: #e8756b;
+    --v-cornish: #6fbf68; --v-vera: #e8756b; --v-siff: #9a8ee0;
   }
 }
 

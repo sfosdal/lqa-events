@@ -76,6 +76,53 @@ export function parseScDetailDate(html) {
 }
 
 /**
+ * Parse SIFF's server-rendered /calendar?date=YYYY-MM-DD HTML. Every showtime
+ * button carries a data-screening attribute with a JSON blob (EventName,
+ * Showtime/ShowtimeEnd as "/Date(ms)/" UTC instants, VenueName like
+ * "SIFF Cinema Uptown House 3"). A film screens several times a day across
+ * houses; collapse to one event per film per local date at its earliest
+ * showtime, keeping only venues matching venueRe. Each screening's film URL
+ * is the nearest preceding /cinema/in-theaters/ link in the document.
+ * Returns [{ title, date, time, end?, url }].
+ */
+export function parseSiffScreenings(html, venueRe = /^SIFF Cinema Uptown/) {
+  const s = String(html);
+  const links = [];
+  for (const m of s.matchAll(/href="(\/cinema\/in-theaters\/[^"#?]+)"/g)) {
+    links.push({ at: m.index, url: m[1] });
+  }
+  const fmt = (ms) => new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }).format(new Date(ms));
+  const best = new Map();
+  for (const m of s.matchAll(/data-screening="([^"]+)"/g)) {
+    let d;
+    try { d = JSON.parse(decodeEntities(m[1])); } catch { continue; }
+    if (!d.EventName || !venueRe.test(d.VenueName || '')) continue;
+    const ms = Number((String(d.Showtime || '').match(/\d+/) || [])[0]);
+    if (!ms) continue;
+    const [date, time] = fmt(ms).split(' ');
+    let link = '';
+    for (const l of links) { if (l.at < m.index) link = l.url; else break; }
+    const ev = {
+      title: decodeEntities(d.EventName),
+      date, time,
+      url: link ? `https://www.siff.net${link}` : 'https://www.siff.net/calendar',
+    };
+    const endMs = Number((String(d.ShowtimeEnd || '').match(/\d+/) || [])[0]);
+    if (endMs) {
+      // same-local-day ends only, as with DICE — overnight ends would lie
+      const [endDate, endTime] = fmt(endMs).split(' ');
+      if (endDate === date && endTime > time) ev.end = endTime;
+    }
+    const k = `${ev.title}|${date}`;
+    if (!best.has(k) || time < best.get(k).time) best.set(k, ev);
+  }
+  return [...best.values()];
+}
+
+/**
  * Map a DICE events-api response ({data: [...]}) to feed events, converting
  * each UTC instant to its venue-local date and time.
  */
