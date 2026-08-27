@@ -130,7 +130,8 @@ h1 {
 /* included: bold and bright; excluded: dimmed and struck out */
 .badge.is-on { box-shadow: 0 0 0 2px var(--gold); font-weight: 700; }
 .badge.is-ex {
-  color: var(--ink-soft); background: none; font-weight: 700;
+  color: var(--ink); font-weight: 700; box-shadow: 0 0 0 2px var(--ex);
+  background: color-mix(in srgb, var(--ex) 16%, var(--mist));
   text-decoration: line-through var(--ex); text-decoration-thickness: .16em;
 }
 .chip {
@@ -149,9 +150,12 @@ h1 {
   box-shadow: inset 0 0 0 1px var(--dot, var(--ink));
   background: color-mix(in srgb, var(--dot, var(--ink)) 22%, var(--mist));
 }
-/* dim the label, not the element, so the red strike keeps full strength */
+/* excluded mirrors included's weight, but everything goes red: ring,
+   tinted fill, and a thick full-strength strike through the label */
 .chip.is-ex {
-  color: var(--ink-soft); font-weight: 700;
+  font-weight: 700; border-color: var(--ex);
+  box-shadow: inset 0 0 0 1px var(--ex);
+  background: color-mix(in srgb, var(--ex) 16%, var(--mist));
   text-decoration: line-through var(--ex); text-decoration-thickness: .16em;
 }
 .fp-legend {
