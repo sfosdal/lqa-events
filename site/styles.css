@@ -251,7 +251,6 @@ button.cal-day:hover { background: var(--gold-soft); }
   .b-sold { color: var(--sky); background: var(--ink); border-color: var(--ink); }
 }
 .pop-note { color: var(--ink-soft); font-size: .85em; }
-.pop-justify { text-align: justify; }
 .pop-filter { display: flex; gap: .5em; align-items: center; cursor: pointer; font-weight: 600; }
 .pop-filter input { accent-color: var(--gold); }
 

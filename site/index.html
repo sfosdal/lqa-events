@@ -23,7 +23,6 @@
     <p class="updated" id="updated" aria-live="polite"></p>
     <button id="subscribeBtn" class="btn-gold" type="button" aria-expanded="false">Add to your calendar</button>
     <div id="subscribePop" class="pop" hidden>
-      <p>Subscribe in your calendar app and new events show up on their own.</p>
       <label class="pop-filter" id="subFilterRow" hidden>
         <input type="checkbox" id="subUseFilter" checked> Include my filter choices
       </label>
@@ -32,10 +31,8 @@
       <p class="pop-row"><a id="gcalLink" href="#" target="_blank" rel="noopener">Add to Google Calendar</a></p>
       <p class="pop-row feed-url"><code id="icsUrl"></code>
         <button id="copyIcs" type="button">Copy</button></p>
-      <p class="pop-note pop-justify">These are live subscriptions, not a one-time download:
-        the feed refreshes every few hours and your calendar app picks up
-        changes on its own schedule — most apps within a day. Only importing a
-        downloaded .ics file would freeze a copy.</p>
+      <p class="pop-note">A live subscription, not a download — new events show
+        up in your calendar on their own, usually within a day.</p>
     </div>
   </div>
 </header>
