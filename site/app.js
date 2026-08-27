@@ -57,7 +57,18 @@
   var TEAM_BY_SLUG = {};
   TEAMS.forEach(function (t) { TEAM_BY_SLUG[t.slug] = t; });
 
-  var state = { events: [], byDate: {}, venues: [], venuesOn: {}, badges: {}, teamsOff: {}, month: null, showPast: false };
+  // Each filter map holds name → 'in' | 'ex' (absent = off). A click cycles
+  // off → include → exclude → off.
+  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false };
+
+  function modeKeys(map, mode) {
+    return Object.keys(map).filter(function (k) { return map[k] === mode; });
+  }
+  function cycleMode(map, key) {
+    if (!map[key]) map[key] = 'in';
+    else if (map[key] === 'in') map[key] = 'ex';
+    else delete map[key];
+  }
 
   function slugify(s) {
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -120,8 +131,8 @@
         var now = new Date();
         state.month = new Date(now.getFullYear(), now.getMonth(), 1);
         // forget saved venues that no longer appear in the feed
-        Object.keys(state.venuesOn).forEach(function (v) {
-          if (state.venues.indexOf(v) === -1) delete state.venuesOn[v];
+        Object.keys(state.venueMode).forEach(function (v) {
+          if (state.venues.indexOf(v) === -1) delete state.venueMode[v];
         });
         renderFilters(); renderCal(); renderAgenda(); updateSubscribe();
       })
@@ -141,24 +152,21 @@
     'soldout': function (e) { return !!e.soldOut; },
     'free': function (e) { return !!e.free; },
   };
-  function activeBadges() {
-    return Object.keys(state.badges).filter(function (k) { return state.badges[k]; });
-  }
-  function activeVenues() {
-    return Object.keys(state.venuesOn).filter(function (k) { return state.venuesOn[k]; });
-  }
-  function activeTeams() {
-    return Object.keys(state.teamsOff).filter(function (k) { return state.teamsOff[k]; });
-  }
-  // Venues OR together; badges AND on top; hidden teams drop out last.
+  // Included venues OR together and excluded venues drop out; included badges
+  // AND on top while excluded badges must all miss; included teams OR (only
+  // their games) and excluded teams drop out last.
   function filtered(list) {
-    var keys = activeBadges();
-    var venues = activeVenues();
-    var teams = activeTeams();
+    var vIn = modeKeys(state.venueMode, 'in'), vEx = modeKeys(state.venueMode, 'ex');
+    var bIn = modeKeys(state.badgeMode, 'in'), bEx = modeKeys(state.badgeMode, 'ex');
+    var tIn = modeKeys(state.teamMode, 'in'), tEx = modeKeys(state.teamMode, 'ex');
     return list.filter(function (e) {
-      if (venues.length && venues.indexOf(e.venue) === -1) return false;
-      for (var i = 0; i < keys.length; i++) if (!BADGE_PREDS[keys[i]](e)) return false;
-      for (var j = 0; j < teams.length; j++) if (TEAM_BY_SLUG[teams[j]].re.test(e.title || '')) return false;
+      if (vIn.length && vIn.indexOf(e.venue) === -1) return false;
+      if (vEx.indexOf(e.venue) !== -1) return false;
+      for (var i = 0; i < bIn.length; i++) if (!BADGE_PREDS[bIn[i]](e)) return false;
+      for (var j = 0; j < bEx.length; j++) if (BADGE_PREDS[bEx[j]](e)) return false;
+      var title = e.title || '';
+      for (var k = 0; k < tEx.length; k++) if (TEAM_BY_SLUG[tEx[k]].re.test(title)) return false;
+      if (tIn.length && !tIn.some(function (s) { return TEAM_BY_SLUG[s].re.test(title); })) return false;
       return true;
     });
   }
@@ -221,7 +229,7 @@
     allBtn.className = 'chip';
     allBtn.dataset.teamAll = '1';
     allBtn.textContent = 'All';
-    allBtn.title = 'Hide every team’s games';
+    allBtn.title = 'Every team at once: only games, then no games, then off';
     pt.appendChild(allBtn);
     TEAMS.forEach(function (t) {
       var b = document.createElement('button');
@@ -229,7 +237,7 @@
       b.className = 'chip';
       b.dataset.team = t.slug;
       b.textContent = t.label;
-      b.title = 'Hide ' + t.label + ' games';
+      b.title = t.label + ' games: tap for only, again to hide';
       pt.appendChild(b);
     });
     syncFilters();
@@ -251,57 +259,74 @@
     fitTimer = setTimeout(fitPresets, 100);
   });
   // One venue or badge can be represented by several buttons (preset pill,
-  // panel chip) — sync the on-state everywhere.
+  // panel chip) — sync the tri-state everywhere. aria-pressed reads
+  // true / mixed / false for include / exclude / off.
+  function markMode(c, mode) {
+    c.classList.toggle('is-on', mode === 'in');
+    c.classList.toggle('is-ex', mode === 'ex');
+    c.setAttribute('aria-pressed', mode === 'in' ? 'true' : mode === 'ex' ? 'mixed' : 'false');
+  }
   function syncFilters() {
     document.querySelectorAll('[data-venue]').forEach(function (c) {
-      c.classList.toggle('is-on', !!state.venuesOn[c.dataset.venue]);
+      markMode(c, state.venueMode[c.dataset.venue]);
     });
     document.querySelectorAll('[data-badge]').forEach(function (c) {
-      c.classList.toggle('is-on', !!state.badges[c.dataset.badge]);
-      c.setAttribute('aria-pressed', String(!!state.badges[c.dataset.badge]));
+      markMode(c, state.badgeMode[c.dataset.badge]);
     });
     document.querySelectorAll('[data-team]').forEach(function (c) {
-      c.classList.toggle('is-on', !!state.teamsOff[c.dataset.team]);
-      c.setAttribute('aria-pressed', String(!!state.teamsOff[c.dataset.team]));
+      markMode(c, state.teamMode[c.dataset.team]);
     });
-    var everyTeam = TEAMS.every(function (t) { return !!state.teamsOff[t.slug]; });
+    var allIn = TEAMS.every(function (t) { return state.teamMode[t.slug] === 'in'; });
+    var allEx = TEAMS.every(function (t) { return state.teamMode[t.slug] === 'ex'; });
     document.querySelectorAll('[data-team-all]').forEach(function (c) {
-      c.classList.toggle('is-on', everyTeam);
-      c.setAttribute('aria-pressed', String(everyTeam));
+      markMode(c, allIn ? 'in' : allEx ? 'ex' : undefined);
     });
-    var any = activeVenues().length > 0 || activeBadges().length > 0 || activeTeams().length > 0;
+    var any = Object.keys(state.venueMode).length > 0 ||
+      Object.keys(state.badgeMode).length > 0 ||
+      Object.keys(state.teamMode).length > 0;
     $('filterToggle').classList.toggle('is-on', any);
     $('clearAll').disabled = !any;
   }
   // Filter choices persist per-browser (no login — just localStorage).
   function saveFilters() {
     try {
-      localStorage.setItem('lqa-filters', JSON.stringify({ venues: activeVenues(), badges: activeBadges(), teams: activeTeams() }));
+      localStorage.setItem('lqa-filters', JSON.stringify({ v: 2, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode }));
     } catch (e) { /* private mode etc. — filters just won't persist */ }
   }
   function loadFilters() {
     try {
       var s = JSON.parse(localStorage.getItem('lqa-filters') || '{}');
-      (s.venues || []).forEach(function (v) { state.venuesOn[v] = true; });
-      (s.badges || []).forEach(function (k) { if (BADGE_PREDS[k]) state.badges[k] = true; });
-      (s.teams || []).forEach(function (k) { if (TEAM_BY_SLUG[k]) state.teamsOff[k] = true; });
+      var mode = function (m) { return m === 'in' || m === 'ex' ? m : null; };
+      if (s.v === 2) {
+        Object.keys(s.venues || {}).forEach(function (v) { if (mode(s.venues[v])) state.venueMode[v] = s.venues[v]; });
+        Object.keys(s.badges || {}).forEach(function (k) { if (BADGE_PREDS[k] && mode(s.badges[k])) state.badgeMode[k] = s.badges[k]; });
+        Object.keys(s.teams || {}).forEach(function (k) { if (TEAM_BY_SLUG[k] && mode(s.teams[k])) state.teamMode[k] = s.teams[k]; });
+      } else {
+        // v1 arrays: venues and badges were includes, teams were exclusions
+        (s.venues || []).forEach(function (v) { state.venueMode[v] = 'in'; });
+        (s.badges || []).forEach(function (k) { if (BADGE_PREDS[k]) state.badgeMode[k] = 'in'; });
+        (s.teams || []).forEach(function (k) { if (TEAM_BY_SLUG[k]) state.teamMode[k] = 'ex'; });
+      }
     } catch (e) { /* unreadable storage — start unfiltered */ }
   }
   function applyFilters() { syncFilters(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
 
   document.addEventListener('click', function (e) {
     var v = e.target.closest('[data-venue]');
-    if (v) { state.venuesOn[v.dataset.venue] = !state.venuesOn[v.dataset.venue]; applyFilters(); return; }
+    if (v) { cycleMode(state.venueMode, v.dataset.venue); applyFilters(); return; }
     var b = e.target.closest('[data-badge]');
-    if (b) { state.badges[b.dataset.badge] = !state.badges[b.dataset.badge]; applyFilters(); return; }
+    if (b) { cycleMode(state.badgeMode, b.dataset.badge); applyFilters(); return; }
     var t = e.target.closest('[data-team]');
-    if (t) { state.teamsOff[t.dataset.team] = !state.teamsOff[t.dataset.team]; applyFilters(); return; }
-    // "All" toggles the whole team list: hide every team, or un-hide them all.
+    if (t) { cycleMode(state.teamMode, t.dataset.team); applyFilters(); return; }
+    // "All" cycles the whole team list together: include every team (games
+    // only), then exclude every team (no games), then clear them all.
     var ta = e.target.closest('[data-team-all]');
     if (ta) {
-      var allOn = TEAMS.every(function (tm) { return !!state.teamsOff[tm.slug]; });
-      state.teamsOff = {};
-      if (!allOn) TEAMS.forEach(function (tm) { state.teamsOff[tm.slug] = true; });
+      var allIn = TEAMS.every(function (tm) { return state.teamMode[tm.slug] === 'in'; });
+      var allEx = TEAMS.every(function (tm) { return state.teamMode[tm.slug] === 'ex'; });
+      state.teamMode = {};
+      if (allIn) TEAMS.forEach(function (tm) { state.teamMode[tm.slug] = 'ex'; });
+      else if (!allEx) TEAMS.forEach(function (tm) { state.teamMode[tm.slug] = 'in'; });
       applyFilters();
     }
   });
@@ -319,9 +344,9 @@
     }
   });
   function clearAllFilters() {
-    state.venuesOn = {};
-    state.badges = {};
-    state.teamsOff = {};
+    state.venueMode = {};
+    state.badgeMode = {};
+    state.teamMode = {};
     applyFilters();
   }
   $('clearFilters').addEventListener('click', clearAllFilters);
@@ -529,16 +554,18 @@
   // one venue, one badge, or one hidden team. Combos fall back to the full feed.
   var icsHref = '';
   function updateSubscribe() {
-    var keys = activeBadges();
-    var venues = activeVenues();
-    var teams = activeTeams();
     var filteredFile = null;
-    if (venues.length === 1 && !keys.length && !teams.length) {
-      filteredFile = 'events-venue-' + slugify(venues[0]) + '.ics';
-    } else if (!venues.length && keys.length === 1 && !teams.length) {
-      filteredFile = 'events-' + keys[0] + '.ics';
-    } else if (!venues.length && !keys.length && teams.length === 1) {
-      filteredFile = 'events-no-' + teams[0] + '.ics';
+    // Pre-built feeds only cover a single included venue, a single included
+    // badge, or a single excluded team — any other combo gets the full feed.
+    var total = Object.keys(state.venueMode).length +
+      Object.keys(state.badgeMode).length + Object.keys(state.teamMode).length;
+    if (total === 1) {
+      var vIn = modeKeys(state.venueMode, 'in');
+      var bIn = modeKeys(state.badgeMode, 'in');
+      var tEx = modeKeys(state.teamMode, 'ex');
+      if (vIn.length) filteredFile = 'events-venue-' + slugify(vIn[0]) + '.ics';
+      else if (bIn.length) filteredFile = 'events-' + bIn[0] + '.ics';
+      else if (tEx.length) filteredFile = 'events-no-' + tEx[0] + '.ics';
     }
     $('subFilterRow').hidden = !filteredFile;
     var file = (filteredFile && $('subUseFilter').checked) ? filteredFile : 'events.ics';

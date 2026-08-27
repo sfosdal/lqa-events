@@ -92,12 +92,13 @@
   <div id="presets" class="presets"><!-- marquee venue pills injected by app.js --></div>
 </nav>
 <div id="filterPanel" class="filter-panel" hidden>
+  <p class="fp-legend">Tap a filter once to include it, again to exclude it (struck out), a third time to turn it off.</p>
   <div class="fp-group">
-    <h3>Hide home games <span class="fp-hint">every team you pick drops out</span></h3>
+    <h3>Home games <span class="fp-hint">include = only games, exclude = no games</span></h3>
     <div id="panelTeams" class="chip-row"><!-- team chips injected by app.js --></div>
   </div>
   <div class="fp-group">
-    <h3>Event type <span class="fp-hint">only events matching every pick</span></h3>
+    <h3>Event type <span class="fp-hint">every include must match, no exclude may</span></h3>
     <div class="chip-row">
       <button type="button" class="badge b-21" data-badge="21plus" aria-pressed="false" title="Door-restricted, no minors">21+</button>
       <button type="button" class="badge b-day" data-badge="day" aria-pressed="false" title="Wraps up by 4 p.m.">day</button>
@@ -106,7 +107,7 @@
     </div>
   </div>
   <div class="fp-group">
-    <h3>Venues <span class="fp-hint">any picked venue counts</span></h3>
+    <h3>Venues <span class="fp-hint">any included venue counts, excluded ones drop out</span></h3>
     <div id="panelVenues" class="chip-row"><!-- every venue, injected by app.js --></div>
   </div>
   <div class="fp-group">
