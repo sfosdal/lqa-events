@@ -299,7 +299,8 @@
       }
     } catch (e) { /* unreadable storage — start unfiltered */ }
   }
-  function applyFilters() { syncFilters(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
+  // fitPresets too: bold include labels change pill widths in the one-line bar
+  function applyFilters() { syncFilters(); fitPresets(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
 
   document.addEventListener('click', function (e) {
     var v = e.target.closest('[data-venue]');

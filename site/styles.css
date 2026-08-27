@@ -8,7 +8,6 @@
   --line: #c9d2da;
   --gold: #e8791d;       /* Space Needle "Galaxy Gold" */
   --gold-soft: #fbe9d8;
-  --ex: #b3382e;         /* excluded-filter ring */
   /* venue hues (chips, grid ticks, agenda tags) */
   --v-cpa: #0f7c7c;
   --v-mccaw: #7c3a64;
@@ -22,7 +21,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2;
-    --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a; --ex: #e8756b;
+    --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
     --v-cpa: #35b5b5; --v-mccaw: #c674a8; --v-seactr: #6f9be0;
     --v-cornish: #6fbf68; --v-vera: #e8756b;
   }
@@ -127,42 +126,26 @@ h1 {
 .filter-panel .chip { background: var(--sky); }
 .chip-row .badge { cursor: pointer; background: none; padding: .4em .8em; font-size: .68rem; }
 .chip-row .b-sold { background: var(--ink); }
-.badge.is-on { box-shadow: 0 0 0 2px var(--gold); }
-.badge.is-ex { box-shadow: 0 0 0 2px var(--ex); text-decoration: line-through; }
-/* filter badges (not the agenda's display badges) get the same state marker
-   as chips: dot when off, + included, × excluded — in the badge's own color */
-.chip-row .badge::before {
-  content: ""; display: inline-grid; place-items: center;
-  width: .7em; height: .7em; margin-right: .35em; vertical-align: -.07em;
-  font-weight: 700; font-size: 1em; line-height: 1;
-  background: radial-gradient(circle closest-side, currentColor 0 70%, transparent 72%);
-}
-.chip-row .badge.is-on::before { content: "+"; background: none; }
-.chip-row .badge.is-ex::before { content: "×"; background: none; color: var(--ex); }
+/* included: bold and bright; excluded: dimmed and struck out */
+.badge.is-on { box-shadow: 0 0 0 2px var(--gold); font-weight: 700; }
+.badge.is-ex { opacity: .5; text-decoration: line-through; }
 .chip {
   font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
   padding: .5em .95em; background: var(--mist); color: var(--ink);
   border: 1px solid var(--line);
 }
-/* state marker: neutral dot when off, + when included, × when excluded.
-   Fixed-size box in all three states so the label never shifts; the atomic
-   inline box also keeps is-ex's line-through off the × glyph. */
-.chip::before {
-  content: ""; display: inline-grid; place-items: center;
-  width: .7em; height: .7em; margin-right: .4em; vertical-align: -.07em;
-  font-weight: 700; font-size: 1em; line-height: 1;
-  background: radial-gradient(circle closest-side, var(--dot, var(--ink-soft)) 0 70%, transparent 72%);
-}
-.chip.is-on::before { content: "+"; background: none; color: var(--dot, var(--ink)); }
-.chip.is-ex::before { content: "×"; background: none; color: var(--ex); }
-.chip[data-venue=""]::before, #clearFilters::before { display: none; }
 .clear-icon { width: 2.2rem; color: var(--ink-soft); }
 .clear-icon svg { width: .95rem; height: .95rem; }
 .clear-icon:disabled { opacity: .35; cursor: default; }
 .clear-icon:not(:disabled):hover { color: var(--ink); border-color: var(--ink-soft); }
-.chip.is-on { border-color: var(--dot, var(--ink)); box-shadow: inset 0 0 0 1px var(--dot, var(--ink)); }
-/* excluded: red ring + struck-out label */
-.chip.is-ex { border-color: var(--ex); box-shadow: inset 0 0 0 1px var(--ex); text-decoration: line-through; }
+/* included: bold and bright, filled with the venue's color; excluded: the
+   whole chip dims and the label is struck out */
+.chip.is-on {
+  font-weight: 700; border-color: var(--dot, var(--ink));
+  box-shadow: inset 0 0 0 1px var(--dot, var(--ink));
+  background: color-mix(in srgb, var(--dot, var(--ink)) 22%, var(--mist));
+}
+.chip.is-ex { opacity: .5; text-decoration: line-through; }
 .fp-legend {
   font-family: var(--mono); font-size: .68rem; color: var(--ink-soft);
   margin: 0 0 1rem;

@@ -94,14 +94,6 @@
 <div id="filterPanel" class="filter-panel" hidden>
   <p class="fp-legend">Tap a filter once to include it, again to exclude it (struck out), a third time to turn it off.</p>
   <div class="fp-group">
-    <h3>Home games <span class="fp-hint">include = only games, exclude = no games</span></h3>
-    <div id="panelTeams" class="chip-row"><!-- team chips injected by app.js --></div>
-  </div>
-  <div class="fp-group">
-    <h3>Venues <span class="fp-hint">any included venue counts, excluded ones drop out</span></h3>
-    <div id="panelVenues" class="chip-row"><!-- every venue, injected by app.js --></div>
-  </div>
-  <div class="fp-group">
     <h3>Event type <span class="fp-hint">every include must match, no exclude may</span></h3>
     <div class="chip-row">
       <button type="button" class="badge b-21" data-badge="21plus" aria-pressed="false" title="Door-restricted, no minors">21+</button>
@@ -109,6 +101,14 @@
       <button type="button" class="badge b-sold" data-badge="soldout" aria-pressed="false" title="Full house guaranteed">sold out</button>
       <button type="button" class="badge b-free" data-badge="free" aria-pressed="false" title="Open to walk-ups">free</button>
     </div>
+  </div>
+  <div class="fp-group">
+    <h3>Venues <span class="fp-hint">any included venue counts, excluded ones drop out</span></h3>
+    <div id="panelVenues" class="chip-row"><!-- every venue, injected by app.js --></div>
+  </div>
+  <div class="fp-group">
+    <h3>Home games <span class="fp-hint">include = only games, exclude = no games</span></h3>
+    <div id="panelTeams" class="chip-row"><!-- team chips injected by app.js --></div>
   </div>
   <div class="fp-group">
     <button id="clearFilters" class="chip" type="button">Clear all filters</button>
