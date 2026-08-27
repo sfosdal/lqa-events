@@ -592,18 +592,20 @@
   // A fresh marquee line every visit ("On stage in LQA" stays as the
   // no-JS fallback in the HTML).
   var TITLES = [
-    'On stage in LQA',
-    'Now playing in LQA',
-    'Showtime in LQA',
-    'Curtain up in LQA',
-    'Lights up in LQA',
-    'Doors open in LQA',
-    'Mic check in LQA',
-    'Big nights in LQA',
-    'Full houses in LQA',
-    'On the marquee in LQA',
-    'Game on in LQA',
-    'The lineup in LQA',
+    'Smells like LQA spirit',
+    'Come as you are, LQA',
+    'Unplugged in LQA',
+    'Black hole sun over LQA',
+    'Still alive in LQA',
+    'Feedback and flannel in LQA',
+    'Turn it up, LQA',
+    'Amps on in LQA',
+    'Soundcheck in LQA',
+    'Distortion nights in LQA',
+    'Loud and live in LQA',
+    'Wall of sound in LQA',
+    'Flannel weather in LQA',
+    'Heavy sets in LQA',
   ];
   $('agendaTitle').textContent = TITLES[Math.floor(Math.random() * TITLES.length)];
 
