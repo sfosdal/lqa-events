@@ -64,7 +64,7 @@
   // Kayak-style checkboxes: each filter map holds name → 'ex' for unchecked
   // (hidden); absent = checked (shown). Everything starts checked except SIFF
   // movies — see applyDefaultFilters.
-  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false };
+  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false, page: 0, pageByDate: {} };
 
   function modeKeys(map, mode) {
     return Object.keys(map).filter(function (k) { return map[k] === mode; });
@@ -393,8 +393,9 @@
       }
     } catch (e) { applyDefaultFilters(); } // unreadable storage — start at the baseline
   }
-  // fitPresets too: bold include labels change pill widths in the one-line bar
-  function applyFilters() { syncFilters(); fitPresets(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
+  // fitPresets too: checked labels change chip widths in the one-line bar;
+  // a filter change also rewinds the agenda to its first page
+  function applyFilters() { state.page = 0; syncFilters(); fitPresets(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
 
   // Each group's map and full key list, for "only" and Select/Clear all.
   function groupInfo(g) {
@@ -477,30 +478,24 @@
     var m = state.month;
     if (!m) return;
     var bounds = monthBounds();
+    var next = new Date(m.getFullYear(), m.getMonth() + 1, 1);
     $('calPrev').disabled = !bounds || sameMonth(m, new Date(bounds.min.getFullYear(), bounds.min.getMonth(), 1));
-    $('calNext').disabled = !bounds || sameMonth(m, new Date(bounds.max.getFullYear(), bounds.max.getMonth(), 1));
+    $('calNext').disabled = !bounds ||
+      next.getFullYear() * 12 + next.getMonth() >= bounds.max.getFullYear() * 12 + bounds.max.getMonth();
 
     var grid = $('calGrid');
     grid.innerHTML = '';
     var today = todayStr();
-    var now = new Date();
-    // The current month renders as a rolling window — this week plus the
-    // next four — so the top of the next month is always in view. Arrow
-    // navigation shows classic full months.
-    var rolling = sameMonth(m, now);
-    var start, end;
-    if (rolling) {
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
-      end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 27);
-    } else {
-      start = new Date(m.getFullYear(), m.getMonth(), 1);
-      start.setDate(1 - start.getDay()); // back up to Sunday
-      end = new Date(m.getFullYear(), m.getMonth() + 1, 0);
-    }
-    $('calTitle').textContent = (rolling && end.getMonth() !== start.getMonth())
-      ? start.toLocaleDateString('en-US', { month: 'short' }) + ' – ' +
-        end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-      : m.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    // Two full months at a time — this one and the next — so the near
+    // future is always completely in view. Arrows slide the pair by one.
+    var start = new Date(m.getFullYear(), m.getMonth(), 1);
+    start.setDate(1 - start.getDay()); // back up to Sunday
+    var end = new Date(m.getFullYear(), m.getMonth() + 2, 0); // next month's last day
+    $('calTitle').textContent =
+      m.toLocaleDateString('en-US', m.getFullYear() === next.getFullYear()
+        ? { month: 'short' } : { month: 'short', year: 'numeric' }) +
+      ' – ' + next.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    var loYm = m.getFullYear() * 12 + m.getMonth();
     var cells = Math.ceil((Math.round((end - start) / 86400e3) + 1) / 7) * 7;
     for (var i = 0; i < cells; i++) {
       var d = new Date(start);
@@ -509,9 +504,9 @@
       var evs = filtered(state.byDate[key] || []);
       var cell = document.createElement(evs.length ? 'button' : 'div');
       cell.className = 'cal-day';
-      // in the rolling window every day carries equal weight — only the
-      // month-grid views dim their neighbors' spill-over days
-      if (!rolling && d.getMonth() !== m.getMonth()) cell.className += ' is-out';
+      var ym = d.getFullYear() * 12 + d.getMonth();
+      // only spill days outside the two shown months go faint
+      if (ym < loYm || ym > loYm + 1) cell.className += ' is-out';
       if (key === today) cell.className += ' is-today';
       // Month differentiation: the card's own border frames the whole
       // calendar (it follows the rounded corners); cells only draw the
@@ -522,16 +517,10 @@
       };
       if (i >= 7 && nb(-7)) cell.className += ' mo-t';
       if (i % 7 !== 0 && nb(-1)) cell.className += ' mo-l';
-      // ...and the earlier month's day numbers go muted.
-      var primaryYm = rolling ? now.getFullYear() * 12 + now.getMonth() : m.getFullYear() * 12 + m.getMonth();
-      if (d.getFullYear() * 12 + d.getMonth() < primaryYm ||
-          (rolling && end.getMonth() !== start.getMonth() && d.getFullYear() * 12 + d.getMonth() === primaryYm)) {
-        cell.className += ' mo-fade';
-      }
       var num = document.createElement('span');
       num.className = 'num';
-      // the spill-over month announces itself on its 1st
-      if (d.getDate() === 1 && d.getMonth() !== m.getMonth()) {
+      // each month after the first announces itself on its 1st
+      if (d.getDate() === 1 && ym > loYm) {
         num.className += ' num-mo';
         num.textContent = d.toLocaleDateString('en-US', { month: 'short' });
       } else {
@@ -563,28 +552,51 @@
   $('calGrid').addEventListener('click', function (e) {
     var cell = e.target.closest('button.cal-day');
     if (!cell || !cell.dataset.date) return;
-    if (cell.dataset.date < todayStr() && !state.showPast) {
-      state.showPast = true;
+    var date = cell.dataset.date;
+    if (date < todayStr()) {
+      // past days live above page one, behind the toggle
+      if (!state.showPast || state.page !== 0) {
+        state.showPast = true;
+        state.page = 0;
+        renderAgenda();
+      }
+    } else if (state.pageByDate[date] != null && state.pageByDate[date] !== state.page) {
+      state.page = state.pageByDate[date];
       renderAgenda();
     }
-    var row = document.querySelector('.day-row[data-date="' + cell.dataset.date + '"]');
+    var row = document.querySelector('.day-row[data-date="' + date + '"]');
     if (row) row.scrollIntoView({ block: 'start' });
   });
 
   // ---- agenda ----
+  // Upcoming days are paged in two-week windows (empty windows are skipped),
+  // so the first page reads as "the next two weeks". Past events stay behind
+  // their toggle, which lives on page one only.
+  var PAGE_DAYS = 14;
   function renderAgenda() {
     var ol = $('agenda');
     ol.innerHTML = '';
     var dates = Object.keys(state.byDate).sort();
     var today = todayStr();
-    var shown = 0;
+    var t0 = parseDate(today);
     var pastCount = 0;
+    var buckets = {};
+    state.pageByDate = {};
     dates.forEach(function (date) {
-      if (date < today) {
-        pastCount += filtered(state.byDate[date]).length;
-      }
+      var n = filtered(state.byDate[date]).length;
+      if (!n) return;
+      if (date < today) { pastCount += n; return; }
+      // Math.round eats the DST hour before the day count is windowed
+      var idx = Math.floor(Math.round((parseDate(date) - t0) / 86400e3) / PAGE_DAYS);
+      (buckets[idx] = buckets[idx] || []).push(date);
     });
-    if (pastCount) {
+    var pageKeys = Object.keys(buckets).map(Number).sort(function (a, b) { return a - b; });
+    if (state.page >= pageKeys.length) state.page = Math.max(0, pageKeys.length - 1);
+    pageKeys.forEach(function (k, i) {
+      buckets[k].forEach(function (d) { state.pageByDate[d] = i; });
+    });
+    var shown = 0;
+    if (pastCount && state.page === 0) {
       var tli = document.createElement('li');
       tli.className = 'past-toggle';
       var tb = document.createElement('button');
@@ -599,10 +611,14 @@
       tli.appendChild(tb);
       ol.appendChild(tli);
     }
-    dates.forEach(function (date) {
-      if (date < today && !state.showPast) return;
+    var visible = pageKeys.length ? buckets[pageKeys[state.page]] : [];
+    if (state.showPast && state.page === 0) {
+      visible = dates.filter(function (d) {
+        return d < today && filtered(state.byDate[d]).length;
+      }).concat(visible);
+    }
+    visible.forEach(function (date) {
       var evs = filtered(state.byDate[date]);
-      if (!evs.length) return;
       shown += evs.length;
       var li = document.createElement('li');
       li.className = 'day-row' + (date === today ? ' is-today' : '') + (date < today ? ' is-past' : '');
@@ -650,12 +666,69 @@
       li.appendChild(wrap);
       ol.appendChild(li);
     });
-    if (!shown) {
+    if (!shown && !pastCount) {
       var li = document.createElement('li');
       li.className = 'empty';
       li.textContent = 'No upcoming events for this filter yet — check back after the next refresh.';
       ol.appendChild(li);
     }
+    renderPager(pageKeys, buckets);
+  }
+
+  // ---- pager: ‹ 1 2 3 › under the list, ellipsized when the year runs long ----
+  function gotoPage(p) {
+    state.page = p;
+    renderAgenda();
+    $('agendaTitle').scrollIntoView({ block: 'start' });
+  }
+  function renderPager(pageKeys, buckets) {
+    var nav = $('agendaPager');
+    nav.innerHTML = '';
+    var total = pageKeys.length;
+    if (total < 2) return;
+    var rangeLabel = function (i) {
+      var ds = buckets[pageKeys[i]];
+      var fmt = function (s) {
+        return parseDate(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      };
+      return fmt(ds[0]) + ' – ' + fmt(ds[ds.length - 1]);
+    };
+    var arrow = function (txt, target, label) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pg-arrow';
+      b.textContent = txt;
+      b.setAttribute('aria-label', label);
+      if (target == null) b.disabled = true;
+      else b.addEventListener('click', function () { gotoPage(target); });
+      return b;
+    };
+    nav.appendChild(arrow('‹', state.page > 0 ? state.page - 1 : null, 'Earlier events'));
+    var last = -1;
+    for (var i = 0; i < total; i++) {
+      // always the first, last, and current±1; the rest collapse into …
+      if (total > 7 && i !== 0 && i !== total - 1 && Math.abs(i - state.page) > 1) continue;
+      if (i - last > 1) {
+        var gap = document.createElement('span');
+        gap.className = 'pg-gap';
+        gap.textContent = '…';
+        nav.appendChild(gap);
+      }
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = i + 1;
+      b.title = rangeLabel(i);
+      if (i === state.page) {
+        b.className = 'pg-cur';
+        b.disabled = true;
+        b.setAttribute('aria-current', 'page');
+      } else {
+        b.addEventListener('click', (function (p) { return function () { gotoPage(p); }; })(i));
+      }
+      nav.appendChild(b);
+      last = i;
+    }
+    nav.appendChild(arrow('›', state.page < total - 1 ? state.page + 1 : null, 'Later events'));
   }
 
   // ---- subscribe popover ----
@@ -728,26 +801,6 @@
       setTimeout(function () { label.textContent = 'Copy link'; }, 1500);
     });
   });
-
-  // A fresh marquee line every visit ("On stage in LQA" stays as the
-  // no-JS fallback in the HTML).
-  var TITLES = [
-    'Smells like LQA spirit',
-    'Come as you are, LQA',
-    'Unplugged in LQA',
-    'Black hole sun over LQA',
-    'Still alive in LQA',
-    'Feedback and flannel in LQA',
-    'Turn it up, LQA',
-    'Amps on in LQA',
-    'Soundcheck in LQA',
-    'Distortion nights in LQA',
-    'Loud and live in LQA',
-    'Wall of sound in LQA',
-    'Flannel weather in LQA',
-    'Heavy sets in LQA',
-  ];
-  $('agendaTitle').textContent = TITLES[Math.floor(Math.random() * TITLES.length)];
 
   loadFilters();
   load();

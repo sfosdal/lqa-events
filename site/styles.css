@@ -178,7 +178,10 @@ h1 {
   display: grid; grid-template-columns: minmax(0, 1fr) 18rem;
   gap: 0 2.5rem; align-items: start;
 }
-.cal-side { position: sticky; top: 1rem; }
+/* the pager sits between list and calendar in the DOM — pin the columns so
+   auto-placement doesn't hand it the calendar's cell */
+.agenda-layout > ol, .agenda-layout > .pager { grid-column: 1; }
+.cal-side { position: sticky; top: 1rem; grid-column: 2; grid-row: 1; }
 @media (max-width: 760px) {
   .agenda-layout { display: flex; flex-direction: column; }
   .cal-side { order: -1; position: static; width: 100%; max-width: 24rem; margin: 0 auto 1.5rem; }
@@ -231,7 +234,6 @@ button.cal-day:hover { background: var(--gold-soft); }
    closes each month's frame at the calendar edge */
 .cal-day.mo-t { border-top: 2px solid var(--ink-soft); }
 .cal-day.mo-l { border-left: 2px solid var(--ink-soft); }
-.cal-day.mo-fade { color: var(--ink-soft); }
 .ticks { display: flex; flex-wrap: wrap; gap: 2px; margin-top: .2rem; }
 .ticks i { width: .28rem; height: .28rem; border-radius: 1px; background: var(--dot, var(--ink-soft)); }
 
@@ -275,6 +277,23 @@ button.cal-day:hover { background: var(--gold-soft); }
   font-family: var(--mono); font-size: .72rem; text-transform: uppercase;
   letter-spacing: .06em; color: var(--dot, var(--ink-soft));
 }
+
+/* ---- agenda pager ---- */
+.pager { display: flex; align-items: center; justify-content: center; gap: .4rem; margin: 1.4rem 0 0; }
+.pager:empty { display: none; }
+.pager button {
+  font: 500 .9rem/1 var(--body); min-width: 2rem; height: 2rem; cursor: pointer;
+  background: none; border: 0; border-radius: 8px; color: var(--ink);
+}
+.pager button:not(:disabled):hover { background: var(--mist); }
+.pager .pg-cur { color: var(--ink-soft); font-weight: 700; cursor: default; }
+.pager .pg-arrow {
+  border: 1px solid var(--line); background: var(--mist); border-radius: 10px;
+  width: 2.4rem; font-size: 1.05rem;
+}
+.pager .pg-arrow:disabled { opacity: .35; cursor: default; }
+.pager .pg-arrow:not(:disabled):hover { border-color: var(--ink-soft); }
+.pg-gap { color: var(--ink-soft); }
 
 /* ---- event badges + legend ---- */
 .badge {
