@@ -656,7 +656,7 @@
         row.className = 'ev';
         row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' 9%, transparent)';
         // the right edge carries the event type's hue, matching its filter dot
-        row.style.borderRight = '.3rem solid ' + typeColor(eventType(e));
+        row.style.borderRight = '.5rem solid ' + typeColor(eventType(e));
         var time = document.createElement('span');
         time.className = 'time';
         time.textContent = fmtTime(e.time);
