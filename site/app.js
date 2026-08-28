@@ -52,14 +52,19 @@
   // title no matter what the venue. Mirrors TEAMS in scripts/badges.mjs.
   // venue = the team's home building, re-checked whenever the team turns on
   // (a checked team with its stadium hidden would silently show nothing).
+  // logo = ESPN's public team-logo CDN, shown beside the game in the agenda.
   var TEAMS = [
-    { slug: 'mariners', label: 'Mariners', re: /mariners/i, venue: 'T-Mobile Park' },
-    { slug: 'storm', label: 'Storm', re: /seattle storm/i, venue: 'Climate Pledge Arena' },
-    { slug: 'seahawks', label: 'Seahawks', re: /seahawks/i, venue: 'Lumen Field' },
-    { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i, venue: 'Lumen Field' },
-    { slug: 'sounders', label: 'Sounders', re: /sounders/i, venue: 'Lumen Field' },
-    { slug: 'kraken', label: 'Kraken', re: /kraken/i, venue: 'Climate Pledge Arena' },
+    { slug: 'mariners', label: 'Mariners', re: /mariners/i, venue: 'T-Mobile Park', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/sea.png' },
+    { slug: 'storm', label: 'Storm', re: /seattle storm/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/wnba/500/sea.png' },
+    { slug: 'seahawks', label: 'Seahawks', re: /seahawks/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/sea.png' },
+    { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/15363.png' },
+    { slug: 'sounders', label: 'Sounders', re: /sounders/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/9726.png' },
+    { slug: 'kraken', label: 'Kraken', re: /kraken/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/sea.png' },
   ];
+  function teamFor(title) {
+    for (var i = 0; i < TEAMS.length; i++) if (TEAMS[i].re.test(title || '')) return TEAMS[i];
+    return null;
+  }
   var TEAM_BY_SLUG = {};
   TEAMS.forEach(function (t) { TEAM_BY_SLUG[t.slug] = t; });
 
@@ -161,6 +166,13 @@
     { key: 'movie', label: 'movies', title: 'Film screenings at SIFF Cinema Uptown — unchecked by default' },
     { key: 'community', label: 'community & festivals', title: 'Grounds events, festivals, fairs, SIFF specials' },
   ];
+  // Type hues mirror the venue hues: a dot on the filter rows, a colored
+  // right edge on each agenda row.
+  var TYPE_VARS = {
+    concert: '--t-concert', sports: '--t-sports', arts: '--t-arts',
+    movie: '--t-movie', community: '--t-community',
+  };
+  function typeColor(k) { return 'var(' + TYPE_VARS[k] + ')'; }
   var TYPE_VENUE_DEFAULT = {
     'Climate Pledge Arena': 'concert', 'The Vera Project': 'concert',
     'T-Mobile Park': 'concert', 'Lumen Field': 'concert', // non-game stadium bookings are shows
@@ -269,16 +281,17 @@
     row.appendChild(lab); row.appendChild(only); row.appendChild(cnt);
     return row;
   }
-  function venueName(v) {
+  function dottedName(label, color) {
     var name = document.createElement('span');
     name.className = 'fp-name';
     var dot = document.createElement('i');
     dot.className = 'dot';
-    dot.style.setProperty('--dot', venueColor(v));
+    dot.style.setProperty('--dot', color);
     name.appendChild(dot);
-    name.appendChild(document.createTextNode(v));
+    name.appendChild(document.createTextNode(label));
     return name;
   }
+  function venueName(v) { return dottedName(v, venueColor(v)); }
   function renderFilters() {
     // Counts play the role of Kayak's price column: upcoming events each row
     // would govern, unaffected by the current filter so they stay stable.
@@ -295,11 +308,8 @@
         ql.appendChild(filterRow('venue', q.key, venueName(q.key), n));
       } else {
         var t = typeByKey[q.key];
-        var name = document.createElement('span');
-        name.className = 'fp-name';
-        name.textContent = t.label;
         var m = upcoming.filter(function (e) { return eventType(e) === t.key; }).length;
-        ql.appendChild(filterRow('badge', t.key, name, m, t.title));
+        ql.appendChild(filterRow('badge', t.key, dottedName(t.label, typeColor(t.key)), m, t.title));
       }
     });
     var pv = $('panelVenues');
@@ -320,11 +330,8 @@
     var pb = $('panelBadges');
     pb.innerHTML = '';
     TYPE_LIST.forEach(function (t) {
-      var name = document.createElement('span');
-      name.className = 'fp-name';
-      name.textContent = t.label;
       var n = upcoming.filter(function (e) { return eventType(e) === t.key; }).length;
-      pb.appendChild(filterRow('badge', t.key, name, n, t.title));
+      pb.appendChild(filterRow('badge', t.key, dottedName(t.label, typeColor(t.key)), n, t.title));
     });
     syncFilters();
   }
@@ -435,7 +442,6 @@
     applyDefaultFilters();
     applyFilters();
   }
-  $('clearFilters').addEventListener('click', clearAllFilters);
   $('clearAll').addEventListener('click', clearAllFilters);
 
   // ---- month grid ----
@@ -551,32 +557,38 @@
   });
 
   // ---- agenda ----
-  // Upcoming days are paged in two-week windows (empty windows are skipped),
-  // so the first page reads as "the next two weeks". Past events stay behind
-  // their toggle, which lives on page one only.
+  // Upcoming days are paged greedily: a page spans at most two weeks AND at
+  // most 15 events, whichever fills first (a day is never split, so one huge
+  // day can overflow a page by itself). Past events stay behind their
+  // toggle, which lives on page one only.
   var PAGE_DAYS = 14;
+  var PAGE_EVENTS = 15;
   function renderAgenda() {
     var ol = $('agenda');
     ol.innerHTML = '';
     var dates = Object.keys(state.byDate).sort();
     var today = todayStr();
-    var t0 = parseDate(today);
     var pastCount = 0;
-    var buckets = {};
+    var pages = [];
+    var count = 0;
     state.pageByDate = {};
     dates.forEach(function (date) {
       var n = filtered(state.byDate[date]).length;
       if (!n) return;
       if (date < today) { pastCount += n; return; }
-      // Math.round eats the DST hour before the day count is windowed
-      var idx = Math.floor(Math.round((parseDate(date) - t0) / 86400e3) / PAGE_DAYS);
-      (buckets[idx] = buckets[idx] || []).push(date);
+      var start = pages.length ? pages[pages.length - 1][0] : null;
+      // Math.round eats the DST hour before the day count is compared
+      var days = start ? Math.round((parseDate(date) - parseDate(start)) / 86400e3) : 0;
+      if (!pages.length || days >= PAGE_DAYS || count + n > PAGE_EVENTS) {
+        pages.push([date]);
+        count = n;
+      } else {
+        pages[pages.length - 1].push(date);
+        count += n;
+      }
+      state.pageByDate[date] = pages.length - 1;
     });
-    var pageKeys = Object.keys(buckets).map(Number).sort(function (a, b) { return a - b; });
-    if (state.page >= pageKeys.length) state.page = Math.max(0, pageKeys.length - 1);
-    pageKeys.forEach(function (k, i) {
-      buckets[k].forEach(function (d) { state.pageByDate[d] = i; });
-    });
+    if (state.page >= pages.length) state.page = Math.max(0, pages.length - 1);
     var shown = 0;
     if (pastCount && state.page === 0) {
       var tli = document.createElement('li');
@@ -593,7 +605,7 @@
       tli.appendChild(tb);
       ol.appendChild(tli);
     }
-    var visible = pageKeys.length ? buckets[pageKeys[state.page]] : [];
+    var visible = pages.length ? pages[state.page] : [];
     if (state.showPast && state.page === 0) {
       visible = dates.filter(function (d) {
         return d < today && filtered(state.byDate[d]).length;
@@ -621,6 +633,8 @@
         var row = document.createElement('div');
         row.className = 'ev';
         row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' 9%, transparent)';
+        // the right edge carries the event type's hue, matching its filter dot
+        row.style.borderRight = '.3rem solid ' + typeColor(eventType(e));
         var time = document.createElement('span');
         time.className = 'time';
         time.textContent = fmtTime(e.time);
@@ -637,7 +651,19 @@
         a.target = '_blank';
         a.rel = 'noopener';
         a.textContent = e.title;
-        body.appendChild(venue); body.appendChild(a);
+        var titleLine = document.createElement('span');
+        titleLine.className = 'ev-title';
+        var team = teamFor(e.title);
+        if (team) {
+          var logo = document.createElement('img');
+          logo.className = 'team-logo';
+          logo.src = team.logo;
+          logo.alt = team.label + ' logo';
+          logo.loading = 'lazy';
+          titleLine.appendChild(logo);
+        }
+        titleLine.appendChild(a);
+        body.appendChild(venue); body.appendChild(titleLine);
         var tags = document.createElement('div');
         tags.className = 'ev-tags';
         appendBadges(tags, e);
@@ -654,7 +680,7 @@
       li.textContent = 'No upcoming events for this filter yet — check back after the next refresh.';
       ol.appendChild(li);
     }
-    renderPager(pageKeys, buckets);
+    renderPager(pages);
   }
 
   // ---- pager: ‹ 1 2 3 › under the list, ellipsized when the year runs long ----
@@ -663,13 +689,13 @@
     renderAgenda();
     document.querySelector('.agenda').scrollIntoView({ block: 'start' });
   }
-  function renderPager(pageKeys, buckets) {
+  function renderPager(pages) {
     var nav = $('agendaPager');
     nav.innerHTML = '';
-    var total = pageKeys.length;
+    var total = pages.length;
     if (total < 2) return;
     var rangeLabel = function (i) {
-      var ds = buckets[pageKeys[i]];
+      var ds = pages[i];
       var fmt = function (s) {
         return parseDate(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       };

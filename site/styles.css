@@ -16,6 +16,12 @@
   --v-vera: #b3382e;
   --v-siff: #5b4ea3;
   --v-otb: #b93b6e;
+  /* event-type hues (filter dots, agenda right edge) */
+  --t-concert: #c26a12;
+  --t-sports: #1f8a5a;
+  --t-arts: #8a4ec2;
+  --t-movie: #607086;
+  --t-community: #3b9ec2;
   --display: "Big Shoulders", "Arial Narrow", sans-serif;
   --body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -26,6 +32,8 @@
     --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
     --v-cpa: #35b5b5; --v-mccaw: #c674a8; --v-seactr: #6f9be0;
     --v-cornish: #6fbf68; --v-vera: #e8756b; --v-siff: #9a8ee0; --v-otb: #e07ba4;
+    --t-concert: #f0954a; --t-sports: #4dc48e; --t-arts: #b98ae8;
+    --t-movie: #8fa3bd; --t-community: #62c3e8;
   }
 }
 
@@ -98,20 +106,32 @@ h1 {
 .tile:hover { border-color: var(--gold); }
 .tile:hover span { color: var(--ink); }
 /* ---- filter area: icon bar, quick slice, full panel ---- */
-.filterbar { display: flex; flex-wrap: nowrap; gap: .5rem; align-items: center; margin: .5rem 0 .9rem; }
+.filterbar { display: flex; flex-wrap: nowrap; gap: .7rem; align-items: flex-end; margin: .5rem 0 0; }
 .filterbar > * { flex-shrink: 0; }
+/* the toggle reads as a tab on the filter card: squared bottom, no bottom
+   border, nudged down one pixel to swallow the card's top border */
 .filter-icon {
-  width: 2.6rem; height: 2.05rem; border-radius: 999px; cursor: pointer;
-  border: 1px solid var(--line); background: var(--mist); color: var(--ink);
+  width: 3rem; height: 2.4rem; border-radius: 10px 10px 0 0; cursor: pointer;
+  border: 1px solid var(--line); border-bottom: 0;
+  background: var(--mist); color: var(--ink);
   display: grid; place-items: center;
+  position: relative; z-index: 1; margin-bottom: -1px;
 }
 .filter-icon svg { width: 1.1rem; height: 1.1rem; }
 .filter-icon:hover { border-color: var(--ink-soft); }
 .filter-icon.is-on { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
-/* the collapsed state: a narrow slice of the panel with the go-to filters */
-.quick-panel { max-width: 24rem; padding: .55rem .65rem; margin-bottom: 1.25rem; }
+.reset-chip { margin-bottom: .5rem; }
+.reset-chip:disabled { opacity: .45; cursor: default; }
+.reset-chip:not(:disabled):hover { border-color: var(--ink-soft); }
+/* the collapsed state: a slice of the panel, spread across the full width */
+.quick-panel { padding: .55rem .75rem; }
+.quick-panel .fp-list {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  column-gap: 2rem;
+}
 .filter-panel {
-  background: var(--mist); border: 1px solid var(--line); border-radius: 10px;
+  background: var(--mist); border: 1px solid var(--line);
+  border-radius: 0 10px 10px 10px; /* the tab occupies the top-left corner */
   padding: 1rem 1.1rem; margin-bottom: 1.25rem;
 }
 /* Kayak-style panel: columns of checkbox rows, Select all | Clear all links
@@ -155,17 +175,11 @@ h1 {
 .fp-row:hover .fp-only, .fp-row:focus-within .fp-only { visibility: visible; }
 @media (hover: none) { .fp-only { visibility: visible; } }
 .fp-count { margin-left: auto; font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); }
-.fp-reset { margin-top: 1.1rem; }
-.filter-panel .chip { background: var(--sky); }
 .chip {
   font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
   padding: .5em .95em; background: var(--mist); color: var(--ink);
   border: 1px solid var(--line);
 }
-.clear-icon { width: 2.2rem; color: var(--ink-soft); }
-.clear-icon svg { width: .95rem; height: .95rem; }
-.clear-icon:disabled { opacity: .35; cursor: default; }
-.clear-icon:not(:disabled):hover { color: var(--ink); border-color: var(--ink-soft); }
 
 /* ---- agenda layout: list + docked mini calendar ---- */
 .agenda { margin-top: 1.6rem; }
@@ -270,6 +284,8 @@ button.cal-day:hover { background: var(--gold-soft); }
 .ev { display: flex; gap: .8rem; align-items: flex-start; padding: .45em .55em; border-radius: 6px; }
 .ev-body { display: flex; flex-direction: column; align-items: flex-start; gap: .18rem; min-width: 0; }
 .ev-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+.ev-title { display: flex; align-items: center; gap: .45rem; min-width: 0; }
+.team-logo { flex: none; width: 1.35rem; height: 1.35rem; object-fit: contain; }
 .ev a { font-weight: 600; text-decoration-color: var(--line); }
 .ev a:hover { text-decoration-color: var(--gold); }
 .ev .time { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); min-width: 5.5rem; padding-top: .15em; }
