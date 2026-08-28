@@ -536,10 +536,28 @@
     var now = new Date();
     state.month = new Date(now.getFullYear(), now.getMonth(), 1);
     renderCal();
+    jumpToMonth();
   });
   function shiftMonth(dir) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + dir, 1);
     renderCal();
+    jumpToMonth();
+  }
+  // The listing follows the calendar: land on the page holding the shown
+  // month's first listed day (a fully past month opens the past list instead).
+  function jumpToMonth() {
+    var target = ymd(state.month);
+    if (target < todayStr() && !sameMonth(state.month, new Date())) {
+      if (!state.showPast || state.page !== 0) { state.showPast = true; gotoPage(0); }
+      return;
+    }
+    var dates = Object.keys(state.pageByDate).sort();
+    var hit = null;
+    for (var i = 0; i < dates.length; i++) {
+      if (dates[i] >= target) { hit = dates[i]; break; }
+    }
+    if (hit == null && dates.length) hit = dates[dates.length - 1];
+    if (hit != null && state.pageByDate[hit] !== state.page) gotoPage(state.pageByDate[hit]);
   }
   $('calGrid').addEventListener('click', function (e) {
     var cell = e.target.closest('button.cal-day');
