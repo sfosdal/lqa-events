@@ -46,8 +46,8 @@
     };
   }
 
-  // Local pro teams — an exclusion filter ("hide Mariners games"), matched on
-  // the title no matter what the venue. Mirrors TEAMS in scripts/badges.mjs.
+  // Local pro teams — uncheck one to hide its home games, matched on the
+  // title no matter what the venue. Mirrors TEAMS in scripts/badges.mjs.
   var TEAMS = [
     { slug: 'mariners', label: 'Mariners', re: /mariners/i },
     { slug: 'storm', label: 'Storm', re: /seattle storm/i },
@@ -60,17 +60,16 @@
   var TEAM_BY_SLUG = {};
   TEAMS.forEach(function (t) { TEAM_BY_SLUG[t.slug] = t; });
 
-  // Each filter map holds name → 'in' | 'ex' (absent = off). A click cycles
-  // off → include → exclude → off.
+  // Kayak-style checkboxes: each filter map holds name → 'ex' for unchecked
+  // (hidden); absent = checked (shown). Everything starts checked except SIFF
+  // movies — see applyDefaultFilters.
   var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false };
 
   function modeKeys(map, mode) {
     return Object.keys(map).filter(function (k) { return map[k] === mode; });
   }
-  function cycleMode(map, key) {
-    if (!map[key]) map[key] = 'in';
-    else if (map[key] === 'in') map[key] = 'ex';
-    else delete map[key];
+  function setChecked(map, key, on) {
+    if (on) delete map[key]; else map[key] = 'ex';
   }
 
   function slugify(s) {
@@ -157,29 +156,36 @@
     'movie': function (e) { return !!e.movie; },
     'siffevent': function (e) { return e.venue === 'SIFF Cinema Uptown' && !e.movie; },
   };
-  // The baseline every visitor starts from (and "Clear all filters" returns
-  // to): SIFF's daily movie showings hidden, everything else visible.
+  // Panel rows for the Event type group, in display order. The label reuses
+  // the same badge classes the agenda tags wear, so the filter and the tags
+  // speak the same color language.
+  var PANEL_BADGES = [
+    { key: '21plus', cls: 'b-21', label: '21+', title: 'Door-restricted, no minors' },
+    { key: 'day', cls: 'b-day', label: 'day', title: 'Wraps up by 4 p.m.' },
+    { key: 'soldout', cls: 'b-sold', label: 'sold out', title: 'Full house guaranteed' },
+    { key: 'free', cls: 'b-free', label: 'free', title: 'Open to walk-ups' },
+    { key: 'movie', cls: 'b-movie', label: 'siff movies', title: 'Regular film screenings at SIFF Cinema Uptown — unchecked by default' },
+    { key: 'siffevent', cls: 'b-siffev', label: 'siff events', title: 'SIFF special programming — festivals, Movie Club, series nights' },
+  ];
+  // The baseline every visitor starts from (and "Reset filters" returns to):
+  // SIFF's daily movie showings unchecked, everything else checked.
   function applyDefaultFilters() { state.badgeMode = { movie: 'ex' }; }
   function isDefaultState() {
     if (Object.keys(state.venueMode).length || Object.keys(state.teamMode).length) return false;
     var k = Object.keys(state.badgeMode);
     return k.length === 1 && state.badgeMode.movie === 'ex';
   }
-  // Included venues OR together and excluded venues drop out; included badges
-  // AND on top while excluded badges must all miss; included teams OR (only
-  // their games) and excluded teams drop out last.
+  // Purely subtractive: everything shows until unchecked. An unchecked venue
+  // drops its events, an unchecked team drops its home games, and an event
+  // carrying any unchecked type is hidden.
   function filtered(list) {
-    var vIn = modeKeys(state.venueMode, 'in'), vEx = modeKeys(state.venueMode, 'ex');
-    var bIn = modeKeys(state.badgeMode, 'in'), bEx = modeKeys(state.badgeMode, 'ex');
-    var tIn = modeKeys(state.teamMode, 'in'), tEx = modeKeys(state.teamMode, 'ex');
+    var bEx = modeKeys(state.badgeMode, 'ex');
+    var tEx = modeKeys(state.teamMode, 'ex');
     return list.filter(function (e) {
-      if (vIn.length && vIn.indexOf(e.venue) === -1) return false;
-      if (vEx.indexOf(e.venue) !== -1) return false;
-      for (var i = 0; i < bIn.length; i++) if (!BADGE_PREDS[bIn[i]](e)) return false;
+      if (state.venueMode[e.venue] === 'ex') return false;
       for (var j = 0; j < bEx.length; j++) if (BADGE_PREDS[bEx[j]](e)) return false;
       var title = e.title || '';
       for (var k = 0; k < tEx.length; k++) if (TEAM_BY_SLUG[tEx[k]].re.test(title)) return false;
-      if (tIn.length && !tIn.some(function (s) { return TEAM_BY_SLUG[s].re.test(title); })) return false;
       return true;
     });
   }
@@ -225,8 +231,37 @@
     b.className = 'chip';
     b.dataset.venue = v;
     b.textContent = v;
+    b.title = 'Show or hide ' + v + ' events';
     b.style.setProperty('--dot', venueColor(v));
     return b;
+  }
+  // One panel row: [✓] name  only  count. The native checkbox stays in the
+  // DOM (visually replaced by .cb) so keyboard and screen-reader behavior
+  // come for free; "only" unchecks everything else in the group.
+  function filterRow(group, key, nameEl, count, title) {
+    var row = document.createElement('div');
+    row.className = 'fp-row';
+    var lab = document.createElement('label');
+    lab.className = 'fp-check';
+    if (title) lab.title = title;
+    var input = document.createElement('input');
+    input.type = 'checkbox';
+    input.dataset[group] = key;
+    var box = document.createElement('span');
+    box.className = 'cb';
+    lab.appendChild(input); lab.appendChild(box); lab.appendChild(nameEl);
+    var only = document.createElement('button');
+    only.type = 'button';
+    only.className = 'fp-only';
+    only.dataset.group = group;
+    only.dataset.key = key;
+    only.textContent = 'only';
+    only.title = 'Show only this one';
+    var cnt = document.createElement('span');
+    cnt.className = 'fp-count';
+    cnt.textContent = count;
+    row.appendChild(lab); row.appendChild(only); row.appendChild(cnt);
+    return row;
   }
   function renderFilters() {
     var presets = $('presets');
@@ -234,26 +269,40 @@
     PRESET_VENUES.forEach(function (v) {
       if (state.venues.indexOf(v) !== -1) presets.appendChild(venueChip(v));
     });
+    // Counts play the role of Kayak's price column: upcoming events each row
+    // would govern, unaffected by the current filter so they stay stable.
+    var today = todayStr();
+    var upcoming = state.events.filter(function (e) { return e.date >= today; });
     var pv = $('panelVenues');
     pv.innerHTML = '';
-    state.venues.forEach(function (v) { pv.appendChild(venueChip(v)); });
+    state.venues.forEach(function (v) {
+      var name = document.createElement('span');
+      name.className = 'fp-name';
+      var dot = document.createElement('i');
+      dot.className = 'dot';
+      dot.style.setProperty('--dot', venueColor(v));
+      name.appendChild(dot);
+      name.appendChild(document.createTextNode(v));
+      var n = upcoming.filter(function (e) { return e.venue === v; }).length;
+      pv.appendChild(filterRow('venue', v, name, n));
+    });
     var pt = $('panelTeams');
     pt.innerHTML = '';
-    var allBtn = document.createElement('button');
-    allBtn.type = 'button';
-    allBtn.className = 'chip';
-    allBtn.dataset.teamAll = '1';
-    allBtn.textContent = 'All';
-    allBtn.title = 'Every team at once: only games, then no games, then off';
-    pt.appendChild(allBtn);
     TEAMS.forEach(function (t) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip';
-      b.dataset.team = t.slug;
-      b.textContent = t.label;
-      b.title = t.label + ' games: tap for only, again to hide';
-      pt.appendChild(b);
+      var name = document.createElement('span');
+      name.className = 'fp-name';
+      name.textContent = t.label;
+      var n = upcoming.filter(function (e) { return t.re.test(e.title || ''); }).length;
+      pt.appendChild(filterRow('team', t.slug, name, n, t.label + ' home games'));
+    });
+    var pb = $('panelBadges');
+    pb.innerHTML = '';
+    PANEL_BADGES.forEach(function (b) {
+      var name = document.createElement('span');
+      name.className = 'badge ' + b.cls;
+      name.textContent = b.label;
+      var n = upcoming.filter(BADGE_PREDS[b.key]).length;
+      pb.appendChild(filterRow('badge', b.key, name, n, b.title));
     });
     syncFilters();
     fitPresets();
@@ -273,28 +322,22 @@
     clearTimeout(fitTimer);
     fitTimer = setTimeout(fitPresets, 100);
   });
-  // One venue or badge can be represented by several buttons (preset pill,
-  // panel chip) — sync the tri-state everywhere. aria-pressed reads
-  // true / mixed / false for include / exclude / off.
-  function markMode(c, mode) {
-    c.classList.toggle('is-on', mode === 'in');
-    c.classList.toggle('is-ex', mode === 'ex');
-    c.setAttribute('aria-pressed', mode === 'in' ? 'true' : mode === 'ex' ? 'mixed' : 'false');
-  }
+  // One venue can be represented twice (marquee pill + panel checkbox) —
+  // sync them all from state. Pills read as pressed while their venue shows.
   function syncFilters() {
-    document.querySelectorAll('[data-venue]').forEach(function (c) {
-      markMode(c, state.venueMode[c.dataset.venue]);
+    document.querySelectorAll('input[data-venue]').forEach(function (c) {
+      c.checked = state.venueMode[c.dataset.venue] !== 'ex';
     });
-    document.querySelectorAll('[data-badge]').forEach(function (c) {
-      markMode(c, state.badgeMode[c.dataset.badge]);
+    document.querySelectorAll('input[data-badge]').forEach(function (c) {
+      c.checked = state.badgeMode[c.dataset.badge] !== 'ex';
     });
-    document.querySelectorAll('[data-team]').forEach(function (c) {
-      markMode(c, state.teamMode[c.dataset.team]);
+    document.querySelectorAll('input[data-team]').forEach(function (c) {
+      c.checked = state.teamMode[c.dataset.team] !== 'ex';
     });
-    var allIn = TEAMS.every(function (t) { return state.teamMode[t.slug] === 'in'; });
-    var allEx = TEAMS.every(function (t) { return state.teamMode[t.slug] === 'ex'; });
-    document.querySelectorAll('[data-team-all]').forEach(function (c) {
-      markMode(c, allIn ? 'in' : allEx ? 'ex' : undefined);
+    document.querySelectorAll('.chip[data-venue]').forEach(function (c) {
+      var off = state.venueMode[c.dataset.venue] === 'ex';
+      c.classList.toggle('is-ex', off);
+      c.setAttribute('aria-pressed', String(!off));
     });
     var any = !isDefaultState();
     $('filterToggle').classList.toggle('is-on', any);
@@ -303,7 +346,7 @@
   // Filter choices persist per-browser (no login — just localStorage).
   function saveFilters() {
     try {
-      localStorage.setItem('lqa-filters', JSON.stringify({ v: 2, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode }));
+      localStorage.setItem('lqa-filters', JSON.stringify({ v: 3, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode }));
     } catch (e) { /* private mode etc. — filters just won't persist */ }
   }
   function loadFilters() {
@@ -312,15 +355,14 @@
     if (raw == null) { applyDefaultFilters(); return; } // first visit
     try {
       var s = JSON.parse(raw);
-      var mode = function (m) { return m === 'in' || m === 'ex' ? m : null; };
-      if (s.v === 2) {
-        Object.keys(s.venues || {}).forEach(function (v) { if (mode(s.venues[v])) state.venueMode[v] = s.venues[v]; });
-        Object.keys(s.badges || {}).forEach(function (k) { if (BADGE_PREDS[k] && mode(s.badges[k])) state.badgeMode[k] = s.badges[k]; });
-        Object.keys(s.teams || {}).forEach(function (k) { if (TEAM_BY_SLUG[k] && mode(s.teams[k])) state.teamMode[k] = s.teams[k]; });
+      if (s.v === 3 || s.v === 2) {
+        // v2 was the tri-state era: its 'in' entries have no checkbox
+        // equivalent and are dropped; 'ex' carries over as unchecked.
+        Object.keys(s.venues || {}).forEach(function (v) { if (s.venues[v] === 'ex') state.venueMode[v] = 'ex'; });
+        Object.keys(s.badges || {}).forEach(function (k) { if (BADGE_PREDS[k] && s.badges[k] === 'ex') state.badgeMode[k] = 'ex'; });
+        Object.keys(s.teams || {}).forEach(function (k) { if (TEAM_BY_SLUG[k] && s.teams[k] === 'ex') state.teamMode[k] = 'ex'; });
       } else {
-        // v1 arrays: venues and badges were includes, teams were exclusions
-        (s.venues || []).forEach(function (v) { state.venueMode[v] = 'in'; });
-        (s.badges || []).forEach(function (k) { if (BADGE_PREDS[k]) state.badgeMode[k] = 'in'; });
+        // v1 arrays: only its team exclusions survive the checkbox model
         (s.teams || []).forEach(function (k) { if (TEAM_BY_SLUG[k]) state.teamMode[k] = 'ex'; });
       }
     } catch (e) { applyDefaultFilters(); } // unreadable storage — start at the baseline
@@ -328,22 +370,40 @@
   // fitPresets too: bold include labels change pill widths in the one-line bar
   function applyFilters() { syncFilters(); fitPresets(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
 
+  // Each group's map and full key list, for "only" and Select/Clear all.
+  function groupInfo(g) {
+    if (g === 'venue') return { map: state.venueMode, keys: state.venues.slice() };
+    if (g === 'team') return { map: state.teamMode, keys: TEAMS.map(function (t) { return t.slug; }) };
+    return { map: state.badgeMode, keys: PANEL_BADGES.map(function (b) { return b.key; }) };
+  }
+  // Panel checkboxes drive state through the native change event…
+  document.addEventListener('change', function (e) {
+    var c = e.target;
+    if (!(c instanceof HTMLInputElement) || c.type !== 'checkbox') return;
+    if (c.dataset.venue != null) { setChecked(state.venueMode, c.dataset.venue, c.checked); applyFilters(); }
+    else if (c.dataset.badge != null) { setChecked(state.badgeMode, c.dataset.badge, c.checked); applyFilters(); }
+    else if (c.dataset.team != null) { setChecked(state.teamMode, c.dataset.team, c.checked); applyFilters(); }
+  });
+  // …while the marquee pills, "only" links, and group links are buttons.
   document.addEventListener('click', function (e) {
-    var v = e.target.closest('[data-venue]');
-    if (v) { cycleMode(state.venueMode, v.dataset.venue); applyFilters(); return; }
-    var b = e.target.closest('[data-badge]');
-    if (b) { cycleMode(state.badgeMode, b.dataset.badge); applyFilters(); return; }
-    var t = e.target.closest('[data-team]');
-    if (t) { cycleMode(state.teamMode, t.dataset.team); applyFilters(); return; }
-    // "All" cycles the whole team list as one: include every team (games
-    // only), then exclude every team (no games), then clear them all.
-    var ta = e.target.closest('[data-team-all]');
-    if (ta) {
-      var allIn = TEAMS.every(function (tm) { return state.teamMode[tm.slug] === 'in'; });
-      var allEx = TEAMS.every(function (tm) { return state.teamMode[tm.slug] === 'ex'; });
-      state.teamMode = {};
-      if (allIn) TEAMS.forEach(function (tm) { state.teamMode[tm.slug] = 'ex'; });
-      else if (!allEx) TEAMS.forEach(function (tm) { state.teamMode[tm.slug] = 'in'; });
+    var v = e.target.closest('.chip[data-venue]');
+    if (v) {
+      setChecked(state.venueMode, v.dataset.venue, state.venueMode[v.dataset.venue] === 'ex');
+      applyFilters();
+      return;
+    }
+    var o = e.target.closest('.fp-only');
+    if (o) {
+      var g = groupInfo(o.dataset.group);
+      g.keys.forEach(function (k) { g.map[k] = 'ex'; });
+      delete g.map[o.dataset.key];
+      applyFilters();
+      return;
+    }
+    var l = e.target.closest('.fp-link');
+    if (l) {
+      var gi = groupInfo(l.dataset.group);
+      gi.keys.forEach(function (k) { setChecked(gi.map, k, l.dataset.act === 'all'); });
       applyFilters();
     }
   });
@@ -567,24 +627,26 @@
   }
 
   // ---- subscribe popover ----
-  // The feed follows the active filter where a pre-built file exists: exactly
-  // one venue, one badge, or one hidden team. Combos fall back to the full feed.
+  // The feed follows the active filter where a pre-built file exists: the
+  // default no-movies view, one hidden team, or "only" one venue. Anything
+  // else falls back to the full feed.
   var icsHref = '';
   function updateSubscribe() {
     var filteredFile = null;
-    // Pre-built feeds only cover a single included venue, a single included
-    // badge, or a single excluded team — any other combo gets the full feed.
-    var total = Object.keys(state.venueMode).length +
-      Object.keys(state.badgeMode).length + Object.keys(state.teamMode).length;
-    if (total === 1) {
-      var vIn = modeKeys(state.venueMode, 'in');
-      var bIn = modeKeys(state.badgeMode, 'in');
-      var bEx = modeKeys(state.badgeMode, 'ex');
-      var tEx = modeKeys(state.teamMode, 'ex');
-      if (vIn.length) filteredFile = 'events-venue-' + slugify(vIn[0]) + '.ics';
-      else if (bIn.length) filteredFile = 'events-' + bIn[0] + '.ics';
-      else if (bEx[0] === 'movie') filteredFile = 'events-no-movies.ics'; // the default view
-      else if (tEx.length) filteredFile = 'events-no-' + tEx[0] + '.ics';
+    var vEx = modeKeys(state.venueMode, 'ex');
+    var bEx = modeKeys(state.badgeMode, 'ex');
+    var tEx = modeKeys(state.teamMode, 'ex');
+    var vOn = state.venues.filter(function (v) { return state.venueMode[v] !== 'ex'; });
+    var movieOnly = bEx.length === 1 && bEx[0] === 'movie';
+    if (!vEx.length && !tEx.length && movieOnly) {
+      filteredFile = 'events-no-movies.ics'; // the default view
+    } else if (!vEx.length && !bEx.length && tEx.length === 1) {
+      filteredFile = 'events-no-' + tEx[0] + '.ics';
+    } else if (vOn.length === 1 && !tEx.length &&
+        (!bEx.length || (movieOnly && vOn[0] !== 'SIFF Cinema Uptown'))) {
+      // a lone remaining venue is "only that venue"; the baseline movie
+      // exclusion changes nothing unless that venue is the cinema itself
+      filteredFile = 'events-venue-' + slugify(vOn[0]) + '.ics';
     }
     $('subFilterRow').hidden = !filteredFile;
     var file = (filteredFile && $('subUseFilter').checked) ? filteredFile : 'events.ics';

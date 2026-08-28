@@ -92,28 +92,37 @@
   <div id="presets" class="presets"><!-- marquee venue pills injected by app.js --></div>
 </nav>
 <div id="filterPanel" class="filter-panel" hidden>
-  <p class="fp-legend">Tap a filter once to include it, again to exclude it (struck out), a third time to turn it off.</p>
-  <div class="fp-group">
-    <h3>Venues <span class="fp-hint">any included venue counts, excluded ones drop out</span></h3>
-    <div id="panelVenues" class="chip-row"><!-- every venue, injected by app.js --></div>
-  </div>
-  <div class="fp-group">
-    <h3>Home games <span class="fp-hint">include = only games, exclude = no games</span></h3>
-    <div id="panelTeams" class="chip-row"><!-- team chips injected by app.js --></div>
-  </div>
-  <div class="fp-group">
-    <h3>Event type <span class="fp-hint">every include must match, no exclude may</span></h3>
-    <div class="chip-row">
-      <button type="button" class="badge b-21" data-badge="21plus" aria-pressed="false" title="Door-restricted, no minors">21+</button>
-      <button type="button" class="badge b-day" data-badge="day" aria-pressed="false" title="Wraps up by 4 p.m.">day</button>
-      <button type="button" class="badge b-sold" data-badge="soldout" aria-pressed="false" title="Full house guaranteed">sold out</button>
-      <button type="button" class="badge b-free" data-badge="free" aria-pressed="false" title="Open to walk-ups">free</button>
-      <button type="button" class="badge b-movie" data-badge="movie" aria-pressed="false" title="Regular film screenings at SIFF Cinema Uptown — hidden by default">siff movies</button>
-      <button type="button" class="badge b-siffev" data-badge="siffevent" aria-pressed="false" title="SIFF special programming — festivals, Movie Club, series nights">siff events</button>
+  <div class="fp-cols">
+    <div class="fp-group">
+      <h3>Venues</h3>
+      <p class="fp-links">
+        <button type="button" class="fp-link" data-group="venue" data-act="all">Select all</button>
+        <span aria-hidden="true">|</span>
+        <button type="button" class="fp-link" data-group="venue" data-act="none">Clear all</button>
+      </p>
+      <div id="panelVenues" class="fp-list"><!-- venue rows injected by app.js --></div>
+    </div>
+    <div class="fp-group">
+      <h3>Home games</h3>
+      <p class="fp-links">
+        <button type="button" class="fp-link" data-group="team" data-act="all">Select all</button>
+        <span aria-hidden="true">|</span>
+        <button type="button" class="fp-link" data-group="team" data-act="none">Clear all</button>
+      </p>
+      <div id="panelTeams" class="fp-list"><!-- team rows injected by app.js --></div>
+    </div>
+    <div class="fp-group">
+      <h3>Event type</h3>
+      <p class="fp-links">
+        <button type="button" class="fp-link" data-group="badge" data-act="all">Select all</button>
+        <span aria-hidden="true">|</span>
+        <button type="button" class="fp-link" data-group="badge" data-act="none">Clear all</button>
+      </p>
+      <div id="panelBadges" class="fp-list"><!-- type rows injected by app.js --></div>
     </div>
   </div>
-  <div class="fp-group">
-    <button id="clearFilters" class="chip" type="button">Clear all filters</button>
+  <div class="fp-group fp-reset">
+    <button id="clearFilters" class="chip" type="button">Reset filters</button>
   </div>
 </div>
 

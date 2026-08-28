@@ -115,26 +115,49 @@ h1 {
   background: var(--mist); border: 1px solid var(--line); border-radius: 10px;
   padding: 1rem 1.1rem; margin-bottom: 1.25rem;
 }
-.fp-group + .fp-group { margin-top: 1rem; }
+/* Kayak-style panel: columns of checkbox rows, Select all | Clear all links
+   per group, an "only" link on hover, and an event count on the right. */
+.fp-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1.25rem 2.25rem; }
 .fp-group h3 {
   font-family: var(--mono); font-size: .68rem; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--ink-soft); margin: 0 0 .55rem; font-weight: 500;
+  letter-spacing: .1em; color: var(--ink-soft); margin: 0 0 .35rem; font-weight: 500;
 }
-.fp-hint {
-  text-transform: none; letter-spacing: 0; font-weight: 400;
-  opacity: .7; margin-left: .5em;
+.fp-links { display: flex; gap: .55em; align-items: baseline; margin: 0 0 .45rem; color: var(--line); }
+.fp-link {
+  font: 600 .8rem/1 var(--body); color: var(--v-seactr); background: none; border: 0;
+  padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
 }
-.chip-row { display: flex; flex-wrap: wrap; gap: .5rem; }
+.fp-link:hover { color: var(--ink); }
+.fp-list { display: flex; flex-direction: column; }
+.fp-row { display: flex; align-items: center; gap: .5rem; padding: .3rem .35rem; border-radius: 6px; }
+.fp-row:hover { background: var(--sky); }
+.fp-check { position: relative; display: flex; align-items: center; gap: .6rem; cursor: pointer; min-width: 0; }
+/* the native checkbox stays for keyboard + screen readers; .cb is its face */
+.fp-check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.cb {
+  flex: none; width: 1.1rem; height: 1.1rem; position: relative;
+  border: 1.5px solid var(--ink-soft); border-radius: 4px; background: var(--mist);
+}
+.fp-check input:checked + .cb { background: var(--v-seactr); border-color: var(--v-seactr); }
+.fp-check input:checked + .cb::after {
+  content: ""; position: absolute; left: .3rem; top: .1rem;
+  width: .28rem; height: .55rem;
+  border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+.fp-check input:focus-visible + .cb { outline: 2px solid var(--gold); outline-offset: 2px; }
+.fp-name { font-size: .88rem; display: flex; align-items: center; gap: .45rem; overflow-wrap: anywhere; }
+.fp-name .dot { flex: none; width: .55rem; height: .55rem; border-radius: 50%; background: var(--dot, var(--ink-soft)); }
+.fp-row:has(input:not(:checked)) .fp-name,
+.fp-row:has(input:not(:checked)) .badge { opacity: .5; }
+.fp-only {
+  font: 700 .72rem/1 var(--body); color: var(--v-seactr); background: none; border: 0;
+  padding: .15em .35em; cursor: pointer; visibility: hidden;
+}
+.fp-row:hover .fp-only, .fp-row:focus-within .fp-only { visibility: visible; }
+@media (hover: none) { .fp-only { visibility: visible; } }
+.fp-count { margin-left: auto; font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); }
+.fp-reset { margin-top: 1.1rem; }
 .filter-panel .chip { background: var(--sky); }
-.chip-row .badge { cursor: pointer; background: none; padding: .4em .8em; font-size: .68rem; }
-.chip-row .b-sold { background: var(--ink); }
-/* included: bold and bright; excluded: dimmed and struck out */
-.badge.is-on { box-shadow: 0 0 0 2px var(--gold); font-weight: 700; }
-.badge.is-ex {
-  color: var(--ink); font-weight: 700; box-shadow: 0 0 0 2px var(--ex);
-  background: color-mix(in srgb, var(--ex) 16%, var(--mist));
-  text-decoration: line-through var(--ex); text-decoration-thickness: .16em;
-}
 .chip {
   font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
   padding: .5em .95em; background: var(--mist); color: var(--ink);
@@ -144,24 +167,16 @@ h1 {
 .clear-icon svg { width: .95rem; height: .95rem; }
 .clear-icon:disabled { opacity: .35; cursor: default; }
 .clear-icon:not(:disabled):hover { color: var(--ink); border-color: var(--ink-soft); }
-/* included: bold and bright, filled with the venue's color; excluded: the
-   whole chip dims and the label is struck out */
-.chip.is-on {
-  font-weight: 700; border-color: var(--dot, var(--ink));
-  box-shadow: inset 0 0 0 1px var(--dot, var(--ink));
-  background: color-mix(in srgb, var(--dot, var(--ink)) 22%, var(--mist));
-}
-/* excluded mirrors included's weight, but everything goes red: ring,
-   tinted fill, a thick strike through the label, and a corner-to-corner
-   slash across the whole pill so the state reads at any size */
+/* a hidden venue's marquee pill: everything goes red — ring, tinted fill,
+   a thick strike through the label, and a corner-to-corner X across the
+   whole pill so the state reads at any size */
 .chip.is-ex {
-  font-weight: 700; border-color: var(--ex);
+  font-weight: 700; border-color: var(--ex); position: relative;
   box-shadow: inset 0 0 0 1px var(--ex);
   background: color-mix(in srgb, var(--ex) 16%, var(--mist));
   text-decoration: line-through var(--ex); text-decoration-thickness: .16em;
 }
-.chip.is-ex, .chip-row .badge.is-ex { position: relative; }
-.chip.is-ex::after, .chip-row .badge.is-ex::after {
+.chip.is-ex::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   border-radius: inherit;
   background:
@@ -171,10 +186,6 @@ h1 {
     linear-gradient(to bottom right,
       transparent calc(50% - .09em), var(--ex) 0,
       var(--ex) calc(50% + .09em), transparent 0);
-}
-.fp-legend {
-  font-family: var(--mono); font-size: .68rem; color: var(--ink-soft);
-  margin: 0 0 1rem;
 }
 
 /* ---- agenda layout: list + docked mini calendar ---- */
