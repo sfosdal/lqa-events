@@ -15,6 +15,7 @@
   --v-cornish: #3f7d3a;
   --v-vera: #b3382e;
   --v-siff: #5b4ea3;
+  --v-otb: #b93b6e;
   --display: "Big Shoulders", "Arial Narrow", sans-serif;
   --body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -24,7 +25,7 @@
     --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2;
     --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
     --v-cpa: #35b5b5; --v-mccaw: #c674a8; --v-seactr: #6f9be0;
-    --v-cornish: #6fbf68; --v-vera: #e8756b; --v-siff: #9a8ee0;
+    --v-cornish: #6fbf68; --v-vera: #e8756b; --v-siff: #9a8ee0; --v-otb: #e07ba4;
   }
 }
 
@@ -96,7 +97,7 @@ h1 {
 }
 .tile:hover { border-color: var(--gold); }
 .tile:hover span { color: var(--ink); }
-/* ---- filter bar: icon + marquee presets, full panel below ---- */
+/* ---- filter area: icon bar, quick slice, full panel ---- */
 .filterbar { display: flex; flex-wrap: nowrap; gap: .5rem; align-items: center; margin: .5rem 0 .9rem; }
 .filterbar > * { flex-shrink: 0; }
 .filter-icon {
@@ -107,9 +108,8 @@ h1 {
 .filter-icon svg { width: 1.1rem; height: 1.1rem; }
 .filter-icon:hover { border-color: var(--ink-soft); }
 .filter-icon.is-on { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
-/* one line only: pills that don't fit are hidden by app.js, never wrapped */
-.presets { display: flex; flex-wrap: nowrap; gap: .5rem; overflow: hidden; flex: 0 1 auto; min-width: 0; }
-.presets .chip { flex-shrink: 0; white-space: nowrap; }
+/* the collapsed state: a narrow slice of the panel with the go-to filters */
+.quick-panel { max-width: 24rem; padding: .55rem .65rem; margin-bottom: 1.25rem; }
 .filter-panel {
   background: var(--mist); border: 1px solid var(--line); border-radius: 10px;
   padding: 1rem 1.1rem; margin-bottom: 1.25rem;
@@ -132,13 +132,13 @@ h1 {
 .fp-row:hover { background: var(--sky); }
 .fp-check { position: relative; display: flex; align-items: center; gap: .6rem; cursor: pointer; min-width: 0; }
 /* the native checkbox stays for keyboard + screen readers; .cb is its face */
-.fp-check input, .chip-check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.fp-check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .cb {
   flex: none; width: 1.1rem; height: 1.1rem; position: relative;
   border: 1.5px solid var(--ink-soft); border-radius: 4px; background: var(--mist);
 }
-.fp-check input:checked + .cb, .chip-check input:checked + .cb { background: var(--v-seactr); border-color: var(--v-seactr); }
-.fp-check input:checked + .cb::after, .chip-check input:checked + .cb::after {
+.fp-check input:checked + .cb { background: var(--v-seactr); border-color: var(--v-seactr); }
+.fp-check input:checked + .cb::after {
   content: ""; position: absolute; left: .3rem; top: .1rem;
   width: .28rem; height: .55rem;
   border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
@@ -166,14 +166,9 @@ h1 {
 .clear-icon svg { width: .95rem; height: .95rem; }
 .clear-icon:disabled { opacity: .35; cursor: default; }
 .clear-icon:not(:disabled):hover { color: var(--ink); border-color: var(--ink-soft); }
-/* quick-bar chips: the same checkbox controls as the panel, pill-shaped */
-.chip-check { position: relative; display: inline-flex; align-items: center; gap: .4rem; font-weight: 500; padding: .5em .8em; }
-.chip-check .cb { width: 1rem; height: 1rem; }
-.chip-check .dot { flex: none; width: .55rem; height: .55rem; border-radius: 50%; background: var(--dot, var(--ink-soft)); }
-.chip-check:has(input:not(:checked)) { color: var(--ink-soft); }
-.chip-check:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 /* ---- agenda layout: list + docked mini calendar ---- */
+.agenda { margin-top: 1.6rem; }
 .agenda-layout {
   display: grid; grid-template-columns: minmax(0, 1fr) 18rem;
   gap: 0 2.5rem; align-items: start;
@@ -205,6 +200,12 @@ h1 {
   background: none; color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
 }
 .cal-head button:disabled { opacity: .3; cursor: default; }
+.cal-tools { display: flex; align-items: center; gap: .3rem; }
+#calToday {
+  width: auto; padding: 0 .55em; font: 500 .62rem/1 var(--mono);
+  text-transform: uppercase; letter-spacing: .07em; color: var(--ink-soft);
+}
+#calToday:not(:disabled):hover { color: var(--ink); border-color: var(--ink-soft); }
 .cal-dow, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
 .cal-dow { border-bottom: 2px solid color-mix(in srgb, var(--ink-soft) 78%, var(--gold)); }
 .cal-grid > :nth-child(-n+7) { border-top: 0; } /* no hairline doubling the dow line */
@@ -248,7 +249,6 @@ button.cal-day:hover { background: var(--gold-soft); }
   display: grid; grid-template-columns: 5.2rem 1fr; gap: 1rem;
   border-top: 1px solid var(--line); padding: 1rem 0;
 }
-.day-row.is-today .date-rail .dnum { color: var(--gold); }
 .day-row.is-past { opacity: .5; }
 .past-toggle { padding: .6rem 0 1rem; }
 .past-toggle button {

@@ -10,7 +10,7 @@
  */
 import { writeFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
-import { parseScCards, parseScDetailDate, parseScVenueCats, mapDiceEvents, parseSiffScreenings } from './sources.mjs';
+import { parseScCards, parseScDetailDate, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents } from './sources.mjs';
 import { mergeWithArchive } from './merge.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
 
@@ -174,6 +174,15 @@ async function siffUptown() {
   return events;
 }
 
+// --- On the Boards (100 W Roy St, a block off the Center): Squarespace
+//     events collection — ?format=json lists the upcoming performance runs;
+//     mapOtbEvents expands each run to one event per night. ---
+async function onTheBoards() {
+  const res = await fetch('https://ontheboards.org/events?format=json', { headers: { 'user-agent': BROWSER_UA } });
+  if (!res.ok) { console.error('On the Boards HTTP', res.status); return []; }
+  return mapOtbEvents(await res.json(), 'On the Boards');
+}
+
 // Dedicated per-venue sources run first (better times and ticket links)...
 const sources = [
   () => ticketmasterVenue({ keyword: 'Climate Pledge Arena', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/' }),
@@ -183,6 +192,7 @@ const sources = [
   mccawHallRss,
   veraProjectDice,
   siffUptown,
+  onTheBoards,
 ];
 
 let all = [];
@@ -202,7 +212,7 @@ catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 const CANONICAL_VENUES = new Set([
   'Climate Pledge Arena', 'T-Mobile Park', 'Lumen Field',
   'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
-  'SIFF Cinema Uptown',
+  'SIFF Cinema Uptown', 'On the Boards',
 ]);
 const normalizeVenue = (e) => (CANONICAL_VENUES.has(e.venue) ? e : { ...e, venue: 'Seattle Center' });
 all = all.map(normalizeVenue);

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseScCards, parseScDetailDate, parseScVenueCats, parseClockTime, mapDiceEvents, parseSiffScreenings } from './sources.mjs';
+import { parseScCards, parseScDetailDate, parseScVenueCats, parseClockTime, mapDiceEvents, parseSiffScreenings, mapOtbEvents } from './sources.mjs';
 
 // --- Seattle Center calendar HTML (event cards; dates live on detail pages) ---
 
@@ -191,4 +191,33 @@ test('SIFF screenings: an end past local midnight is dropped', () => {
   assert.equal(evs[0].end, undefined);
   assert.equal(evs[0].url, 'https://www.siff.net/calendar'); // no film link in the doc
   assert.equal(evs[0].movie, undefined);
+});
+
+// ---- On the Boards (Squarespace events JSON) ----
+
+test('OtB runs expand to one event per local night at curtain time', () => {
+  const data = {
+    upcoming: [
+      // Sep 18 02:30 UTC = Sep 17 7:30 PM PDT; end lands in the Sep 19 show
+      { title: 'Clayton Lee &amp; Friends', fullUrl: '/events/26-27/goldberg-variations', startDate: 1789698600424, endDate: 1789876800424 },
+      // single night: endDate === startDate
+      { title: 'ILVS STRAUSS', fullUrl: '/events/26-27/manifesto', startDate: 1789698600424, endDate: 1789698600424 },
+    ],
+    past: [{ title: 'Old Show', fullUrl: '/events/old', startDate: 1, endDate: 1 }],
+  };
+  const evs = mapOtbEvents(data);
+  assert.deepEqual(evs.map((e) => [e.title, e.date, e.time]), [
+    ['Clayton Lee & Friends', '2026-09-17', '19:30:00'],
+    ['Clayton Lee & Friends', '2026-09-18', '19:30:00'],
+    ['Clayton Lee & Friends', '2026-09-19', '19:30:00'],
+    ['ILVS STRAUSS', '2026-09-17', '19:30:00'],
+  ]);
+  assert.equal(evs[0].venue, 'On the Boards');
+  assert.equal(evs[0].url, 'https://ontheboards.org/events/26-27/goldberg-variations');
+});
+
+test('OtB runaway date ranges cap at six nights', () => {
+  const yearLater = 1789698600424 + 365 * 86400e3;
+  const evs = mapOtbEvents({ upcoming: [{ title: 'Broken', fullUrl: '/e', startDate: 1789698600424, endDate: yearLater }] });
+  assert.equal(evs.length, 6);
 });

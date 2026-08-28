@@ -12,6 +12,7 @@
     'Cornish Playhouse': '--v-cornish',
     'The Vera Project': '--v-vera',
     'SIFF Cinema Uptown': '--v-siff',
+    'On the Boards': '--v-otb',
   };
   function venueColor(v) {
     if (VENUE_VARS[v]) return 'var(' + VENUE_VARS[v] + ')';
@@ -33,6 +34,7 @@
     'Cornish Playhouse': 3,
     'The Vera Project': 4,     // all-ages — least bar crossover of the campus
     'SIFF Cinema Uptown': 5,   // the Queen Anne Ave movie house
+    'On the Boards': 6,        // contemporary performance, a block off the Center
     'T-Mobile Park': 90,
     'Lumen Field': 91,
   };
@@ -162,7 +164,7 @@
   var TYPE_VENUE_DEFAULT = {
     'Climate Pledge Arena': 'concert', 'The Vera Project': 'concert',
     'T-Mobile Park': 'concert', 'Lumen Field': 'concert', // non-game stadium bookings are shows
-    'McCaw Hall': 'arts', 'Cornish Playhouse': 'arts',
+    'McCaw Hall': 'arts', 'Cornish Playhouse': 'arts', 'On the Boards': 'arts',
     'Seattle Center': 'community', 'SIFF Cinema Uptown': 'community', // SIFF specials = festival programming
   };
   function eventType(e) {
@@ -227,37 +229,18 @@
     });
   }
 
-  // ---- filter bar: quick checkboxes + full panel ----
-  // The bar is a one-line sampler of the panel: the same checkbox controls,
-  // just the most-used filters. Ordered by usefulness, so when the bar runs
-  // out of room the least relevant chips are the ones that drop.
+  // ---- quick filters + full panel ----
+  // The collapsed view is a slice of the expanded panel — the same checkbox
+  // rows, just the most-used filters. The filter icon swaps it for the full
+  // panel and back.
   var QUICK_FILTERS = [
-    { group: 'venue', key: 'Climate Pledge Arena', label: 'Climate Pledge' },
-    { group: 'badge', key: 'concert' },
-    { group: 'badge', key: 'sports' },
-    { group: 'badge', key: 'movie' },
-    { group: 'venue', key: 'Seattle Center' },
+    { group: 'venue', key: 'Climate Pledge Arena' },
     { group: 'venue', key: 'McCaw Hall' },
-    { group: 'badge', key: 'community', label: 'community' },
+    { group: 'venue', key: 'Seattle Center' },
+    { group: 'venue', key: 'On the Boards' },
+    { group: 'badge', key: 'sports' },
+    { group: 'badge', key: 'concert' },
   ];
-  function quickChip(group, key, label, color) {
-    var lab = document.createElement('label');
-    lab.className = 'chip chip-check';
-    var input = document.createElement('input');
-    input.type = 'checkbox';
-    input.dataset[group] = key;
-    var box = document.createElement('span');
-    box.className = 'cb';
-    lab.appendChild(input); lab.appendChild(box);
-    if (color) {
-      var dot = document.createElement('i');
-      dot.className = 'dot';
-      dot.style.setProperty('--dot', color);
-      lab.appendChild(dot);
-    }
-    lab.appendChild(document.createTextNode(label));
-    return lab;
-  }
   // One panel row: [✓] name  only  count. The native checkbox stays in the
   // DOM (visually replaced by .cb) so keyboard and screen-reader behavior
   // come for free; "only" unchecks everything else in the group.
@@ -286,36 +269,44 @@
     row.appendChild(lab); row.appendChild(only); row.appendChild(cnt);
     return row;
   }
+  function venueName(v) {
+    var name = document.createElement('span');
+    name.className = 'fp-name';
+    var dot = document.createElement('i');
+    dot.className = 'dot';
+    dot.style.setProperty('--dot', venueColor(v));
+    name.appendChild(dot);
+    name.appendChild(document.createTextNode(v));
+    return name;
+  }
   function renderFilters() {
-    var presets = $('presets');
-    presets.innerHTML = '';
-    var typeLabel = {};
-    TYPE_LIST.forEach(function (t) { typeLabel[t.key] = t.label; });
-    QUICK_FILTERS.forEach(function (q) {
-      if (q.group === 'venue') {
-        if (state.venues.indexOf(q.key) !== -1) {
-          presets.appendChild(quickChip('venue', q.key, q.label || q.key, venueColor(q.key)));
-        }
-      } else {
-        presets.appendChild(quickChip('badge', q.key, q.label || typeLabel[q.key]));
-      }
-    });
     // Counts play the role of Kayak's price column: upcoming events each row
     // would govern, unaffected by the current filter so they stay stable.
     var today = todayStr();
     var upcoming = state.events.filter(function (e) { return e.date >= today; });
+    var typeByKey = {};
+    TYPE_LIST.forEach(function (t) { typeByKey[t.key] = t; });
+    var ql = $('quickList');
+    ql.innerHTML = '';
+    QUICK_FILTERS.forEach(function (q) {
+      if (q.group === 'venue') {
+        if (state.venues.indexOf(q.key) === -1) return;
+        var n = upcoming.filter(function (e) { return e.venue === q.key; }).length;
+        ql.appendChild(filterRow('venue', q.key, venueName(q.key), n));
+      } else {
+        var t = typeByKey[q.key];
+        var name = document.createElement('span');
+        name.className = 'fp-name';
+        name.textContent = t.label;
+        var m = upcoming.filter(function (e) { return eventType(e) === t.key; }).length;
+        ql.appendChild(filterRow('badge', t.key, name, m, t.title));
+      }
+    });
     var pv = $('panelVenues');
     pv.innerHTML = '';
     state.venues.forEach(function (v) {
-      var name = document.createElement('span');
-      name.className = 'fp-name';
-      var dot = document.createElement('i');
-      dot.className = 'dot';
-      dot.style.setProperty('--dot', venueColor(v));
-      name.appendChild(dot);
-      name.appendChild(document.createTextNode(v));
       var n = upcoming.filter(function (e) { return e.venue === v; }).length;
-      pv.appendChild(filterRow('venue', v, name, n));
+      pv.appendChild(filterRow('venue', v, venueName(v), n));
     });
     var pt = $('panelTeams');
     pt.innerHTML = '';
@@ -336,25 +327,9 @@
       pb.appendChild(filterRow('badge', t.key, name, n, t.title));
     });
     syncFilters();
-    fitPresets();
   }
-  // Keep the bar to one line: drop preset pills (lowest priority first) until
-  // icon + presets + Clear all fit. Every venue is still in the panel.
-  function fitPresets() {
-    var wrap = $('presets');
-    var pills = [].slice.call(wrap.children);
-    pills.forEach(function (p) { p.style.display = ''; });
-    for (var i = pills.length - 1; i >= 0 && wrap.scrollWidth > wrap.clientWidth; i--) {
-      pills[i].style.display = 'none';
-    }
-  }
-  var fitTimer;
-  window.addEventListener('resize', function () {
-    clearTimeout(fitTimer);
-    fitTimer = setTimeout(fitPresets, 100);
-  });
-  // One filter can be represented twice (quick-bar chip + panel row) — both
-  // are the same kind of checkbox, so one pass syncs them all from state.
+  // One filter can be represented twice (quick row + panel row) — both are
+  // the same kind of checkbox, so one pass syncs them all from state.
   function syncFilters() {
     document.querySelectorAll('input[data-venue]').forEach(function (c) {
       c.checked = state.venueMode[c.dataset.venue] !== 'ex';
@@ -393,9 +368,8 @@
       }
     } catch (e) { applyDefaultFilters(); } // unreadable storage — start at the baseline
   }
-  // fitPresets too: checked labels change chip widths in the one-line bar;
   // a filter change also rewinds the agenda to its first page
-  function applyFilters() { state.page = 0; syncFilters(); fitPresets(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
+  function applyFilters() { state.page = 0; syncFilters(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
 
   // Each group's map and full key list, for "only" and Select/Clear all.
   function groupInfo(g) {
@@ -440,17 +414,19 @@
       applyFilters();
     }
   });
+  // The icon swaps the quick slice for the full panel and back.
+  function setPanelOpen(open) {
+    $('filterPanel').hidden = !open;
+    $('quickPanel').hidden = open;
+    $('filterToggle').setAttribute('aria-expanded', String(open));
+  }
   $('filterToggle').addEventListener('click', function () {
-    var p = $('filterPanel');
-    p.hidden = !p.hidden;
-    this.setAttribute('aria-expanded', String(!p.hidden));
+    setPanelOpen($('filterPanel').hidden);
   });
-  // clicking anywhere outside the bar/panel closes the panel, same as the button
+  // clicking anywhere outside the filter area collapses back to the quick view
   document.addEventListener('click', function (e) {
-    var p = $('filterPanel');
-    if (!p.hidden && !e.target.closest('#filterPanel') && !e.target.closest('.filterbar')) {
-      p.hidden = true;
-      $('filterToggle').setAttribute('aria-expanded', 'false');
+    if (!$('filterPanel').hidden && !e.target.closest('#filterPanel') && !e.target.closest('.filterbar')) {
+      setPanelOpen(false);
     }
   });
   function clearAllFilters() {
@@ -482,6 +458,7 @@
     $('calPrev').disabled = !bounds || sameMonth(m, new Date(bounds.min.getFullYear(), bounds.min.getMonth(), 1));
     $('calNext').disabled = !bounds ||
       next.getFullYear() * 12 + next.getMonth() >= bounds.max.getFullYear() * 12 + bounds.max.getMonth();
+    $('calToday').disabled = sameMonth(m, new Date());
 
     var grid = $('calGrid');
     grid.innerHTML = '';
@@ -545,6 +522,11 @@
   }
   $('calPrev').addEventListener('click', function () { shiftMonth(-1); });
   $('calNext').addEventListener('click', function () { shiftMonth(1); });
+  $('calToday').addEventListener('click', function () {
+    var now = new Date();
+    state.month = new Date(now.getFullYear(), now.getMonth(), 1);
+    renderCal();
+  });
   function shiftMonth(dir) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + dir, 1);
     renderCal();
@@ -679,7 +661,7 @@
   function gotoPage(p) {
     state.page = p;
     renderAgenda();
-    $('agendaTitle').scrollIntoView({ block: 'start' });
+    document.querySelector('.agenda').scrollIntoView({ block: 'start' });
   }
   function renderPager(pageKeys, buckets) {
     var nav = $('agendaPager');

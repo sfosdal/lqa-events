@@ -89,8 +89,10 @@
       <path d="M6 6l12 12M18 6L6 18"/>
     </svg>
   </button>
-  <div id="presets" class="presets"><!-- marquee venue pills injected by app.js --></div>
 </nav>
+<div id="quickPanel" class="filter-panel quick-panel">
+  <div id="quickList" class="fp-list"><!-- most-used filter rows injected by app.js --></div>
+</div>
 <div id="filterPanel" class="filter-panel" hidden>
   <div class="fp-cols">
     <div class="fp-group">
@@ -127,7 +129,6 @@
 </div>
 
 <section class="agenda" aria-label="Upcoming events">
-  <h2 class="section-title" id="agendaTitle">Upcoming events</h2>
   <div class="agenda-layout">
     <ol id="agenda"><li class="empty">Loading events…</li></ol>
     <nav id="agendaPager" class="pager" aria-label="More events"></nav>
@@ -136,7 +137,10 @@
         <div class="cal-head">
           <button id="calPrev" type="button" aria-label="Previous month">‹</button>
           <h2 id="calTitle">…</h2>
-          <button id="calNext" type="button" aria-label="Next month">›</button>
+          <span class="cal-tools">
+            <button id="calToday" type="button" title="Back to the current month">today</button>
+            <button id="calNext" type="button" aria-label="Next month">›</button>
+          </span>
         </div>
         <div class="cal-dow" aria-hidden="true">
           <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>

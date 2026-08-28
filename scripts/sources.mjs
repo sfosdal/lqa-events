@@ -127,6 +127,34 @@ export function parseSiffScreenings(html, venueRe = /^SIFF Cinema Uptown/) {
 }
 
 /**
+ * Map On the Boards' Squarespace events JSON (/events?format=json) to feed
+ * events. Each upcoming item is a performance run: startDate is the first
+ * night's curtain as a UTC-ms instant and endDate lands somewhere in the
+ * last night (sometimes its start, sometimes its end) — expand the run to
+ * one event per local night at the opening's local time, capped at 6 nights
+ * so a mis-entered range can't flood the feed.
+ * Returns [{ venue, title, date, time, url }].
+ */
+export function mapOtbEvents(data, venueLabel = 'On the Boards') {
+  const fmt = (ms) => new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }).format(new Date(ms));
+  const nextDay = (d) => new Date(Date.parse(`${d}T12:00:00Z`) + 86400e3).toISOString().slice(0, 10);
+  const out = [];
+  for (const it of data?.upcoming || []) {
+    if (!it.title || !it.startDate) continue;
+    const [first, time] = fmt(it.startDate).split(' ');
+    const last = it.endDate > it.startDate ? fmt(it.endDate).split(' ')[0] : first;
+    const url = it.fullUrl ? `https://ontheboards.org${it.fullUrl}` : 'https://ontheboards.org/events';
+    for (let d = first, i = 0; d <= last && i < 6; d = nextDay(d), i++) {
+      out.push({ venue: venueLabel, title: decodeEntities(it.title), date: d, time, url });
+    }
+  }
+  return out;
+}
+
+/**
  * Map a DICE events-api response ({data: [...]}) to feed events, converting
  * each UTC instant to its venue-local date and time.
  */
