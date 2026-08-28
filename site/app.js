@@ -239,6 +239,13 @@
     state.venues.forEach(function (v) { pv.appendChild(venueChip(v)); });
     var pt = $('panelTeams');
     pt.innerHTML = '';
+    var allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = 'chip';
+    allBtn.dataset.teamAll = '1';
+    allBtn.textContent = 'All';
+    allBtn.title = 'Every team at once: only games, then no games, then off';
+    pt.appendChild(allBtn);
     TEAMS.forEach(function (t) {
       var b = document.createElement('button');
       b.type = 'button';
@@ -284,6 +291,11 @@
     document.querySelectorAll('[data-team]').forEach(function (c) {
       markMode(c, state.teamMode[c.dataset.team]);
     });
+    var allIn = TEAMS.every(function (t) { return state.teamMode[t.slug] === 'in'; });
+    var allEx = TEAMS.every(function (t) { return state.teamMode[t.slug] === 'ex'; });
+    document.querySelectorAll('[data-team-all]').forEach(function (c) {
+      markMode(c, allIn ? 'in' : allEx ? 'ex' : undefined);
+    });
     var any = !isDefaultState();
     $('filterToggle').classList.toggle('is-on', any);
     $('clearAll').disabled = !any;
@@ -322,7 +334,18 @@
     var b = e.target.closest('[data-badge]');
     if (b) { cycleMode(state.badgeMode, b.dataset.badge); applyFilters(); return; }
     var t = e.target.closest('[data-team]');
-    if (t) { cycleMode(state.teamMode, t.dataset.team); applyFilters(); }
+    if (t) { cycleMode(state.teamMode, t.dataset.team); applyFilters(); return; }
+    // "All" cycles the whole team list as one: include every team (games
+    // only), then exclude every team (no games), then clear them all.
+    var ta = e.target.closest('[data-team-all]');
+    if (ta) {
+      var allIn = TEAMS.every(function (tm) { return state.teamMode[tm.slug] === 'in'; });
+      var allEx = TEAMS.every(function (tm) { return state.teamMode[tm.slug] === 'ex'; });
+      state.teamMode = {};
+      if (allIn) TEAMS.forEach(function (tm) { state.teamMode[tm.slug] = 'ex'; });
+      else if (!allEx) TEAMS.forEach(function (tm) { state.teamMode[tm.slug] = 'in'; });
+      applyFilters();
+    }
   });
   $('filterToggle').addEventListener('click', function () {
     var p = $('filterPanel');
