@@ -312,9 +312,16 @@
         ql.appendChild(filterRow('badge', t.key, dottedName(t.label, typeColor(t.key)), m, t.title));
       }
     });
+    // The quick strip stays visible while expanded (so More/Less never moves),
+    // so the groups below list only what the strip doesn't already show.
+    var quickVenue = {}, quickBadge = {};
+    QUICK_FILTERS.forEach(function (q) {
+      (q.group === 'venue' ? quickVenue : quickBadge)[q.key] = true;
+    });
     var pv = $('panelVenues');
     pv.innerHTML = '';
     state.venues.forEach(function (v) {
+      if (quickVenue[v]) return;
       var n = upcoming.filter(function (e) { return e.venue === v; }).length;
       pv.appendChild(filterRow('venue', v, venueName(v), n));
     });
@@ -330,13 +337,14 @@
     var pb = $('panelBadges');
     pb.innerHTML = '';
     TYPE_LIST.forEach(function (t) {
+      if (quickBadge[t.key]) return;
       var n = upcoming.filter(function (e) { return eventType(e) === t.key; }).length;
       pb.appendChild(filterRow('badge', t.key, dottedName(t.label, typeColor(t.key)), n, t.title));
     });
     syncFilters();
   }
-  // One filter can be represented twice (quick row + panel row) — both are
-  // the same kind of checkbox, so one pass syncs them all from state.
+  // Every checkbox for a filter (quick strip or group list) syncs from state
+  // in one pass, so Select all / only / Reset reach the strip rows too.
   function syncFilters() {
     document.querySelectorAll('input[data-venue]').forEach(function (c) {
       c.checked = state.venueMode[c.dataset.venue] !== 'ex';
