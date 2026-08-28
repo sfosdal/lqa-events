@@ -8,7 +8,7 @@
  * expose feeds/APIs. Ticketmaster needs a free Discovery API key in env
  * TICKETMASTER_API_KEY (repo secret of the same name); with no key it's skipped.
  */
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
 import { parseScCards, parseScDetailDate, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents } from './sources.mjs';
 import { mergeWithArchive } from './merge.mjs';
@@ -24,6 +24,17 @@ const FEED_URL = process.env.FEED_URL || 'https://fosdal.net/lqa-events/events.j
 const MAX_EVENTS = 1200; // sanity cap, not a display cap
 
 const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+
+// Local runs: when the environment doesn't provide TICKETMASTER_API_KEY (CI
+// passes it as a repo secret), pick it up from an untracked repo-root .env so
+// the localhost preview gets the arena and stadium listings too.
+if (!process.env.TICKETMASTER_API_KEY) {
+  try {
+    const m = readFileSync(new URL('../.env', import.meta.url), 'utf8')
+      .match(/^TICKETMASTER_API_KEY=(.+)$/m);
+    if (m) process.env.TICKETMASTER_API_KEY = m[1].trim();
+  } catch { /* no .env — Ticketmaster sources warn and skip */ }
+}
 
 function decodeEntities(s) {
   return String(s)

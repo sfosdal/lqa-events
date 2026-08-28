@@ -3,3 +3,5 @@ site/events.json
 site/events.ics
 site/events-*.ics
 .DS_Store
+# local Ticketmaster key for preview fetches — never committed
+.env
