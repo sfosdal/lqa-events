@@ -81,14 +81,16 @@ export function parseScDetailDate(html) {
  * Showtime/ShowtimeEnd as "/Date(ms)/" UTC instants, VenueName like
  * "SIFF Cinema Uptown House 3"). A film screens several times a day across
  * houses; collapse to one event per film per local date at its earliest
- * showtime, keeping only venues matching venueRe. Each screening's film URL
- * is the nearest preceding /cinema/in-theaters/ link in the document.
- * Returns [{ title, date, time, end?, url }].
+ * showtime, keeping only venues matching venueRe. Each screening's URL is the
+ * nearest preceding detail link in the document; a /cinema/in-theaters/ link
+ * marks it as a regular film screening (movie: true), any other listing (a
+ * special event page) is left unflagged.
+ * Returns [{ title, date, time, end?, url, movie? }].
  */
 export function parseSiffScreenings(html, venueRe = /^SIFF Cinema Uptown/) {
   const s = String(html);
   const links = [];
-  for (const m of s.matchAll(/href="(\/cinema\/in-theaters\/[^"#?]+)"/g)) {
+  for (const m of s.matchAll(/href="(\/(?:cinema\/in-theaters|events)\/[^"#?]+)"/g)) {
     links.push({ at: m.index, url: m[1] });
   }
   const fmt = (ms) => new Intl.DateTimeFormat('sv-SE', {
@@ -110,6 +112,7 @@ export function parseSiffScreenings(html, venueRe = /^SIFF Cinema Uptown/) {
       date, time,
       url: link ? `https://www.siff.net${link}` : 'https://www.siff.net/calendar',
     };
+    if (link.startsWith('/cinema/in-theaters/')) ev.movie = true;
     const endMs = Number((String(d.ShowtimeEnd || '').match(/\d+/) || [])[0]);
     if (endMs) {
       // same-local-day ends only, as with DICE — overnight ends would lie

@@ -154,6 +154,7 @@
     'day': function (e) { var end = endEstimate(e); return !!end && end <= '16:00:00'; },
     'soldout': function (e) { return !!e.soldOut; },
     'free': function (e) { return !!e.free; },
+    'movie': function (e) { return !!e.movie; },
   };
   // Included venues OR together and excluded venues drop out; included badges
   // AND on top while excluded badges must all miss; included teams OR (only
@@ -189,6 +190,7 @@
     if (end && end <= '16:00:00') out.push(['b-day', 'day', 'Wraps up by 4 p.m.']);
     if (e.soldOut) out.push(['b-sold', 'sold out', 'Full house guaranteed']);
     if (e.free) out.push(['b-free', 'free', 'Open to walk-ups']);
+    if (e.movie) out.push(['b-movie', 'movie', 'A film screening, not a live event']);
     if (e.dateTbd) out.push(['b-tbd', 'date tbd', 'Date not final — the league may still move this game']);
     return out;
   }

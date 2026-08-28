@@ -160,6 +160,17 @@ test('SIFF screenings: Uptown only, earliest showtime per film-day, local time',
   assert.equal(evs[0].time, '16:00:00');
   assert.equal(evs[0].end, '18:27:00');
   assert.equal(evs[0].url, 'https://www.siff.net/cinema/in-theaters/the-samurai-and-the-prisoner');
+  assert.equal(evs[0].movie, true);
+});
+
+test('SIFF screenings: a listing linked outside in-theaters is an event, not a movie', () => {
+  const seven = Date.UTC(2026, 7, 29, 2, 0);
+  const html = `
+    <h3><a href="/events/siff-quiz-night">SIFF Quiz Night</a></h3>
+    ${siffBtn('SIFF Quiz Night', 'SIFF Cinema Uptown', seven, seven + 90 * 60000)}`;
+  const evs = parseSiffScreenings(html);
+  assert.equal(evs[0].movie, undefined);
+  assert.equal(evs[0].url, 'https://www.siff.net/events/siff-quiz-night');
 });
 
 test('SIFF screenings: an end past local midnight is dropped', () => {
@@ -169,4 +180,5 @@ test('SIFF screenings: an end past local midnight is dropped', () => {
   assert.equal(evs[0].time, '23:00:00');
   assert.equal(evs[0].end, undefined);
   assert.equal(evs[0].url, 'https://www.siff.net/calendar'); // no film link in the doc
+  assert.equal(evs[0].movie, undefined);
 });

@@ -42,4 +42,6 @@ test('badge predicates', () => {
   assert.equal(BADGE_FEEDS['free'][1]({ free: true }), true);
   assert.equal(BADGE_FEEDS['day'][1]({ time: '11:00:00' }), true);   // ends 14:00
   assert.equal(BADGE_FEEDS['day'][1]({ time: '19:00:00' }), false);  // ends 22:00
+  assert.equal(BADGE_FEEDS['movie'][1]({ movie: true }), true);
+  assert.equal(BADGE_FEEDS['movie'][1]({}), false);
 });
