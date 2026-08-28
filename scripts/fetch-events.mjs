@@ -158,7 +158,9 @@ async function siffUptown() {
   for (let i = 0; i < DAYS; i++) {
     const day = new Date(Date.now() + i * 86400e3).toISOString().slice(0, 10);
     try {
-      const res = await fetch(`https://www.siff.net/calendar?date=${day}`, { headers: { 'user-agent': BROWSER_UA } });
+      // view=list is explicit: future dates default to the grid view, whose
+      // markup carries the screening blobs but not the detail-page links
+      const res = await fetch(`https://www.siff.net/calendar?view=list&date=${day}`, { headers: { 'user-agent': BROWSER_UA } });
       if (!res.ok) { console.error(`SIFF calendar ${day} HTTP ${res.status}`); continue; }
       for (const ev of parseSiffScreenings(await res.text())) {
         const k = `${ev.title}|${ev.date}`;

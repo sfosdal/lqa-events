@@ -83,14 +83,15 @@ export function parseScDetailDate(html) {
  * houses; collapse to one event per film per local date at its earliest
  * showtime, keeping only venues matching venueRe. Each screening's URL is the
  * nearest preceding detail link in the document; a /cinema/in-theaters/ link
- * marks it as a regular film screening (movie: true), any other listing (a
- * special event page) is left unflagged.
+ * (a regular film run) marks it movie: true, while special programming —
+ * /programs-and-events/ (Movie Club, quiz nights), /events/, /festival/ —
+ * stays unflagged and reads as a SIFF event.
  * Returns [{ title, date, time, end?, url, movie? }].
  */
 export function parseSiffScreenings(html, venueRe = /^SIFF Cinema Uptown/) {
   const s = String(html);
   const links = [];
-  for (const m of s.matchAll(/href="(\/(?:cinema\/in-theaters|events)\/[^"#?]+)"/g)) {
+  for (const m of s.matchAll(/href="(\/(?:cinema\/in-theaters|programs-and-events|events|festival)\/[^"#?]+)"/g)) {
     links.push({ at: m.index, url: m[1] });
   }
   const fmt = (ms) => new Intl.DateTimeFormat('sv-SE', {

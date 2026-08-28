@@ -173,6 +173,16 @@ test('SIFF screenings: a listing linked outside in-theaters is an event, not a m
   assert.equal(evs[0].url, 'https://www.siff.net/events/siff-quiz-night');
 });
 
+test('SIFF screenings: special programming links attach but stay unflagged', () => {
+  const evening = Date.UTC(2026, 8, 15, 1, 30);  // 2026-09-14 18:30 PDT
+  const html = `
+    <h3><a href="/programs-and-events/siff-movie-club/serial-mom">SIFF Movie Club: Serial Mom</a></h3>
+    ${siffBtn('Serial Mom', 'SIFF Cinema Uptown House 1', evening, evening + 93 * 60000)}`;
+  const evs = parseSiffScreenings(html);
+  assert.equal(evs[0].movie, undefined);
+  assert.equal(evs[0].url, 'https://www.siff.net/programs-and-events/siff-movie-club/serial-mom');
+});
+
 test('SIFF screenings: an end past local midnight is dropped', () => {
   const late = Date.UTC(2026, 7, 29, 6, 0);    // 2026-08-28 23:00 PDT
   const html = siffBtn('Midnight Movie', 'SIFF Cinema Uptown', late, late + 120 * 60000);
