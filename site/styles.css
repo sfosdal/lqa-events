@@ -142,15 +142,11 @@ h1 {
   border-radius: 10px; /* the tab sits inset, past the corner curve */
   padding: 1rem 1.1rem; margin-bottom: 1.25rem;
 }
-/* lower-left of the quick slice: the way into the full panel */
-.fp-more {
-  display: inline-flex; align-items: center; gap: .35rem; margin-top: .4rem;
-  font: 600 .8rem/1 var(--body); color: var(--v-seactr); background: none;
-  border: 0; padding: .15em .35em .15em 0; cursor: pointer;
-}
-.fp-more svg { width: .95rem; height: .95rem; transition: transform .15s; }
-.fp-more[aria-expanded="true"] svg { transform: rotate(180deg); }
-.fp-more:hover { color: var(--ink); }
+/* More/Less chip in the bar: expands the panel's full groups below */
+.more-chip { margin-bottom: .5rem; display: inline-flex; align-items: center; gap: .35rem; }
+.more-chip svg { width: .9rem; height: .9rem; transition: transform .15s; }
+.more-chip[aria-expanded="true"] svg { transform: rotate(180deg); }
+.more-chip:hover { border-color: var(--ink-soft); }
 /* Kayak-style panel: columns of checkbox rows, Select all | Clear all links
    per group, an "only" link on hover, and an event count on the right. */
 .fp-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1.25rem 2.25rem; }

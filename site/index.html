@@ -84,16 +84,16 @@
       <circle cx="16" cy="6" r="2.2"/><circle cx="8" cy="12" r="2.2"/><circle cx="16" cy="18" r="2.2"/>
     </svg>
   </button>
+  <button id="quickMore" class="chip more-chip" type="button" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    <span id="quickMoreLabel">More</span>
+  </button>
   <button id="clearAll" class="chip reset-chip" type="button" disabled title="Back to the default view">Reset filters</button>
 </nav>
 <div id="quickPanel" class="filter-panel quick-panel">
   <div id="quickList" class="fp-list"><!-- most-used filter rows injected by app.js --></div>
-  <button id="quickMore" class="fp-more" type="button" aria-expanded="false">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-    <span id="quickMoreLabel">More</span>
-  </button>
-  <!-- the full groups unfold BELOW the More button, so it never moves and a
-       second click in the same spot collapses them again -->
+  <!-- the full groups unfold below the quick strip; the More/Less toggle lives
+       up in the bar, above everything that grows, so it never moves -->
   <div id="fullFilters" hidden>
   <div class="fp-cols">
     <div class="fp-group">
