@@ -666,10 +666,10 @@
         var team = teamFor(e.title);
         if (team) {
           var logo = document.createElement('img');
-          logo.className = 'team-logo';
+          logo.className = 'team-mark';
           logo.src = team.logo;
-          logo.alt = team.label + ' logo';
-          titleLine.appendChild(logo);
+          logo.alt = ''; // decorative — the title already names the team
+          row.appendChild(logo);
         }
         titleLine.appendChild(a);
         body.appendChild(venue); body.appendChild(titleLine);

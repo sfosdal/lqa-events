@@ -298,11 +298,16 @@ button.cal-day:hover { background: var(--gold-soft); }
 }
 .day-events { display: grid; gap: .6rem; align-content: start; }
 /* each row carries a whisper of its venue's color (set inline by app.js) */
-.ev { display: flex; gap: .8rem; align-items: flex-start; padding: .45em .55em; border-radius: 6px; }
+.ev { display: flex; gap: .8rem; align-items: flex-start; padding: .45em .55em; border-radius: 6px; position: relative; overflow: hidden; }
 .ev-body { display: flex; flex-direction: column; align-items: flex-start; gap: .18rem; min-width: 0; }
 .ev-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
 .ev-title { display: flex; align-items: center; gap: .45rem; min-width: 0; }
-.team-logo { flex: none; width: 1.35rem; height: 1.35rem; object-fit: contain; }
+/* home games carry the team crest as a faint watermark at the row's right */
+.team-mark {
+  position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
+  width: 2.9rem; height: 2.9rem; object-fit: contain;
+  opacity: .16; pointer-events: none;
+}
 .ev a { font-weight: 600; text-decoration-color: var(--line); }
 .ev a:hover { text-decoration-color: var(--gold); }
 .ev .time { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); min-width: 5.5rem; padding-top: .15em; }
