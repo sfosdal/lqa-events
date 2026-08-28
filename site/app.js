@@ -659,7 +659,6 @@
           logo.className = 'team-logo';
           logo.src = team.logo;
           logo.alt = team.label + ' logo';
-          logo.loading = 'lazy';
           titleLine.appendChild(logo);
         }
         titleLine.appendChild(a);
