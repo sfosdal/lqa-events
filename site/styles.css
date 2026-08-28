@@ -285,7 +285,7 @@ button.cal-day:hover { background: var(--gold-soft); }
 .b-21 { color: var(--v-vera); }
 .b-day { color: var(--gold); }
 .b-tbd { color: var(--ink-soft); border-style: dashed; }
-.b-movie { color: var(--v-siff); }
+.b-movie, .b-siffev { color: var(--v-siff); }
 .b-sold { color: var(--mist); background: var(--ink); border-color: var(--ink); }
 .b-free { color: var(--v-cornish); }
 @media (prefers-color-scheme: dark) {

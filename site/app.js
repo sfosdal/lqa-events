@@ -155,7 +155,16 @@
     'soldout': function (e) { return !!e.soldOut; },
     'free': function (e) { return !!e.free; },
     'movie': function (e) { return !!e.movie; },
+    'siffevent': function (e) { return e.venue === 'SIFF Cinema Uptown' && !e.movie; },
   };
+  // The baseline every visitor starts from (and "Clear all filters" returns
+  // to): SIFF's daily movie showings hidden, everything else visible.
+  function applyDefaultFilters() { state.badgeMode = { movie: 'ex' }; }
+  function isDefaultState() {
+    if (Object.keys(state.venueMode).length || Object.keys(state.teamMode).length) return false;
+    var k = Object.keys(state.badgeMode);
+    return k.length === 1 && state.badgeMode.movie === 'ex';
+  }
   // Included venues OR together and excluded venues drop out; included badges
   // AND on top while excluded badges must all miss; included teams OR (only
   // their games) and excluded teams drop out last.
@@ -275,9 +284,7 @@
     document.querySelectorAll('[data-team]').forEach(function (c) {
       markMode(c, state.teamMode[c.dataset.team]);
     });
-    var any = Object.keys(state.venueMode).length > 0 ||
-      Object.keys(state.badgeMode).length > 0 ||
-      Object.keys(state.teamMode).length > 0;
+    var any = !isDefaultState();
     $('filterToggle').classList.toggle('is-on', any);
     $('clearAll').disabled = !any;
   }
@@ -288,8 +295,11 @@
     } catch (e) { /* private mode etc. — filters just won't persist */ }
   }
   function loadFilters() {
+    var raw = null;
+    try { raw = localStorage.getItem('lqa-filters'); } catch (e) { /* unreadable storage */ }
+    if (raw == null) { applyDefaultFilters(); return; } // first visit
     try {
-      var s = JSON.parse(localStorage.getItem('lqa-filters') || '{}');
+      var s = JSON.parse(raw);
       var mode = function (m) { return m === 'in' || m === 'ex' ? m : null; };
       if (s.v === 2) {
         Object.keys(s.venues || {}).forEach(function (v) { if (mode(s.venues[v])) state.venueMode[v] = s.venues[v]; });
@@ -301,7 +311,7 @@
         (s.badges || []).forEach(function (k) { if (BADGE_PREDS[k]) state.badgeMode[k] = 'in'; });
         (s.teams || []).forEach(function (k) { if (TEAM_BY_SLUG[k]) state.teamMode[k] = 'ex'; });
       }
-    } catch (e) { /* unreadable storage — start unfiltered */ }
+    } catch (e) { applyDefaultFilters(); } // unreadable storage — start at the baseline
   }
   // fitPresets too: bold include labels change pill widths in the one-line bar
   function applyFilters() { syncFilters(); fitPresets(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
@@ -329,8 +339,8 @@
   });
   function clearAllFilters() {
     state.venueMode = {};
-    state.badgeMode = {};
     state.teamMode = {};
+    applyDefaultFilters();
     applyFilters();
   }
   $('clearFilters').addEventListener('click', clearAllFilters);
@@ -546,9 +556,11 @@
     if (total === 1) {
       var vIn = modeKeys(state.venueMode, 'in');
       var bIn = modeKeys(state.badgeMode, 'in');
+      var bEx = modeKeys(state.badgeMode, 'ex');
       var tEx = modeKeys(state.teamMode, 'ex');
       if (vIn.length) filteredFile = 'events-venue-' + slugify(vIn[0]) + '.ics';
       else if (bIn.length) filteredFile = 'events-' + bIn[0] + '.ics';
+      else if (bEx[0] === 'movie') filteredFile = 'events-no-movies.ics'; // the default view
       else if (tEx.length) filteredFile = 'events-no-' + tEx[0] + '.ics';
     }
     $('subFilterRow').hidden = !filteredFile;

@@ -40,5 +40,6 @@ export const BADGE_FEEDS = {
   'day': ['daytime', isDay],
   'soldout': ['sold out', (e) => !!e.soldOut],
   'free': ['free', (e) => !!e.free],
-  'movie': ['movies', (e) => !!e.movie],
+  'movie': ['SIFF movies', (e) => !!e.movie],
+  'siffevent': ['SIFF events', (e) => e.venue === 'SIFF Cinema Uptown' && !e.movie],
 };

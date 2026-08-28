@@ -222,7 +222,12 @@ try {
   const r = await fetch(FEED_URL);
   // normalized too, so past events published under old micro-venue names
   // don't resurrect their filter chips
-  if (r.ok) { const d = await r.json(); archived = (Array.isArray(d) ? d : (d.events || [])).map(normalizeVenue); }
+  if (r.ok) {
+    const d = await r.json();
+    archived = (Array.isArray(d) ? d : (d.events || [])).map(normalizeVenue)
+      // backfill the movie flag on entries archived before it existed
+      .map((e) => (!e.movie && e.url && e.url.includes('/cinema/in-theaters/') ? { ...e, movie: true } : e));
+  }
   else console.error(`Archive fetch HTTP ${r.status} — past events not carried this run`);
 } catch (err) { console.error('Archive fetch failed:', err.message); }
 
@@ -246,6 +251,11 @@ for (const [slug, [label, pred]] of Object.entries(BADGE_FEEDS)) {
     buildIcs(merged.filter(pred), new Date(), { calname: `LQA Events — ${label}` }));
   nFeeds++;
 }
+// The site hides SIFF's daily movie showings by default — publish the
+// matching exclusion feed so a default-view subscription lines up.
+writeFileSync(new URL('events-no-movies.ics', siteDir),
+  buildIcs(merged.filter((e) => !e.movie), new Date(), { calname: 'LQA Events — no movies' }));
+nFeeds++;
 // Exclusion feeds, one per local team: everything except that team's games.
 for (const t of TEAMS) {
   writeFileSync(new URL(`events-no-${t.slug}.ics`, siteDir),

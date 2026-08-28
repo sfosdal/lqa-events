@@ -44,4 +44,7 @@ test('badge predicates', () => {
   assert.equal(BADGE_FEEDS['day'][1]({ time: '19:00:00' }), false);  // ends 22:00
   assert.equal(BADGE_FEEDS['movie'][1]({ movie: true }), true);
   assert.equal(BADGE_FEEDS['movie'][1]({}), false);
+  assert.equal(BADGE_FEEDS['siffevent'][1]({ venue: 'SIFF Cinema Uptown' }), true);
+  assert.equal(BADGE_FEEDS['siffevent'][1]({ venue: 'SIFF Cinema Uptown', movie: true }), false);
+  assert.equal(BADGE_FEEDS['siffevent'][1]({ venue: 'McCaw Hall' }), false);
 });
