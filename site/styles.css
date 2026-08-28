@@ -136,7 +136,8 @@ h1 {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
   column-gap: 2rem;
 }
-#fullFilters { margin: .65rem .35rem .45rem; }
+#quickList[hidden] { display: none; } /* author display beats the UA [hidden] rule */
+.quick-panel.is-open { padding: 1rem 1.1rem; }
 .filter-panel {
   background: var(--mist); border: 1px solid var(--line);
   border-radius: 10px; /* the tab sits inset, past the corner curve */

@@ -312,16 +312,9 @@
         ql.appendChild(filterRow('badge', t.key, dottedName(t.label, typeColor(t.key)), m, t.title));
       }
     });
-    // The quick strip stays visible while expanded (so More/Less never moves),
-    // so the groups below list only what the strip doesn't already show.
-    var quickVenue = {}, quickBadge = {};
-    QUICK_FILTERS.forEach(function (q) {
-      (q.group === 'venue' ? quickVenue : quickBadge)[q.key] = true;
-    });
     var pv = $('panelVenues');
     pv.innerHTML = '';
     state.venues.forEach(function (v) {
-      if (quickVenue[v]) return;
       var n = upcoming.filter(function (e) { return e.venue === v; }).length;
       pv.appendChild(filterRow('venue', v, venueName(v), n));
     });
@@ -337,7 +330,6 @@
     var pb = $('panelBadges');
     pb.innerHTML = '';
     TYPE_LIST.forEach(function (t) {
-      if (quickBadge[t.key]) return;
       var n = upcoming.filter(function (e) { return eventType(e) === t.key; }).length;
       pb.appendChild(filterRow('badge', t.key, dottedName(t.label, typeColor(t.key)), n, t.title));
     });
@@ -429,10 +421,12 @@
       applyFilters();
     }
   });
-  // The full groups unfold in place below the More button — the button never
-  // moves, so a second click on the same spot folds them back up.
+  // More/Less lives up in the bar (above everything that grows, so it never
+  // moves); the card below swaps its quick strip for the full groups.
   function setPanelOpen(open) {
+    $('quickList').hidden = open;
     $('fullFilters').hidden = !open;
+    $('quickPanel').classList.toggle('is-open', open);
     $('quickMoreLabel').textContent = open ? 'Less' : 'More';
     $('quickMore').setAttribute('aria-expanded', String(open));
     $('filterToggle').setAttribute('aria-expanded', String(open));
