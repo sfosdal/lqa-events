@@ -299,11 +299,16 @@ button.cal-day:hover { background: var(--gold-soft); }
 .ev-body { display: flex; flex-direction: column; align-items: flex-start; gap: .18rem; min-width: 0; }
 .ev-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
 .ev-title { display: flex; align-items: center; gap: .45rem; min-width: 0; }
-/* home games carry the team crest as a faint watermark at the row's right */
+/* home games carry the team crest as a monochrome watermark at the row's
+   right — grayscale in light mode, inverted to white-on-dark in dark mode */
 .team-mark {
   position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
   width: 2.9rem; height: 2.9rem; object-fit: contain;
-  opacity: .5; pointer-events: none;
+  opacity: .7; pointer-events: none;
+  filter: grayscale(1);
+}
+@media (prefers-color-scheme: dark) {
+  .team-mark { filter: grayscale(1) invert(1) brightness(1.35); }
 }
 .ev a { font-weight: 600; text-decoration-color: var(--line); }
 .ev a:hover { text-decoration-color: var(--gold); }
