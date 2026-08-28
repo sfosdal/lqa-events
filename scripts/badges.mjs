@@ -31,7 +31,6 @@ export const TEAMS = [
   { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i },
   { slug: 'sounders', label: 'Sounders', re: /sounders/i },
   { slug: 'kraken', label: 'Kraken', re: /kraken/i },
-  { slug: 'huskies', label: 'Huskies', re: /huskies/i },
 ];
 
 // key → [label for the calendar name, predicate]

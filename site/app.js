@@ -48,14 +48,15 @@
 
   // Local pro teams — uncheck one to hide its home games, matched on the
   // title no matter what the venue. Mirrors TEAMS in scripts/badges.mjs.
+  // venue = the team's home building, re-checked whenever the team turns on
+  // (a checked team with its stadium hidden would silently show nothing).
   var TEAMS = [
-    { slug: 'mariners', label: 'Mariners', re: /mariners/i },
-    { slug: 'storm', label: 'Storm', re: /seattle storm/i },
-    { slug: 'seahawks', label: 'Seahawks', re: /seahawks/i },
-    { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i },
-    { slug: 'sounders', label: 'Sounders', re: /sounders/i },
-    { slug: 'kraken', label: 'Kraken', re: /kraken/i },
-    { slug: 'huskies', label: 'Huskies', re: /huskies/i },
+    { slug: 'mariners', label: 'Mariners', re: /mariners/i, venue: 'T-Mobile Park' },
+    { slug: 'storm', label: 'Storm', re: /seattle storm/i, venue: 'Climate Pledge Arena' },
+    { slug: 'seahawks', label: 'Seahawks', re: /seahawks/i, venue: 'Lumen Field' },
+    { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i, venue: 'Lumen Field' },
+    { slug: 'sounders', label: 'Sounders', re: /sounders/i, venue: 'Lumen Field' },
+    { slug: 'kraken', label: 'Kraken', re: /kraken/i, venue: 'Climate Pledge Arena' },
   ];
   var TEAM_BY_SLUG = {};
   TEAMS.forEach(function (t) { TEAM_BY_SLUG[t.slug] = t; });
@@ -147,26 +148,34 @@
       });
   }
 
-  // Predicates mirror scripts/badges.mjs — keep the two in sync.
-  var BADGE_PREDS = {
-    '21plus': function (e) { return !!e.age21; },
-    'day': function (e) { var end = endEstimate(e); return !!end && end <= '16:00:00'; },
-    'soldout': function (e) { return !!e.soldOut; },
-    'free': function (e) { return !!e.free; },
-    'movie': function (e) { return !!e.movie; },
-    'siffevent': function (e) { return e.venue === 'SIFF Cinema Uptown' && !e.movie; },
-  };
-  // Panel rows for the Event type group, in display order. The label reuses
-  // the same badge classes the agenda tags wear, so the filter and the tags
-  // speak the same color language.
-  var PANEL_BADGES = [
-    { key: '21plus', cls: 'b-21', label: '21+', title: 'Door-restricted, no minors' },
-    { key: 'day', cls: 'b-day', label: 'day', title: 'Wraps up by 4 p.m.' },
-    { key: 'soldout', cls: 'b-sold', label: 'sold out', title: 'Full house guaranteed' },
-    { key: 'free', cls: 'b-free', label: 'free', title: 'Open to walk-ups' },
-    { key: 'movie', cls: 'b-movie', label: 'siff movies', title: 'Regular film screenings at SIFF Cinema Uptown — unchecked by default' },
-    { key: 'siffevent', cls: 'b-siffev', label: 'siff events', title: 'SIFF special programming — festivals, Movie Club, series nights' },
+  // Event type is inferred, not sourced: every event lands in exactly one
+  // bucket, from its flags, title, then venue. The 'movie' key survives from
+  // the badge era so the saved movies-hidden default and the no-movies feed
+  // carry over unchanged.
+  var TYPE_LIST = [
+    { key: 'concert', label: 'concerts', title: 'Live music — arena tours to Vera Project shows' },
+    { key: 'sports', label: 'sports', title: 'Pro and college games' },
+    { key: 'arts', label: 'arts & theater', title: 'Opera, ballet, plays, comedy, dance' },
+    { key: 'movie', label: 'movies', title: 'Film screenings at SIFF Cinema Uptown — unchecked by default' },
+    { key: 'community', label: 'community & festivals', title: 'Grounds events, festivals, fairs, SIFF specials' },
   ];
+  var TYPE_VENUE_DEFAULT = {
+    'Climate Pledge Arena': 'concert', 'The Vera Project': 'concert',
+    'T-Mobile Park': 'concert', 'Lumen Field': 'concert', // non-game stadium bookings are shows
+    'McCaw Hall': 'arts', 'Cornish Playhouse': 'arts',
+    'Seattle Center': 'community', 'SIFF Cinema Uptown': 'community', // SIFF specials = festival programming
+  };
+  function eventType(e) {
+    var title = e.title || '';
+    if (e.movie) return 'movie';
+    if (TEAMS.some(function (t) { return t.re.test(title); }) || /\bvs\.?\s/i.test(title)) return 'sports';
+    if (/ballet|opera|symphon|orchestra|philharmon|theatre|theater|musical|broadway|shakespeare|comedy|stand-?up|improv|dance|cirque|on ice/i.test(title)) return 'arts';
+    if (/festival|fest[aá]l|\bfair\b|\bexpo\b|market|convention|summit|celebration|ceremony|\bwalk\b|\brun\b|parade/i.test(title)) return 'community';
+    if (/concert|\btour\b|live music|\bdj\b|\blive\b/i.test(title)) return 'concert';
+    return TYPE_VENUE_DEFAULT[e.venue] || 'community';
+  }
+  var TYPE_KEYS = {};
+  TYPE_LIST.forEach(function (t) { TYPE_KEYS[t.key] = true; });
   // The baseline every visitor starts from (and "Reset filters" returns to):
   // SIFF's daily movie showings unchecked, everything else checked.
   function applyDefaultFilters() { state.badgeMode = { movie: 'ex' }; }
@@ -176,14 +185,13 @@
     return k.length === 1 && state.badgeMode.movie === 'ex';
   }
   // Purely subtractive: everything shows until unchecked. An unchecked venue
-  // drops its events, an unchecked team drops its home games, and an event
-  // carrying any unchecked type is hidden.
+  // drops its events, an unchecked team drops its home games, and an
+  // unchecked type drops every event inferred into it.
   function filtered(list) {
-    var bEx = modeKeys(state.badgeMode, 'ex');
     var tEx = modeKeys(state.teamMode, 'ex');
     return list.filter(function (e) {
       if (state.venueMode[e.venue] === 'ex') return false;
-      for (var j = 0; j < bEx.length; j++) if (BADGE_PREDS[bEx[j]](e)) return false;
+      if (state.badgeMode[eventType(e)] === 'ex') return false;
       var title = e.title || '';
       for (var k = 0; k < tEx.length; k++) if (TEAM_BY_SLUG[tEx[k]].re.test(title)) return false;
       return true;
@@ -219,21 +227,36 @@
     });
   }
 
-  // ---- filter bar: preset pills + full panel ----
-  // The marquee venues get a spot in the bar; everything lives in the panel.
-  // Same bar-owner order as VENUE_RANK, so when the bar runs out of room the
-  // least relevant pills are the ones that drop.
-  var PRESET_VENUES = ['Climate Pledge Arena', 'McCaw Hall', 'Seattle Center', 'Cornish Playhouse', 'The Vera Project', 'SIFF Cinema Uptown', 'T-Mobile Park', 'Lumen Field'];
-
-  function venueChip(v) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'chip';
-    b.dataset.venue = v;
-    b.textContent = v;
-    b.title = 'Show or hide ' + v + ' events';
-    b.style.setProperty('--dot', venueColor(v));
-    return b;
+  // ---- filter bar: quick checkboxes + full panel ----
+  // The bar is a one-line sampler of the panel: the same checkbox controls,
+  // just the most-used filters. Ordered by usefulness, so when the bar runs
+  // out of room the least relevant chips are the ones that drop.
+  var QUICK_FILTERS = [
+    { group: 'venue', key: 'Climate Pledge Arena', label: 'Climate Pledge' },
+    { group: 'badge', key: 'concert' },
+    { group: 'badge', key: 'sports' },
+    { group: 'badge', key: 'movie' },
+    { group: 'venue', key: 'Seattle Center' },
+    { group: 'venue', key: 'McCaw Hall' },
+    { group: 'badge', key: 'community', label: 'community' },
+  ];
+  function quickChip(group, key, label, color) {
+    var lab = document.createElement('label');
+    lab.className = 'chip chip-check';
+    var input = document.createElement('input');
+    input.type = 'checkbox';
+    input.dataset[group] = key;
+    var box = document.createElement('span');
+    box.className = 'cb';
+    lab.appendChild(input); lab.appendChild(box);
+    if (color) {
+      var dot = document.createElement('i');
+      dot.className = 'dot';
+      dot.style.setProperty('--dot', color);
+      lab.appendChild(dot);
+    }
+    lab.appendChild(document.createTextNode(label));
+    return lab;
   }
   // One panel row: [✓] name  only  count. The native checkbox stays in the
   // DOM (visually replaced by .cb) so keyboard and screen-reader behavior
@@ -266,8 +289,16 @@
   function renderFilters() {
     var presets = $('presets');
     presets.innerHTML = '';
-    PRESET_VENUES.forEach(function (v) {
-      if (state.venues.indexOf(v) !== -1) presets.appendChild(venueChip(v));
+    var typeLabel = {};
+    TYPE_LIST.forEach(function (t) { typeLabel[t.key] = t.label; });
+    QUICK_FILTERS.forEach(function (q) {
+      if (q.group === 'venue') {
+        if (state.venues.indexOf(q.key) !== -1) {
+          presets.appendChild(quickChip('venue', q.key, q.label || q.key, venueColor(q.key)));
+        }
+      } else {
+        presets.appendChild(quickChip('badge', q.key, q.label || typeLabel[q.key]));
+      }
     });
     // Counts play the role of Kayak's price column: upcoming events each row
     // would govern, unaffected by the current filter so they stay stable.
@@ -297,12 +328,12 @@
     });
     var pb = $('panelBadges');
     pb.innerHTML = '';
-    PANEL_BADGES.forEach(function (b) {
+    TYPE_LIST.forEach(function (t) {
       var name = document.createElement('span');
-      name.className = 'badge ' + b.cls;
-      name.textContent = b.label;
-      var n = upcoming.filter(BADGE_PREDS[b.key]).length;
-      pb.appendChild(filterRow('badge', b.key, name, n, b.title));
+      name.className = 'fp-name';
+      name.textContent = t.label;
+      var n = upcoming.filter(function (e) { return eventType(e) === t.key; }).length;
+      pb.appendChild(filterRow('badge', t.key, name, n, t.title));
     });
     syncFilters();
     fitPresets();
@@ -322,8 +353,8 @@
     clearTimeout(fitTimer);
     fitTimer = setTimeout(fitPresets, 100);
   });
-  // One venue can be represented twice (marquee pill + panel checkbox) —
-  // sync them all from state. Pills read as pressed while their venue shows.
+  // One filter can be represented twice (quick-bar chip + panel row) — both
+  // are the same kind of checkbox, so one pass syncs them all from state.
   function syncFilters() {
     document.querySelectorAll('input[data-venue]').forEach(function (c) {
       c.checked = state.venueMode[c.dataset.venue] !== 'ex';
@@ -333,11 +364,6 @@
     });
     document.querySelectorAll('input[data-team]').forEach(function (c) {
       c.checked = state.teamMode[c.dataset.team] !== 'ex';
-    });
-    document.querySelectorAll('.chip[data-venue]').forEach(function (c) {
-      var off = state.venueMode[c.dataset.venue] === 'ex';
-      c.classList.toggle('is-ex', off);
-      c.setAttribute('aria-pressed', String(!off));
     });
     var any = !isDefaultState();
     $('filterToggle').classList.toggle('is-on', any);
@@ -359,7 +385,7 @@
         // v2 was the tri-state era: its 'in' entries have no checkbox
         // equivalent and are dropped; 'ex' carries over as unchecked.
         Object.keys(s.venues || {}).forEach(function (v) { if (s.venues[v] === 'ex') state.venueMode[v] = 'ex'; });
-        Object.keys(s.badges || {}).forEach(function (k) { if (BADGE_PREDS[k] && s.badges[k] === 'ex') state.badgeMode[k] = 'ex'; });
+        Object.keys(s.badges || {}).forEach(function (k) { if (TYPE_KEYS[k] && s.badges[k] === 'ex') state.badgeMode[k] = 'ex'; });
         Object.keys(s.teams || {}).forEach(function (k) { if (TEAM_BY_SLUG[k] && s.teams[k] === 'ex') state.teamMode[k] = 'ex'; });
       } else {
         // v1 arrays: only its team exclusions survive the checkbox model
@@ -374,7 +400,11 @@
   function groupInfo(g) {
     if (g === 'venue') return { map: state.venueMode, keys: state.venues.slice() };
     if (g === 'team') return { map: state.teamMode, keys: TEAMS.map(function (t) { return t.slug; }) };
-    return { map: state.badgeMode, keys: PANEL_BADGES.map(function (b) { return b.key; }) };
+    return { map: state.badgeMode, keys: TYPE_LIST.map(function (t) { return t.key; }) };
+  }
+  function ensureTeamVenue(slug) {
+    var t = TEAM_BY_SLUG[slug];
+    if (t && t.venue) setChecked(state.venueMode, t.venue, true);
   }
   // Panel checkboxes drive state through the native change event…
   document.addEventListener('change', function (e) {
@@ -382,21 +412,20 @@
     if (!(c instanceof HTMLInputElement) || c.type !== 'checkbox') return;
     if (c.dataset.venue != null) { setChecked(state.venueMode, c.dataset.venue, c.checked); applyFilters(); }
     else if (c.dataset.badge != null) { setChecked(state.badgeMode, c.dataset.badge, c.checked); applyFilters(); }
-    else if (c.dataset.team != null) { setChecked(state.teamMode, c.dataset.team, c.checked); applyFilters(); }
-  });
-  // …while the marquee pills, "only" links, and group links are buttons.
-  document.addEventListener('click', function (e) {
-    var v = e.target.closest('.chip[data-venue]');
-    if (v) {
-      setChecked(state.venueMode, v.dataset.venue, state.venueMode[v.dataset.venue] === 'ex');
+    else if (c.dataset.team != null) {
+      setChecked(state.teamMode, c.dataset.team, c.checked);
+      if (c.checked) ensureTeamVenue(c.dataset.team);
       applyFilters();
-      return;
     }
+  });
+  // …while the "only" links and group links are buttons.
+  document.addEventListener('click', function (e) {
     var o = e.target.closest('.fp-only');
     if (o) {
       var g = groupInfo(o.dataset.group);
       g.keys.forEach(function (k) { g.map[k] = 'ex'; });
       delete g.map[o.dataset.key];
+      if (o.dataset.group === 'team') ensureTeamVenue(o.dataset.key);
       applyFilters();
       return;
     }
@@ -404,6 +433,9 @@
     if (l) {
       var gi = groupInfo(l.dataset.group);
       gi.keys.forEach(function (k) { setChecked(gi.map, k, l.dataset.act === 'all'); });
+      if (l.dataset.group === 'team' && l.dataset.act === 'all') {
+        TEAMS.forEach(function (t) { ensureTeamVenue(t.slug); });
+      }
       applyFilters();
     }
   });
