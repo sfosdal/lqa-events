@@ -324,8 +324,14 @@ button.cal-day:hover { background: var(--gold-soft); }
 .feed-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .4rem; }
 .feed-list code { background: var(--mist); border: 1px solid var(--line); border-radius: 4px; padding: .15em .45em; font-size: .82rem; }
 
-footer { margin-top: 3.5rem; border-top: 1px solid var(--line); padding-top: 1rem; }
-footer p { color: var(--ink-soft); font-size: .85rem; }
+footer { margin-top: 3.5rem; border-top: 1px solid var(--line); padding-top: 1.6rem; text-align: center; }
+footer p { color: var(--ink-soft); font-size: .85rem; margin: .4rem auto 0; max-width: 36rem; }
+.gw-logo { width: 46px; height: 46px; color: var(--ink-soft); }
+.gw-credit {
+  font-family: var(--mono); font-size: .78rem; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--ink);
+}
+.gw-credit strong { font-weight: 500; color: var(--gold); }
 
 /* ---- small screens: tighter header, horizontal date headers, stacked rows ---- */
 @media (max-width: 640px) {
