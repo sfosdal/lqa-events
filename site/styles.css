@@ -303,7 +303,7 @@ button.cal-day:hover { background: var(--gold-soft); }
 .team-mark {
   position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
   width: 2.9rem; height: 2.9rem; object-fit: contain;
-  opacity: .3; pointer-events: none;
+  opacity: .5; pointer-events: none;
 }
 .ev a { font-weight: 600; text-decoration-color: var(--line); }
 .ev a:hover { text-decoration-color: var(--gold); }
