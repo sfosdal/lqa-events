@@ -430,9 +430,11 @@
   $('filterToggle').addEventListener('click', function () {
     setPanelOpen($('filterPanel').hidden);
   });
+  $('quickMore').addEventListener('click', function () { setPanelOpen(true); });
   // clicking anywhere outside the filter area collapses back to the quick view
+  // (#quickPanel counts as inside: its "All filters" click just opened the panel)
   document.addEventListener('click', function (e) {
-    if (!$('filterPanel').hidden && !e.target.closest('#filterPanel') && !e.target.closest('.filterbar')) {
+    if (!$('filterPanel').hidden && !e.target.closest('.filter-panel, .filterbar')) {
       setPanelOpen(false);
     }
   });
