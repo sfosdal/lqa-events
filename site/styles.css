@@ -129,12 +129,14 @@ h1 {
 .reset-chip { margin-bottom: .5rem; }
 .reset-chip:disabled { opacity: .45; cursor: default; }
 .reset-chip:not(:disabled):hover { border-color: var(--ink-soft); }
-/* the collapsed state: a slice of the panel, spread across the full width */
+/* the collapsed state: a slice of the panel, spread across the full width
+   (#quickList only — the group lists inside #fullFilters stay columns) */
 .quick-panel { padding: .55rem .75rem; }
-.quick-panel .fp-list {
+#quickList {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
   column-gap: 2rem;
 }
+#fullFilters { margin: .65rem .35rem .45rem; }
 .filter-panel {
   background: var(--mist); border: 1px solid var(--line);
   border-radius: 10px; /* the tab sits inset, past the corner curve */
@@ -146,7 +148,8 @@ h1 {
   font: 600 .8rem/1 var(--body); color: var(--v-seactr); background: none;
   border: 0; padding: .15em .35em .15em 0; cursor: pointer;
 }
-.fp-more svg { width: .95rem; height: .95rem; }
+.fp-more svg { width: .95rem; height: .95rem; transition: transform .15s; }
+.fp-more[aria-expanded="true"] svg { transform: rotate(180deg); }
 .fp-more:hover { color: var(--ink); }
 /* Kayak-style panel: columns of checkbox rows, Select all | Clear all links
    per group, an "only" link on hover, and an event count on the right. */

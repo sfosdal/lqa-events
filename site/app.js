@@ -421,20 +421,20 @@
       applyFilters();
     }
   });
-  // The icon swaps the quick slice for the full panel and back.
+  // The full groups unfold in place below the More button — the button never
+  // moves, so a second click on the same spot folds them back up.
   function setPanelOpen(open) {
-    $('filterPanel').hidden = !open;
-    $('quickPanel').hidden = open;
+    $('fullFilters').hidden = !open;
+    $('quickMoreLabel').textContent = open ? 'Less' : 'More';
+    $('quickMore').setAttribute('aria-expanded', String(open));
     $('filterToggle').setAttribute('aria-expanded', String(open));
   }
-  $('filterToggle').addEventListener('click', function () {
-    setPanelOpen($('filterPanel').hidden);
-  });
-  $('quickMore').addEventListener('click', function () { setPanelOpen(true); });
+  function togglePanel() { setPanelOpen($('fullFilters').hidden); }
+  $('filterToggle').addEventListener('click', togglePanel);
+  $('quickMore').addEventListener('click', togglePanel);
   // clicking anywhere outside the filter area collapses back to the quick view
-  // (#quickPanel counts as inside: its "All filters" click just opened the panel)
   document.addEventListener('click', function (e) {
-    if (!$('filterPanel').hidden && !e.target.closest('.filter-panel, .filterbar')) {
+    if (!$('fullFilters').hidden && !e.target.closest('.filter-panel, .filterbar')) {
       setPanelOpen(false);
     }
   });
