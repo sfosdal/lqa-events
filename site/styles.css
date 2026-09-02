@@ -14,45 +14,63 @@
      orange → red → pink), teams are sea-and-field greens/teals. */
   /* venue hues (chips, grid ticks, agenda tags): a sweep from teal through
      blue and violet to magenta, neighbors alternating light and dark */
-  --v-cornish: #009999;
-  --v-cpa: #0099cc;
-  --v-tmobile: #3399ff;
-  --v-seactr: #0033cc;
-  --v-lumen: #6666ff;
+  --v-cornish: #009966;
+  --v-cpa: #0066cc;
+  --v-tmobile: #33cccc;
+  --v-seactr: #0000cc;
+  --v-lumen: #6666cc;
   --v-siff: #9966cc;
   --v-vera: #6600cc;
-  --v-otb: #cc33ff;
-  --v-mccaw: #cc0099;
+  --v-otb: #cc33cc;
+  --v-mccaw: #990066;
   /* event-type hues (filter dots, agenda right edge) */
   --t-concert: #ff6600;
   --t-sports: #cc9900;
   --t-arts: #cc0000;
   --t-movie: #996633;
-  --t-community: #ff3399;
-  /* team hues (Home games dots) */
-  --tm-mariners: #009966;
+  --t-community: #ff0099;
+  /* team hues (Home games dots): lime through olive to spring green */
+  --tm-mariners: #99cc00;
   --tm-storm: #336633;
   --tm-seahawks: #66cc00;
-  --tm-reign: #00cc99;
+  --tm-reign: #009966;
   --tm-sounders: #669900;
-  --tm-kraken: #006633;
-  --tm-torrent: #99cc33;
+  --tm-kraken: #00cc00;
+  --tm-torrent: #cccc00;
   --display: "Big Shoulders", "Arial Narrow", sans-serif;
   --body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
+/* Dark palette. Applies when the system prefers dark and the visitor hasn't
+   picked Light, or whenever they've picked Dark (the toggle sets
+   data-theme on <html>; "system" leaves it unset). The two blocks must
+   stay identical — CSS has no way to give one ruleset two unrelated
+   conditions. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2;
     --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
-    --v-cornish: #33cccc; --v-cpa: #00ccff; --v-tmobile: #99ccff; --v-seactr: #3366ff;
-    --v-lumen: #6666ff; --v-siff: #cc99ff; --v-vera: #9933ff; --v-otb: #cc66ff; --v-mccaw: #ff33ff;
-    --t-concert: #ff9900; --t-sports: #ffff33; --t-arts: #ff3333;
-    --t-movie: #cc9966; --t-community: #ff6699;
-    --tm-mariners: #00cc66; --tm-storm: #66cc66; --tm-seahawks: #99ff33;
-    --tm-reign: #33ff99; --tm-sounders: #99cc33; --tm-kraken: #009966; --tm-torrent: #ccff66;
+    --v-cornish: #00ff99; --v-cpa: #0099ff; --v-tmobile: #ccffff; --v-seactr: #3333ff;
+    --v-lumen: #6666ff; --v-siff: #cc99ff; --v-vera: #9900ff; --v-otb: #ff66ff; --v-mccaw: #cc0099;
+    --t-concert: #ff9900; --t-sports: #ffff00; --t-arts: #ff3333;
+    --t-movie: #cc9966; --t-community: #ff66cc;
+    --tm-mariners: #ccff66; --tm-storm: #339933; --tm-seahawks: #99ff00;
+    --tm-reign: #00cc66; --tm-sounders: #669900; --tm-kraken: #00ff00; --tm-torrent: #ccff00;
   }
 }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2;
+  --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
+  --v-cornish: #00ff99; --v-cpa: #0099ff; --v-tmobile: #ccffff; --v-seactr: #3333ff;
+  --v-lumen: #6666ff; --v-siff: #cc99ff; --v-vera: #9900ff; --v-otb: #ff66ff; --v-mccaw: #cc0099;
+  --t-concert: #ff9900; --t-sports: #ffff00; --t-arts: #ff3333;
+  --t-movie: #cc9966; --t-community: #ff66cc;
+  --tm-mariners: #ccff66; --tm-storm: #339933; --tm-seahawks: #99ff00;
+  --tm-reign: #00cc66; --tm-sounders: #669900; --tm-kraken: #00ff00; --tm-torrent: #ccff00;
+}
+:root[data-theme="light"] { color-scheme: light; }
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -158,8 +176,31 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
 .reset-chip { margin-bottom: .5rem; }
 .reset-chip:disabled { opacity: .45; cursor: default; }
 .reset-chip:not(:disabled):hover { border-color: var(--ink-soft); }
+/* light / system / dark: a three-stop pill at the bar's right end, the gold
+   knob sliding under the active icon */
+.theme-toggle {
+  position: relative; display: inline-flex; margin-left: auto; margin-bottom: .5rem;
+  padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--mist);
+}
+.theme-toggle button {
+  position: relative; z-index: 1; width: 2rem; height: 1.7rem; cursor: pointer;
+  background: none; border: 0; padding: 0; color: var(--ink-soft); border-radius: 999px;
+  display: grid; place-items: center;
+}
+.theme-toggle button svg { width: 1rem; height: 1rem; }
+.theme-toggle button[aria-checked="true"] { color: #1b2733; cursor: default; }
+.theme-toggle button:not([aria-checked="true"]):hover { color: var(--ink); }
+.theme-knob {
+  position: absolute; top: 3px; left: 3px; width: 2rem; height: calc(100% - 6px);
+  border-radius: 999px; background: var(--gold); transition: left .18s;
+}
+.theme-toggle[data-active="system"] .theme-knob { left: calc(3px + 2rem); }
+.theme-toggle[data-active="dark"] .theme-knob { left: calc(3px + 4rem); }
+@media (prefers-reduced-motion: reduce) { .theme-knob { transition: none; } }
 #copyFilterLink { margin-bottom: .5rem; display: inline-flex; align-items: center; gap: .4rem; }
 #copyFilterLink svg { width: .9rem; height: .9rem; }
+#copyFilterLabel { transition: opacity .4s; }
+#copyFilterLabel.is-fading { opacity: 0; }
 #copyFilterLink:hover { border-color: var(--ink-soft); }
 /* the collapsed state: a slice of the panel, spread across the full width
    (#quickList only — the group lists inside #fullFilters stay columns) */
@@ -338,8 +379,9 @@ button.cal-day:hover { background: var(--gold-soft); }
   filter: grayscale(1);
 }
 @media (prefers-color-scheme: dark) {
-  .team-mark { filter: grayscale(1) invert(1) brightness(1.35); }
+  :root:not([data-theme="light"]) .team-mark { filter: grayscale(1) invert(1) brightness(1.35); }
 }
+:root[data-theme="dark"] .team-mark { filter: grayscale(1) invert(1) brightness(1.35); }
 .ev a { font-weight: 600; text-decoration-color: var(--line); }
 .ev a:hover { text-decoration-color: var(--gold); }
 .ev .time { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); min-width: 5.5rem; padding-top: .15em; }
@@ -354,6 +396,13 @@ button.cal-day:hover { background: var(--gold-soft); }
 /* ---- agenda pager ---- */
 .pager { display: flex; align-items: center; justify-content: center; gap: .4rem; margin: 1.4rem 0 0; }
 .pager:empty { display: none; }
+/* With enough pages (renderPager adds the class) and the rail beside the
+   cards, the pager spans exactly the cards' width: ‹ at their left edge, ›
+   at their right, pages spread between. The offset is .day-row's rail
+   column plus its gap. */
+@media (min-width: 761px) {
+  .pager--wide { margin-left: calc(5.2rem + 1rem); justify-content: space-between; }
+}
 .pager button {
   font: 500 .9rem/1 var(--body); min-width: 2rem; height: 2rem; cursor: pointer;
   background: none; border: 0; border-radius: 8px; color: var(--ink);
@@ -381,8 +430,9 @@ button.cal-day:hover { background: var(--gold-soft); }
 .b-sold { color: var(--mist); background: var(--ink); border-color: var(--ink); }
 .b-free { color: var(--v-cornish); }
 @media (prefers-color-scheme: dark) {
-  .b-sold { color: var(--sky); background: var(--ink); border-color: var(--ink); }
+  :root:not([data-theme="light"]) .b-sold { color: var(--sky); background: var(--ink); border-color: var(--ink); }
 }
+:root[data-theme="dark"] .b-sold { color: var(--sky); background: var(--ink); border-color: var(--ink); }
 .pop-note { color: var(--ink-soft); font-size: .85em; text-align: justify; }
 .pop-filter { display: flex; gap: .5em; align-items: center; cursor: pointer; font-weight: 600; }
 .pop-filter input { accent-color: var(--gold); }
@@ -396,7 +446,8 @@ button.cal-day:hover { background: var(--gold-soft); }
   background: var(--ink); color: var(--sky); border-radius: 8px;
   padding: .9rem 1rem; overflow-x: auto; font-family: var(--mono); font-size: .78rem;
 }
-@media (prefers-color-scheme: dark) { .share pre { background: var(--mist); color: var(--ink); border: 1px solid var(--line); } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .share pre { background: var(--mist); color: var(--ink); border: 1px solid var(--line); } }
+:root[data-theme="dark"] .share pre { background: var(--mist); color: var(--ink); border: 1px solid var(--line); }
 .share code { font-family: var(--mono); }
 .feed-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .4rem; }
 .feed-list code { background: var(--mist); border: 1px solid var(--line); border-radius: 4px; padding: .15em .45em; font-size: .82rem; }

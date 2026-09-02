@@ -102,7 +102,7 @@
   // Kayak-style checkboxes: each filter map holds name → 'ex' for unchecked
   // (hidden); absent = checked (shown). Everything starts checked except SIFF
   // movies — see applyDefaultFilters.
-  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false, page: 0, pageByDate: {} };
+  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false, pastFrom: null, page: 0, pageByDate: {} };
 
   function modeKeys(map, mode) {
     return Object.keys(map).filter(function (k) { return map[k] === mode; });
@@ -525,14 +525,38 @@
     applyFilters();
   }
   $('clearAll').addEventListener('click', clearAllFilters);
+  // ---- light / system / dark ----
+  // The head script already applied the saved choice; this just drives the
+  // toggle and swaps <html data-theme> when a stop is picked.
+  function applyTheme(t) {
+    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    else { t = 'system'; delete document.documentElement.dataset.theme; }
+    $('themeToggle').dataset.active = t;
+    $('themeToggle').querySelectorAll('button').forEach(function (b) {
+      b.setAttribute('aria-checked', String(b.dataset.theme === t));
+    });
+    try { if (t === 'system') localStorage.removeItem('lqa-theme'); else localStorage.setItem('lqa-theme', t); } catch (e) { /* no storage */ }
+  }
+  applyTheme(document.documentElement.dataset.theme || 'system');
+  $('themeToggle').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-theme]');
+    if (b) applyTheme(b.dataset.theme);
+  });
   $('copyFilterLink').addEventListener('click', function () {
     var code = LQAFilter.encodeFilterCode({ venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
     var url = location.origin + location.pathname + '?f=' + code;
     var label = $('copyFilterLabel');
     var original = label.textContent;
     navigator.clipboard.writeText(url).then(function () {
-      label.textContent = 'Copied';
-      setTimeout(function () { label.textContent = original; }, 1500);
+      label.textContent = 'Copied!';
+      // hold, fade out, then bring the normal label back in
+      setTimeout(function () {
+        label.classList.add('is-fading');
+        setTimeout(function () {
+          label.textContent = original;
+          label.classList.remove('is-fading');
+        }, 400);
+      }, 1200);
     });
   });
 
@@ -636,7 +660,9 @@
   function jumpToMonth() {
     var target = ymd(state.month);
     if (target < todayStr() && !sameMonth(state.month, new Date())) {
-      if (!state.showPast || state.page !== 0) { state.showPast = true; gotoPage(0); }
+      state.showPast = true;
+      state.pastFrom = target; // nothing older than that month
+      gotoPage(0);
       return;
     }
     var dates = Object.keys(state.pageByDate).sort();
@@ -652,12 +678,12 @@
     if (!cell || !cell.dataset.date) return;
     var date = cell.dataset.date;
     if (date < todayStr()) {
-      // past days live above page one, behind the toggle
-      if (!state.showPast || state.page !== 0) {
-        state.showPast = true;
-        state.page = 0;
-        renderAgenda();
-      }
+      // past days live above page one, behind the toggle — and a clicked
+      // day is where the past list starts, not the whole year of history
+      state.showPast = true;
+      state.pastFrom = date;
+      state.page = 0;
+      renderAgenda();
     } else if (state.pageByDate[date] != null && state.pageByDate[date] !== state.page) {
       state.page = state.pageByDate[date];
       renderAgenda();
@@ -678,14 +704,16 @@
     ol.innerHTML = '';
     var dates = Object.keys(state.byDate).sort();
     var today = todayStr();
-    var pastCount = 0;
+    var pastCount = 0;   // every past event there is
+    var pastListed = 0;  // the ones the past list will actually show
+    var inPast = function (d) { return d < today && (!state.pastFrom || d >= state.pastFrom); };
     var pages = [];
     var count = 0;
     state.pageByDate = {};
     dates.forEach(function (date) {
       var n = filtered(state.byDate[date]).length;
       if (!n) return;
-      if (date < today) { pastCount += n; return; }
+      if (date < today) { pastCount += n; if (inPast(date)) pastListed += n; return; }
       var start = pages.length ? pages[pages.length - 1][0] : null;
       // Math.round eats the DST hour before the day count is compared
       var days = start ? Math.round((parseDate(date) - parseDate(start)) / 86400e3) : 0;
@@ -706,10 +734,11 @@
       var tb = document.createElement('button');
       tb.type = 'button';
       tb.textContent = state.showPast
-        ? 'Hide the ' + pastCount + ' past events'
+        ? 'Hide the ' + pastListed + ' past events'
         : 'Show ' + pastCount + ' past events';
       tb.addEventListener('click', function () {
         state.showPast = !state.showPast;
+        state.pastFrom = null; // the button means all of them
         renderAgenda();
       });
       tli.appendChild(tb);
@@ -718,7 +747,7 @@
     var visible = pages.length ? pages[state.page] : [];
     if (state.showPast && state.page === 0) {
       visible = dates.filter(function (d) {
-        return d < today && filtered(state.byDate[d]).length;
+        return inPast(d) && filtered(state.byDate[d]).length;
       }).concat(visible);
     }
     visible.forEach(function (date) {
@@ -803,6 +832,9 @@
     var nav = $('agendaPager');
     nav.innerHTML = '';
     var total = pages.length;
+    // with enough pages the pager spreads across the listing cards' width
+    // (see .pager--wide); a short one stays a compact centered cluster
+    nav.classList.toggle('pager--wide', total >= 5);
     if (total < 2) return;
     var rangeLabel = function (i) {
       var ds = pages[i];
