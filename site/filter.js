@@ -71,8 +71,9 @@
 
   // Compact filter code <-> filter state, for share links (?f=CODE).
   // REGISTRY is every filterable key in a fixed order; the code is the set of
-  // EXCLUDED entries as a bitmask written in base 36, zero-padded to
-  // CODE_LENGTH characters ("000000" means everything shown). Append-only:
+  // EXCLUDED entries as a bitmask written in upper-case base 36, zero-padded
+  // to CODE_LENGTH characters ("000000" means everything shown); parsing
+  // accepts either case. Append-only:
   // adding an entry adds a bit and every existing code keeps meaning what it
   // meant. Six base-36 digits hold 31 bits, so the registry can grow to 31
   // entries before CODE_LENGTH needs a bump (old, shorter codes still parse).
@@ -94,7 +95,7 @@
       var map = mode[GROUP_MAP[entry[0]]] || {};
       if (map[entry[1]] === 'ex') mask += Math.pow(2, i);
     });
-    var code = mask.toString(36);
+    var code = mask.toString(36).toUpperCase();
     while (code.length < CODE_LENGTH) code = '0' + code;
     return code;
   }

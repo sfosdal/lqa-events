@@ -809,7 +809,7 @@
   // the cards' width at the normal spacing, so the extra room shows more
   // numbers rather than stretching the gaps.
   function pagerSlots(nav) {
-    if (!nav.classList.contains('pager--wide') || !matchMedia('(min-width: 761px)').matches) return 7;
+    if (!nav.classList.contains('pager--wide') || !matchMedia('(min-width: 641px)').matches) return 7;
     var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     var width = $('agenda').clientWidth - 6.2 * rem; // the cards' width — see .pager--wide
     var slot = 2 * rem + 0.4 * rem;                  // a 2rem button plus the gap

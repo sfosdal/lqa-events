@@ -232,10 +232,10 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
 }
 .fp-links { display: flex; gap: .55em; align-items: baseline; margin: 0 0 .45rem; color: var(--line); }
 .fp-link {
-  font: 600 .8rem/1 var(--body); color: var(--v-seactr); background: none; border: 0;
+  font: 600 .8rem/1 var(--body); color: var(--ink); background: none; border: 0;
   padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
 }
-.fp-link:hover { color: var(--ink); }
+.fp-link:hover { color: var(--gold); }
 .fp-list { display: flex; flex-direction: column; }
 .fp-row { display: flex; align-items: center; gap: .5rem; padding: .3rem .35rem; border-radius: 6px; }
 .fp-row:hover { background: var(--sky); }
@@ -246,12 +246,16 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
   flex: none; width: 1.1rem; height: 1.1rem; position: relative;
   border: 1.5px solid var(--ink-soft); border-radius: 4px; background: var(--mist);
 }
-.fp-check input:checked + .cb { background: var(--v-seactr); border-color: var(--v-seactr); }
+/* checked = ink box with a page-colored tick; the row's hover turns the box
+   gold, like every other hover on the site */
+.fp-check input:checked + .cb { background: var(--ink); border-color: var(--ink); }
 .fp-check input:checked + .cb::after {
   content: ""; position: absolute; left: .3rem; top: .1rem;
   width: .28rem; height: .55rem;
-  border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
+  border: solid var(--mist); border-width: 0 2px 2px 0; transform: rotate(45deg);
 }
+.fp-check:hover .cb { border-color: var(--gold); }
+.fp-check:hover input:checked + .cb { background: var(--gold); border-color: var(--gold); }
 .fp-check input:focus-visible + .cb { outline: 2px solid var(--gold); outline-offset: 2px; }
 .fp-name { font-size: .88rem; display: flex; align-items: center; gap: .45rem; overflow-wrap: anywhere; }
 .fp-name a { text-decoration-color: var(--line); }
@@ -259,9 +263,10 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
 .fp-name .dot { flex: none; width: .65rem; height: .65rem; border-radius: 50%; background: var(--dot, var(--ink-soft)); }
 .fp-row:has(input:not(:checked)) .fp-name { opacity: .5; }
 .fp-only {
-  font: 700 .72rem/1 var(--body); color: var(--v-seactr); background: none; border: 0;
+  font: 700 .72rem/1 var(--body); color: var(--ink); background: none; border: 0;
   padding: .15em .35em; cursor: pointer; visibility: hidden;
 }
+.fp-only:hover { color: var(--gold); }
 .fp-row:hover .fp-only, .fp-row:focus-within .fp-only { visibility: visible; }
 @media (hover: none) { .fp-only { visibility: visible; } }
 .fp-count { margin-left: auto; font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); }
@@ -283,6 +288,9 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
 .cal-side { position: sticky; top: 1rem; grid-column: 2; grid-row: 1; }
 @media (max-width: 760px) {
   .agenda-layout { display: flex; flex-direction: column; }
+  /* the grid's align-items: start carries over; the pager must span the
+     column or it shrinks to its content and hugs the left edge */
+  .agenda-layout > .pager { align-self: stretch; }
   .cal-side { order: -1; position: static; width: 100%; max-width: 24rem; margin: 0 auto 1.5rem; }
 }
 
@@ -327,7 +335,9 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
 }
 .cal-day { background: none; border-right: 0; border-bottom: 0; color: var(--ink); display: block; width: 100%; }
 button.cal-day { cursor: pointer; }
-button.cal-day:hover { background: var(--gold-soft); }
+/* inset ring rather than a border so the cell doesn't shift and the month
+   boundary lines underneath stay put */
+button.cal-day:hover { background: var(--gold-soft); box-shadow: inset 0 0 0 1px var(--gold); }
 .cal-day .num { display: block; }
 .cal-day.is-today .num {
   display: inline-block; background: var(--gold); color: #fff;
@@ -412,7 +422,7 @@ button.cal-day:hover { background: var(--gold-soft); }
    at their right, the page numbers centered between at the normal gap —
    the extra room goes to showing more numbers (pagerSlots in app.js), not
    to wider gaps. The offset is .day-row's rail column plus its gap. */
-@media (min-width: 761px) {
+@media (min-width: 641px) { /* = while .day-row keeps its rail beside the cards */
   .pager--wide { margin-left: calc(5.2rem + 1rem); }
   .pager--wide .pg-arrow:first-child { margin-right: auto; }
   .pager--wide .pg-arrow:last-child { margin-left: auto; }
