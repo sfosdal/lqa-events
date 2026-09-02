@@ -272,6 +272,20 @@
     name.appendChild(document.createTextNode(label));
     return name;
   }
+  // A name that links out (venue events page, team schedule) — or plain text
+  // when there's nowhere to send it. Filter rows sit inside a <label> that
+  // toggles the checkbox on any click; native label activation already
+  // skips a nested link, and stopPropagation keeps the delegated handlers
+  // out of it too.
+  function extLink(text, url, title) {
+    if (!url) return document.createTextNode(text);
+    var a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    if (title) a.title = title;
+    a.textContent = text;
+    a.addEventListener('click', function (e) { e.stopPropagation(); });
+    return a;
+  }
   function venueName(v) {
     var name = document.createElement('span');
     name.className = 'fp-name';
@@ -279,20 +293,7 @@
     dot.className = 'dot';
     dot.style.setProperty('--dot', venueColor(v));
     name.appendChild(dot);
-    var url = VENUE_URL[v];
-    if (url) {
-      var a = document.createElement('a');
-      a.href = url; a.target = '_blank'; a.rel = 'noopener';
-      a.title = "See " + v + "’s own events list";
-      a.textContent = v;
-      // The label around this row toggles the checkbox on any click inside
-      // it; keep that click from also reaching that logic (native label
-      // activation already skips it for a nested link, but no harm here).
-      a.addEventListener('click', function (e) { e.stopPropagation(); });
-      name.appendChild(a);
-    } else {
-      name.appendChild(document.createTextNode(v));
-    }
+    name.appendChild(extLink(v, VENUE_URL[v], "See " + v + "’s own events list"));
     return name;
   }
   function renderFilters() {
@@ -326,7 +327,7 @@
     TEAMS.forEach(function (t) {
       var name = document.createElement('span');
       name.className = 'fp-name';
-      name.textContent = t.label;
+      name.appendChild(extLink(t.label, t.schedule, t.label + ' schedule'));
       var n = upcoming.filter(function (e) { return t.re.test(e.title || ''); }).length;
       pt.appendChild(filterRow('team', t.slug, name, n, t.label + ' home games'));
     });
@@ -461,13 +462,10 @@
     $('quickList').hidden = open;
     $('fullFilters').hidden = !open;
     $('quickPanel').classList.toggle('is-open', open);
-    $('quickMoreLabel').textContent = open ? 'Less' : 'More';
-    $('quickMore').setAttribute('aria-expanded', String(open));
     $('filterToggle').setAttribute('aria-expanded', String(open));
   }
   function togglePanel() { setPanelOpen($('fullFilters').hidden); }
   $('filterToggle').addEventListener('click', togglePanel);
-  $('quickMore').addEventListener('click', togglePanel);
   // clicking anywhere outside the filter area collapses back to the quick view
   document.addEventListener('click', function (e) {
     if (!$('fullFilters').hidden && !e.target.closest('.filter-panel, .filterbar')) {
@@ -710,7 +708,7 @@
         body.className = 'ev-body';
         var venue = document.createElement('span');
         venue.className = 'venue';
-        venue.textContent = e.venue;
+        venue.appendChild(extLink(e.venue, VENUE_URL[e.venue], "See " + e.venue + "’s own events list"));
         venue.style.setProperty('--dot', venueColor(e.venue));
         var a = document.createElement('a');
         a.href = e.url || '#';

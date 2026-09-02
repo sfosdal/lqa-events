@@ -92,18 +92,15 @@
       <path d="M4 6h9M19 6h1M4 12h1M11 12h9M4 18h9M19 18h1"/>
       <circle cx="16" cy="6" r="2.2"/><circle cx="8" cy="12" r="2.2"/><circle cx="16" cy="18" r="2.2"/>
     </svg>
-  </button>
-  <button id="quickMore" class="chip more-chip" type="button" aria-expanded="false">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-    <span id="quickMoreLabel">More</span>
+    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
   </button>
   <button id="clearAll" class="chip reset-chip" type="button" disabled title="Back to the default view">Reset filters</button>
   <button id="copyFilterLink" class="chip" type="button" title="Copy a link that opens with this exact filter">Copy Filter Link</button>
 </nav>
 <div id="quickPanel" class="filter-panel quick-panel">
   <div id="quickList" class="fp-list"><!-- most-used filter rows injected by app.js --></div>
-  <!-- More/Less (in the bar, so it never moves) swaps the quick strip above
-       for these full groups -->
+  <!-- the tab in the bar (above everything that grows, so it never moves)
+       swaps the quick strip above for these full groups -->
   <div id="fullFilters" hidden>
   <div class="fp-cols">
     <div class="fp-group">
