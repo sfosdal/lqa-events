@@ -129,6 +129,8 @@ h1 {
 .reset-chip { margin-bottom: .5rem; }
 .reset-chip:disabled { opacity: .45; cursor: default; }
 .reset-chip:not(:disabled):hover { border-color: var(--ink-soft); }
+#copyFilterLink { margin-bottom: .5rem; }
+#copyFilterLink:hover { border-color: var(--ink-soft); }
 /* the collapsed state: a slice of the panel, spread across the full width
    (#quickList only — the group lists inside #fullFilters stay columns) */
 .quick-panel { padding: .55rem .75rem; }
