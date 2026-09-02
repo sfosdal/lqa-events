@@ -42,7 +42,7 @@
   }
   function teamColor(slug) { return 'var(--tm-' + slug + ')'; }
   // Each venue's own events listing — not a ticket vendor. An event's own
-  // link (the agenda row, badges, etc.) still goes to wherever tickets are
+  // link (the agenda row's title) still goes to wherever tickets are
   // sold; this is for the venue name in the panel and the agenda. A venue
   // with no entry here stays plain text.
   var VENUE_URL = {
@@ -215,35 +215,6 @@
   function filtered(list) {
     return list.filter(function (e) {
       return LQAFilter.matchesFilter(e, { venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
-    });
-  }
-
-  // Estimated end: the source's real end time, else start + 3h. '' if unknown
-  // or the estimate crosses midnight.
-  function endEstimate(e) {
-    if (e.end) return e.end;
-    if (!e.time) return '';
-    var h = Number(e.time.split(':')[0]) + 3;
-    return h >= 24 ? '' : pad(h) + ':' + e.time.split(':')[1] + ':00';
-  }
-  function badgesFor(e) {
-    var out = [];
-    if (e.age21) out.push(['b-21', '21+', 'Door-restricted, no minors']);
-    var end = endEstimate(e);
-    if (end && end <= '16:00:00') out.push(['b-day', 'day', 'Wraps up by 4 p.m.']);
-    if (e.soldOut) out.push(['b-sold', 'sold out', 'Full house guaranteed']);
-    if (e.free) out.push(['b-free', 'free', 'Open to walk-ups']);
-    if (e.movie) out.push(['b-movie', 'movie', 'A film screening, not a live event']);
-    if (e.dateTbd) out.push(['b-tbd', 'date tbd', 'Date not final — the league may still move this game']);
-    return out;
-  }
-  function appendBadges(el, e) {
-    badgesFor(e).forEach(function (b) {
-      var s = document.createElement('span');
-      s.className = 'badge ' + b[0];
-      s.textContent = b[1];
-      s.title = b[2];
-      el.appendChild(s);
     });
   }
 
@@ -804,10 +775,6 @@
         }
         titleLine.appendChild(a);
         body.appendChild(venue); body.appendChild(titleLine);
-        var tags = document.createElement('div');
-        tags.className = 'ev-tags';
-        appendBadges(tags, e);
-        if (tags.children.length) body.appendChild(tags);
         row.appendChild(time); row.appendChild(body);
         wrap.appendChild(row);
       });

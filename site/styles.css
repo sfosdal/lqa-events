@@ -257,8 +257,7 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
 .fp-name a { text-decoration-color: var(--line); }
 .fp-name a:hover { text-decoration-color: var(--gold); }
 .fp-name .dot { flex: none; width: .65rem; height: .65rem; border-radius: 50%; background: var(--dot, var(--ink-soft)); }
-.fp-row:has(input:not(:checked)) .fp-name,
-.fp-row:has(input:not(:checked)) .badge { opacity: .5; }
+.fp-row:has(input:not(:checked)) .fp-name { opacity: .5; }
 .fp-only {
   font: 700 .72rem/1 var(--body); color: var(--v-seactr); background: none; border: 0;
   padding: .15em .35em; cursor: pointer; visibility: hidden;
@@ -378,7 +377,6 @@ button.cal-day:hover { background: var(--gold-soft); }
 /* each row carries a whisper of its venue's color (set inline by app.js) */
 .ev { display: flex; gap: .8rem; align-items: flex-start; padding: .45em .55em; border-radius: 6px; position: relative; overflow: hidden; }
 .ev-body { display: flex; flex-direction: column; align-items: flex-start; gap: .18rem; min-width: 0; }
-.ev-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
 .ev-title { display: flex; align-items: center; gap: .45rem; min-width: 0; }
 /* home games carry the team crest as a monochrome watermark at the row's
    right — grayscale in light mode, inverted to white-on-dark in dark mode */
@@ -433,22 +431,6 @@ button.cal-day:hover { background: var(--gold-soft); }
 .pager .pg-arrow:not(:disabled):hover { border-color: var(--ink-soft); }
 .pg-gap { color: var(--ink-soft); }
 
-/* ---- event badges + legend ---- */
-.badge {
-  font-family: var(--mono); font-size: .62rem; text-transform: uppercase;
-  letter-spacing: .08em; border-radius: 3px; padding: .18em .5em;
-  border: 1px solid currentColor; align-self: center; white-space: nowrap;
-}
-.b-21 { color: var(--v-vera); }
-.b-day { color: var(--gold); }
-.b-tbd { color: var(--ink-soft); border-style: dashed; }
-.b-movie { color: var(--v-siff); }
-.b-sold { color: var(--mist); background: var(--ink); border-color: var(--ink); }
-.b-free { color: var(--v-cornish); }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .b-sold { color: var(--sky); background: var(--ink); border-color: var(--ink); }
-}
-:root[data-theme="dark"] .b-sold { color: var(--sky); background: var(--ink); border-color: var(--ink); }
 .pop-note { color: var(--ink-soft); font-size: .85em; text-align: justify; }
 .pop-filter { display: flex; gap: .5em; align-items: center; cursor: pointer; font-weight: 600; }
 .pop-filter input { accent-color: var(--gold); }

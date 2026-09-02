@@ -36,7 +36,6 @@
         '.lqa-ev-title{font-weight:600;text-decoration:none;color:inherit}' +
         '.lqa-ev-title:hover{text-decoration:underline}' +
         '.lqa-ev-venue{font-size:.8em;text-transform:uppercase;letter-spacing:.05em;opacity:.6}' +
-        '.lqa-ev-badge{font-size:.7em;text-transform:uppercase;letter-spacing:.07em;border:1px solid currentColor;border-radius:3px;padding:.1em .45em;opacity:.8}' +
         '.lqa-ev-more{font-size:.85em;opacity:.75;padding-top:.5em}' +
         '.lqa-ev-more a{color:inherit}';
       document.head.appendChild(css);
@@ -71,18 +70,6 @@
           v.className = 'lqa-ev-venue';
           v.textContent = e.venue;
           li.appendChild(d); li.appendChild(a); li.appendChild(v);
-          var tags = [];
-          if (e.age21) tags.push('21+');
-          if (e.soldOut) tags.push('sold out');
-          if (e.free) tags.push('free');
-          if (e.movie) tags.push('movie');
-          if (e.dateTbd) tags.push('date tbd');
-          tags.forEach(function (t) {
-            var b = document.createElement('span');
-            b.className = 'lqa-ev-badge';
-            b.textContent = t;
-            li.appendChild(b);
-          });
           ul.appendChild(li);
         });
         var more = document.createElement('div');
