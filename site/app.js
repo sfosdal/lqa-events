@@ -13,13 +13,19 @@
     'The Vera Project': '--v-vera',
     'SIFF Cinema Uptown': '--v-siff',
     'On the Boards': '--v-otb',
+    'T-Mobile Park': '--v-tmobile',
+    'Lumen Field': '--v-lumen',
   };
+  // Unexpected venues draw from the same cool, web-safe family as the
+  // curated ones, hashed from the name so the pick is stable day to day.
+  var VENUE_FALLBACK = ['#3399cc', '#6666ff', '#33cccc', '#9966cc', '#6699ff', '#cc66ff', '#0099cc', '#3366ff'];
   function venueColor(v) {
     if (VENUE_VARS[v]) return 'var(' + VENUE_VARS[v] + ')';
     var h = 0;
     for (var i = 0; i < v.length; i++) h = (h * 31 + v.charCodeAt(i)) % 360;
-    return 'hsl(' + h + ', 42%, 52%)';
+    return VENUE_FALLBACK[h % VENUE_FALLBACK.length];
   }
+  function teamColor(slug) { return 'var(--tm-' + slug + ')'; }
   // Each venue's own events listing — not a ticket vendor. An event's own
   // link (the agenda row, badges, etc.) still goes to wherever tickets are
   // sold; this is only for the filter panel's venue name. Venues the campus
@@ -30,7 +36,7 @@
     'McCaw Hall': 'https://www.mccawhall.com/events',
     'Seattle Center': 'https://www.seattlecenter.com/events/event-calendar',
     'On the Boards': 'https://ontheboards.org/events',
-    'T-Mobile Park': 'https://www.mlb.com/mariners/schedule',
+    'T-Mobile Park': 'https://www.mlb.com/mariners/ballpark/events', // the ballpark's own list — concerts too, not just Mariners games
     'Lumen Field': 'https://www.lumenfield.com/events',
     'SIFF Cinema Uptown': 'https://www.siff.net/calendar',
   };
@@ -327,6 +333,10 @@
     TEAMS.forEach(function (t) {
       var name = document.createElement('span');
       name.className = 'fp-name';
+      var dot = document.createElement('i');
+      dot.className = 'dot';
+      dot.style.setProperty('--dot', teamColor(t.slug));
+      name.appendChild(dot);
       name.appendChild(extLink(t.label, t.schedule, t.label + ' schedule'));
       var n = upcoming.filter(function (e) { return t.re.test(e.title || ''); }).length;
       pt.appendChild(filterRow('team', t.slug, name, n, t.label + ' home games'));
@@ -718,7 +728,7 @@
         var titleLine = document.createElement('span');
         titleLine.className = 'ev-title';
         var team = teamFor(e.title);
-        if (team) {
+        if (team && team.logo) {
           var logo = document.createElement('img');
           logo.className = 'team-mark';
           logo.src = team.logo;

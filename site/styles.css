@@ -8,20 +8,34 @@
   --line: #c9d2da;
   --gold: #e8791d;       /* Space Needle "Galaxy Gold" */
   --gold-soft: #fbe9d8;
+  /* Color coding is web-safe (each channel 00/33/66/99/CC/FF) and each
+     group keeps to its own family so a dot or stripe reads as what it is:
+     venues are cool (blue → violet → teal), event types are warm (yellow →
+     orange → red → pink), teams are sea-and-field greens/teals. */
   /* venue hues (chips, grid ticks, agenda tags) */
-  --v-cpa: #0f7c7c;
-  --v-mccaw: #7c3a64;
-  --v-seactr: #2b5fa3;
-  --v-cornish: #3f7d3a;
-  --v-vera: #b3382e;
-  --v-siff: #5b4ea3;
-  --v-otb: #b93b6e;
+  --v-cpa: #0099cc;
+  --v-mccaw: #cc3399;
+  --v-seactr: #3366cc;
+  --v-cornish: #339999;
+  --v-vera: #6633cc;
+  --v-siff: #9966cc;
+  --v-otb: #6699cc;
+  --v-tmobile: #0066cc;
+  --v-lumen: #333399;
   /* event-type hues (filter dots, agenda right edge) */
-  --t-concert: #c26a12;
-  --t-sports: #1f8a5a;
-  --t-arts: #8a4ec2;
-  --t-movie: #607086;
-  --t-community: #3b9ec2;
+  --t-concert: #ff6600;
+  --t-sports: #cc9900;
+  --t-arts: #cc0066;
+  --t-movie: #996633;
+  --t-community: #cc0000;
+  /* team hues (Home games dots) */
+  --tm-mariners: #006666;
+  --tm-storm: #336600;
+  --tm-seahawks: #66cc00;
+  --tm-reign: #009966;
+  --tm-sounders: #669900;
+  --tm-kraken: #669999;
+  --tm-torrent: #33cc99;
   --display: "Big Shoulders", "Arial Narrow", sans-serif;
   --body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -30,10 +44,13 @@
   :root {
     --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2;
     --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
-    --v-cpa: #35b5b5; --v-mccaw: #c674a8; --v-seactr: #6f9be0;
-    --v-cornish: #6fbf68; --v-vera: #e8756b; --v-siff: #9a8ee0; --v-otb: #e07ba4;
-    --t-concert: #f0954a; --t-sports: #4dc48e; --t-arts: #b98ae8;
-    --t-movie: #8fa3bd; --t-community: #62c3e8;
+    --v-cpa: #33ccff; --v-mccaw: #ff66cc; --v-seactr: #6699ff;
+    --v-cornish: #33cccc; --v-vera: #9966ff; --v-siff: #cc99ff; --v-otb: #99ccff;
+    --v-tmobile: #3399ff; --v-lumen: #9999ff;
+    --t-concert: #ff9933; --t-sports: #ffcc33; --t-arts: #ff66cc;
+    --t-movie: #cc9966; --t-community: #ff3333;
+    --tm-mariners: #33cccc; --tm-storm: #66cc66; --tm-seahawks: #99ff33;
+    --tm-reign: #33ff99; --tm-sounders: #99cc33; --tm-kraken: #99cccc; --tm-torrent: #66ffcc;
   }
 }
 
@@ -326,7 +343,7 @@ button.cal-day:hover { background: var(--gold-soft); }
 .ev a:hover { text-decoration-color: var(--gold); }
 .ev .time { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); min-width: 5.5rem; padding-top: .15em; }
 .ev .venue {
-  font-family: var(--mono); font-size: .72rem; text-transform: uppercase;
+  font-family: var(--mono); font-size: 1rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .06em; color: var(--dot, var(--ink-soft));
 }
 /* the venue link keeps the label's look — .ev a above is for the title */

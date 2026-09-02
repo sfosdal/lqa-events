@@ -25,6 +25,9 @@
     { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/15363.png', schedule: 'https://www.reignfc.com/schedule' },
     { slug: 'sounders', label: 'Sounders', re: /sounders/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/9726.png', schedule: 'https://www.soundersfc.com/schedule/' },
     { slug: 'kraken', label: 'Kraken', re: /kraken/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/sea.png', schedule: 'https://www.nhl.com/kraken/schedule' },
+    // PWHL, first season 2025-26. No public crest image to hotlink yet, and
+    // the league site has no per-team schedule URL — the team page holds it.
+    { slug: 'torrent', label: 'Torrent', re: /seattle torrent/i, venue: 'Climate Pledge Arena', schedule: 'https://www.thepwhl.com/en/teams/seattle-torrent' },
   ];
   var TEAM_BY_SLUG = {};
   TEAMS.forEach(function (t) { TEAM_BY_SLUG[t.slug] = t; });
