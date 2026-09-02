@@ -431,6 +431,13 @@ button.cal-day:hover { background: var(--gold-soft); }
 .pager .pg-arrow:not(:disabled):hover { border-color: var(--ink-soft); }
 .pg-gap { color: var(--ink-soft); }
 
+/* ---- the "date tbd" badge ---- */
+.badge {
+  font-family: var(--mono); font-size: .62rem; text-transform: uppercase;
+  letter-spacing: .08em; border-radius: 3px; padding: .18em .5em;
+  border: 1px solid currentColor; align-self: center; white-space: nowrap;
+}
+.b-tbd { color: var(--ink-soft); border-style: dashed; }
 .pop-note { color: var(--ink-soft); font-size: .85em; text-align: justify; }
 .pop-filter { display: flex; gap: .5em; align-items: center; cursor: pointer; font-weight: 600; }
 .pop-filter input { accent-color: var(--gold); }

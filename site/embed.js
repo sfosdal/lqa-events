@@ -36,6 +36,7 @@
         '.lqa-ev-title{font-weight:600;text-decoration:none;color:inherit}' +
         '.lqa-ev-title:hover{text-decoration:underline}' +
         '.lqa-ev-venue{font-size:.8em;text-transform:uppercase;letter-spacing:.05em;opacity:.6}' +
+        '.lqa-ev-badge{font-size:.7em;text-transform:uppercase;letter-spacing:.07em;border:1px dashed currentColor;border-radius:3px;padding:.1em .45em;opacity:.8}' +
         '.lqa-ev-more{font-size:.85em;opacity:.75;padding-top:.5em}' +
         '.lqa-ev-more a{color:inherit}';
       document.head.appendChild(css);
@@ -70,6 +71,12 @@
           v.className = 'lqa-ev-venue';
           v.textContent = e.venue;
           li.appendChild(d); li.appendChild(a); li.appendChild(v);
+          if (e.dateTbd) {
+            var b = document.createElement('span');
+            b.className = 'lqa-ev-badge';
+            b.textContent = 'date tbd';
+            li.appendChild(b);
+          }
           ul.appendChild(li);
         });
         var more = document.createElement('div');

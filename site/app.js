@@ -775,6 +775,14 @@
         }
         titleLine.appendChild(a);
         body.appendChild(venue); body.appendChild(titleLine);
+        // the one status worth flagging: a game the league may still move
+        if (e.dateTbd) {
+          var tbd = document.createElement('span');
+          tbd.className = 'badge b-tbd';
+          tbd.textContent = 'date tbd';
+          tbd.title = 'Date not final — the league may still move this game';
+          titleLine.appendChild(tbd);
+        }
         row.appendChild(time); row.appendChild(body);
         wrap.appendChild(row);
       });
