@@ -28,15 +28,15 @@
   function teamColor(slug) { return 'var(--tm-' + slug + ')'; }
   // Each venue's own events listing — not a ticket vendor. An event's own
   // link (the agenda row, badges, etc.) still goes to wherever tickets are
-  // sold; this is only for the filter panel's venue name. Venues the campus
-  // sweep picks up without a dedicated source (e.g. Cornish Playhouse) have
-  // no entry here and stay plain text.
+  // sold; this is for the venue name in the panel and the agenda. A venue
+  // with no entry here stays plain text.
   var VENUE_URL = {
     'Climate Pledge Arena': 'https://climatepledgearena.com/events/',
     'McCaw Hall': 'https://www.mccawhall.com/events',
     'Seattle Center': 'https://www.seattlecenter.com/events/event-calendar',
     'On the Boards': 'https://ontheboards.org/events',
     'The Vera Project': 'https://theveraproject.org/events/',
+    'Cornish Playhouse': 'https://www.cornish.edu/cornish-college-event-calendar/',
     'T-Mobile Park': 'https://www.mlb.com/mariners/ballpark/events', // the ballpark's own list — concerts too, not just Mariners games
     'Lumen Field': 'https://www.lumenfield.com/events',
     'SIFF Cinema Uptown': 'https://www.siff.net/calendar',
