@@ -71,10 +71,14 @@
 
   // Compact filter code <-> filter state, for share links (?f=CODE).
   // REGISTRY is every filterable key in a fixed order; the code is the set of
-  // EXCLUDED entries as a bitmask written in base 36 — a few characters, and
-  // "0" means everything shown. Append-only: adding an entry adds a bit and
-  // every existing code keeps meaning what it meant. A venue the feed turns
-  // up that isn't listed here can't be encoded and drops out of the link.
+  // EXCLUDED entries as a bitmask written in base 36, zero-padded to
+  // CODE_LENGTH characters ("000000" means everything shown). Append-only:
+  // adding an entry adds a bit and every existing code keeps meaning what it
+  // meant. Six base-36 digits hold 31 bits, so the registry can grow to 31
+  // entries before CODE_LENGTH needs a bump (old, shorter codes still parse).
+  // A venue the feed turns up that isn't listed here can't be encoded and
+  // drops out of the link.
+  var CODE_LENGTH = 6;
   var REGISTRY = [
     ['venue', 'Climate Pledge Arena'], ['venue', 'McCaw Hall'], ['venue', 'Seattle Center'],
     ['venue', 'Cornish Playhouse'], ['venue', 'The Vera Project'], ['venue', 'SIFF Cinema Uptown'],
@@ -90,7 +94,9 @@
       var map = mode[GROUP_MAP[entry[0]]] || {};
       if (map[entry[1]] === 'ex') mask += Math.pow(2, i);
     });
-    return mask.toString(36);
+    var code = mask.toString(36);
+    while (code.length < CODE_LENGTH) code = '0' + code;
+    return code;
   }
   function parseFilterCode(code) {
     var mode = { venueMode: {}, badgeMode: {}, teamMode: {} };

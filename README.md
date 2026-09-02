@@ -29,10 +29,11 @@ Options via data-attributes: `data-max`, `data-venue`, `data-target`,
 ## Filter links
 
 The "Copy Filter Link" button (next to Reset Filters) copies a URL that
-reproduces the current filter panel state as a short code — e.g. `?f=35s`
-(the default view, movies hidden). The code is the set of excluded
-venues/types/teams as a base-36 bitmask over a fixed, append-only registry
-in `filter.js`, so links keep working as venues and teams are added.
+reproduces the current filter panel state as a short code — e.g.
+`?f=00035s` (the default view, movies hidden). The code is the set of
+excluded venues/types/teams as a base-36 bitmask over a fixed, append-only
+registry in `filter.js`, zero-padded to six digits, so links keep working
+as venues and teams are added and every code is the same length.
 Opening one loads with those exclusions instead of your saved local prefs.
 `filter.js` exposes `LQAFilter.parseFilterCode`/`encodeFilterCode`/
 `matchesFilter` so another site can apply the same code to its own copy of
