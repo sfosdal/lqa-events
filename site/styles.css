@@ -100,7 +100,7 @@ h1 {
 
 .masthead-actions {
   position: relative; text-align: right; align-self: stretch;
-  display: flex; flex-direction: column; justify-content: space-between;
+  display: flex; flex-direction: column;
   align-items: flex-end;
 }
 .updated {
@@ -108,11 +108,17 @@ h1 {
   text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
   margin: 0 0 .5rem; min-height: 1em;
 }
-.btn-gold {
-  font: 600 1rem/1 var(--body); color: #fff; background: var(--gold);
-  border: 0; border-radius: 6px; padding: .8em 1.2em; cursor: pointer;
+/* The subscribe pill: solid ink with the page background as its text — a
+   dark pill in light mode, a light one in dark — gold on hover. Auto
+   vertical margins center it in the column below the Updated stamp. */
+.btn-cal {
+  display: inline-flex; align-items: center; gap: .55em; margin: auto 0;
+  font: 600 1rem/1 var(--body); color: var(--sky); background: var(--ink);
+  border: 0; border-radius: 999px; padding: .85em 1.4em .85em 1.15em; cursor: pointer;
+  transition: background .15s, color .15s;
 }
-.btn-gold:hover { filter: brightness(1.07); }
+.btn-cal svg { width: 1.15em; height: 1.15em; flex: none; }
+.btn-cal:hover { background: var(--gold); color: #1b2733; }
 .pop {
   position: absolute; right: 0; top: calc(100% + .5rem); z-index: 10;
   width: min(24rem, 88vw); background: var(--mist); border: 1px solid var(--line);
@@ -481,7 +487,7 @@ footer p { color: var(--ink-soft); font-size: .85rem; margin: .4rem auto 0; max-
     flex-direction: column; align-items: stretch; gap: .2rem;
   }
   .updated { font-size: 1.05rem; margin: 0 0 .4rem; }
-  .btn-gold { width: 100%; }
+  .btn-cal { width: 100%; justify-content: center; margin: 0; }
   .pop { left: 0; right: 0; width: auto; }
   .section-title { font-size: 1.6rem; margin-top: 1.8rem; }
 
