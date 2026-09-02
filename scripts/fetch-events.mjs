@@ -12,6 +12,7 @@ import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
 import { parseScCards, parseScDetailDate, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents } from './sources.mjs';
 import { mergeWithArchive } from './merge.mjs';
+import { applySchedules } from './schedules.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
 
 const JSON_OUT = new URL('../site/events.json', import.meta.url);

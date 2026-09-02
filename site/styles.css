@@ -545,8 +545,9 @@ body.sheet-open { overflow: hidden; }
   .btn-cal { width: 100%; justify-content: center; margin: 0; }
   /* the bar can't wrap (the tab must stay joined to the card below), so on a
      phone the copy button is icon-only to keep the row inside the screen */
-  #copyFilterLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  #copyFilterLink { padding: .5em .7em; }
+  #copyFilterLabel, #clearAll span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  #copyFilterLink, #clearAll { padding: .5em .7em; }
+  #copyFilterLink svg, #clearAll svg { width: 1.1rem; height: 1.1rem; }
   .pop { left: 0; right: 0; width: auto; }
   .section-title { font-size: 1.6rem; margin-top: 1.8rem; }
 

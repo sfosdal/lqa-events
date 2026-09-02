@@ -655,14 +655,14 @@
   });
 
   // ---- phones: collapsible mini calendar ----
-  // Stacked above the list on small screens, it's a full screen of grid
-  // before the first event; it starts collapsed there and remembers. On the
-  // wide layout it's always open and the toggle is hidden.
+  // Stacked above the list on small screens, it can be folded away behind
+  // the toggle; it starts open and remembers a fold. On the wide layout it's
+  // always open and the toggle is hidden.
   var STACKED = '(max-width: 760px)';
   function syncCal() {
     var stacked = matchMedia(STACKED).matches;
     var open = true;
-    if (stacked) { try { open = localStorage.getItem('lqa-cal') === 'open'; } catch (e) { open = false; } }
+    if (stacked) { try { open = localStorage.getItem('lqa-cal') !== 'closed'; } catch (e) { open = true; } }
     $('calBox').hidden = !open;
     $('calToggle').setAttribute('aria-expanded', String(open));
     $('calToggle').querySelector('span').textContent = open ? 'Hide calendar' : 'Show calendar';
