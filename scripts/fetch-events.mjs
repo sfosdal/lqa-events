@@ -196,7 +196,7 @@ async function onTheBoards() {
 
 // Dedicated per-venue sources run first (better times and ticket links)...
 const sources = [
-  () => ticketmasterVenue({ keyword: 'Climate Pledge Arena', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/' }),
+  () => ticketmasterVenue({ keyword: 'Climate Pledge Arena', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/', exclude: /arena tours?|all access pass/i }),
   // The SoDo stadiums: not Seattle Center, but big enough to move the whole city.
   () => ticketmasterVenue({ keyword: 'T-Mobile Park', venueMatch: 't-mobile park', label: 'T-Mobile Park', fallbackUrl: 'https://www.mlb.com/mariners', exclude: /ballpark tour|flex membership/i }),
   () => ticketmasterVenue({ keyword: 'Lumen Field', venueMatch: 'lumen field', label: 'Lumen Field', fallbackUrl: 'https://www.lumenfield.com/events', exclude: /stadium tour|notification list/i }),

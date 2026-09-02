@@ -102,7 +102,7 @@
   // Kayak-style checkboxes: each filter map holds name → 'ex' for unchecked
   // (hidden); absent = checked (shown). Everything starts checked except SIFF
   // movies — see applyDefaultFilters.
-  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false, pastFrom: null, page: 0, pageByDate: {} };
+  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false, pastFrom: null, page: 0, pageByDate: {}, series: [], seriesByDate: {}, seriesLanes: 0 };
 
   function modeKeys(map, mode) {
     return Object.keys(map).filter(function (k) { return map[k] === mode; });
@@ -132,12 +132,138 @@
   }
 
   // ---- data ----
+  // ---- series: the same event on nearby days — a homestand, a two-night
+  // stand, an opera run. Same venue + same title, occurrences within a week
+  // of each other. Movies sit this out: SIFF's daily showtimes would make
+  // everything a series. Each series gets a lane (interval coloring over its
+  // date range) shared by the gutter graph and the calendar bars. ----
+  function seriesKey(e) { return e.venue + '|' + String(e.title || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function seriesLabel(s) {
+    var f = function (d) { return parseDate(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+    return s.events[0].title + ' — ' + s.events.length + ' ' + (eventType(s.events[0]) === 'sports' ? 'games' : 'nights') + ' · ' + f(s.start) + ' – ' + f(s.end);
+  }
+  function findSeries(list) {
+    var groups = {};
+    list.forEach(function (e) {
+      delete e.series;
+      if (e.movie) return;
+      var k = seriesKey(e);
+      (groups[k] = groups[k] || []).push(e);
+    });
+    var all = [];
+    var flush = function (run) {
+      if (run.length < 2) return;
+      var s = { venue: run[0].venue, start: run[0].date, end: run[run.length - 1].date, events: run };
+      run.forEach(function (e, i) { e.series = { s: s, n: i + 1, total: run.length }; });
+      all.push(s);
+    };
+    Object.keys(groups).forEach(function (k) {
+      var evs = groups[k].sort(function (a, b) { return (a.date + (a.time || '')) < (b.date + (b.time || '')) ? -1 : 1; });
+      var run = [evs[0]];
+      for (var i = 1; i < evs.length; i++) {
+        var gap = Math.round((parseDate(evs[i].date) - parseDate(evs[i - 1].date)) / 86400e3);
+        if (gap <= 7) run.push(evs[i]); else { flush(run); run = [evs[i]]; }
+      }
+      flush(run);
+    });
+    all.sort(function (a, b) { return a.start < b.start ? -1 : a.start > b.start ? 1 : 0; });
+    var laneEnd = [];
+    var byDate = {};
+    all.forEach(function (s, i) {
+      s.id = i;
+      for (var l = 0; ; l++) {
+        if (laneEnd[l] == null || laneEnd[l] < s.start) { laneEnd[l] = s.end; s.lane = l; break; }
+      }
+      var d = parseDate(s.start), end = parseDate(s.end);
+      while (d <= end) { var key = ymd(d); (byDate[key] = byDate[key] || []).push(s); d.setDate(d.getDate() + 1); }
+    });
+    state.series = all;
+    state.seriesByDate = byDate;
+    state.seriesLanes = laneEnd.length;
+    document.querySelector('.agenda-layout').classList.toggle('has-series', all.length > 0);
+  }
+  // series with at least one event the current filter shows
+  function visibleSeries() {
+    return state.series.filter(function (s) { return filtered(s.events).length > 0; });
+  }
+  // The graph: a vertical line per series in the gutter, git-client style —
+  // a dot on each of its cards, the line running off the page edge when the
+  // series continues on another page. Drawn from the rendered rows, so it
+  // follows whatever the current page and filters show.
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  function drawSeriesGraph() {
+    var ol = $('agenda');
+    var old = ol.querySelector('.series-graph');
+    if (old) old.remove();
+    var layout = document.querySelector('.agenda-layout');
+    if (!state.series.length || !matchMedia('(min-width: 641px)').matches) { layout.style.removeProperty('--gutter'); return; }
+    var rows = Array.from(ol.querySelectorAll('.ev[data-series]'));
+    var de = ol.querySelector('.day-events');
+    if (!rows.length || !de) { layout.style.setProperty('--gutter', '0.9rem'); return; }
+    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var dates = Array.from(ol.querySelectorAll('.day-row')).map(function (li) { return li.dataset.date; });
+    var first = dates[0], last = dates[dates.length - 1];
+    // Lanes are assigned on row order (not pixels) so the gutter can be
+    // sized for this page before anything is measured: the first free lane
+    // whose last series ended above this one.
+    var byId = {};
+    rows.forEach(function (row, i) { (byId[row.dataset.series] = byId[row.dataset.series] || { rows: [], idx: [] }).rows.push(row); byId[row.dataset.series].idx.push(i); });
+    var items = Object.keys(byId).map(function (id) {
+      var s = state.series[Number(id)];
+      var idx = byId[id].idx;
+      return { s: s, rows: byId[id].rows, before: s.start < first, after: s.end > last, from: s.start < first ? -1 : idx[0], to: s.end > last ? rows.length : idx[idx.length - 1] };
+    }).sort(function (a, b) { return a.from - b.from; });
+    var laneEnd = [];
+    items.forEach(function (it) {
+      for (var l = 0; ; l++) {
+        if (laneEnd[l] == null || laneEnd[l] < it.from) { laneEnd[l] = it.to; it.lane = l; break; }
+      }
+    });
+    layout.style.setProperty('--gutter', (laneEnd.length * 0.9 + 0.3) + 'rem');
+    var olBox = ol.getBoundingClientRect(); // measured after the gutter is set
+    items.forEach(function (it) {
+      it.ys = it.rows.map(function (row) { var r = row.getBoundingClientRect(); return r.top + r.height / 2 - olBox.top; });
+      it.top = it.before ? 0 : it.ys[0];
+      it.bottom = it.after ? olBox.height : it.ys[it.ys.length - 1];
+    });
+    var laneW = 0.9 * rem;
+    var gx = de.getBoundingClientRect().right - olBox.left + 1 * rem; // the gutter starts past the cards and the grid gap
+    var svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'series-graph');
+    svg.setAttribute('width', olBox.width);
+    svg.setAttribute('height', olBox.height);
+    svg.setAttribute('aria-hidden', 'true');
+    items.forEach(function (it) {
+      var x = gx + it.lane * laneW + laneW / 2;
+      var color = venueColor(it.s.venue);
+      var line = document.createElementNS(SVG_NS, 'line');
+      line.setAttribute('class', 'sg-line');
+      line.setAttribute('x1', x); line.setAttribute('x2', x);
+      line.setAttribute('y1', it.top); line.setAttribute('y2', it.bottom);
+      line.style.stroke = color;
+      svg.appendChild(line);
+      it.ys.forEach(function (y) {
+        var dot = document.createElementNS(SVG_NS, 'circle');
+        dot.setAttribute('class', 'sg-dot');
+        dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', 4);
+        dot.style.fill = color;
+        var tip = document.createElementNS(SVG_NS, 'title');
+        tip.textContent = seriesLabel(it.s);
+        dot.appendChild(tip);
+        svg.appendChild(dot);
+      });
+    });
+    ol.appendChild(svg);
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { drawSeriesGraph(); });
+
   function load() {
     fetch('events.json', { cache: 'no-store' })
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (data) {
         var list = Array.isArray(data) ? data : (data.events || []);
         state.events = list;
+        findSeries(list);
         state.byDate = {};
         var vs = {};
         list.forEach(function (e) {
@@ -562,6 +688,15 @@
   function renderCal() {
     var m = state.month;
     if (!m) return;
+    // calendar bars: lanes over the series the filter leaves visible, so
+    // hiding a venue also clears its bars and the rows stay as few as possible
+    var calLane = {}, calEnd = [];
+    visibleSeries().forEach(function (s) {
+      for (var l = 0; ; l++) {
+        if (calEnd[l] == null || calEnd[l] < s.start) { calEnd[l] = s.end; calLane[s.id] = l; break; }
+      }
+    });
+    var calRows = Math.max(1, calEnd.length);
     var bounds = monthBounds();
     var next = new Date(m.getFullYear(), m.getMonth() + 1, 1);
     $('calPrev').disabled = !bounds || sameMonth(m, new Date(bounds.min.getFullYear(), bounds.min.getMonth(), 1));
@@ -626,6 +761,23 @@
         });
         cell.appendChild(ticks);
         cell.dataset.date = key;
+      }
+      // a bar per series running through this day, in the series' lane, so
+      // a homestand reads as one stroke across the week (off-days included)
+      var active = (state.seriesByDate[key] || []).filter(function (s) { return calLane[s.id] != null; });
+      if (active.length) {
+        var bars = document.createElement('span');
+        bars.className = 'sbars';
+        bars.style.setProperty('--rows', calRows);
+        active.forEach(function (s) {
+          var b = document.createElement('i');
+          b.className = 'sbar' + (s.start === key ? ' is-start' : '') + (s.end === key ? ' is-end' : '');
+          b.style.setProperty('--dot', venueColor(s.venue));
+          b.style.gridRow = String(calLane[s.id] + 1);
+          b.title = seriesLabel(s);
+          bars.appendChild(b);
+        });
+        cell.appendChild(bars);
       }
       grid.appendChild(cell);
     }
@@ -765,6 +917,15 @@
         var time = document.createElement('span');
         time.className = 'time';
         time.textContent = fmtTime(e.time);
+        if (e.series) {
+          // "2 of 4" under the time; the gutter graph picks the row up by id
+          var sn = document.createElement('span');
+          sn.className = 'series-n';
+          sn.textContent = e.series.n + ' of ' + e.series.total;
+          sn.title = seriesLabel(e.series.s);
+          time.appendChild(sn);
+          row.dataset.series = e.series.s.id;
+        }
         // time keeps its own column; everything else stacks left-aligned:
         // venue, then title, then tags
         var body = document.createElement('div');
@@ -812,6 +973,7 @@
       ol.appendChild(li);
     }
     renderPager(pages);
+    drawSeriesGraph();
   }
 
   // ---- pager: ‹ 1 2 3 › under the list, ellipsized when the year runs long ----
@@ -827,7 +989,8 @@
   function pagerSlots(nav) {
     if (!nav.classList.contains('pager--wide') || !matchMedia('(min-width: 641px)').matches) return 7;
     var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    var width = $('agenda').clientWidth - 6.2 * rem; // the cards' width — see .pager--wide
+    var de = $('agenda').querySelector('.day-events');
+    var width = de ? de.clientWidth : $('agenda').clientWidth - 6.2 * rem; // the cards' width — see .pager--wide
     var slot = 2 * rem + 0.4 * rem;                  // a 2rem button plus the gap
     var arrows = 2 * (2.4 * rem + 0.4 * rem);
     return Math.max(7, Math.floor((width - arrows) / slot));
@@ -914,7 +1077,7 @@
   var resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () { if (lastPages.length) renderPager(lastPages); }, 150);
+    resizeTimer = setTimeout(function () { if (lastPages.length) renderPager(lastPages); drawSeriesGraph(); }, 150);
   });
 
   // ---- subscribe popover ----
