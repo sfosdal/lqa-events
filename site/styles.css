@@ -336,6 +336,10 @@ button.cal-day:hover { background: var(--gold-soft); }
 .cal-day.mo-l { border-left: 2px solid var(--ink-soft); }
 .ticks { display: flex; flex-wrap: wrap; gap: 2px; margin-top: .2rem; }
 .ticks i { width: .28rem; height: .28rem; border-radius: 1px; background: var(--dot, var(--ink-soft)); }
+/* past days go grey: the number in the soft ink, the venue ticks washed
+   out — still tinted enough to tell venues apart, just clearly behind us */
+.cal-day.is-past { color: var(--ink-soft); }
+.cal-day.is-past .ticks i { filter: saturate(.4); opacity: .6; }
 
 /* ---- agenda ---- */
 .section-title {

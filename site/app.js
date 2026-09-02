@@ -607,6 +607,7 @@
       // only spill days outside the two shown months go faint
       if (ym < loYm || ym > loYm + 1) cell.className += ' is-out';
       if (key === today) cell.className += ' is-today';
+      if (key < today) cell.className += ' is-past';
       // Month differentiation: the card's own border frames the whole
       // calendar (it follows the rounded corners); cells only draw the
       // interior month-boundary segments, so each region still reads as
