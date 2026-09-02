@@ -675,6 +675,18 @@
   syncCal();
   window.addEventListener('resize', syncCal);
 
+  // ---- the filter bar folds Reset / Copy to icons only when it must ----
+  // Measured with the labels shown: if the row would overflow its box, the
+  // labels go (see .filterbar.is-tight). Re-checked on resize.
+  function fitFilterBar() {
+    var bar = document.querySelector('.filterbar');
+    bar.classList.remove('is-tight');
+    if (bar.scrollWidth > bar.clientWidth + 1) bar.classList.add('is-tight');
+  }
+  fitFilterBar();
+  window.addEventListener('resize', fitFilterBar);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitFilterBar);
+
   // ---- phones: the event sheet ----
   // A tap anywhere on a card opens it (capture phase, so it wins over the
   // venue link's own handler); the sheet carries every detail and full-size
