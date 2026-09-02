@@ -48,25 +48,17 @@
     };
   }
 
-  // Local pro teams — uncheck one to hide its home games, matched on the
-  // title no matter what the venue. Mirrors TEAMS in scripts/badges.mjs.
-  // venue = the team's home building, re-checked whenever the team turns on
-  // (a checked team with its stadium hidden would silently show nothing).
-  // logo = ESPN's public team-logo CDN, shown beside the game in the agenda.
-  var TEAMS = [
-    { slug: 'mariners', label: 'Mariners', re: /mariners/i, venue: 'T-Mobile Park', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/sea.png' },
-    { slug: 'storm', label: 'Storm', re: /seattle storm/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/wnba/500/sea.png' },
-    { slug: 'seahawks', label: 'Seahawks', re: /seahawks/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/sea.png' },
-    { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/15363.png' },
-    { slug: 'sounders', label: 'Sounders', re: /sounders/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/9726.png' },
-    { slug: 'kraken', label: 'Kraken', re: /kraken/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/sea.png' },
-  ];
+  // Team roster, event-type classification, venue slugs, and filter
+  // matching are shared with other sites that render a filtered slice of
+  // this feed (see filter.js) — this is a thin alias, not a second copy.
+  var TEAMS = LQAFilter.TEAMS;
+  var TEAM_BY_SLUG = LQAFilter.TEAM_BY_SLUG;
+  var slugify = LQAFilter.slugify;
+  var eventType = LQAFilter.eventType;
   function teamFor(title) {
     for (var i = 0; i < TEAMS.length; i++) if (TEAMS[i].re.test(title || '')) return TEAMS[i];
     return null;
   }
-  var TEAM_BY_SLUG = {};
-  TEAMS.forEach(function (t) { TEAM_BY_SLUG[t.slug] = t; });
 
   // Kayak-style checkboxes: each filter map holds name → 'ex' for unchecked
   // (hidden); absent = checked (shown). Everything starts checked except SIFF
@@ -78,10 +70,6 @@
   }
   function setChecked(map, key, on) {
     if (on) delete map[key]; else map[key] = 'ex';
-  }
-
-  function slugify(s) {
-    return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
 
   var $ = function (id) { return document.getElementById(id); };
@@ -173,21 +161,6 @@
     movie: '--t-movie', community: '--t-community',
   };
   function typeColor(k) { return 'var(' + TYPE_VARS[k] + ')'; }
-  var TYPE_VENUE_DEFAULT = {
-    'Climate Pledge Arena': 'concert', 'The Vera Project': 'concert',
-    'T-Mobile Park': 'concert', 'Lumen Field': 'concert', // non-game stadium bookings are shows
-    'McCaw Hall': 'arts', 'Cornish Playhouse': 'arts', 'On the Boards': 'arts',
-    'Seattle Center': 'community', 'SIFF Cinema Uptown': 'community', // SIFF specials = festival programming
-  };
-  function eventType(e) {
-    var title = e.title || '';
-    if (e.movie) return 'movie';
-    if (TEAMS.some(function (t) { return t.re.test(title); }) || /\bvs\.?\s/i.test(title)) return 'sports';
-    if (/ballet|opera|symphon|orchestra|philharmon|theatre|theater|musical|broadway|shakespeare|comedy|stand-?up|improv|dance|cirque|on ice/i.test(title)) return 'arts';
-    if (/festival|fest[aá]l|\bfair\b|\bexpo\b|market|convention|summit|celebration|ceremony|\bwalk\b|\brun\b|parade/i.test(title)) return 'community';
-    if (/concert|\btour\b|live music|\bdj\b|\blive\b/i.test(title)) return 'concert';
-    return TYPE_VENUE_DEFAULT[e.venue] || 'community';
-  }
   var TYPE_KEYS = {};
   TYPE_LIST.forEach(function (t) { TYPE_KEYS[t.key] = true; });
   // The baseline every visitor starts from (and "Reset filters" returns to):
@@ -198,17 +171,11 @@
     var k = Object.keys(state.badgeMode);
     return k.length === 1 && state.badgeMode.movie === 'ex';
   }
-  // Purely subtractive: everything shows until unchecked. An unchecked venue
-  // drops its events, an unchecked team drops its home games, and an
-  // unchecked type drops every event inferred into it.
+  // Matching itself lives in filter.js so other sites filtering this feed
+  // (e.g. river's Neighborhood section) can't drift from these rules.
   function filtered(list) {
-    var tEx = modeKeys(state.teamMode, 'ex');
     return list.filter(function (e) {
-      if (state.venueMode[e.venue] === 'ex') return false;
-      if (state.badgeMode[eventType(e)] === 'ex') return false;
-      var title = e.title || '';
-      for (var k = 0; k < tEx.length; k++) if (TEAM_BY_SLUG[tEx[k]].re.test(title)) return false;
-      return true;
+      return LQAFilter.matchesFilter(e, { venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
     });
   }
 
@@ -375,6 +342,17 @@
       }
     } catch (e) { applyDefaultFilters(); } // unreadable storage — start at the baseline
   }
+  // A link built from "Copy filter link" takes over the initial view instead
+  // of your saved prefs — open it, and you see exactly what was shared.
+  // Interacting with the panel from there saves normally, like any visit.
+  function loadFiltersFromURL() {
+    var parsed = LQAFilter.parseFilterQuery(location.search);
+    if (!parsed.any) return false;
+    state.venueMode = parsed.venueMode;
+    state.badgeMode = parsed.badgeMode;
+    state.teamMode = parsed.teamMode;
+    return true;
+  }
   // a filter change also rewinds the agenda to its first page
   function applyFilters() { state.page = 0; syncFilters(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
 
@@ -447,6 +425,16 @@
     applyFilters();
   }
   $('clearAll').addEventListener('click', clearAllFilters);
+  $('copyFilterLink').addEventListener('click', function () {
+    var qs = LQAFilter.encodeFilterQuery({ venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
+    var url = location.origin + location.pathname + (qs ? '?' + qs : '');
+    var label = $('copyFilterLink');
+    var original = label.textContent;
+    navigator.clipboard.writeText(url).then(function () {
+      label.textContent = 'Copied';
+      setTimeout(function () { label.textContent = original; }, 1500);
+    });
+  });
 
   // ---- month grid ----
   function monthBounds() {
@@ -831,6 +819,6 @@
     });
   });
 
-  loadFilters();
+  if (!loadFiltersFromURL()) loadFilters();
   load();
 })();

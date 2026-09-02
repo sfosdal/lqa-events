@@ -14,6 +14,8 @@ the data every ~6 hours and deploys straight to GitHub Pages (no data commits).
 | `/lqa-events/events.json` | JSON feed: `{ generated, events: [{venue,title,date,time,url}] }` — plus optional per-event `end` (same-day local end time), `age21`, `soldOut`, `free` |
 | `/lqa-events/events.ics` | iCalendar feed — subscribable in Google/Apple Calendar |
 | `/lqa-events/embed.js` | Drop-in widget for other sites |
+| `/lqa-events/filter.js` | Shared filter/classification logic (teams, event types, venue matching) — the single source of truth other sites should use if they filter this feed themselves, instead of re-implementing the rules |
+| `/lqa-events/named-filters.json` | Hand-maintained (not touched by the fetch cron) map of name → filter query string, e.g. `{"river": "ex_badge=movie"}` — lets a consuming site reference a filter by name and pick up changes without a code deploy on its end |
 
 Embed on any site:
 
@@ -24,6 +26,15 @@ Embed on any site:
 
 Options via data-attributes: `data-max`, `data-venue`, `data-target`,
 `data-nostyle`. Output uses `lqa-ev-*` classes for restyling.
+
+## Filter links
+
+The "Copy filter link" button (next to Reset filters) copies a URL that
+reproduces the current filter panel state — e.g.
+`?ex_venue=The+Vera+Project&ex_badge=movie`. Opening that URL loads with
+those exclusions instead of your saved local prefs. `filter.js` exposes
+`LQAFilter.parseFilterQuery`/`encodeFilterQuery`/`matchesFilter` so another
+site can apply the same query string to its own copy of `events.json`.
 
 ## Layout
 
