@@ -20,6 +20,20 @@
     for (var i = 0; i < v.length; i++) h = (h * 31 + v.charCodeAt(i)) % 360;
     return 'hsl(' + h + ', 42%, 52%)';
   }
+  // Each venue's own events listing — not a ticket vendor. An event's own
+  // link (the agenda row, badges, etc.) still goes to wherever tickets are
+  // sold; this is only for the filter panel's venue name. Venues the campus
+  // sweep picks up without a dedicated source (e.g. Cornish Playhouse) have
+  // no entry here and stay plain text.
+  var VENUE_URL = {
+    'Climate Pledge Arena': 'https://climatepledgearena.com/events/',
+    'McCaw Hall': 'https://www.mccawhall.com/events',
+    'Seattle Center': 'https://www.seattlecenter.com/events/event-calendar',
+    'On the Boards': 'https://ontheboards.org/events',
+    'T-Mobile Park': 'https://www.mlb.com/mariners/schedule',
+    'Lumen Field': 'https://www.lumenfield.com/events',
+    'SIFF Cinema Uptown': 'https://www.siff.net/calendar',
+  };
 
   // Venue list order = usefulness to an LQA bar owner: the campus venues that
   // actually walk a crowd past the bar come first, the SoDo stadiums last
@@ -258,7 +272,29 @@
     name.appendChild(document.createTextNode(label));
     return name;
   }
-  function venueName(v) { return dottedName(v, venueColor(v)); }
+  function venueName(v) {
+    var name = document.createElement('span');
+    name.className = 'fp-name';
+    var dot = document.createElement('i');
+    dot.className = 'dot';
+    dot.style.setProperty('--dot', venueColor(v));
+    name.appendChild(dot);
+    var url = VENUE_URL[v];
+    if (url) {
+      var a = document.createElement('a');
+      a.href = url; a.target = '_blank'; a.rel = 'noopener';
+      a.title = "See " + v + "’s own events list";
+      a.textContent = v;
+      // The label around this row toggles the checkbox on any click inside
+      // it; keep that click from also reaching that logic (native label
+      // activation already skips it for a nested link, but no harm here).
+      a.addEventListener('click', function (e) { e.stopPropagation(); });
+      name.appendChild(a);
+    } else {
+      name.appendChild(document.createTextNode(v));
+    }
+    return name;
+  }
   function renderFilters() {
     // Counts play the role of Kayak's price column: upcoming events each row
     // would govern, unaffected by the current filter so they stay stable.
@@ -366,6 +402,23 @@
     var t = TEAM_BY_SLUG[slug];
     if (t && t.venue) setChecked(state.venueMode, t.venue, true);
   }
+  // Team exclusion alone only drops a few teams' games — everything else
+  // (concerts, arts, festivals, other venues) passes right through, since
+  // matchesFilter's team check only fires for events matching an excluded
+  // team's regex. So "only Reign" has to isolate venue and event-type too,
+  // not just the team: the team's home venue is the only one that can host
+  // its games, and a home game always classifies as 'sports'.
+  function onlyTeam(slug) {
+    var t = TEAM_BY_SLUG[slug];
+    TEAMS.forEach(function (x) { state.teamMode[x.slug] = 'ex'; });
+    delete state.teamMode[slug];
+    if (t && t.venue) {
+      state.venues.forEach(function (v) { state.venueMode[v] = 'ex'; });
+      delete state.venueMode[t.venue];
+    }
+    TYPE_LIST.forEach(function (ty) { state.badgeMode[ty.key] = 'ex'; });
+    delete state.badgeMode.sports;
+  }
   // Panel checkboxes drive state through the native change event…
   document.addEventListener('change', function (e) {
     var c = e.target;
@@ -382,10 +435,13 @@
   document.addEventListener('click', function (e) {
     var o = e.target.closest('.fp-only');
     if (o) {
-      var g = groupInfo(o.dataset.group);
-      g.keys.forEach(function (k) { g.map[k] = 'ex'; });
-      delete g.map[o.dataset.key];
-      if (o.dataset.group === 'team') ensureTeamVenue(o.dataset.key);
+      if (o.dataset.group === 'team') {
+        onlyTeam(o.dataset.key);
+      } else {
+        var g = groupInfo(o.dataset.group);
+        g.keys.forEach(function (k) { g.map[k] = 'ex'; });
+        delete g.map[o.dataset.key];
+      }
       applyFilters();
       return;
     }
