@@ -16,9 +16,24 @@
     'T-Mobile Park': '--v-tmobile',
     'Lumen Field': '--v-lumen',
   };
+  // Venue marks for agenda rows that have no team crest: the venue's site
+  // icon, via Google's favicon service where it serves a 100px+ version and
+  // the site's own file where that's sharper. McCaw Hall only publishes a
+  // 16px favicon, so its rows go without.
+  function favicon(domain) { return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=128'; }
+  var VENUE_ICON = {
+    'Climate Pledge Arena': favicon('climatepledgearena.com'),
+    'Seattle Center': 'https://www.seattlecenter.com/Dev/Logos/logobug.png',
+    'Cornish Playhouse': favicon('www.cornish.edu'),
+    'The Vera Project': favicon('theveraproject.org'),
+    'SIFF Cinema Uptown': 'https://www.siff.net/images/SIFF_favicon_03.png',
+    'On the Boards': favicon('ontheboards.org'),
+    'T-Mobile Park': favicon('www.mlb.com'),
+    'Lumen Field': favicon('www.lumenfield.com'),
+  };
   // Unexpected venues draw from the same cool, web-safe family as the
   // curated ones, hashed from the name so the pick is stable day to day.
-  var VENUE_FALLBACK = ['#3399cc', '#6666ff', '#33cccc', '#9966cc', '#6699ff', '#cc66ff', '#0099cc', '#3366ff'];
+  var VENUE_FALLBACK = ['#66ccff', '#9999ff', '#66ffff', '#cc66cc', '#3399ff', '#ff99ff', '#00cccc', '#6666ff'];
   function venueColor(v) {
     if (VENUE_VARS[v]) return 'var(' + VENUE_VARS[v] + ')';
     var h = 0;
@@ -397,8 +412,9 @@
   // of your saved prefs — open it, and you see exactly what was shared.
   // Interacting with the panel from there saves normally, like any visit.
   function loadFiltersFromURL() {
-    var parsed = LQAFilter.parseFilterQuery(location.search);
-    if (!parsed.any) return false;
+    var code = new URLSearchParams(location.search).get('f');
+    var parsed = code == null ? null : LQAFilter.parseFilterCode(code);
+    if (!parsed) return false;
     state.venueMode = parsed.venueMode;
     state.badgeMode = parsed.badgeMode;
     state.teamMode = parsed.teamMode;
@@ -510,9 +526,9 @@
   }
   $('clearAll').addEventListener('click', clearAllFilters);
   $('copyFilterLink').addEventListener('click', function () {
-    var qs = LQAFilter.encodeFilterQuery({ venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
-    var url = location.origin + location.pathname + (qs ? '?' + qs : '');
-    var label = $('copyFilterLink');
+    var code = LQAFilter.encodeFilterCode({ venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
+    var url = location.origin + location.pathname + '?f=' + code;
+    var label = $('copyFilterLabel');
     var original = label.textContent;
     navigator.clipboard.writeText(url).then(function () {
       label.textContent = 'Copied';
@@ -748,11 +764,12 @@
         var titleLine = document.createElement('span');
         titleLine.className = 'ev-title';
         var team = teamFor(e.title);
-        if (team && team.logo) {
+        var mark = (team && team.logo) || VENUE_ICON[e.venue];
+        if (mark) {
           var logo = document.createElement('img');
           logo.className = 'team-mark';
-          logo.src = team.logo;
-          logo.alt = ''; // decorative — the title already names the team
+          logo.src = mark;
+          logo.alt = ''; // decorative — the row already names the team/venue
           row.appendChild(logo);
         }
         titleLine.appendChild(a);

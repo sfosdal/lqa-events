@@ -12,30 +12,31 @@
      group keeps to its own family so a dot or stripe reads as what it is:
      venues are cool (blue → violet → teal), event types are warm (yellow →
      orange → red → pink), teams are sea-and-field greens/teals. */
-  /* venue hues (chips, grid ticks, agenda tags) */
+  /* venue hues (chips, grid ticks, agenda tags): a sweep from teal through
+     blue and violet to magenta, neighbors alternating light and dark */
+  --v-cornish: #009999;
   --v-cpa: #0099cc;
-  --v-mccaw: #cc3399;
-  --v-seactr: #3366cc;
-  --v-cornish: #339999;
-  --v-vera: #6633cc;
+  --v-tmobile: #3399ff;
+  --v-seactr: #0033cc;
+  --v-lumen: #6666ff;
   --v-siff: #9966cc;
-  --v-otb: #6699cc;
-  --v-tmobile: #0066cc;
-  --v-lumen: #333399;
+  --v-vera: #6600cc;
+  --v-otb: #cc33ff;
+  --v-mccaw: #cc0099;
   /* event-type hues (filter dots, agenda right edge) */
   --t-concert: #ff6600;
   --t-sports: #cc9900;
-  --t-arts: #cc0066;
+  --t-arts: #cc0000;
   --t-movie: #996633;
-  --t-community: #cc0000;
+  --t-community: #ff3399;
   /* team hues (Home games dots) */
-  --tm-mariners: #006666;
-  --tm-storm: #336600;
+  --tm-mariners: #009966;
+  --tm-storm: #336633;
   --tm-seahawks: #66cc00;
-  --tm-reign: #009966;
+  --tm-reign: #00cc99;
   --tm-sounders: #669900;
-  --tm-kraken: #669999;
-  --tm-torrent: #33cc99;
+  --tm-kraken: #006633;
+  --tm-torrent: #99cc33;
   --display: "Big Shoulders", "Arial Narrow", sans-serif;
   --body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -44,13 +45,12 @@
   :root {
     --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2;
     --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
-    --v-cpa: #33ccff; --v-mccaw: #ff66cc; --v-seactr: #6699ff;
-    --v-cornish: #33cccc; --v-vera: #9966ff; --v-siff: #cc99ff; --v-otb: #99ccff;
-    --v-tmobile: #3399ff; --v-lumen: #9999ff;
-    --t-concert: #ff9933; --t-sports: #ffcc33; --t-arts: #ff66cc;
-    --t-movie: #cc9966; --t-community: #ff3333;
-    --tm-mariners: #33cccc; --tm-storm: #66cc66; --tm-seahawks: #99ff33;
-    --tm-reign: #33ff99; --tm-sounders: #99cc33; --tm-kraken: #99cccc; --tm-torrent: #66ffcc;
+    --v-cornish: #33cccc; --v-cpa: #00ccff; --v-tmobile: #99ccff; --v-seactr: #3366ff;
+    --v-lumen: #6666ff; --v-siff: #cc99ff; --v-vera: #9933ff; --v-otb: #cc66ff; --v-mccaw: #ff33ff;
+    --t-concert: #ff9900; --t-sports: #ffff33; --t-arts: #ff3333;
+    --t-movie: #cc9966; --t-community: #ff6699;
+    --tm-mariners: #00cc66; --tm-storm: #66cc66; --tm-seahawks: #99ff33;
+    --tm-reign: #33ff99; --tm-sounders: #99cc33; --tm-kraken: #009966; --tm-torrent: #ccff66;
   }
 }
 
@@ -158,7 +158,8 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
 .reset-chip { margin-bottom: .5rem; }
 .reset-chip:disabled { opacity: .45; cursor: default; }
 .reset-chip:not(:disabled):hover { border-color: var(--ink-soft); }
-#copyFilterLink { margin-bottom: .5rem; }
+#copyFilterLink { margin-bottom: .5rem; display: inline-flex; align-items: center; gap: .4rem; }
+#copyFilterLink svg { width: .9rem; height: .9rem; }
 #copyFilterLink:hover { border-color: var(--ink-soft); }
 /* the collapsed state: a slice of the panel, spread across the full width
    (#quickList only — the group lists inside #fullFilters stay columns) */
@@ -208,7 +209,7 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
 .fp-name { font-size: .88rem; display: flex; align-items: center; gap: .45rem; overflow-wrap: anywhere; }
 .fp-name a { text-decoration-color: var(--line); }
 .fp-name a:hover { text-decoration-color: var(--gold); }
-.fp-name .dot { flex: none; width: .55rem; height: .55rem; border-radius: 50%; background: var(--dot, var(--ink-soft)); }
+.fp-name .dot { flex: none; width: .65rem; height: .65rem; border-radius: 50%; background: var(--dot, var(--ink-soft)); }
 .fp-row:has(input:not(:checked)) .fp-name,
 .fp-row:has(input:not(:checked)) .badge { opacity: .5; }
 .fp-only {

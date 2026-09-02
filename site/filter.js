@@ -69,30 +69,36 @@
     return true;
   }
 
-  // URL query <-> filter state. Venue names are stored verbatim (URL-encoded
-  // by URLSearchParams) rather than slugified, so matching stays exact —
-  // slugifying and reversing risks collisions between similarly-named venues.
-  function encodeFilterQuery(mode) {
-    var params = new URLSearchParams();
-    Object.keys(mode.venueMode || {}).forEach(function (v) {
-      if (mode.venueMode[v] === 'ex') params.append('ex_venue', v);
+  // Compact filter code <-> filter state, for share links (?f=CODE).
+  // REGISTRY is every filterable key in a fixed order; the code is the set of
+  // EXCLUDED entries as a bitmask written in base 36 — a few characters, and
+  // "0" means everything shown. Append-only: adding an entry adds a bit and
+  // every existing code keeps meaning what it meant. A venue the feed turns
+  // up that isn't listed here can't be encoded and drops out of the link.
+  var REGISTRY = [
+    ['venue', 'Climate Pledge Arena'], ['venue', 'McCaw Hall'], ['venue', 'Seattle Center'],
+    ['venue', 'Cornish Playhouse'], ['venue', 'The Vera Project'], ['venue', 'SIFF Cinema Uptown'],
+    ['venue', 'On the Boards'], ['venue', 'T-Mobile Park'], ['venue', 'Lumen Field'],
+    ['badge', 'concert'], ['badge', 'sports'], ['badge', 'arts'], ['badge', 'movie'], ['badge', 'community'],
+    ['team', 'mariners'], ['team', 'storm'], ['team', 'seahawks'], ['team', 'reign'],
+    ['team', 'sounders'], ['team', 'kraken'], ['team', 'torrent'],
+  ];
+  var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode' };
+  function encodeFilterCode(mode) {
+    var mask = 0;
+    REGISTRY.forEach(function (entry, i) {
+      var map = mode[GROUP_MAP[entry[0]]] || {};
+      if (map[entry[1]] === 'ex') mask += Math.pow(2, i);
     });
-    Object.keys(mode.badgeMode || {}).forEach(function (k) {
-      if (mode.badgeMode[k] === 'ex') params.append('ex_badge', k);
-    });
-    Object.keys(mode.teamMode || {}).forEach(function (k) {
-      if (mode.teamMode[k] === 'ex') params.append('ex_team', k);
-    });
-    return params.toString();
+    return mask.toString(36);
   }
-  function parseFilterQuery(search) {
-    var params = new URLSearchParams(search);
+  function parseFilterCode(code) {
     var mode = { venueMode: {}, badgeMode: {}, teamMode: {} };
-    var any = false;
-    params.getAll('ex_venue').forEach(function (v) { mode.venueMode[v] = 'ex'; any = true; });
-    params.getAll('ex_badge').forEach(function (k) { mode.badgeMode[k] = 'ex'; any = true; });
-    params.getAll('ex_team').forEach(function (k) { mode.teamMode[k] = 'ex'; any = true; });
-    mode.any = any;
+    var mask = parseInt(code, 36);
+    if (isNaN(mask) || mask < 0) return null;
+    REGISTRY.forEach(function (entry, i) {
+      if (Math.floor(mask / Math.pow(2, i)) % 2 === 1) mode[GROUP_MAP[entry[0]]][entry[1]] = 'ex';
+    });
     return mode;
   }
 
@@ -102,7 +108,7 @@
     slugify: slugify,
     eventType: eventType,
     matchesFilter: matchesFilter,
-    encodeFilterQuery: encodeFilterQuery,
-    parseFilterQuery: parseFilterQuery,
+    encodeFilterCode: encodeFilterCode,
+    parseFilterCode: parseFilterCode,
   };
 })(window);
