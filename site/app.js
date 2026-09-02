@@ -828,14 +828,54 @@
     renderAgenda();
     document.querySelector('.agenda').scrollIntoView({ block: 'start' });
   }
+  // How many page buttons (numbers plus … gaps) there's room for. Compact:
+  // seven — first, last, current±1 and two gaps. Wide: whatever fits across
+  // the cards' width at the normal spacing, so the extra room shows more
+  // numbers rather than stretching the gaps.
+  function pagerSlots(nav) {
+    if (!nav.classList.contains('pager--wide') || !matchMedia('(min-width: 761px)').matches) return 7;
+    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var width = $('agenda').clientWidth - 6.2 * rem; // the cards' width — see .pager--wide
+    var slot = 2 * rem + 0.4 * rem;                  // a 2rem button plus the gap
+    var arrows = 2 * (2.4 * rem + 0.4 * rem);
+    return Math.max(7, Math.floor((width - arrows) / slot));
+  }
+  // Always the first, last and current page; then the current's neighbors,
+  // outward, until the slots run out (a … between non-adjacent numbers
+  // takes a slot too).
+  function pagesToShow(total, page, slots) {
+    var i, all = [];
+    if (total <= slots) { for (i = 0; i < total; i++) all.push(i); return all; }
+    var shown = {};
+    shown[0] = shown[total - 1] = shown[page] = true;
+    var keys = function () { return Object.keys(shown).map(Number).sort(function (a, b) { return a - b; }); };
+    var rendered = function () {
+      var k = keys(), n = k.length;
+      for (var j = 1; j < k.length; j++) if (k[j] - k[j - 1] > 1) n++;
+      return n;
+    };
+    for (var r = 1; r < total; r++) {
+      var added = false;
+      [page - r, page + r].forEach(function (p) {
+        if (p <= 0 || p >= total - 1 || shown[p]) return;
+        shown[p] = true;
+        if (rendered() > slots) delete shown[p]; else added = true;
+      });
+      if (!added) break;
+    }
+    return keys();
+  }
+  var lastPages = [];
   function renderPager(pages) {
     var nav = $('agendaPager');
     nav.innerHTML = '';
+    lastPages = pages;
     var total = pages.length;
-    // with enough pages the pager spreads across the listing cards' width
-    // (see .pager--wide); a short one stays a compact centered cluster
+    // with enough pages the pager spans the listing cards' width (see
+    // .pager--wide); a short one stays a compact centered cluster
     nav.classList.toggle('pager--wide', total >= 5);
     if (total < 2) return;
+    var show = pagesToShow(total, state.page, pagerSlots(nav));
     var rangeLabel = function (i) {
       var ds = pages[i];
       var fmt = function (s) {
@@ -855,9 +895,7 @@
     };
     nav.appendChild(arrow('‹', state.page > 0 ? state.page - 1 : null, 'Earlier events'));
     var last = -1;
-    for (var i = 0; i < total; i++) {
-      // always the first, last, and current±1; the rest collapse into …
-      if (total > 7 && i !== 0 && i !== total - 1 && Math.abs(i - state.page) > 1) continue;
+    show.forEach(function (i) {
       if (i - last > 1) {
         var gap = document.createElement('span');
         gap.className = 'pg-gap';
@@ -877,9 +915,15 @@
       }
       nav.appendChild(b);
       last = i;
-    }
+    });
     nav.appendChild(arrow('›', state.page < total - 1 ? state.page + 1 : null, 'Later events'));
   }
+  // the wide pager's slot count depends on the window width
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { if (lastPages.length) renderPager(lastPages); }, 150);
+  });
 
   // ---- subscribe popover ----
   // The feed follows the active filter where a pre-built file exists: the

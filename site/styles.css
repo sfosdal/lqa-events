@@ -372,6 +372,9 @@ button.cal-day:hover { background: var(--gold-soft); }
 .ev-title { display: flex; align-items: center; gap: .45rem; min-width: 0; }
 /* home games carry the team crest as a monochrome watermark at the row's
    right — grayscale in light mode, inverted to white-on-dark in dark mode */
+/* a row with a mark keeps its text clear of it — the title wraps rather than
+   running underneath (mark width + its inset + a little breathing room) */
+.ev:has(.team-mark) { padding-right: calc(2.9rem + .75rem + .6rem); }
 .team-mark {
   position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
   width: 2.9rem; height: 2.9rem; object-fit: contain;
@@ -398,10 +401,13 @@ button.cal-day:hover { background: var(--gold-soft); }
 .pager:empty { display: none; }
 /* With enough pages (renderPager adds the class) and the rail beside the
    cards, the pager spans exactly the cards' width: ‹ at their left edge, ›
-   at their right, pages spread between. The offset is .day-row's rail
-   column plus its gap. */
+   at their right, the page numbers centered between at the normal gap —
+   the extra room goes to showing more numbers (pagerSlots in app.js), not
+   to wider gaps. The offset is .day-row's rail column plus its gap. */
 @media (min-width: 761px) {
-  .pager--wide { margin-left: calc(5.2rem + 1rem); justify-content: space-between; }
+  .pager--wide { margin-left: calc(5.2rem + 1rem); }
+  .pager--wide .pg-arrow:first-child { margin-right: auto; }
+  .pager--wide .pg-arrow:last-child { margin-left: auto; }
 }
 .pager button {
   font: 500 .9rem/1 var(--body); min-width: 2rem; height: 2rem; cursor: pointer;
