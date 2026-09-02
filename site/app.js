@@ -152,7 +152,7 @@
     { key: 'sports', label: 'Sports', title: 'Pro and college games' },
     { key: 'arts', label: 'Arts & Theater', title: 'Opera, ballet, plays, comedy, dance' },
     { key: 'movie', label: 'Movies', title: 'Film screenings at SIFF Cinema Uptown — unchecked by default' },
-    { key: 'community', label: 'Community & Festivals', title: 'Grounds events, festivals, fairs, SIFF specials' },
+    { key: 'community', label: 'Festivals', title: 'Grounds events, festivals, fairs, SIFF specials' },
   ];
   // Type hues mirror the venue hues: a dot on the filter rows, a colored
   // right edge on each agenda row.
