@@ -36,7 +36,10 @@
     'Seattle Center': 'https://www.seattlecenter.com/events/event-calendar',
     'On the Boards': 'https://ontheboards.org/events',
     'The Vera Project': 'https://theveraproject.org/events/',
-    'Cornish Playhouse': 'https://www.cornish.edu/cornish-college-event-calendar/',
+    // Seattle Center's calendar filtered to the Playhouse (the same venue
+    // category the feed's sweep reads); Cornish's own calendar mixes in the
+    // college's other campuses and can't be filtered by venue.
+    'Cornish Playhouse': 'https://www.seattlecenter.com/events/event-calendar?cats=173',
     'T-Mobile Park': 'https://www.mlb.com/mariners/ballpark/events', // the ballpark's own list — concerts too, not just Mariners games
     'Lumen Field': 'https://www.lumenfield.com/events',
     'SIFF Cinema Uptown': 'https://www.siff.net/calendar',
