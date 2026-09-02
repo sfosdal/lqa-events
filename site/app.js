@@ -434,6 +434,20 @@
     TYPE_LIST.forEach(function (ty) { state.badgeMode[ty.key] = 'ex'; });
     delete state.badgeMode.sports;
   }
+  // The venue counterpart: keep the teams that play there, and the event
+  // types that actually occur there (a venue with nothing upcoming leaves
+  // the types alone — there's nothing to narrow to).
+  function onlyVenue(v) {
+    state.venues.forEach(function (x) { state.venueMode[x] = 'ex'; });
+    delete state.venueMode[v];
+    TEAMS.forEach(function (t) { setChecked(state.teamMode, t.slug, t.venue === v); });
+    var today = todayStr();
+    var present = {};
+    state.events.forEach(function (e) { if (e.venue === v && e.date >= today) present[eventType(e)] = true; });
+    if (Object.keys(present).length) {
+      TYPE_LIST.forEach(function (ty) { setChecked(state.badgeMode, ty.key, !!present[ty.key]); });
+    }
+  }
   // Panel checkboxes drive state through the native change event…
   document.addEventListener('change', function (e) {
     var c = e.target;
@@ -452,6 +466,8 @@
     if (o) {
       if (o.dataset.group === 'team') {
         onlyTeam(o.dataset.key);
+      } else if (o.dataset.group === 'venue') {
+        onlyVenue(o.dataset.key);
       } else {
         var g = groupInfo(o.dataset.group);
         g.keys.forEach(function (k) { g.map[k] = 'ex'; });
