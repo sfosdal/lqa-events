@@ -254,6 +254,9 @@ try {
 
 const merged = mergeWithArchive(fresh, archived, today, cutoff).slice(-MAX_EVENTS);
 
+// League schedules flag floating dates Ticketmaster doesn't know yet
+try { await applySchedules(merged); } catch (err) { console.error('Schedules step failed:', err.message); }
+
 writeFileSync(JSON_OUT, JSON.stringify({ generated: new Date().toISOString(), events: merged }, null, 2) + '\n');
 writeFileSync(ICS_OUT, buildIcs(merged));
 

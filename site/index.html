@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- browser chrome matches the page; app.js repoints both when a theme is
+     chosen by hand -->
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#edf1f4" data-light="#edf1f4">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141a20" data-dark="#141a20">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="LQA Events">
+<meta name="mobile-web-app-capable" content="yes">
 <script>
   // Apply a saved Light/Dark choice before the first paint; "system" (or
   // nothing saved) leaves it to prefers-color-scheme. The toggle in the
@@ -106,7 +114,10 @@
     </svg>
     <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
   </button>
-  <button id="clearAll" class="chip reset-chip" type="button" disabled title="Back to the default view">Reset Filters</button>
+  <button id="clearAll" class="chip reset-chip" type="button" disabled title="Back to the default view">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    <span>Reset Filters</span>
+  </button>
   <button id="copyFilterLink" class="chip" type="button" title="Copy a link that opens with this exact filter">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
     <span id="copyFilterLabel">Copy Filter Link</span>
@@ -166,7 +177,14 @@
     <ol id="agenda"><li class="empty">Loading events…</li></ol>
     <nav id="agendaPager" class="pager" aria-label="More events"></nav>
     <aside class="cal-side" aria-label="Month calendar">
-      <div class="cal">
+      <!-- phones only (see .cal-toggle): the calendar collapses so the list
+           is one tap away -->
+      <button id="calToggle" class="cal-toggle" type="button" aria-expanded="true" aria-controls="calBox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+        <span>Hide calendar</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="cal" id="calBox">
         <div class="cal-head">
           <button id="calPrev" type="button" aria-label="Previous month">‹</button>
           <h2 id="calTitle">…</h2>
@@ -231,6 +249,22 @@
 </footer>
 
 <script src="qrcode.js?v=__V__" defer></script>
+<!-- phones: tapping a listing opens this sheet instead of following the
+     title link, so every detail and link gets a full-size tap target -->
+<div id="sheet" class="sheet" hidden>
+  <div class="sheet-back" id="sheetBack"></div>
+  <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <p class="sheet-venue" id="sheetVenue"></p>
+    <h2 class="sheet-title" id="sheetTitle"></h2>
+    <p class="sheet-when" id="sheetWhen"></p>
+    <div class="sheet-actions">
+      <a id="sheetTickets" class="btn-cal" href="#" target="_blank" rel="noopener">Tickets &amp; details</a>
+      <a id="sheetVenueLink" class="chip" href="#" target="_blank" rel="noopener"></a>
+      <button id="sheetClose" class="chip" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
 <script src="filter.js?v=__V__" defer></script>
 <script src="app.js?v=__V__" defer></script>
 </body>

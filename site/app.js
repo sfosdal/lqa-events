@@ -102,7 +102,7 @@
   // Kayak-style checkboxes: each filter map holds name → 'ex' for unchecked
   // (hidden); absent = checked (shown). Everything starts checked except SIFF
   // movies — see applyDefaultFilters.
-  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false, pastFrom: null, page: 0, pageByDate: {}, series: [], seriesByDate: {}, seriesLanes: 0 };
+  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false, pastFrom: null, page: 0, pageByDate: {}, series: [] };
 
   function modeKeys(map, mode) {
     return Object.keys(map).filter(function (k) { return map[k] === mode; });
@@ -167,29 +167,15 @@
       flush(run);
     });
     all.sort(function (a, b) { return a.start < b.start ? -1 : a.start > b.start ? 1 : 0; });
-    var laneEnd = [];
-    var byDate = {};
-    all.forEach(function (s, i) {
-      s.id = i;
-      for (var l = 0; ; l++) {
-        if (laneEnd[l] == null || laneEnd[l] < s.start) { laneEnd[l] = s.end; s.lane = l; break; }
-      }
-      var d = parseDate(s.start), end = parseDate(s.end);
-      while (d <= end) { var key = ymd(d); (byDate[key] = byDate[key] || []).push(s); d.setDate(d.getDate() + 1); }
-    });
+    all.forEach(function (s, i) { s.id = i; });
     state.series = all;
-    state.seriesByDate = byDate;
-    state.seriesLanes = laneEnd.length;
     document.querySelector('.agenda-layout').classList.toggle('has-series', all.length > 0);
   }
-  // series with at least one event the current filter shows
-  function visibleSeries() {
-    return state.series.filter(function (s) { return filtered(s.events).length > 0; });
-  }
-  // The graph: a vertical line per series in the gutter, git-client style —
-  // a dot on each of its cards, the line running off the page edge when the
-  // series continues on another page. Drawn from the rendered rows, so it
-  // follows whatever the current page and filters show.
+  // The graph: a vertical line per series in the gutter, git-client style,
+  // in the series' event-type color; at each of its cards the line curves
+  // into the card's type stripe like a branch merging. It runs off the page
+  // edge when the series continues on another page. Drawn from the rendered
+  // rows, so it follows whatever the current page and filters show.
   var SVG_NS = 'http://www.w3.org/2000/svg';
   function drawSeriesGraph() {
     var ol = $('agenda');
@@ -222,9 +208,9 @@
     layout.style.setProperty('--gutter', (laneEnd.length * 0.9 + 0.3) + 'rem');
     var olBox = ol.getBoundingClientRect(); // measured after the gutter is set
     items.forEach(function (it) {
-      it.ys = it.rows.map(function (row) { var r = row.getBoundingClientRect(); return r.top + r.height / 2 - olBox.top; });
-      it.top = it.before ? 0 : it.ys[0];
-      it.bottom = it.after ? olBox.height : it.ys[it.ys.length - 1];
+      it.pts = it.rows.map(function (row) { var r = row.getBoundingClientRect(); return { y: r.top + r.height / 2 - olBox.top, x: r.right - olBox.left - 1 }; });
+      it.top = it.before ? 0 : it.pts[0].y;
+      it.bottom = it.after ? olBox.height : it.pts[it.pts.length - 1].y;
     });
     var laneW = 0.9 * rem;
     var gx = de.getBoundingClientRect().right - olBox.left + 1 * rem; // the gutter starts past the cards and the grid gap
@@ -233,25 +219,32 @@
     svg.setAttribute('width', olBox.width);
     svg.setAttribute('height', olBox.height);
     svg.setAttribute('aria-hidden', 'true');
+    var bend = 14; // how far above/below a card the curve leaves the lane
     items.forEach(function (it) {
       var x = gx + it.lane * laneW + laneW / 2;
-      var color = venueColor(it.s.venue);
-      var line = document.createElementNS(SVG_NS, 'line');
-      line.setAttribute('class', 'sg-line');
-      line.setAttribute('x1', x); line.setAttribute('x2', x);
-      line.setAttribute('y1', it.top); line.setAttribute('y2', it.bottom);
-      line.style.stroke = color;
-      svg.appendChild(line);
-      it.ys.forEach(function (y) {
-        var dot = document.createElementNS(SVG_NS, 'circle');
-        dot.setAttribute('class', 'sg-dot');
-        dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', 4);
-        dot.style.fill = color;
-        var tip = document.createElementNS(SVG_NS, 'title');
-        tip.textContent = seriesLabel(it.s);
-        dot.appendChild(tip);
-        svg.appendChild(dot);
+      var color = typeColor(eventType(it.s.events[0]));
+      var d = '';
+      it.pts.forEach(function (p, i) {
+        if (i === 0 && !it.before) {
+          // the series starts here: out of the stripe, bending down into the lane
+          d += 'M' + p.x + ' ' + p.y + ' C' + x + ' ' + p.y + ' ' + x + ' ' + p.y + ' ' + x + ' ' + (p.y + bend);
+        } else {
+          // a branch off the lane, bending into the stripe
+          d += 'M' + x + ' ' + (p.y - bend) + ' C' + x + ' ' + p.y + ' ' + x + ' ' + p.y + ' ' + p.x + ' ' + p.y;
+        }
       });
+      // the lane itself, between the first curve's exit and the last's entry
+      var y1 = it.before ? 0 : it.pts[0].y + bend;
+      var y2 = it.after ? olBox.height : it.pts[it.pts.length - 1].y - bend;
+      if (y2 > y1) d += 'M' + x + ' ' + y1 + ' L' + x + ' ' + y2;
+      var path = document.createElementNS(SVG_NS, 'path');
+      path.setAttribute('class', 'sg-line');
+      path.setAttribute('d', d);
+      path.style.stroke = color;
+      var tip = document.createElementNS(SVG_NS, 'title');
+      tip.textContent = seriesLabel(it.s);
+      path.appendChild(tip);
+      svg.appendChild(path);
     });
     ol.appendChild(svg);
   }
@@ -649,12 +642,68 @@
       b.setAttribute('aria-checked', String(b.dataset.theme === t));
     });
     try { if (t === 'system') localStorage.removeItem('lqa-theme'); else localStorage.setItem('lqa-theme', t); } catch (e) { /* no storage */ }
+    // browser chrome follows: both theme-color metas take the chosen shade,
+    // or go back to their own light/dark values under "system"
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) {
+      m.content = t === 'dark' ? '#141a20' : t === 'light' ? '#edf1f4' : (m.dataset.light || m.dataset.dark);
+    });
   }
   applyTheme(document.documentElement.dataset.theme || 'system');
   $('themeToggle').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-theme]');
     if (b) applyTheme(b.dataset.theme);
   });
+
+  // ---- phones: collapsible mini calendar ----
+  // Stacked above the list on small screens, it's a full screen of grid
+  // before the first event; it starts collapsed there and remembers. On the
+  // wide layout it's always open and the toggle is hidden.
+  var STACKED = '(max-width: 760px)';
+  function syncCal() {
+    var stacked = matchMedia(STACKED).matches;
+    var open = true;
+    if (stacked) { try { open = localStorage.getItem('lqa-cal') === 'open'; } catch (e) { open = false; } }
+    $('calBox').hidden = !open;
+    $('calToggle').setAttribute('aria-expanded', String(open));
+    $('calToggle').querySelector('span').textContent = open ? 'Hide calendar' : 'Show calendar';
+  }
+  $('calToggle').addEventListener('click', function () {
+    var open = $('calBox').hidden;
+    try { localStorage.setItem('lqa-cal', open ? 'open' : 'closed'); } catch (e) { /* no storage */ }
+    syncCal();
+  });
+  syncCal();
+  window.addEventListener('resize', syncCal);
+
+  // ---- phones: the event sheet ----
+  // A tap anywhere on a card opens it (capture phase, so it wins over the
+  // venue link's own handler); the sheet carries every detail and full-size
+  // links. Desktop keeps its inline links.
+  var sheetTouch = '(max-width: 640px)';
+  function openSheet(e) {
+    $('sheetVenue').textContent = e.venue;
+    $('sheetTitle').textContent = e.title;
+    var when = parseDate(e.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' · ' + fmtTime(e.time);
+    if (e.series) when += ' · ' + e.series.n + ' of ' + e.series.total;
+    if (e.dateTbd) when += ' · date TBD';
+    $('sheetWhen').textContent = when;
+    var t = $('sheetTickets'); t.href = e.url || '#'; t.hidden = !e.url;
+    var v = $('sheetVenueLink'); v.href = VENUE_URL[e.venue] || '#'; v.hidden = !VENUE_URL[e.venue]; v.textContent = e.venue + ' events';
+    $('sheet').hidden = false;
+    document.body.classList.add('sheet-open');
+    $('sheetClose').focus();
+  }
+  function closeSheet() { $('sheet').hidden = true; document.body.classList.remove('sheet-open'); }
+  $('sheetClose').addEventListener('click', closeSheet);
+  $('sheetBack').addEventListener('click', closeSheet);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('sheet').hidden) closeSheet(); });
+  function cardTap(e) {
+    return function (ev) {
+      if (!matchMedia(sheetTouch).matches) return;
+      ev.preventDefault(); ev.stopPropagation();
+      openSheet(e);
+    };
+  }
   $('copyFilterLink').addEventListener('click', function () {
     var code = LQAFilter.encodeFilterCode({ venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
     var url = location.origin + location.pathname + '?f=' + code;
@@ -688,15 +737,6 @@
   function renderCal() {
     var m = state.month;
     if (!m) return;
-    // calendar bars: lanes over the series the filter leaves visible, so
-    // hiding a venue also clears its bars and the rows stay as few as possible
-    var calLane = {}, calEnd = [];
-    visibleSeries().forEach(function (s) {
-      for (var l = 0; ; l++) {
-        if (calEnd[l] == null || calEnd[l] < s.start) { calEnd[l] = s.end; calLane[s.id] = l; break; }
-      }
-    });
-    var calRows = Math.max(1, calEnd.length);
     var bounds = monthBounds();
     var next = new Date(m.getFullYear(), m.getMonth() + 1, 1);
     $('calPrev').disabled = !bounds || sameMonth(m, new Date(bounds.min.getFullYear(), bounds.min.getMonth(), 1));
@@ -761,23 +801,6 @@
         });
         cell.appendChild(ticks);
         cell.dataset.date = key;
-      }
-      // a bar per series running through this day, in the series' lane, so
-      // a homestand reads as one stroke across the week (off-days included)
-      var active = (state.seriesByDate[key] || []).filter(function (s) { return calLane[s.id] != null; });
-      if (active.length) {
-        var bars = document.createElement('span');
-        bars.className = 'sbars';
-        bars.style.setProperty('--rows', calRows);
-        active.forEach(function (s) {
-          var b = document.createElement('i');
-          b.className = 'sbar' + (s.start === key ? ' is-start' : '') + (s.end === key ? ' is-end' : '');
-          b.style.setProperty('--dot', venueColor(s.venue));
-          b.style.gridRow = String(calLane[s.id] + 1);
-          b.title = seriesLabel(s);
-          bars.appendChild(b);
-        });
-        cell.appendChild(bars);
       }
       grid.appendChild(cell);
     }
@@ -911,6 +934,7 @@
       evs.forEach(function (e) {
         var row = document.createElement('div');
         row.className = 'ev';
+        row.addEventListener('click', cardTap(e), true);
         row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' 9%, transparent)';
         // the right edge carries the event type's hue, matching its filter dot
         row.style.borderRight = '1rem solid ' + typeColor(eventType(e));
