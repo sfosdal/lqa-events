@@ -36,6 +36,7 @@
     'McCaw Hall': 'https://www.mccawhall.com/events',
     'Seattle Center': 'https://www.seattlecenter.com/events/event-calendar',
     'On the Boards': 'https://ontheboards.org/events',
+    'The Vera Project': 'https://theveraproject.org/events/',
     'T-Mobile Park': 'https://www.mlb.com/mariners/ballpark/events', // the ballpark's own list — concerts too, not just Mariners games
     'Lumen Field': 'https://www.lumenfield.com/events',
     'SIFF Cinema Uptown': 'https://www.siff.net/calendar',
