@@ -424,6 +424,24 @@
   // The venue counterpart: keep the teams that play there, and the event
   // types that actually occur there (a venue with nothing upcoming leaves
   // the types alone — there's nothing to narrow to).
+  // And the type counterpart: keep the venues that host that type (from the
+  // upcoming events) and, for Sports, the teams with upcoming games; any
+  // other type drops every team (their games are all Sports anyway).
+  function onlyType(key) {
+    TYPE_LIST.forEach(function (ty) { state.badgeMode[ty.key] = 'ex'; });
+    delete state.badgeMode[key];
+    var today = todayStr();
+    var upcoming = state.events.filter(function (e) { return e.date >= today && eventType(e) === key; });
+    var venuesHosting = {};
+    upcoming.forEach(function (e) { venuesHosting[e.venue] = true; });
+    if (upcoming.length) {
+      state.venues.forEach(function (v) { setChecked(state.venueMode, v, !!venuesHosting[v]); });
+    }
+    TEAMS.forEach(function (t) {
+      var plays = key === 'sports' && upcoming.some(function (e) { return t.re.test(e.title || ''); });
+      setChecked(state.teamMode, t.slug, plays);
+    });
+  }
   function onlyVenue(v) {
     state.venues.forEach(function (x) { state.venueMode[x] = 'ex'; });
     delete state.venueMode[v];
@@ -456,9 +474,7 @@
       } else if (o.dataset.group === 'venue') {
         onlyVenue(o.dataset.key);
       } else {
-        var g = groupInfo(o.dataset.group);
-        g.keys.forEach(function (k) { g.map[k] = 'ex'; });
-        delete g.map[o.dataset.key];
+        onlyType(o.dataset.key);
       }
       applyFilters();
       return;

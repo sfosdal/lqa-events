@@ -487,6 +487,10 @@ footer p { color: var(--ink-soft); font-size: .85rem; margin: .4rem auto 0; max-
   }
   .updated { font-size: 1.05rem; margin: 0 0 .4rem; }
   .btn-cal { width: 100%; justify-content: center; margin: 0; }
+  /* the bar can't wrap (the tab must stay joined to the card below), so on a
+     phone the copy button is icon-only to keep the row inside the screen */
+  #copyFilterLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  #copyFilterLink { padding: .5em .7em; }
   .pop { left: 0; right: 0; width: auto; }
   .section-title { font-size: 1.6rem; margin-top: 1.8rem; }
 
