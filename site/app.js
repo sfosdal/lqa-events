@@ -148,11 +148,11 @@
   // the badge era so the saved movies-hidden default and the no-movies feed
   // carry over unchanged.
   var TYPE_LIST = [
-    { key: 'concert', label: 'concerts', title: 'Live music — arena tours to Vera Project shows' },
-    { key: 'sports', label: 'sports', title: 'Pro and college games' },
-    { key: 'arts', label: 'arts & theater', title: 'Opera, ballet, plays, comedy, dance' },
-    { key: 'movie', label: 'movies', title: 'Film screenings at SIFF Cinema Uptown — unchecked by default' },
-    { key: 'community', label: 'community & festivals', title: 'Grounds events, festivals, fairs, SIFF specials' },
+    { key: 'concert', label: 'Concerts', title: 'Live music — arena tours to Vera Project shows' },
+    { key: 'sports', label: 'Sports', title: 'Pro and college games' },
+    { key: 'arts', label: 'Arts & Theater', title: 'Opera, ballet, plays, comedy, dance' },
+    { key: 'movie', label: 'Movies', title: 'Film screenings at SIFF Cinema Uptown — unchecked by default' },
+    { key: 'community', label: 'Community & Festivals', title: 'Grounds events, festivals, fairs, SIFF specials' },
   ];
   // Type hues mirror the venue hues: a dot on the filter rows, a colored
   // right edge on each agenda row.
