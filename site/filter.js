@@ -48,6 +48,29 @@
     return TYPE_VENUE_DEFAULT[e.venue] || 'community';
   }
 
+  // Venue marks for listings without a team crest: the venue's site icon,
+  // via Google's favicon service where it serves a 100px+ version and the
+  // site's own file where that's sharper. McCaw Hall only publishes 16px,
+  // so it has none.
+  function favicon(domain) { return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=128'; }
+  var VENUE_ICON = {
+    'Climate Pledge Arena': favicon('climatepledgearena.com'),
+    'Seattle Center': 'https://www.seattlecenter.com/Dev/Logos/logobug.png',
+    'Cornish Playhouse': favicon('www.cornish.edu'),
+    'The Vera Project': favicon('theveraproject.org'),
+    'SIFF Cinema Uptown': 'https://www.siff.net/images/SIFF_favicon_03.png',
+    'On the Boards': favicon('ontheboards.org'),
+    'T-Mobile Park': favicon('www.mlb.com'),
+    'Lumen Field': favicon('www.lumenfield.com'),
+  };
+  // Venue hues for dark backgrounds — the same values the calendar's
+  // styles.css dark block sets as --v-* variables; keep the two in step.
+  var VENUE_COLOR = {
+    'Cornish Playhouse': '#00ff99', 'Climate Pledge Arena': '#0099ff', 'T-Mobile Park': '#ccffff',
+    'Seattle Center': '#3333ff', 'Lumen Field': '#6666ff', 'SIFF Cinema Uptown': '#cc99ff',
+    'The Vera Project': '#9900ff', 'On the Boards': '#ff66ff', 'McCaw Hall': '#cc0099',
+  };
+
   function slugify(s) {
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
@@ -112,6 +135,8 @@
   global.LQAFilter = {
     TEAMS: TEAMS,
     TEAM_BY_SLUG: TEAM_BY_SLUG,
+    VENUE_ICON: VENUE_ICON,
+    VENUE_COLOR: VENUE_COLOR,
     slugify: slugify,
     eventType: eventType,
     matchesFilter: matchesFilter,

@@ -16,21 +16,9 @@
     'T-Mobile Park': '--v-tmobile',
     'Lumen Field': '--v-lumen',
   };
-  // Venue marks for agenda rows that have no team crest: the venue's site
-  // icon, via Google's favicon service where it serves a 100px+ version and
-  // the site's own file where that's sharper. McCaw Hall only publishes a
-  // 16px favicon, so its rows go without.
-  function favicon(domain) { return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=128'; }
-  var VENUE_ICON = {
-    'Climate Pledge Arena': favicon('climatepledgearena.com'),
-    'Seattle Center': 'https://www.seattlecenter.com/Dev/Logos/logobug.png',
-    'Cornish Playhouse': favicon('www.cornish.edu'),
-    'The Vera Project': favicon('theveraproject.org'),
-    'SIFF Cinema Uptown': 'https://www.siff.net/images/SIFF_favicon_03.png',
-    'On the Boards': favicon('ontheboards.org'),
-    'T-Mobile Park': favicon('www.mlb.com'),
-    'Lumen Field': favicon('www.lumenfield.com'),
-  };
+  // Venue marks for agenda rows with no team crest — shared with other
+  // sites via filter.js
+  var VENUE_ICON = LQAFilter.VENUE_ICON;
   // Unexpected venues draw from the same cool, web-safe family as the
   // curated ones, hashed from the name so the pick is stable day to day.
   var VENUE_FALLBACK = ['#66ccff', '#9999ff', '#66ffff', '#cc66cc', '#3399ff', '#ff99ff', '#00cccc', '#6666ff'];
