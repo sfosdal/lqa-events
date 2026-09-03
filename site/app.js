@@ -120,127 +120,39 @@
   }
 
   // ---- data ----
-  // ---- series: the same event on nearby days — a homestand, a two-night
-  // stand, an opera run. Same venue + same title, occurrences within a week
-  // of each other. Movies sit this out: SIFF's daily showtimes would make
-  // everything a series. Each series gets a lane (interval coloring over its
-  // date range) shared by the gutter graph and the calendar bars. ----
-  function seriesKey(e) { return e.venue + '|' + String(e.title || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
-  function seriesLabel(s) {
-    var f = function (d) { return parseDate(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
-    return s.events[0].title + ' — ' + s.events.length + ' ' + (eventType(s.events[0]) === 'sports' ? 'games' : 'nights') + ' · ' + f(s.start) + ' – ' + f(s.end);
-  }
+  // ---- series (detection, labels and the gutter graph live in filter.js,
+  // shared with other sites that list the feed) ----
+  var seriesLabel = LQAFilter.seriesLabel;
   function findSeries(list) {
-    var groups = {};
-    list.forEach(function (e) {
-      delete e.series;
-      if (e.movie) return;
-      var k = seriesKey(e);
-      (groups[k] = groups[k] || []).push(e);
-    });
-    var all = [];
-    var flush = function (run) {
-      if (run.length < 2) return;
-      var s = { venue: run[0].venue, start: run[0].date, end: run[run.length - 1].date, events: run };
-      run.forEach(function (e, i) { e.series = { s: s, n: i + 1, total: run.length }; });
-      all.push(s);
-    };
-    Object.keys(groups).forEach(function (k) {
-      var evs = groups[k].sort(function (a, b) { return (a.date + (a.time || '')) < (b.date + (b.time || '')) ? -1 : 1; });
-      var run = [evs[0]];
-      for (var i = 1; i < evs.length; i++) {
-        var gap = Math.round((parseDate(evs[i].date) - parseDate(evs[i - 1].date)) / 86400e3);
-        if (gap <= 7) run.push(evs[i]); else { flush(run); run = [evs[i]]; }
-      }
-      flush(run);
-    });
-    all.sort(function (a, b) { return a.start < b.start ? -1 : a.start > b.start ? 1 : 0; });
-    all.forEach(function (s, i) { s.id = i; });
-    state.series = all;
-    document.querySelector('.agenda-layout').classList.toggle('has-series', all.length > 0);
+    state.series = LQAFilter.findSeries(list);
+    document.querySelector('.agenda-layout').classList.toggle('has-series', state.series.length > 0);
   }
-  // The graph: a vertical line per series in the gutter, git-client style,
-  // in the series' event-type color; at each of its cards the line curves
-  // into the card's type stripe like a branch merging. It runs off the page
-  // edge when the series continues on another page. Drawn from the rendered
-  // rows, so it follows whatever the current page and filters show.
-  var SVG_NS = 'http://www.w3.org/2000/svg';
+  // The gutter column right of the cards is sized per page for the lanes
+  // the graph needs; lines are in the series' event-type color and curve
+  // into each card's type stripe.
   function drawSeriesGraph() {
     var ol = $('agenda');
-    var old = ol.querySelector('.series-graph');
-    if (old) old.remove();
     var layout = document.querySelector('.agenda-layout');
-    if (!state.series.length || !matchMedia('(min-width: 641px)').matches) { layout.style.removeProperty('--gutter'); return; }
-    var rows = Array.from(ol.querySelectorAll('.ev[data-series]'));
-    var de = ol.querySelector('.day-events');
-    if (!rows.length || !de) { layout.style.setProperty('--gutter', '0.9rem'); return; }
+    if (!state.series.length || !matchMedia('(min-width: 641px)').matches) {
+      var old = ol.querySelector('.series-graph');
+      if (old) old.remove();
+      layout.style.removeProperty('--gutter');
+      return;
+    }
     var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var de = ol.querySelector('.day-events');
+    var rows = Array.from(ol.querySelectorAll('.ev[data-series]')).map(function (el) {
+      return { el: el, series: state.series[Number(el.dataset.series)] };
+    });
     var dates = Array.from(ol.querySelectorAll('.day-row')).map(function (li) { return li.dataset.date; });
-    var first = dates[0], last = dates[dates.length - 1];
-    // Lanes are assigned on row order (not pixels) so the gutter can be
-    // sized for this page before anything is measured: the first free lane
-    // whose last series ended above this one.
-    var byId = {};
-    rows.forEach(function (row, i) { (byId[row.dataset.series] = byId[row.dataset.series] || { rows: [], idx: [] }).rows.push(row); byId[row.dataset.series].idx.push(i); });
-    var items = Object.keys(byId).map(function (id) {
-      var s = state.series[Number(id)];
-      var idx = byId[id].idx;
-      return { s: s, rows: byId[id].rows, before: s.start < first, after: s.end > last, from: s.start < first ? -1 : idx[0], to: s.end > last ? rows.length : idx[idx.length - 1] };
-    }).sort(function (a, b) { return a.from - b.from; });
-    var laneEnd = [];
-    items.forEach(function (it) {
-      for (var l = 0; ; l++) {
-        if (laneEnd[l] == null || laneEnd[l] < it.from) { laneEnd[l] = it.to; it.lane = l; break; }
-      }
+    LQAFilter.drawSeriesGraph(ol, rows, {
+      firstDate: dates[0], lastDate: dates[dates.length - 1],
+      laneWidth: 0.9 * rem,
+      onLanes: function (n) { layout.style.setProperty('--gutter', (n ? n * 0.9 + 0.3 : 0.9) + 'rem'); },
+      gutterX: function (box) { return de.getBoundingClientRect().right - box.left + rem; }, // past the cards and the grid gap
+      color: function (s) { return typeColor(eventType(s.events[0])); },
+      label: seriesLabel,
     });
-    layout.style.setProperty('--gutter', (laneEnd.length * 0.9 + 0.3) + 'rem');
-    var olBox = ol.getBoundingClientRect(); // measured after the gutter is set
-    items.forEach(function (it) {
-      it.pts = it.rows.map(function (row) { var r = row.getBoundingClientRect(); return { y: r.top + r.height / 2 - olBox.top, x: r.right - olBox.left - 1 }; });
-    });
-    var laneW = 0.9 * rem;
-    var gx = de.getBoundingClientRect().right - olBox.left + 1 * rem; // the gutter starts past the cards and the grid gap
-    var svg = document.createElementNS(SVG_NS, 'svg');
-    svg.setAttribute('class', 'series-graph');
-    svg.setAttribute('width', olBox.width);
-    svg.setAttribute('height', olBox.height);
-    svg.setAttribute('aria-hidden', 'true');
-    // At each card the lane swings over to touch the stripe and swings back:
-    // an incoming curve from above and its mirror going out below, meeting
-    // at the stripe. The first card of a series has only the outgoing half,
-    // the last only the incoming half. `b` is how far along the lane each
-    // half reaches; the straight lane runs between cards.
-    var b = 24;
-    var f = function (v) { return Math.round(v * 10) / 10; };
-    items.forEach(function (it) {
-      var x = f(gx + it.lane * laneW + laneW / 2);
-      var color = typeColor(eventType(it.s.events[0]));
-      var n = it.pts.length;
-      // One continuous path per series, drawn top to bottom: the pen starts
-      // at the page edge (or the first card's stripe), and for each card
-      // runs the straight lane down to the card's entry, curves into the
-      // stripe, and curves back out — then on to the next card or the edge.
-      var d = it.before ? 'M' + x + ' 0' : '';
-      it.pts.forEach(function (p, i) {
-        var starts = i === 0 && !it.before, ends = i === n - 1 && !it.after;
-        var px = f(p.x), py = f(p.y);
-        var rx = f(p.x + (x - p.x) * 0.45); // where the curve levels out toward the stripe
-        if (starts) d += 'M' + px + ' ' + py;
-        else d += ' L' + x + ' ' + f(py - b) + ' C' + x + ' ' + f(py - b / 3) + ' ' + rx + ' ' + py + ' ' + px + ' ' + py;
-        if (!ends) d += ' C' + rx + ' ' + py + ' ' + x + ' ' + f(py + b / 3) + ' ' + x + ' ' + f(py + b);
-      });
-      if (it.after) d += ' L' + x + ' ' + f(olBox.height);
-      if (d.indexOf('C') < 0 && d.indexOf('L') < 0) return; // a lone card with nothing to connect
-      var path = document.createElementNS(SVG_NS, 'path');
-      path.setAttribute('class', 'sg-line');
-      path.setAttribute('d', d);
-      path.style.stroke = color;
-      var tip = document.createElementNS(SVG_NS, 'title');
-      tip.textContent = seriesLabel(it.s);
-      path.appendChild(tip);
-      svg.appendChild(path);
-    });
-    ol.appendChild(svg);
   }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { drawSeriesGraph(); });
 
@@ -1025,31 +937,7 @@
     var arrows = 2 * (2.4 * rem + 0.4 * rem);
     return Math.max(7, Math.floor((width - arrows) / slot));
   }
-  // Always the first, last and current page; then the current's neighbors,
-  // outward, until the slots run out (a … between non-adjacent numbers
-  // takes a slot too).
-  function pagesToShow(total, page, slots) {
-    var i, all = [];
-    if (total <= slots) { for (i = 0; i < total; i++) all.push(i); return all; }
-    var shown = {};
-    shown[0] = shown[total - 1] = shown[page] = true;
-    var keys = function () { return Object.keys(shown).map(Number).sort(function (a, b) { return a - b; }); };
-    var rendered = function () {
-      var k = keys(), n = k.length;
-      for (var j = 1; j < k.length; j++) if (k[j] - k[j - 1] > 1) n++;
-      return n;
-    };
-    for (var r = 1; r < total; r++) {
-      var added = false;
-      [page - r, page + r].forEach(function (p) {
-        if (p <= 0 || p >= total - 1 || shown[p]) return;
-        shown[p] = true;
-        if (rendered() > slots) delete shown[p]; else added = true;
-      });
-      if (!added) break;
-    }
-    return keys();
-  }
+  var pagesToShow = LQAFilter.pagesToShow; // first, last, current, then neighbors until the slots run out
   var lastPages = [];
   function renderPager(pages) {
     var nav = $('agendaPager');
