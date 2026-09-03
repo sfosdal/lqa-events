@@ -219,29 +219,39 @@
     svg.setAttribute('width', olBox.width);
     svg.setAttribute('height', olBox.height);
     svg.setAttribute('aria-hidden', 'true');
-    var r = 20; // corner radius where the lane turns into a stripe
+    // At each card the lane swings over to touch the stripe and swings back:
+    // an incoming curve from above and its mirror going out below, meeting
+    // at the stripe. The first card of a series has only the outgoing half,
+    // the last only the incoming half. `b` is how far along the lane each
+    // half reaches; the straight lane runs between cards.
+    var b = 24;
     items.forEach(function (it) {
       var x = gx + it.lane * laneW + laneW / 2;
       var color = typeColor(eventType(it.s.events[0]));
       var d = '';
       var n = it.pts.length;
+      var reach = function (p) { return p.x + (x - p.x) * 0.45; }; // where the curve levels out toward the stripe
       it.pts.forEach(function (p, i) {
         var starts = i === 0 && !it.before, ends = i === n - 1 && !it.after;
-        if (starts && !ends) {
-          // first card: straight out of the stripe, then a quarter turn down into the lane
-          d += 'M' + p.x + ' ' + p.y + ' L' + (x - r) + ' ' + p.y + ' A' + r + ' ' + r + ' 0 0 1 ' + x + ' ' + (p.y + r);
-        } else if (ends && !starts) {
-          // last card: the mirror — the lane comes down and quarter-turns into the stripe
-          d += 'M' + x + ' ' + (p.y - r) + ' A' + r + ' ' + r + ' 0 0 1 ' + (x - r) + ' ' + p.y + ' L' + p.x + ' ' + p.y;
-        } else {
-          // the lane passes through: a straight branch into the stripe
-          d += 'M' + p.x + ' ' + p.y + ' L' + x + ' ' + p.y;
+        if (!starts) {
+          d += 'M' + x + ' ' + (p.y - b) + ' C' + x + ' ' + (p.y - b / 3) + ' ' + reach(p) + ' ' + p.y + ' ' + p.x + ' ' + p.y;
+        }
+        if (!ends) {
+          d += 'M' + p.x + ' ' + p.y + ' C' + reach(p) + ' ' + p.y + ' ' + x + ' ' + (p.y + b / 3) + ' ' + x + ' ' + (p.y + b);
         }
       });
-      // the lane itself, between the first corner's exit and the last's entry
-      var y1 = it.before ? 0 : it.pts[0].y + r;
-      var y2 = it.after ? olBox.height : it.pts[n - 1].y - r;
-      if (y2 > y1) d += 'M' + x + ' ' + y1 + ' L' + x + ' ' + y2;
+      // the straight lane: page edge or first card's exit, down to the next
+      // card's entry, and on to the last card's entry or the page edge
+      var ys = [];
+      it.pts.forEach(function (p, i) {
+        if (i > 0 || it.before) ys.push(p.y - b);
+        if (i < n - 1 || it.after) ys.push(p.y + b);
+      });
+      if (it.before) ys.unshift(0);
+      if (it.after) ys.push(olBox.height);
+      for (var k = 0; k + 1 < ys.length; k += 2) {
+        if (ys[k + 1] > ys[k]) d += 'M' + x + ' ' + ys[k] + ' L' + x + ' ' + ys[k + 1];
+      }
       var path = document.createElementNS(SVG_NS, 'path');
       path.setAttribute('class', 'sg-line');
       path.setAttribute('d', d);
