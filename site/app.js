@@ -243,18 +243,9 @@
     });
   }
 
-  // ---- quick filters + full panel ----
-  // The collapsed view is a slice of the expanded panel — the same checkbox
-  // rows, just the most-used filters. The filter icon swaps it for the full
-  // panel and back.
-  var QUICK_FILTERS = [
-    { group: 'venue', key: 'Climate Pledge Arena' },
-    { group: 'venue', key: 'McCaw Hall' },
-    { group: 'venue', key: 'Seattle Center' },
-    { group: 'venue', key: 'On the Boards' },
-    { group: 'badge', key: 'sports' },
-    { group: 'badge', key: 'concert' },
-  ];
+  // ---- filter panel ----
+  // Kayak-style groups of checkbox rows, dropped open under the bar by the
+  // funnel chip and closed by it or a click anywhere else.
   // One panel row: [✓] name  only  count. The native checkbox stays in the
   // DOM (visually replaced by .cb) so keyboard and screen-reader behavior
   // come for free; "only" unchecks everything else in the group.
@@ -322,21 +313,6 @@
     // would govern, unaffected by the current filter so they stay stable.
     var today = todayStr();
     var upcoming = state.events.filter(function (e) { return e.date >= today; });
-    var typeByKey = {};
-    TYPE_LIST.forEach(function (t) { typeByKey[t.key] = t; });
-    var ql = $('quickList');
-    ql.innerHTML = '';
-    QUICK_FILTERS.forEach(function (q) {
-      if (q.group === 'venue') {
-        if (state.venues.indexOf(q.key) === -1) return;
-        var n = upcoming.filter(function (e) { return e.venue === q.key; }).length;
-        ql.appendChild(filterRow('venue', q.key, venueName(q.key), n));
-      } else {
-        var t = typeByKey[q.key];
-        var m = upcoming.filter(function (e) { return eventType(e) === t.key; }).length;
-        ql.appendChild(filterRow('badge', t.key, dottedName(t.label, typeColor(t.key)), m, t.title));
-      }
-    });
     var pv = $('panelVenues');
     pv.innerHTML = '';
     state.venues.forEach(function (v) {
@@ -364,8 +340,8 @@
     });
     syncFilters();
   }
-  // Every checkbox for a filter (quick strip or group list) syncs from state
-  // in one pass, so Select all / only / Reset reach the strip rows too.
+  // Every checkbox in the panel syncs from state in one pass, so Select all /
+  // only / Reset all land in the same place.
   function syncFilters() {
     document.querySelectorAll('input[data-venue]').forEach(function (c) {
       c.checked = state.venueMode[c.dataset.venue] !== 'ex';
@@ -514,19 +490,15 @@
       applyFilters();
     }
   });
-  // More/Less lives up in the bar (above everything that grows, so it never
-  // moves); the card below swaps its quick strip for the full groups.
   function setPanelOpen(open) {
-    $('quickList').hidden = open;
-    $('fullFilters').hidden = !open;
-    $('quickPanel').classList.toggle('is-open', open);
+    $('filterPanel').hidden = !open;
     $('filterToggle').setAttribute('aria-expanded', String(open));
   }
-  function togglePanel() { setPanelOpen($('fullFilters').hidden); }
+  function togglePanel() { setPanelOpen($('filterPanel').hidden); }
   $('filterToggle').addEventListener('click', togglePanel);
-  // clicking anywhere outside the filter area collapses back to the quick view
+  // a click anywhere outside the panel or its chip closes it
   document.addEventListener('click', function (e) {
-    if (!$('fullFilters').hidden && !e.target.closest('.filter-panel, .filterbar')) {
+    if (!$('filterPanel').hidden && !e.target.closest('#filterPanel, #filterToggle')) {
       setPanelOpen(false);
     }
   });
@@ -560,23 +532,41 @@
     if (b) applyTheme(b.dataset.theme);
   });
 
-  // ---- phones: collapsible mini calendar ----
-  // Stacked above the list on small screens, it can be folded away behind
-  // the toggle; it starts open and remembers a fold. On the wide layout it's
-  // always open and the toggle is hidden.
+  // ---- the mini calendar: docked or floating ----
+  // Wide layout: docked beside the list, open by default, and a fold is
+  // remembered; folded, the list takes the full width and a floating handle
+  // at the right edge brings it back. Phones: never docked — the handle
+  // opens it as a floating panel over the list, and it closes again on a
+  // day pick or a tap elsewhere (transient, so nothing is stored).
   var STACKED = '(max-width: 760px)';
+  var calFloatOpen = false;
+  function wideCalOpen() {
+    try { return localStorage.getItem('lqa-cal-wide') !== 'closed'; } catch (e) { return true; }
+  }
   function syncCal() {
     var stacked = matchMedia(STACKED).matches;
-    var open = true;
-    if (stacked) { try { open = localStorage.getItem('lqa-cal') !== 'closed'; } catch (e) { open = true; } }
+    var open = stacked ? calFloatOpen : wideCalOpen();
     $('calBox').hidden = !open;
-    $('calToggle').setAttribute('aria-expanded', String(open));
-    $('calToggle').querySelector('span').textContent = open ? 'Hide calendar' : 'Show calendar';
+    document.querySelector('.cal-side').classList.toggle('is-float', stacked && open);
+    document.querySelector('.agenda-layout').classList.toggle('cal-closed', !stacked && !open);
+    var t = $('calToggle');
+    t.classList.toggle('is-fab', stacked || !open);
+    t.setAttribute('aria-expanded', String(open));
+    t.title = open ? 'Hide calendar' : 'Show calendar';
+    t.querySelector('span').textContent = t.title;
   }
   $('calToggle').addEventListener('click', function () {
     var open = $('calBox').hidden;
-    try { localStorage.setItem('lqa-cal', open ? 'open' : 'closed'); } catch (e) { /* no storage */ }
+    if (matchMedia(STACKED).matches) calFloatOpen = open;
+    else { try { localStorage.setItem('lqa-cal-wide', open ? 'open' : 'closed'); } catch (e) { /* no storage */ } }
     syncCal();
+  });
+  function closeFloatCal() { if (calFloatOpen) { calFloatOpen = false; syncCal(); } }
+  $('calGrid').addEventListener('click', function (e) {
+    if (e.target.closest('button.cal-day')) closeFloatCal();
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.cal-side')) closeFloatCal();
   });
   syncCal();
   window.addEventListener('resize', syncCal);
@@ -843,8 +833,8 @@
       rail.className = 'date-rail';
       rail.innerHTML =
         '<span class="dnum">' + d.getDate() + '</span>' +
-        '<span class="dmeta">' + d.toLocaleDateString('en-US', { weekday: 'short' }) + ' · ' +
-        d.toLocaleDateString('en-US', { month: 'short' }) + '</span>';
+        '<span class="dmeta">' + d.toLocaleDateString('en-US', { month: 'short' }) + ' · ' +
+        d.toLocaleDateString('en-US', { weekday: 'short' }) + '</span>';
       li.appendChild(rail);
 
       var wrap = document.createElement('div');
@@ -1052,10 +1042,13 @@
     var open = pop.hidden;
     pop.hidden = !open;
     this.setAttribute('aria-expanded', String(open));
+    // sit under the chip, but never past the bar's right edge
+    var bar = this.parentNode;
+    pop.style.setProperty('--pop-x', Math.max(0, Math.min(this.offsetLeft, bar.clientWidth - pop.offsetWidth)) + 'px');
     if (open) { $('qrPanel').hidden = true; $('qrBtn').setAttribute('aria-expanded', 'false'); }
   });
   document.addEventListener('click', function (e) {
-    if (!e.target.closest('.masthead-actions')) {
+    if (!e.target.closest('#subscribeBtn, #subscribePop')) {
       $('subscribePop').hidden = true;
       $('subscribeBtn').setAttribute('aria-expanded', 'false');
     }

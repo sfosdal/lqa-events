@@ -108,9 +108,9 @@ h1 {
   text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
   margin: 0 0 .5rem; min-height: 1em;
 }
-/* The subscribe pill: solid ink with the page background as its text — a
-   dark pill in light mode, a light one in dark — gold on hover. Auto
-   vertical margins center it in the column below the Updated stamp. */
+/* Solid-ink pill with the page background as its text — a dark pill in
+   light mode, a light one in dark — gold on hover (the event sheet's
+   Tickets button). */
 .btn-cal {
   display: inline-flex; align-items: center; gap: .55em; margin: auto 0;
   font: 600 1rem/1 var(--body); color: var(--sky); background: var(--ink);
@@ -119,9 +119,11 @@ h1 {
 }
 .btn-cal svg { width: 1.15em; height: 1.15em; flex: none; }
 .btn-cal:hover { background: var(--gold); color: #1b2733; }
+/* the subscribe pop hangs under its chip (app.js sets --pop-x to the chip's
+   offset, pulled back if the pop would run past the bar's right edge) */
 .pop {
-  position: absolute; right: 0; top: calc(100% + .5rem); z-index: 10;
-  width: min(24rem, 88vw); background: var(--mist); border: 1px solid var(--line);
+  position: absolute; left: var(--pop-x, 0); top: calc(100% + .5rem); z-index: 10;
+  width: min(24rem, 100%); background: var(--mist); border: 1px solid var(--line);
   border-radius: 8px; padding: 1rem 1.1rem; box-shadow: 0 8px 28px rgba(15, 25, 35, .18);
   font-size: .92rem;
 }
@@ -146,55 +148,39 @@ h1 {
 }
 .tile:hover { border-color: var(--gold); }
 .tile:hover span { color: var(--ink); }
-/* ---- filter area: icon bar, quick slice, full panel ---- */
-.filterbar { display: flex; flex-wrap: nowrap; gap: .7rem; align-items: flex-end; margin: .5rem 0 0; }
+/* ---- filter bar: one row of matching chips ---- */
+/* Funnel (filters), Reset, Copy link, Add To Calendar, then the theme pill
+   at the right end. position: relative makes the bar the box the subscribe
+   pop hangs from. */
+.filterbar {
+  display: flex; flex-wrap: nowrap; gap: .6rem; align-items: center;
+  margin: .75rem 0 0; position: relative;
+}
 .filterbar > * { flex-shrink: 0; }
-/* the toggle reads as a tab on the filter card: squared bottom, no bottom
-   border, inset past the card's rounded corner. The ::after strip paints card
-   background over the card's top border where the tab sits — but only
-   between the tab's side borders (absolute offsets are padding-box relative),
-   never over them: a pseudo-element paints above its parent's border, so a
-   wider strip erases the bottom of the tab's own walls and the outline loses
-   its corners. The card's border pixel under each wall is what turns the
-   outline from the wall onto the card's top edge. */
-.filter-icon {
-  height: 2.4rem; padding: 0 .8rem; border-radius: 10px 10px 0 0; cursor: pointer;
-  border: 1px solid var(--line); border-bottom: 0;
-  background: var(--mist); color: var(--ink);
-  display: inline-flex; align-items: center; gap: .4rem;
-  position: relative; z-index: 1; margin-left: 14px;
+.filterbar .chip {
+  display: inline-flex; align-items: center; gap: .45rem; min-height: 2.25rem;
+  position: relative; /* for the visually-hidden labels in .is-tight */
 }
-.filter-icon::after {
-  content: ""; position: absolute; left: 0; right: 0; top: calc(100% - 1px);
-  height: 4px; background: var(--mist);
-}
-.filter-icon svg { width: 1.1rem; height: 1.1rem; }
-/* the chevron is the open/closed indicator — no More/Less text */
-.filter-icon .chev { width: .9rem; height: .9rem; transition: transform .15s; }
-.filter-icon[aria-expanded="true"] .chev { transform: rotate(180deg); }
-.filter-icon:hover { border-color: var(--ink-soft); }
-/* The tab and the card below it read as one continuous shape (see the
-   ::after seam above); hovering either one highlights both, not just the
-   piece under the cursor. The tab's outline color is deliberately the
-   same whether or not a filter is active — no separate "active" color. */
-body:has(#quickPanel:hover) #filterToggle { border-color: var(--ink-soft); }
-body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
-.reset-chip { margin-bottom: .5rem; display: inline-flex; align-items: center; gap: .4rem; }
-.reset-chip svg { width: .9rem; height: .9rem; }
-/* The bar can't wrap (the tab must stay joined to the card below). When its
-   content wouldn't fit — app.js measures and sets .is-tight — Reset and Copy
-   keep just their icons; the labels stay for screen readers. */
-.filterbar.is-tight #copyFilterLabel, .filterbar.is-tight #clearAll span {
+.filterbar .chip svg { width: 1rem; height: 1rem; flex: none; }
+.filterbar .chip:not(:disabled):hover { border-color: var(--ink-soft); }
+/* the funnel's chevron is the panel's open/closed indicator. Its outline is
+   deliberately the same whether or not a filter is active — Reset lighting
+   up is the "something's filtered" signal. */
+#filterToggle .chev { width: .85rem; height: .85rem; transition: transform .15s; }
+#filterToggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.reset-chip:disabled { opacity: .45; cursor: default; }
+/* The bar can't wrap. When its content wouldn't fit — app.js measures and
+   sets .is-tight — the labeled chips keep just their icons; the labels stay
+   for screen readers. */
+.filterbar.is-tight #clearAll span, .filterbar.is-tight #subscribeBtn span {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
-.filterbar.is-tight #copyFilterLink, .filterbar.is-tight #clearAll { padding: .5em .7em; }
-.filterbar.is-tight #copyFilterLink svg, .filterbar.is-tight #clearAll svg { width: 1.1rem; height: 1.1rem; }
-.reset-chip:disabled { opacity: .45; cursor: default; }
-.reset-chip:not(:disabled):hover { border-color: var(--ink-soft); }
+.filterbar.is-tight #clearAll, .filterbar.is-tight #subscribeBtn { padding: .5em .7em; }
+.filterbar.is-tight #clearAll svg, .filterbar.is-tight #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
 /* light / system / dark: a three-stop pill at the bar's right end, the gold
    knob sliding under the active icon */
 .theme-toggle {
-  position: relative; display: inline-flex; margin-left: auto; margin-bottom: .5rem;
+  position: relative; display: inline-flex; margin-left: auto;
   padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--mist);
 }
 .theme-toggle { --tt: 2rem; } /* stop width — wider on phones for the tap target */
@@ -213,26 +199,11 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
 .theme-toggle[data-active="system"] .theme-knob { left: calc(3px + var(--tt)); }
 .theme-toggle[data-active="dark"] .theme-knob { left: calc(3px + var(--tt) * 2); }
 @media (prefers-reduced-motion: reduce) { .theme-knob { transition: none; } }
-#copyFilterLink { margin-bottom: .5rem; display: inline-flex; align-items: center; gap: .4rem; }
-#copyFilterLink svg { width: .9rem; height: .9rem; }
-#copyFilterLabel { transition: opacity .4s; }
-#copyFilterLabel.is-fading { opacity: 0; }
-#copyFilterLink:hover { border-color: var(--ink-soft); }
-/* the collapsed state: a slice of the panel, spread across the full width
-   (#quickList only — the group lists inside #fullFilters stay columns) */
-.quick-panel { padding: .55rem .75rem; }
-#quickList {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  column-gap: 2rem;
-}
-#quickList[hidden] { display: none; } /* author display beats the UA [hidden] rule */
-.quick-panel.is-open { padding: 1rem 1.1rem; }
+/* the panel drops open under the bar; closed, it takes no room */
 .filter-panel {
   background: var(--mist); border: 1px solid var(--line);
-  border-radius: 10px; /* the tab sits inset, past the corner curve */
-  padding: 1rem 1.1rem; margin-bottom: 1.25rem;
+  border-radius: 10px; padding: 1rem 1.1rem; margin-top: .75rem;
 }
-.filter-panel:hover { border-color: var(--ink-soft); }
 /* Kayak-style panel: columns of checkbox rows, Select all | Clear all links
    per group, an "only" link on hover, and an event count on the right. */
 .fp-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1.25rem 2.25rem; }
@@ -295,13 +266,30 @@ body:has(#filterToggle:hover) #quickPanel { border-color: var(--ink-soft); }
 /* the pager sits between list and calendar in the DOM — pin the columns so
    auto-placement doesn't hand it the calendar's cell */
 .agenda-layout > ol, .agenda-layout > .pager { grid-column: 1; }
-.cal-side { position: sticky; top: 1rem; grid-column: 2; grid-row: 1; }
+.cal-side {
+  position: sticky; top: 1rem; grid-column: 2; grid-row: 1;
+  display: flex; flex-direction: column;
+}
+/* folded (wide): the list takes the whole width. The aside becomes a
+   zero-height sticky strip across the list's top edge (row 1, so the list
+   drops to row 2 at no cost); the handle hangs off its right end and rides
+   along as the list scrolls. */
+.agenda-layout.cal-closed { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.agenda-layout.cal-closed .cal-side { grid-column: 1; grid-row: 1; display: block; height: 0; z-index: 15; }
 @media (max-width: 760px) {
   .agenda-layout { display: flex; flex-direction: column; }
   /* the grid's align-items: start carries over; the pager must span the
      column or it shrinks to its content and hugs the left edge */
   .agenda-layout > .pager { align-self: stretch; }
-  .cal-side { order: -1; position: static; width: 100%; max-width: 24rem; margin: 0 auto 1.5rem; }
+  /* never docked here: the same zero-height sticky strip, first in the
+     column, carrying the handle and the floating calendar */
+  .cal-side { order: -1; display: block; height: 0; top: .6rem; z-index: 15; }
+  .cal-side.is-float .cal {
+    position: absolute; z-index: 14; right: 0; top: 3.1rem; /* under the handle */
+    width: min(22rem, 100%);
+    max-height: calc(100vh - 5rem); overflow-y: auto;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, .3);
+  }
 }
 
 /* ---- mini month calendar ---- */
@@ -474,8 +462,24 @@ button.cal-day:hover { background: var(--gold-soft); box-shadow: inset 0 0 0 1px
 .pop-filter { display: flex; gap: .5em; align-items: center; cursor: pointer; font-weight: 600; }
 .pop-filter input { accent-color: var(--gold); }
 
-/* ---- share / embed ---- */
+/* ---- share / embed (a <details>, closed by default) ---- */
 .share { margin-top: 3rem; }
+.share summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: .8rem; }
+.share summary::-webkit-details-marker { display: none; }
+.share summary .section-title { margin: 0; }
+/* the disclosure chevron: down when closed, up when open */
+.share summary::after {
+  content: ""; width: .6rem; height: .6rem; margin-top: -.3rem;
+  border: solid var(--ink-soft); border-width: 0 2px 2px 0;
+  transform: rotate(45deg); transition: transform .15s, margin .15s;
+}
+.share[open] summary::after { transform: rotate(225deg); margin-top: .3rem; }
+.share[open] summary { margin-bottom: 1rem; }
+.share .chip { display: inline-flex; align-items: center; gap: .45rem; min-height: 2.25rem; }
+.share .chip svg { width: 1rem; height: 1rem; flex: none; }
+.share .chip:hover { border-color: var(--ink-soft); }
+#copyFilterLabel { transition: opacity .4s; }
+#copyFilterLabel.is-fading { opacity: 0; }
 .share-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1.5rem; }
 .share h3 { font-size: 1.05rem; margin: 0 0 .4rem; }
 .share p { color: var(--ink-soft); margin: 0 0 .7rem; }
@@ -498,19 +502,35 @@ footer p { color: var(--ink-soft); font-size: .85rem; margin: .4rem auto 0; max-
 }
 .gw-credit strong { font-weight: 500; color: var(--gold); }
 
-/* ---- small screens: tighter header, horizontal date headers, stacked rows ---- */
-/* ---- phones: the calendar toggle (hidden on the wide layout) and the
-   event sheet ---- */
+/* ---- the calendar's show/hide toggle ---- */
+/* Docked (wide, calendar open): a slim labeled pill right-aligned above the
+   calendar. Floating (.is-fab — phones, or wide + folded): icon + chevron
+   only, pinned to the right end of the aside's sticky strip, so it starts
+   level with the top of the list (under the theme pill) and then floats at
+   the top of the viewport as the list scrolls. The chevron points left while
+   folded ("opens out over the list") and flips right once open. */
 .cal-toggle {
-  display: none; width: 100%; align-items: center; gap: .5rem; margin: 0 0 .6rem;
-  font: 600 .95rem/1 var(--body); color: var(--ink); background: var(--mist);
-  border: 1px solid var(--line); border-radius: 10px; padding: .8em 1em; cursor: pointer;
+  display: inline-flex; align-items: center; gap: .45rem; align-self: flex-end;
+  margin: 0 0 .5rem; font: 600 .82rem/1 var(--body); color: var(--ink);
+  background: var(--mist); border: 1px solid var(--line); border-radius: 10px;
+  padding: .55em .8em; cursor: pointer;
 }
-.cal-toggle svg { width: 1.1rem; height: 1.1rem; flex: none; }
-.cal-toggle span { flex: 1; text-align: left; }
-.cal-toggle .chev { width: .9rem; height: .9rem; transition: transform .15s; }
+.cal-toggle:hover { border-color: var(--ink-soft); }
+.cal-toggle svg { width: 1.05rem; height: 1.05rem; flex: none; }
+.cal-toggle .chev { width: .85rem; height: .85rem; transition: transform .15s; }
 .cal-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
-@media (max-width: 760px) { .cal-toggle { display: flex; } }
+.cal-toggle.is-fab {
+  position: absolute; right: 0; top: 0;
+  margin: 0; padding: .6em .8em; min-height: 2.5rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .22);
+}
+.cal-toggle.is-fab span {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.cal-toggle.is-fab svg { width: 1.2rem; height: 1.2rem; }
+.cal-toggle.is-fab .chev { width: .95rem; height: .95rem; }
+
+/* ---- phones: the event sheet ---- */
 .sheet { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; }
 .sheet[hidden] { display: none; }
 .sheet-back { position: absolute; inset: 0; background: rgba(0, 0, 0, .55); }
@@ -535,7 +555,7 @@ body.sheet-open { overflow: hidden; }
   body {
     padding: 0 max(1rem, env(safe-area-inset-right)) calc(2.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   }
-  .chip, .filter-icon, .pager button, .past-toggle button { min-height: 2.75rem; }
+  .chip, .pager button, .past-toggle button { min-height: 2.75rem; }
   .theme-toggle { --tt: 2.6rem; }
   .theme-toggle button { height: 2.35rem; }
   .cal-grid > * { min-height: 2.75rem; }
@@ -550,7 +570,6 @@ body.sheet-open { overflow: hidden; }
     flex-direction: column; align-items: stretch; gap: .2rem;
   }
   .updated { font-size: 1.05rem; margin: 0 0 .4rem; }
-  .btn-cal { width: 100%; justify-content: center; margin: 0; }
   .pop { left: 0; right: 0; width: auto; }
   .section-title { font-size: 1.6rem; margin-top: 1.8rem; }
 
