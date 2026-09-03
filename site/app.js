@@ -219,23 +219,28 @@
     svg.setAttribute('width', olBox.width);
     svg.setAttribute('height', olBox.height);
     svg.setAttribute('aria-hidden', 'true');
-    var bend = 14; // how far above/below a card the curve leaves the lane
+    var r = 20; // corner radius where the lane turns into a stripe
     items.forEach(function (it) {
       var x = gx + it.lane * laneW + laneW / 2;
       var color = typeColor(eventType(it.s.events[0]));
       var d = '';
+      var n = it.pts.length;
       it.pts.forEach(function (p, i) {
-        if (i === 0 && !it.before) {
-          // the series starts here: out of the stripe, bending down into the lane
-          d += 'M' + p.x + ' ' + p.y + ' C' + x + ' ' + p.y + ' ' + x + ' ' + p.y + ' ' + x + ' ' + (p.y + bend);
+        var starts = i === 0 && !it.before, ends = i === n - 1 && !it.after;
+        if (starts && !ends) {
+          // first card: straight out of the stripe, then a quarter turn down into the lane
+          d += 'M' + p.x + ' ' + p.y + ' L' + (x - r) + ' ' + p.y + ' A' + r + ' ' + r + ' 0 0 1 ' + x + ' ' + (p.y + r);
+        } else if (ends && !starts) {
+          // last card: the mirror — the lane comes down and quarter-turns into the stripe
+          d += 'M' + x + ' ' + (p.y - r) + ' A' + r + ' ' + r + ' 0 0 1 ' + (x - r) + ' ' + p.y + ' L' + p.x + ' ' + p.y;
         } else {
-          // a branch off the lane, bending into the stripe
-          d += 'M' + x + ' ' + (p.y - bend) + ' C' + x + ' ' + p.y + ' ' + x + ' ' + p.y + ' ' + p.x + ' ' + p.y;
+          // the lane passes through: a straight branch into the stripe
+          d += 'M' + p.x + ' ' + p.y + ' L' + x + ' ' + p.y;
         }
       });
-      // the lane itself, between the first curve's exit and the last's entry
-      var y1 = it.before ? 0 : it.pts[0].y + bend;
-      var y2 = it.after ? olBox.height : it.pts[it.pts.length - 1].y - bend;
+      // the lane itself, between the first corner's exit and the last's entry
+      var y1 = it.before ? 0 : it.pts[0].y + r;
+      var y2 = it.after ? olBox.height : it.pts[n - 1].y - r;
       if (y2 > y1) d += 'M' + x + ' ' + y1 + ' L' + x + ' ' + y2;
       var path = document.createElementNS(SVG_NS, 'path');
       path.setAttribute('class', 'sg-line');
