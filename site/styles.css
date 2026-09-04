@@ -37,6 +37,8 @@
   --tm-sounders: #669900;
   --tm-kraken: #00cc00;
   --tm-torrent: #cccc00;
+  --barh: 3.4rem;        /* the pinned filter bar's height (chips 2.25rem + padding) */
+  --rule: color-mix(in srgb, var(--line), var(--ink-soft)); /* list dividers: a step brighter than --line */
   --display: "Big Shoulders", "Arial Narrow", sans-serif;
   --body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -73,7 +75,7 @@
 :root[data-theme="light"] { color-scheme: light; }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: clip; } /* clip: the footer bleeds to the viewport edges */
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body {
   margin: 0 auto; padding: 0 1.25rem 3rem; max-width: 62rem;
@@ -81,7 +83,7 @@ body {
   font: 16px/1.55 var(--body);
 }
 a { color: inherit; text-underline-offset: 2px; }
-:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 2px; }
 
 /* ---- masthead ---- */
 .masthead {
@@ -193,6 +195,7 @@ h1 {
   transform: translateY(-50%); color: var(--ink-soft); pointer-events: none;
 }
 .filterbar.is-tight .search-wrap { flex-basis: 9rem; }
+#toTop[hidden] { display: none; }
 /* Add To Calendar sits at the right end, just left of the theme pill (DOM
    order keeps it with the other actions; flex order moves it) */
 #subscribeBtn { order: 1; margin-left: auto; }
@@ -218,10 +221,20 @@ h1 {
 .theme-toggle[data-active="system"] .theme-knob { left: calc(3px + var(--tt)); }
 .theme-toggle[data-active="dark"] .theme-knob { left: calc(3px + var(--tt) * 2); }
 @media (prefers-reduced-motion: reduce) { .theme-knob { transition: none; } }
-/* the panel drops open under the bar; closed, it takes no room */
+/* the bar stays pinned at the top while the list scrolls (--barh is its
+   height — the month dividers and the calendar strip stick just below it);
+   the panel floats open under it, over the content, which stays put */
+.filter-area {
+  position: sticky; top: 0; z-index: 30; background: var(--sky);
+  padding: .55rem 0 .6rem; margin-top: .2rem;
+}
+.filter-area .filterbar { margin: 0; }
 .filter-panel {
+  position: absolute; left: 0; right: 0; top: calc(100% + .5rem); z-index: 20;
   background: var(--mist); border: 1px solid var(--line);
-  border-radius: 10px; padding: 1rem 1.1rem; margin-top: .75rem;
+  border-radius: 10px; padding: 1rem 1.1rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .3);
+  max-height: calc(100vh - 8rem); overflow-y: auto;
 }
 /* Kayak-style panel: columns of checkbox rows, Select all | Clear all links
    per group, an "only" link on hover, and an event count on the right. */
@@ -266,7 +279,7 @@ h1 {
 }
 .fp-check:hover .cb { border-color: var(--ink); }
 .fp-check:hover input:checked + .cb { background: var(--ink-soft); border-color: var(--ink-soft); }
-.fp-check input:focus-visible + .cb { outline: 2px solid var(--gold); outline-offset: 2px; }
+.fp-check input:focus-visible + .cb { outline: 2px solid var(--ink-soft); outline-offset: 2px; }
 .fp-name { font-size: .88rem; display: flex; align-items: center; gap: .45rem; overflow-wrap: anywhere; }
 .fp-name a { text-decoration-color: var(--line); }
 .fp-name a:hover { text-decoration-color: var(--ink-soft); }
@@ -302,7 +315,7 @@ h1 {
   gap: 0 2.5rem; align-items: start;
 }
 .agenda-layout > ol { grid-column: 1; }
-.cal-side { position: sticky; top: 1rem; grid-column: 2; grid-row: 1; }
+.cal-side { position: sticky; top: calc(var(--barh) + .75rem); grid-column: 2; grid-row: 1; }
 /* Below the page's full width (62rem + padding) the calendar never docks —
    beside the list it would squeeze the cards to a sliver — so from here
    down it floats over the list instead. */
@@ -315,7 +328,7 @@ h1 {
   /* a zero-height sticky strip, first in the column, carrying the handle
      (hanging off its right end) and the floating calendar; both ride along
      as the list scrolls */
-  .cal-side { order: -1; height: 0; top: .6rem; z-index: 15; }
+  .cal-side { order: -1; height: 0; top: calc(var(--barh) + .5rem); z-index: 15; }
   .cal-side.is-float .cal {
     position: absolute; z-index: 14; right: 0; top: 3.1rem; /* under the handle */
     width: min(22rem, 100%);
@@ -361,59 +374,10 @@ h1 {
 .cal-mname {
   padding: .5rem .6rem;
   border-bottom: 2px solid color-mix(in srgb, var(--ink-soft) 78%, var(--gold));
-  /* each month's colors run left to right, laid over the card surface at
-     --sc strength so the type stays readable in both themes; the year reads
-     as one long band — whites through midwinter, green rising in March, a
-     blue notch mid-April, yellow spread across summer, red arriving in
-     August and burning down to deep orange through fall */
-  background: var(--season);
+  /* the Ghostwood Labs orange, deepened so white type reads on it */
+  background: color-mix(in srgb, var(--gold) 72%, #000); color: #fff;
+  font-family: var(--display);
 }
-.cal-month { --sc: 45%; } /* on the card: the --season gradients resolve there */
-.cal-month[data-month="1"] { --season: linear-gradient(90deg, /* white, light blue */
-  color-mix(in srgb, #ffffff var(--sc), var(--mist)) 0 40%,
-  color-mix(in srgb, #99d6ff var(--sc), var(--mist))); }
-.cal-month[data-month="2"] { --season: linear-gradient(90deg, /* white → dark blue, light pink */
-  color-mix(in srgb, #ffffff var(--sc), var(--mist)),
-  color-mix(in srgb, #1f3a93 var(--sc), var(--mist)) 45%,
-  color-mix(in srgb, #ffb3d9 var(--sc), var(--mist))); }
-.cal-month[data-month="3"] { --season: linear-gradient(90deg, /* light green, more green, golden yellow */
-  color-mix(in srgb, #a8e6a1 var(--sc), var(--mist)),
-  color-mix(in srgb, #3cb043 var(--sc), var(--mist)) 45%,
-  color-mix(in srgb, #f5c518 var(--sc), var(--mist))); }
-.cal-month[data-month="4"] { --season: linear-gradient(90deg, /* daffodil, a blue notch, lavender */
-  color-mix(in srgb, #ffe14d var(--sc), var(--mist)) 0 30%,
-  color-mix(in srgb, #4da3ff var(--sc), var(--mist)) 50%,
-  color-mix(in srgb, #b39ddb var(--sc), var(--mist)) 70%); }
-.cal-month[data-month="5"] { --season: linear-gradient(90deg, /* magenta, yellow, pink */
-  color-mix(in srgb, #ff00aa var(--sc), var(--mist)),
-  color-mix(in srgb, #ffe14d var(--sc), var(--mist)) 50%,
-  color-mix(in srgb, #ff99cc var(--sc), var(--mist))); }
-.cal-month[data-month="6"] { --season: linear-gradient(90deg, /* turquoise, yellow, light blue */
-  color-mix(in srgb, #30d5c8 var(--sc), var(--mist)),
-  color-mix(in srgb, #ffe14d var(--sc), var(--mist)) 50%,
-  color-mix(in srgb, #99d6ff var(--sc), var(--mist))); }
-.cal-month[data-month="7"] { --season: linear-gradient(90deg, /* dark blue, yellow, silver */
-  color-mix(in srgb, #1f3a93 var(--sc), var(--mist)),
-  color-mix(in srgb, #ffe14d var(--sc), var(--mist)) 50%,
-  color-mix(in srgb, #c0c0c0 var(--sc), var(--mist))); }
-.cal-month[data-month="8"] { --season: linear-gradient(90deg, /* sunshine yellow, lime, red arriving */
-  color-mix(in srgb, #ffd400 var(--sc), var(--mist)),
-  color-mix(in srgb, #a3e635 var(--sc), var(--mist)) 50%,
-  color-mix(in srgb, #d62828 var(--sc), var(--mist))); }
-.cal-month[data-month="9"] { --season: linear-gradient(90deg, /* deep emerald, lighter green, deep orange */
-  color-mix(in srgb, #046a38 var(--sc), var(--mist)),
-  color-mix(in srgb, #6fd08c var(--sc), var(--mist)) 45%,
-  color-mix(in srgb, #c2410c var(--sc), var(--mist))); }
-.cal-month[data-month="10"] { --season: linear-gradient(90deg, /* orange (most of it), black */
-  color-mix(in srgb, #ff7a00 var(--sc), var(--mist)) 0 55%,
-  color-mix(in srgb, #000000 var(--sc), var(--mist))); }
-.cal-month[data-month="11"] { --season: linear-gradient(90deg, /* orange (most of it), brown */
-  color-mix(in srgb, #ff7a00 var(--sc), var(--mist)) 0 55%,
-  color-mix(in srgb, #6b3e1d var(--sc), var(--mist))); }
-.cal-month[data-month="12"] { --season: linear-gradient(90deg, /* dark blue, dark green, then white */
-  color-mix(in srgb, #1f3a93 var(--sc), var(--mist)),
-  color-mix(in srgb, #0b5d2b var(--sc), var(--mist)) 40%,
-  color-mix(in srgb, #ffffff var(--sc), var(--mist)) 75%); }
 .cal-dow, .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); }
 .cal-dow { border-bottom: 1px solid var(--line); }
 .cal-dow span {
@@ -438,10 +402,9 @@ button.cal-day { cursor: pointer; }
    it reads in both themes */
 button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist)); box-shadow: inset 0 0 0 1px var(--ink-soft); }
 .cal-day .num { display: block; }
-.cal-day.is-today .num {
-  display: inline-block; background: var(--gold); color: #fff;
-  border-radius: 3px; padding: 0 .3em; font-weight: 500;
-}
+/* today: the hover treatment, a touch brighter, held */
+.cal-day.is-today { background: color-mix(in srgb, var(--ink) 20%, var(--mist)); box-shadow: inset 0 0 0 1px var(--ink); }
+.cal-day.is-today .num { font-weight: 700; }
 .ticks { display: flex; flex-wrap: wrap; gap: 2px; margin-top: .2rem; }
 .ticks i { width: .28rem; height: .28rem; border-radius: 1px; background: var(--dot, var(--ink-soft)); }
 /* past days go grey: the number in the soft ink, the venue ticks washed
@@ -450,30 +413,47 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 .cal-day.is-past .ticks i { filter: saturate(.4); opacity: .6; }
 
 /* ---- agenda ---- */
-.section-title {
-  font-family: var(--display); font-weight: 700; font-size: 2rem;
-  text-transform: uppercase; letter-spacing: .03em; margin: 2.5rem 0 1rem;
-}
 .agenda ol { list-style: none; margin: 0; padding: 0; }
 .agenda .empty { color: var(--ink-soft); }
 /* dividers: a name centered between two rules, in the masthead's stamp type
    (see .updated) a size down. The month one is stuck to the top of the
    viewport while its month scrolls by (the next month's slides over it);
    holiday ones just scroll past. */
+/* the name sits on a rule that fades out toward both edges (the rule is the
+   row's background; the name's own background knocks it out behind the text) */
 .month-row, .holiday-row {
-  display: flex; align-items: center; gap: .9rem; padding: .6rem 0 .45rem;
+  position: relative; display: flex; justify-content: center; align-items: center;
+  padding: .6rem 0 .45rem;
   font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1;
   text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
+  background: var(--sky);
 }
-.month-row { position: sticky; top: 0; z-index: 5; background: var(--sky); }
+/* the rule itself: a 1px layer at the row's center, above the shadow */
+.month-row::before, .holiday-row::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; z-index: 1;
+  background: linear-gradient(90deg, transparent, var(--rule) 15%, var(--rule) 85%, transparent);
+}
+.month-row > span, .holiday-row > span { position: relative; z-index: 1; background: var(--sky); padding: 0 .9rem; }
+.month-row { position: sticky; top: var(--barh); z-index: 5; }
 .holiday-row { font-size: 1.05rem; }
-.month-row::before, .month-row::after, .holiday-row::before, .holiday-row::after {
-  content: ""; flex: 1; border-top: 1px solid var(--line);
+/* the shadow it casts while stuck (app.js sets .is-stuck) and as the first
+   thing in the list: a dark gradient starting right at the rule (the row's
+   vertical center) and fading downward past the row, masked with the same
+   15% / 85% stops as the rule so both fade out together toward the sides */
+.month-row::after {
+  content: ""; position: absolute; left: 0; right: 0; top: calc(50% + 1px); bottom: -28px; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, .6), transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  opacity: 0; transition: opacity .15s;
 }
-.month-row + .day-row, .holiday-row + .day-row { border-top: 0; }
+.month-row.is-stuck::after, #agenda > .month-row:first-child::after { opacity: 1; }
+.month-row + .day-row, .holiday-row + .day-row { background: none; }
+/* the rule between days fades out toward both edges */
 .day-row {
   display: grid; grid-template-columns: 5.2rem 1fr; gap: 1rem;
-  border-top: 1px solid var(--line); padding: 1rem 0;
+  padding: 1rem 0;
+  background: linear-gradient(90deg, transparent, var(--rule) 15%, var(--rule) 85%, transparent) top / 100% 1px no-repeat;
 }
 .day-row.is-past { opacity: .5; }
 /* ---- series: "n of N" under the time, and a git-style graph in a gutter
@@ -539,21 +519,30 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
   text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft);
 }
 .pop-filter { display: flex; gap: .5em; align-items: center; cursor: pointer; font-weight: 600; }
-.pop-filter input { accent-color: var(--gold); }
+.pop-filter input { accent-color: var(--ink); }
 
-/* ---- share / embed (a <details>, closed by default) ---- */
-.share { margin-top: 3rem; }
-.share summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: .8rem; }
-.share summary::-webkit-details-marker { display: none; }
-.share summary .section-title { margin: 0; }
-/* the disclosure chevron: down when closed, up when open */
-.share summary::after {
-  content: ""; width: .6rem; height: .6rem; margin-top: -.3rem;
-  border: solid var(--ink-soft); border-width: 0 2px 2px 0;
-  transform: rotate(45deg); transition: transform .15s, margin .15s;
+/* ---- share / embed: a <details> in the footer that opens UPWARD, its body
+   floating over the list ---- */
+.share summary {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem;
+  font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink); padding: .2rem 0;
 }
-.share[open] summary::after { transform: rotate(225deg); margin-top: .3rem; }
-.share[open] summary { margin-bottom: 1rem; }
+.share summary::-webkit-details-marker { display: none; }
+.share summary:hover { color: var(--ink-soft); }
+.share summary .chev { width: .85rem; height: .85rem; transition: transform .15s; } /* up = opens upward */
+.share[open] summary .chev { transform: rotate(180deg); }
+/* one column, the mini calendar's width, hanging from the right end */
+.share-body {
+  position: absolute; right: 0; bottom: calc(100% + .5rem); z-index: 25;
+  width: min(18rem, 100%);
+  background: var(--mist); border: 1px solid var(--line); border-radius: 10px;
+  padding: 1.1rem 1.25rem; text-align: left;
+  box-shadow: 0 -12px 36px rgba(0, 0, 0, .3);
+  max-height: calc(100vh - 8rem); overflow-y: auto;
+}
+.share-body .share-cols { grid-template-columns: 1fr; gap: 1.25rem; }
+.share-body .share-cols > div { min-width: 0; } /* let the long code line scroll instead of widening the column */
 .share .chip { display: inline-flex; align-items: center; gap: .45rem; min-height: 2.25rem; }
 .share .chip svg { width: 1rem; height: 1rem; flex: none; }
 .share .chip:hover { border-color: var(--ink-soft); }
@@ -572,22 +561,43 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 .feed-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .4rem; }
 .feed-list code { background: var(--mist); border: 1px solid var(--line); border-radius: 4px; padding: .15em .45em; font-size: .82rem; }
 
-footer { margin-top: 3.5rem; border-top: 1px solid var(--line); padding-top: 1.6rem; text-align: center; }
-footer p { color: var(--ink-soft); font-size: .85rem; margin: .4rem auto 0; max-width: 36rem; }
-.gw-logo { width: 46px; height: 46px; color: var(--ink-soft); }
-/* once scrolled to (app.js adds .is-pinned), the footer rides the bottom
-   edge, folded into one compact row, while the list scrolls on behind it */
-footer.is-pinned {
+/* pinned to the bottom edge and bleeding to the viewport's sides (negative
+   margins undo the body's column), the list scrolling behind it; the content
+   inside stays in the page column. Row one: credit left, "Put this on your
+   site" right. Row two: the sources, a sentence per line, centered. */
+footer {
   position: sticky; bottom: 0; z-index: 12; background: var(--sky);
-  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .3rem 1.2rem;
-  margin-top: 1.5rem; padding: .55rem 0 calc(.55rem + env(safe-area-inset-bottom));
+  margin: 1.5rem calc(50% - 50vw) 0; padding: .55rem 1.25rem calc(.55rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -16px 34px -6px rgba(0, 0, 0, .65);
 }
-footer.is-pinned .gw-logo { width: 26px; height: 26px; }
-footer.is-pinned p { margin: 0; font-size: .74rem; max-width: none; }
-footer.is-pinned p br { display: none; }
+/* three columns — credit | sources | Put this on your site — the sides sized
+   up to about the height of the three-line center */
+.foot-inner {
+  position: relative; max-width: calc(62rem - 2.5rem); margin: 0 auto;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1.2rem;
+}
+footer p { color: var(--ink-soft); font-size: .74rem; margin: 0; }
+.gw { display: flex; align-items: center; gap: .7rem; justify-self: start; }
+.gw-logo { width: 40px; height: 40px; color: var(--ink-soft); flex: none; }
+/* the masthead's credit, bottom right under the Updated stamp: the mark
+   with "A Ghostwood Labs / project" stacked beneath it */
+.gw-head { margin-top: auto; align-self: stretch; flex-direction: column; align-items: center; gap: .45rem; }
+.gw-head .gw-logo { width: 52px; height: 52px; }
+.gw-head .gw-credit { font-size: .82rem; line-height: 1.35; text-align: center; }
+/* two fully justified lines: the first <br> in the markup is the line break,
+   the second is dropped; the box is as wide as the longer second line */
+.gw-sources { max-width: 27rem; text-align: justify; text-align-last: justify; line-height: 1.5; }
+.gw-sources br:last-of-type { display: none; }
+footer .share { justify-self: end; }
+footer .share summary { font-size: 1rem; }
+@media (max-width: 640px) {
+  .foot-inner { grid-template-columns: 1fr; justify-items: center; gap: .5rem; }
+  .gw, footer .share { justify-self: center; }
+}
 .gw-credit {
-  font-family: var(--mono); font-size: .78rem; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--ink);
+  font-family: var(--mono); font-size: 1rem; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--ink); white-space: nowrap; margin: 0;
 }
 .gw-credit strong { font-weight: 500; color: var(--gold); }
 
@@ -639,6 +649,7 @@ body.sheet-open { overflow: hidden; }
     padding: 0 max(1rem, env(safe-area-inset-right)) calc(2.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   }
   .chip { min-height: 2.75rem; }
+  :root { --barh: 3.9rem; }
   .theme-toggle { --tt: 2.6rem; }
   .theme-toggle button { height: 2.35rem; }
   .cal-days > * { min-height: 2.75rem; }
@@ -654,7 +665,6 @@ body.sheet-open { overflow: hidden; }
   }
   .updated { font-size: 1.05rem; margin: 0 0 .4rem; }
   .pop { left: 0; right: 0; width: auto; }
-  .section-title { font-size: 1.6rem; margin-top: 1.8rem; }
 
   /* day groups: date reads across the top instead of down a rail */
   .day-row { display: block; padding: .85rem 0; }

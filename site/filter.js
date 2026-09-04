@@ -181,7 +181,7 @@
   var TYPE_COLOR = { concert: '#ff9900', sports: '#ffff00', arts: '#ff3333', movie: '#cc9966', community: '#ff66cc' };
 
   // ---- series: the same event on nearby days — a homestand, a two-night
-  // stand, an opera run. Same venue + same title, occurrences within a week
+  // stand, an opera run. Same venue + same title, occurrences within 2 days
   // of each other. Movies sit this out: SIFF's daily showtimes would make
   // everything a series. Returns the series (sorted by start, with ids) and
   // stamps each member event with e.series = { s, n, total }. ----
@@ -211,7 +211,9 @@
       var run = [evs[0]];
       for (var i = 1; i < evs.length; i++) {
         var gap = Math.round((parseYmd(evs[i].date) - parseYmd(evs[i - 1].date)) / 86400e3);
-        if (gap <= 7) run.push(evs[i]); else { flush(run); run = [evs[i]]; }
+        // a run's dates are consecutive or every other day; a class that
+        // meets weekly or Wed/Sat (3–4 apart) must not chain into one
+        if (gap <= 2) run.push(evs[i]); else { flush(run); run = [evs[i]]; }
       }
       flush(run);
     });

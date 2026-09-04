@@ -540,9 +540,10 @@
       return;
     }
     var l = e.target.closest('.fp-link');
-    if (l) {
+    if (l && l.dataset.group) { // Reset all is an .fp-link too, with its own handler
       // a group's own links, or the footer's, which sweep all three groups
       var groups = l.dataset.group === 'all' ? ['venue', 'team', 'badge'] : [l.dataset.group];
+      if (l.dataset.group === 'all') state.holidays = l.dataset.act === 'all'; // the footer's sweep takes Holidays along
       groups.forEach(function (g) {
         var gi = groupInfo(g);
         gi.keys.forEach(function (k) { setChecked(gi.map, k, l.dataset.act === 'all'); });
@@ -979,7 +980,6 @@
       ol.appendChild(li);
     }
     drawSeriesGraph();
-    watchFooter();
   }
   // the series graph is measured from the rows, so it follows the window
   var resizeTimer = null;
@@ -988,31 +988,42 @@
     resizeTimer = setTimeout(drawSeriesGraph, 150);
   });
 
-  // ---- the footer pins itself once you're 45 days into the list ----
-  // The list runs for months, so waiting to reach the footer would be a
-  // long way down. Once the first day 45 days out from today scrolls into
-  // view (or the list's last day, if it's shorter than that), the footer
-  // folds into one compact row along the bottom edge and stays there while
-  // the list scrolls behind it. Watching starts only after the list has
-  // rendered.
-  var footerWatched = false;
-  function watchFooter() {
-    if (footerWatched || !document.querySelector('.day-row')) return;
-    footerWatched = true;
-    var foot = document.querySelector('footer');
-    var mark = new Date(); mark.setDate(mark.getDate() + 45);
-    var markDate = ymd(mark);
-    var check = function () {
-      var rows = Array.from(document.querySelectorAll('.day-row'));
-      var row = rows.filter(function (r) { return r.dataset.date >= markDate; })[0] || rows[rows.length - 1];
-      if (row && row.getBoundingClientRect().top < window.innerHeight) {
-        foot.classList.add('is-pinned');
-        window.removeEventListener('scroll', check);
+  // The month divider that's currently stuck (just under the pinned filter
+  // bar) gets a shadow: the last one whose top has reached the bar's bottom
+  // edge (rAF-throttled scroll).
+  var stuckPending = false;
+  function markStuck() {
+    stuckPending = false;
+    // the bar's Back-to-top button shows once the masthead has scrolled off
+    $('toTop').hidden = document.scrollingElement.scrollTop < 240;
+    var edge = document.querySelector('.filter-area').getBoundingClientRect().bottom + 1;
+    var rows = document.querySelectorAll('.month-row');
+    var stuck = null;
+    rows.forEach(function (r) { if (r.getBoundingClientRect().top <= edge) stuck = r; });
+    rows.forEach(function (r) { r.classList.toggle('is-stuck', r === stuck && document.scrollingElement.scrollTop > 0); });
+    // and the mini calendar follows the list: its first month is the month
+    // of the first day still in view under the bar
+    var days = Array.from(document.querySelectorAll('.day-row'));
+    var first = days.filter(function (d) { return d.getBoundingClientRect().bottom > edge; })[0];
+    if (first && state.month) {
+      var ym = first.dataset.date.slice(0, 7);
+      if (ym !== ymd(state.month).slice(0, 7)) {
+        state.month = new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)) - 1, 1);
+        renderCal();
       }
-    };
-    window.addEventListener('scroll', check, { passive: true });
-    check();
+    }
   }
+  window.addEventListener('scroll', function () {
+    if (!stuckPending) { stuckPending = true; requestAnimationFrame(markStuck); }
+  }, { passive: true });
+  $('toTop').addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+  // "Put this on your site" (in the pinned footer) floats open over the
+  // list; a click anywhere else folds it back
+  document.addEventListener('click', function (e) {
+    var share = $('embed');
+    if (share.open && !e.target.closest('#embed')) share.open = false;
+  });
 
   // ---- subscribe popover ----
   // The feed follows the active filter where a pre-built file exists: the
