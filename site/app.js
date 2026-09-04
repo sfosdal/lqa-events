@@ -967,7 +967,12 @@
       li.appendChild(wrap);
       ol.appendChild(li);
     });
-    if (!shown && !pastCount) {
+    // holidays after the last listed day (or all of them, when the filter
+    // leaves nothing) — the year ahead, so the switch shows something even
+    // with every venue cleared
+    var yearOut = new Date(); yearOut.setFullYear(yearOut.getFullYear() + 1);
+    holidaysThrough(ymd(yearOut));
+    if (!shown && !pastCount && !ol.children.length) {
       var li = document.createElement('li');
       li.className = 'empty';
       li.textContent = 'No upcoming events for this filter yet — check back after the next refresh.';
