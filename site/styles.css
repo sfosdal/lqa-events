@@ -168,7 +168,6 @@ h1 {
    up is the "something's filtered" signal. */
 #filterToggle .chev { width: .85rem; height: .85rem; transition: transform .15s; }
 #filterToggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
-.reset-chip:disabled { opacity: .45; cursor: default; }
 /* The bar can't wrap. When its content wouldn't fit — app.js measures and
    sets .is-tight — the labeled chips keep just their icons; the labels stay
    for screen readers. */
@@ -197,7 +196,7 @@ h1 {
 /* Add To Calendar sits at the right end, just left of the theme pill (DOM
    order keeps it with the other actions; flex order moves it) */
 #subscribeBtn { order: 1; margin-left: auto; }
-/* light / system / dark: a three-stop pill at the bar's right end, the gold
+/* light / system / dark: a three-stop pill at the bar's right end, the ink
    knob sliding under the active icon */
 .theme-toggle {
   position: relative; display: inline-flex; order: 2;
@@ -210,11 +209,11 @@ h1 {
   display: grid; place-items: center;
 }
 .theme-toggle button svg { width: 1rem; height: 1rem; }
-.theme-toggle button[aria-checked="true"] { color: #1b2733; cursor: default; }
+.theme-toggle button[aria-checked="true"] { color: var(--sky); cursor: default; }
 .theme-toggle button:not([aria-checked="true"]):hover { color: var(--ink); }
 .theme-knob {
   position: absolute; top: 3px; left: 3px; width: var(--tt); height: calc(100% - 6px);
-  border-radius: 999px; background: var(--gold); transition: left .18s;
+  border-radius: 999px; background: var(--ink); transition: left .18s; /* ink knob, page-colored icon — like a checked box */
 }
 .theme-toggle[data-active="system"] .theme-knob { left: calc(3px + var(--tt)); }
 .theme-toggle[data-active="dark"] .theme-knob { left: calc(3px + var(--tt) * 2); }
@@ -288,9 +287,8 @@ h1 {
   margin-top: 1rem; padding: .9rem .35rem 0; border-top: 1px solid var(--line);
 }
 .fp-links-all { margin: 0 0 0 auto; }
-.fp-foot .chip { display: inline-flex; align-items: center; gap: .45rem; min-height: 2.25rem; }
-.fp-foot .chip svg { width: 1rem; height: 1rem; flex: none; }
-.fp-foot .chip:not(:disabled):hover { border-color: var(--ink-soft); }
+.fp-reset { font-weight: 800; }                    /* the default action, a touch heavier */
+.fp-reset:disabled { opacity: .4; cursor: default; text-decoration-color: transparent; }
 .chip {
   font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
   padding: .5em .95em; background: var(--mist); color: var(--ink);

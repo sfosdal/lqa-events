@@ -988,20 +988,24 @@
     resizeTimer = setTimeout(drawSeriesGraph, 150);
   });
 
-  // ---- the footer pins itself once you're into the list ----
+  // ---- the footer pins itself once you're 45 days into the list ----
   // The list runs for months, so waiting to reach the footer would be a
-  // long way down. Instead, as soon as the top of the list has scrolled off
-  // (about a screen in) the footer folds into one compact row along the
-  // bottom edge and stays there while the list scrolls behind it. Watching
-  // starts only after the list has rendered.
+  // long way down. Once the first day 45 days out from today scrolls into
+  // view (or the list's last day, if it's shorter than that), the footer
+  // folds into one compact row along the bottom edge and stays there while
+  // the list scrolls behind it. Watching starts only after the list has
+  // rendered.
   var footerWatched = false;
   function watchFooter() {
     if (footerWatched || !document.querySelector('.day-row')) return;
     footerWatched = true;
     var foot = document.querySelector('footer');
-    var agenda = document.querySelector('.agenda');
+    var mark = new Date(); mark.setDate(mark.getDate() + 45);
+    var markDate = ymd(mark);
     var check = function () {
-      if (agenda.getBoundingClientRect().top < -200) {
+      var rows = Array.from(document.querySelectorAll('.day-row'));
+      var row = rows.filter(function (r) { return r.dataset.date >= markDate; })[0] || rows[rows.length - 1];
+      if (row && row.getBoundingClientRect().top < window.innerHeight) {
         foot.classList.add('is-pinned');
         window.removeEventListener('scroll', check);
       }
