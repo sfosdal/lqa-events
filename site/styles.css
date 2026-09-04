@@ -109,7 +109,7 @@ h1 {
   margin: 0 0 .5rem; min-height: 1em;
 }
 /* Solid-ink pill with the page background as its text — a dark pill in
-   light mode, a light one in dark — gold on hover (the event sheet's
+   light mode, a light one in dark — softened on hover (the event sheet's
    Tickets button). */
 .btn-cal {
   display: inline-flex; align-items: center; gap: .55em; margin: auto 0;
@@ -118,7 +118,7 @@ h1 {
   transition: background .15s, color .15s;
 }
 .btn-cal svg { width: 1.15em; height: 1.15em; flex: none; }
-.btn-cal:hover { background: var(--gold); color: #1b2733; }
+.btn-cal:hover { background: var(--ink-soft); color: var(--sky); }
 /* the subscribe pop hangs under its chip (app.js sets --pop-x to the chip's
    offset, pulled back if the pop would run past the bar's right edge) */
 .pop {
@@ -146,7 +146,7 @@ h1 {
   font-family: var(--mono); font-size: .62rem; text-transform: uppercase;
   letter-spacing: .06em; color: var(--ink-soft); white-space: nowrap;
 }
-.tile:hover { border-color: var(--gold); }
+.tile:hover { border-color: var(--ink-soft); }
 .tile:hover span { color: var(--ink); }
 /* ---- filter bar: one row of matching chips ---- */
 /* Funnel (filters), Reset, Copy link, Add To Calendar, then the theme pill
@@ -172,15 +172,35 @@ h1 {
 /* The bar can't wrap. When its content wouldn't fit — app.js measures and
    sets .is-tight — the labeled chips keep just their icons; the labels stay
    for screen readers. */
-.filterbar.is-tight #clearAll span, .filterbar.is-tight #subscribeBtn span {
+.filterbar.is-tight #subscribeBtn span {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
-.filterbar.is-tight #clearAll, .filterbar.is-tight #subscribeBtn { padding: .5em .7em; }
-.filterbar.is-tight #clearAll svg, .filterbar.is-tight #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
+.filterbar.is-tight #subscribeBtn { padding: .5em .7em; }
+.filterbar.is-tight #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
+/* the search box: a chip that takes typing, a magnifier at its right end and
+   no placeholder; it gives up width first when the row gets tight */
+.filterbar .search-wrap { position: relative; display: flex; flex: 0 1 15rem; min-width: 7rem; }
+#searchBox {
+  width: 100%; font: 500 .85rem/1 var(--body); color: var(--ink); background: var(--mist);
+  border: 1px solid var(--line); border-radius: 999px; padding: .5em 2.4em .5em .95em; min-height: 2.25rem;
+  -webkit-appearance: none; appearance: none;
+}
+#searchBox::-webkit-search-cancel-button { margin-right: .2em; }
+/* hover and focus both just brighten the edge — no orange ring on a text box */
+#searchBox:hover { border-color: var(--ink-soft); }
+#searchBox:focus, #searchBox:focus-visible { outline: none; border-color: var(--ink); }
+.search-wrap svg {
+  position: absolute; right: .85rem; top: 50%; width: 1rem; height: 1rem;
+  transform: translateY(-50%); color: var(--ink-soft); pointer-events: none;
+}
+.filterbar.is-tight .search-wrap { flex-basis: 9rem; }
+/* Add To Calendar sits at the right end, just left of the theme pill (DOM
+   order keeps it with the other actions; flex order moves it) */
+#subscribeBtn { order: 1; margin-left: auto; }
 /* light / system / dark: a three-stop pill at the bar's right end, the gold
    knob sliding under the active icon */
 .theme-toggle {
-  position: relative; display: inline-flex; margin-left: auto;
+  position: relative; display: inline-flex; order: 2;
   padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--mist);
 }
 .theme-toggle { --tt: 2rem; } /* stop width — wider on phones for the tap target */
@@ -206,7 +226,17 @@ h1 {
 }
 /* Kayak-style panel: columns of checkbox rows, Select all | Clear all links
    per group, an "only" link on hover, and an event count on the right. */
-.fp-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1.25rem 2.25rem; }
+/* the groups sit in columns with a rule between them (a rule above, on
+   phones, where they stack) */
+.fp-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1.25rem 0; }
+.fp-group { padding: 0 1.25rem; }
+.fp-group:first-child { padding-left: 0; }
+.fp-group:last-child { padding-right: 0; }
+.fp-group + .fp-group { border-left: 1px solid var(--line); }
+@media (max-width: 640px) {
+  .fp-group { padding: 0; }
+  .fp-group + .fp-group { border-left: 0; border-top: 1px solid var(--line); padding-top: 1.1rem; }
+}
 .fp-group h3 {
   font-family: var(--mono); font-size: .68rem; text-transform: uppercase;
   letter-spacing: .1em; color: var(--ink-soft); margin: 0 0 .35rem; font-weight: 500;
@@ -216,7 +246,7 @@ h1 {
   font: 600 .8rem/1 var(--body); color: var(--ink); background: none; border: 0;
   padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
 }
-.fp-link:hover { color: var(--gold); }
+.fp-link:hover { color: var(--ink-soft); }
 .fp-list { display: flex; flex-direction: column; }
 .fp-row { display: flex; align-items: center; gap: .5rem; padding: .3rem .35rem; border-radius: 6px; }
 .fp-row:hover { background: var(--sky); }
@@ -227,30 +257,40 @@ h1 {
   flex: none; width: 1.1rem; height: 1.1rem; position: relative;
   border: 1.5px solid var(--ink-soft); border-radius: 4px; background: var(--mist);
 }
-/* checked = ink box with a page-colored tick; the row's hover turns the box
-   gold, like every other hover on the site */
+/* checked = ink box with a page-colored tick; hover brightens the box's
+   edge, like every other hover on the site */
 .fp-check input:checked + .cb { background: var(--ink); border-color: var(--ink); }
 .fp-check input:checked + .cb::after {
   content: ""; position: absolute; left: .3rem; top: .1rem;
   width: .28rem; height: .55rem;
   border: solid var(--mist); border-width: 0 2px 2px 0; transform: rotate(45deg);
 }
-.fp-check:hover .cb { border-color: var(--gold); }
-.fp-check:hover input:checked + .cb { background: var(--gold); border-color: var(--gold); }
+.fp-check:hover .cb { border-color: var(--ink); }
+.fp-check:hover input:checked + .cb { background: var(--ink-soft); border-color: var(--ink-soft); }
 .fp-check input:focus-visible + .cb { outline: 2px solid var(--gold); outline-offset: 2px; }
 .fp-name { font-size: .88rem; display: flex; align-items: center; gap: .45rem; overflow-wrap: anywhere; }
 .fp-name a { text-decoration-color: var(--line); }
-.fp-name a:hover { text-decoration-color: var(--gold); }
+.fp-name a:hover { text-decoration-color: var(--ink-soft); }
 .fp-name .dot { flex: none; width: .65rem; height: .65rem; border-radius: 50%; background: var(--dot, var(--ink-soft)); }
 .fp-row:has(input:not(:checked)) .fp-name { opacity: .5; }
 .fp-only {
   font: 700 .72rem/1 var(--body); color: var(--ink); background: none; border: 0;
   padding: .15em .35em; cursor: pointer; visibility: hidden;
 }
-.fp-only:hover { color: var(--gold); }
+.fp-only:hover { color: var(--ink-soft); }
 .fp-row:hover .fp-only, .fp-row:focus-within .fp-only { visibility: visible; }
 @media (hover: none) { .fp-only { visibility: visible; } }
 .fp-count { margin-left: auto; font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); }
+/* panel footer: Holidays switch left; Select all | Clear all (every group
+   at once) and Reset at the right */
+.fp-foot {
+  display: flex; align-items: center; gap: 1rem;
+  margin-top: 1rem; padding: .9rem .35rem 0; border-top: 1px solid var(--line);
+}
+.fp-links-all { margin: 0 0 0 auto; }
+.fp-foot .chip { display: inline-flex; align-items: center; gap: .45rem; min-height: 2.25rem; }
+.fp-foot .chip svg { width: 1rem; height: 1rem; flex: none; }
+.fp-foot .chip:not(:disabled):hover { border-color: var(--ink-soft); }
 .chip {
   font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
   padding: .5em .95em; background: var(--mist); color: var(--ink);
@@ -263,90 +303,147 @@ h1 {
   display: grid; grid-template-columns: minmax(0, 1fr) 18rem;
   gap: 0 2.5rem; align-items: start;
 }
-/* the pager sits between list and calendar in the DOM — pin the columns so
-   auto-placement doesn't hand it the calendar's cell */
-.agenda-layout > ol, .agenda-layout > .pager { grid-column: 1; }
-.cal-side {
-  position: sticky; top: 1rem; grid-column: 2; grid-row: 1;
-  display: flex; flex-direction: column;
-}
-/* folded (wide): the list takes the whole width. The aside becomes a
-   zero-height sticky strip across the list's top edge (row 1, so the list
-   drops to row 2 at no cost); the handle hangs off its right end and rides
-   along as the list scrolls. */
-.agenda-layout.cal-closed { grid-template-columns: minmax(0, 1fr); gap: 0; }
-.agenda-layout.cal-closed .cal-side { grid-column: 1; grid-row: 1; display: block; height: 0; z-index: 15; }
-@media (max-width: 760px) {
+.agenda-layout > ol { grid-column: 1; }
+.cal-side { position: sticky; top: 1rem; grid-column: 2; grid-row: 1; }
+/* Below the page's full width (62rem + padding) the calendar never docks —
+   beside the list it would squeeze the cards to a sliver — so from here
+   down it floats over the list instead. */
+@media (max-width: 1023px) {
   .agenda-layout { display: flex; flex-direction: column; }
-  /* the grid's align-items: start carries over; the pager must span the
-     column or it shrinks to its content and hugs the left edge */
-  .agenda-layout > .pager { align-self: stretch; }
-  /* never docked here: the same zero-height sticky strip, first in the
-     column, carrying the handle and the floating calendar */
-  .cal-side { order: -1; display: block; height: 0; top: .6rem; z-index: 15; }
+  /* the grid's align-items: start carries over; the strip must span the
+     column or it shrinks to its content (it has none, so its right edge —
+     where the handle hangs — would be the left edge of the page) */
+  .cal-side { align-self: stretch; width: 100%; }
+  /* a zero-height sticky strip, first in the column, carrying the handle
+     (hanging off its right end) and the floating calendar; both ride along
+     as the list scrolls */
+  .cal-side { order: -1; height: 0; top: .6rem; z-index: 15; }
   .cal-side.is-float .cal {
     position: absolute; z-index: 14; right: 0; top: 3.1rem; /* under the handle */
     width: min(22rem, 100%);
     max-height: calc(100vh - 5rem); overflow-y: auto;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, .3);
   }
+  .cal-side.is-float .cal-month { box-shadow: 0 12px 36px rgba(0, 0, 0, .3); }
 }
 
-/* ---- mini month calendar ---- */
-.cal { background: var(--mist); border: 2px solid var(--ink-soft); border-radius: 10px; overflow: hidden; }
-/* the lines bracketing the weekday labels match the frame, warmed with a
-   hint of gold */
+/* ---- mini month calendar: a nav bar, then one framed card per month ---- */
+.cal { display: grid; gap: .6rem; }
+.cal-months { display: grid; gap: 1.1rem; }
+.cal-month { background: var(--mist); border: 2px solid var(--ink-soft); border-radius: 10px; overflow: hidden; }
+/* ‹ TODAY › as one bar in the cards' own frame — the header card of the
+   stack: ‹ flush left, › flush right, TODAY dead center between them */
 .cal-head {
-  display: flex; align-items: center; justify-content: space-between;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  padding: .2rem .35rem; background: var(--mist);
+  border: 2px solid var(--ink-soft); border-radius: 10px;
+}
+.cal-head #calNext { justify-self: end; }
+.cal-mname {
+  font-family: var(--display); font-weight: 700; font-size: 1.05rem;
+  text-transform: uppercase; letter-spacing: .04em; margin: 0; text-align: center;
+}
+.cal-head button { /* flat controls inside the bar */
+  display: inline-grid; place-items: center; width: 2rem; height: 1.9rem; cursor: pointer;
+  background: none; color: var(--ink); border: 0; border-radius: 6px;
+  transition: background .15s, transform .1s;
+}
+.cal-head button svg { width: 1.1rem; height: 1.1rem; } /* chevrons to match TODAY's weight */
+.cal-head button:disabled { opacity: .3; cursor: default; }
+.cal-head button:not(:disabled):hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist)); }
+.cal-head button:not(:disabled):active { transform: translateY(1px); }
+/* TODAY in the month cards' own type and brightness */
+#calToday {
+  width: auto; padding: 0 .8em; font: 700 .95rem/1 var(--display);
+  text-transform: uppercase; letter-spacing: .06em; color: var(--ink);
+}
+/* each card: its name row, its own weekday row, and only its own days (the
+   grid is padded to whole weeks with blank cells, never with the neighbor
+   months' dates). The line under the name matches the frame, warmed with
+   a hint of gold. */
+.cal-mname {
   padding: .5rem .6rem;
   border-bottom: 2px solid color-mix(in srgb, var(--ink-soft) 78%, var(--gold));
+  /* each month's colors run left to right, laid over the card surface at
+     --sc strength so the type stays readable in both themes; the year reads
+     as one long band — whites through midwinter, green rising in March, a
+     blue notch mid-April, yellow spread across summer, red arriving in
+     August and burning down to deep orange through fall */
+  background: var(--season);
 }
-.cal-head h2 {
-  font-family: var(--display); font-weight: 700; font-size: 1.1rem;
-  text-transform: uppercase; letter-spacing: .04em; margin: 0;
-}
-.cal-head button {
-  font: 700 1rem/1 var(--body); width: 1.7rem; height: 1.7rem; cursor: pointer;
-  background: none; color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
-}
-.cal-head button:disabled { opacity: .3; cursor: default; }
-.cal-tools { display: flex; align-items: center; gap: .3rem; }
-#calToday {
-  width: auto; padding: 0 .55em; font: 500 .62rem/1 var(--mono);
-  text-transform: uppercase; letter-spacing: .07em; color: var(--ink-soft);
-}
-#calToday:not(:disabled):hover { color: var(--ink); border-color: var(--ink-soft); }
-.cal-dow, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
-.cal-dow { border-bottom: 2px solid color-mix(in srgb, var(--ink-soft) 78%, var(--gold)); }
-.cal-grid > :nth-child(-n+7) { border-top: 0; } /* no hairline doubling the dow line */
+.cal-month { --sc: 45%; } /* on the card: the --season gradients resolve there */
+.cal-month[data-month="1"] { --season: linear-gradient(90deg, /* white, light blue */
+  color-mix(in srgb, #ffffff var(--sc), var(--mist)) 0 40%,
+  color-mix(in srgb, #99d6ff var(--sc), var(--mist))); }
+.cal-month[data-month="2"] { --season: linear-gradient(90deg, /* white → dark blue, light pink */
+  color-mix(in srgb, #ffffff var(--sc), var(--mist)),
+  color-mix(in srgb, #1f3a93 var(--sc), var(--mist)) 45%,
+  color-mix(in srgb, #ffb3d9 var(--sc), var(--mist))); }
+.cal-month[data-month="3"] { --season: linear-gradient(90deg, /* light green, more green, golden yellow */
+  color-mix(in srgb, #a8e6a1 var(--sc), var(--mist)),
+  color-mix(in srgb, #3cb043 var(--sc), var(--mist)) 45%,
+  color-mix(in srgb, #f5c518 var(--sc), var(--mist))); }
+.cal-month[data-month="4"] { --season: linear-gradient(90deg, /* daffodil, a blue notch, lavender */
+  color-mix(in srgb, #ffe14d var(--sc), var(--mist)) 0 30%,
+  color-mix(in srgb, #4da3ff var(--sc), var(--mist)) 50%,
+  color-mix(in srgb, #b39ddb var(--sc), var(--mist)) 70%); }
+.cal-month[data-month="5"] { --season: linear-gradient(90deg, /* magenta, yellow, pink */
+  color-mix(in srgb, #ff00aa var(--sc), var(--mist)),
+  color-mix(in srgb, #ffe14d var(--sc), var(--mist)) 50%,
+  color-mix(in srgb, #ff99cc var(--sc), var(--mist))); }
+.cal-month[data-month="6"] { --season: linear-gradient(90deg, /* turquoise, yellow, light blue */
+  color-mix(in srgb, #30d5c8 var(--sc), var(--mist)),
+  color-mix(in srgb, #ffe14d var(--sc), var(--mist)) 50%,
+  color-mix(in srgb, #99d6ff var(--sc), var(--mist))); }
+.cal-month[data-month="7"] { --season: linear-gradient(90deg, /* dark blue, yellow, silver */
+  color-mix(in srgb, #1f3a93 var(--sc), var(--mist)),
+  color-mix(in srgb, #ffe14d var(--sc), var(--mist)) 50%,
+  color-mix(in srgb, #c0c0c0 var(--sc), var(--mist))); }
+.cal-month[data-month="8"] { --season: linear-gradient(90deg, /* sunshine yellow, lime, red arriving */
+  color-mix(in srgb, #ffd400 var(--sc), var(--mist)),
+  color-mix(in srgb, #a3e635 var(--sc), var(--mist)) 50%,
+  color-mix(in srgb, #d62828 var(--sc), var(--mist))); }
+.cal-month[data-month="9"] { --season: linear-gradient(90deg, /* deep emerald, lighter green, deep orange */
+  color-mix(in srgb, #046a38 var(--sc), var(--mist)),
+  color-mix(in srgb, #6fd08c var(--sc), var(--mist)) 45%,
+  color-mix(in srgb, #c2410c var(--sc), var(--mist))); }
+.cal-month[data-month="10"] { --season: linear-gradient(90deg, /* orange (most of it), black */
+  color-mix(in srgb, #ff7a00 var(--sc), var(--mist)) 0 55%,
+  color-mix(in srgb, #000000 var(--sc), var(--mist))); }
+.cal-month[data-month="11"] { --season: linear-gradient(90deg, /* orange (most of it), brown */
+  color-mix(in srgb, #ff7a00 var(--sc), var(--mist)) 0 55%,
+  color-mix(in srgb, #6b3e1d var(--sc), var(--mist))); }
+.cal-month[data-month="12"] { --season: linear-gradient(90deg, /* dark blue, dark green, then white */
+  color-mix(in srgb, #1f3a93 var(--sc), var(--mist)),
+  color-mix(in srgb, #0b5d2b var(--sc), var(--mist)) 40%,
+  color-mix(in srgb, #ffffff var(--sc), var(--mist)) 75%); }
+.cal-dow, .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal-dow { border-bottom: 1px solid var(--line); }
 .cal-dow span {
   font-family: var(--mono); font-size: .6rem; text-transform: uppercase;
-  color: var(--ink-soft); text-align: center; padding: .35rem 0;
+  color: var(--ink-soft); text-align: center; padding: .3rem 0;
 }
-.cal-grid > * {
+.cal-days > * {
   min-height: 2.1rem; border-top: 1px solid var(--line); padding: .2rem .25rem;
   font-family: var(--mono); font-size: .68rem; text-align: left; vertical-align: top;
 }
-.cal-grid > :nth-child(7n+2), .cal-grid > :nth-child(7n+3), .cal-grid > :nth-child(7n+4),
-.cal-grid > :nth-child(7n+5), .cal-grid > :nth-child(7n+6), .cal-grid > :nth-child(7n+7) {
+.cal-days > :nth-child(-n+7) { border-top: 0; } /* no hairline doubling the dow line */
+.cal-days > :nth-child(7n+2), .cal-days > :nth-child(7n+3), .cal-days > :nth-child(7n+4),
+.cal-days > :nth-child(7n+5), .cal-days > :nth-child(7n+6), .cal-days > :nth-child(7n+7) {
   border-left: 1px solid var(--line);
 }
-.cal-day { background: none; border-right: 0; border-bottom: 0; color: var(--ink); display: block; width: 100%; }
+/* days with events are <button>s: strip the UA border on every side the grid
+   doesn't draw itself (the column rule above re-adds the left one) */
+.cal-day { background: none; border-left: 0; border-right: 0; border-bottom: 0; color: var(--ink); display: block; width: 100%; }
 button.cal-day { cursor: pointer; }
-/* inset ring rather than a border so the cell doesn't shift and the month
-   boundary lines underneath stay put */
-button.cal-day:hover { background: var(--gold-soft); box-shadow: inset 0 0 0 1px var(--gold); }
+/* inset ring rather than a border so the cell doesn't shift; the fill is a
+   touch of ink over the card (lighter in dark mode, darker in light), so
+   it reads in both themes */
+button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist)); box-shadow: inset 0 0 0 1px var(--ink-soft); }
 .cal-day .num { display: block; }
 .cal-day.is-today .num {
   display: inline-block; background: var(--gold); color: #fff;
   border-radius: 3px; padding: 0 .3em; font-weight: 500;
 }
-.cal-day.is-out { color: var(--line); }
-.cal-day .num-mo { font-size: .82em; letter-spacing: .03em; }
-/* month differentiation: interior boundary segments; the card border
-   closes each month's frame at the calendar edge */
-.cal-day.mo-t { border-top: 2px solid var(--ink-soft); }
-.cal-day.mo-l { border-left: 2px solid var(--ink-soft); }
 .ticks { display: flex; flex-wrap: wrap; gap: 2px; margin-top: .2rem; }
 .ticks i { width: .28rem; height: .28rem; border-radius: 1px; background: var(--dot, var(--ink-soft)); }
 /* past days go grey: the number in the soft ink, the venue ticks washed
@@ -361,6 +458,21 @@ button.cal-day:hover { background: var(--gold-soft); box-shadow: inset 0 0 0 1px
 }
 .agenda ol { list-style: none; margin: 0; padding: 0; }
 .agenda .empty { color: var(--ink-soft); }
+/* dividers: a name centered between two rules, in the masthead's stamp type
+   (see .updated) a size down. The month one is stuck to the top of the
+   viewport while its month scrolls by (the next month's slides over it);
+   holiday ones just scroll past. */
+.month-row, .holiday-row {
+  display: flex; align-items: center; gap: .9rem; padding: .6rem 0 .45rem;
+  font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
+}
+.month-row { position: sticky; top: 0; z-index: 5; background: var(--sky); }
+.holiday-row { font-size: 1.05rem; }
+.month-row::before, .month-row::after, .holiday-row::before, .holiday-row::after {
+  content: ""; flex: 1; border-top: 1px solid var(--line);
+}
+.month-row + .day-row, .holiday-row + .day-row { border-top: 0; }
 .day-row {
   display: grid; grid-template-columns: 5.2rem 1fr; gap: 1rem;
   border-top: 1px solid var(--line); padding: 1rem 0;
@@ -370,28 +482,20 @@ button.cal-day:hover { background: var(--gold-soft); box-shadow: inset 0 0 0 1px
    right of the cards (one lane per concurrent series, --gutter set by
    app.js) whose type-colored lines curve into each card's type stripe ---- */
 .agenda-layout.has-series .day-row { grid-template-columns: 5.2rem 1fr var(--gutter); }
-#agenda { position: relative; }
+/* clip: a series line continuing from the previous page starts at the very
+   top edge, and its round cap would otherwise poke out above the list */
+#agenda { position: relative; overflow: clip; }
 .series-graph { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
 .sg-line { fill: none; stroke-width: 2.5; stroke-linecap: round; pointer-events: stroke; }
 .series-n { font-size: .68rem; color: var(--ink-soft); letter-spacing: .04em; }
-@media (min-width: 641px) {
-  .agenda-layout.has-series .pager--wide { margin-right: calc(var(--gutter) + 1rem); }
-}
 @media (max-width: 640px) { .series-graph { display: none; } }
-.past-toggle { padding: .6rem 0 1rem; }
-.past-toggle button {
-  font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
-  padding: .5em .95em; background: var(--mist); color: var(--ink-soft);
-  border: 1px dashed var(--line);
-}
-.past-toggle button:hover { color: var(--ink); border-color: var(--ink-soft); }
 .date-rail { text-align: center; }
 .date-rail .dnum {
   font-family: var(--display); font-weight: 700; font-size: 2.6rem; line-height: 1; display: block;
 }
 .date-rail .dmeta {
   font-family: var(--mono); font-size: .7rem; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--ink-soft);
+  letter-spacing: .06em; color: var(--ink-soft); /* "WEDNESDAY" fits the rail */
 }
 .day-events { display: grid; gap: .6rem; align-content: start; }
 /* each row carries a whisper of its venue's color (set inline by app.js) */
@@ -414,7 +518,7 @@ button.cal-day:hover { background: var(--gold-soft); box-shadow: inset 0 0 0 1px
 }
 :root[data-theme="dark"] .team-mark { filter: grayscale(1) invert(1) brightness(1.35); }
 .ev a { font-weight: 600; text-decoration-color: var(--line); }
-.ev a:hover { text-decoration-color: var(--gold); }
+.ev a:hover { text-decoration-color: var(--ink-soft); }
 .ev .time { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); min-width: 5.5rem; padding-top: .15em; display: flex; flex-direction: column; gap: .1rem; }
 .ev .venue {
   font-family: var(--mono); font-size: 1rem; font-weight: 700; text-transform: uppercase;
@@ -422,34 +526,7 @@ button.cal-day:hover { background: var(--gold-soft); box-shadow: inset 0 0 0 1px
 }
 /* the venue link keeps the label's look — .ev a above is for the title */
 .ev .venue a { font-weight: inherit; text-decoration-color: var(--line); }
-.ev .venue a:hover { text-decoration-color: var(--gold); }
-
-/* ---- agenda pager ---- */
-.pager { display: flex; align-items: center; justify-content: center; gap: .4rem; margin: 1.4rem 0 0; }
-.pager:empty { display: none; }
-/* With enough pages (renderPager adds the class) and the rail beside the
-   cards, the pager spans exactly the cards' width: ‹ at their left edge, ›
-   at their right, the page numbers centered between at the normal gap —
-   the extra room goes to showing more numbers (pagerSlots in app.js), not
-   to wider gaps. The offset is .day-row's rail column plus its gap. */
-@media (min-width: 641px) { /* = while .day-row keeps its rail beside the cards */
-  .pager--wide { margin-left: calc(5.2rem + 1rem); }
-  .pager--wide .pg-arrow:first-child { margin-right: auto; }
-  .pager--wide .pg-arrow:last-child { margin-left: auto; }
-}
-.pager button {
-  font: 500 .9rem/1 var(--body); min-width: 2rem; height: 2rem; cursor: pointer;
-  background: none; border: 0; border-radius: 8px; color: var(--ink);
-}
-.pager button:not(:disabled):hover { background: var(--mist); }
-.pager .pg-cur { color: var(--ink-soft); font-weight: 700; cursor: default; }
-.pager .pg-arrow {
-  border: 1px solid var(--line); background: var(--mist); border-radius: 10px;
-  width: 2.4rem; font-size: 1.05rem;
-}
-.pager .pg-arrow:disabled { opacity: .35; cursor: default; }
-.pager .pg-arrow:not(:disabled):hover { border-color: var(--ink-soft); }
-.pg-gap { color: var(--ink-soft); }
+.ev .venue a:hover { text-decoration-color: var(--ink-soft); }
 
 /* ---- the "date tbd" badge ---- */
 .badge {
@@ -458,7 +535,11 @@ button.cal-day:hover { background: var(--gold-soft); box-shadow: inset 0 0 0 1px
   border: 1px solid currentColor; align-self: center; white-space: nowrap;
 }
 .b-tbd { color: var(--ink-soft); border-style: dashed; }
-.pop-note { color: var(--ink-soft); font-size: .85em; text-align: justify; }
+/* notes in the masthead's stamp type (see .updated), small */
+.pop-note {
+  font-family: var(--display); font-weight: 700; font-size: .95rem; line-height: 1.3;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft);
+}
 .pop-filter { display: flex; gap: .5em; align-items: center; cursor: pointer; font-weight: 600; }
 .pop-filter input { accent-color: var(--gold); }
 
@@ -496,39 +577,43 @@ button.cal-day:hover { background: var(--gold-soft); box-shadow: inset 0 0 0 1px
 footer { margin-top: 3.5rem; border-top: 1px solid var(--line); padding-top: 1.6rem; text-align: center; }
 footer p { color: var(--ink-soft); font-size: .85rem; margin: .4rem auto 0; max-width: 36rem; }
 .gw-logo { width: 46px; height: 46px; color: var(--ink-soft); }
+/* once scrolled to (app.js adds .is-pinned), the footer rides the bottom
+   edge, folded into one compact row, while the list scrolls on behind it */
+footer.is-pinned {
+  position: sticky; bottom: 0; z-index: 12; background: var(--sky);
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .3rem 1.2rem;
+  margin-top: 1.5rem; padding: .55rem 0 calc(.55rem + env(safe-area-inset-bottom));
+}
+footer.is-pinned .gw-logo { width: 26px; height: 26px; }
+footer.is-pinned p { margin: 0; font-size: .74rem; max-width: none; }
+footer.is-pinned p br { display: none; }
 .gw-credit {
   font-family: var(--mono); font-size: .78rem; text-transform: uppercase;
   letter-spacing: .1em; color: var(--ink);
 }
 .gw-credit strong { font-weight: 500; color: var(--gold); }
 
-/* ---- the calendar's show/hide toggle ---- */
-/* Docked (wide, calendar open): a slim labeled pill right-aligned above the
-   calendar. Floating (.is-fab — phones, or wide + folded): icon + chevron
-   only, pinned to the right end of the aside's sticky strip, so it starts
-   level with the top of the list (under the theme pill) and then floats at
-   the top of the viewport as the list scrolls. The chevron points left while
-   folded ("opens out over the list") and flips right once open. */
+/* ---- the calendar handle (narrow layouts only) ---- */
+/* Icon + chevron, pinned to the right end of the aside's sticky strip, so
+   it starts level with the top of the list (under the theme pill) and then
+   floats at the top of the viewport as the list scrolls. The chevron points
+   left while closed ("opens out over the list") and flips right once open.
+   On the wide layout the calendar is always docked and app.js hides this. */
 .cal-toggle {
-  display: inline-flex; align-items: center; gap: .45rem; align-self: flex-end;
-  margin: 0 0 .5rem; font: 600 .82rem/1 var(--body); color: var(--ink);
-  background: var(--mist); border: 1px solid var(--line); border-radius: 10px;
-  padding: .55em .8em; cursor: pointer;
-}
-.cal-toggle:hover { border-color: var(--ink-soft); }
-.cal-toggle svg { width: 1.05rem; height: 1.05rem; flex: none; }
-.cal-toggle .chev { width: .85rem; height: .85rem; transition: transform .15s; }
-.cal-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
-.cal-toggle.is-fab {
   position: absolute; right: 0; top: 0;
-  margin: 0; padding: .6em .8em; min-height: 2.5rem;
+  display: inline-flex; align-items: center; gap: .45rem;
+  color: var(--ink); background: var(--mist); border: 1px solid var(--line);
+  border-radius: 10px; padding: .6em .8em; min-height: 2.5rem; cursor: pointer;
   box-shadow: 0 6px 20px rgba(0, 0, 0, .22);
 }
-.cal-toggle.is-fab span {
+.cal-toggle[hidden] { display: none; }
+.cal-toggle:hover { border-color: var(--ink-soft); }
+.cal-toggle span { /* label for screen readers only */
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
-.cal-toggle.is-fab svg { width: 1.2rem; height: 1.2rem; }
-.cal-toggle.is-fab .chev { width: .95rem; height: .95rem; }
+.cal-toggle svg { width: 1.2rem; height: 1.2rem; flex: none; }
+.cal-toggle .chev { width: .95rem; height: .95rem; transition: transform .15s; }
+.cal-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
 
 /* ---- phones: the event sheet ---- */
 .sheet { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; }
@@ -555,10 +640,10 @@ body.sheet-open { overflow: hidden; }
   body {
     padding: 0 max(1rem, env(safe-area-inset-right)) calc(2.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   }
-  .chip, .pager button, .past-toggle button { min-height: 2.75rem; }
+  .chip { min-height: 2.75rem; }
   .theme-toggle { --tt: 2.6rem; }
   .theme-toggle button { height: 2.35rem; }
-  .cal-grid > * { min-height: 2.75rem; }
+  .cal-days > * { min-height: 2.75rem; }
   .cal-head button { min-width: 2.75rem; min-height: 2.75rem; }
   .fp-row { padding: .55rem .35rem; }
   .fp-only { padding: .55em .6em; }

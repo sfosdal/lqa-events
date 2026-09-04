@@ -132,6 +132,50 @@
     return mode;
   }
 
+  // ---- search ----
+  // Every whitespace-separated word must appear somewhere in the event's
+  // venue, title, type words, or the home team's name — so "kraken",
+  // "climate", "arts", "home game" and "vera concert" all do the obvious.
+  var TYPE_WORDS = {
+    concert: 'concert concerts music show', sports: 'sports game games home game',
+    arts: 'arts art theater theatre', movie: 'movie movies film cinema',
+    community: 'community festival festivals fair',
+  };
+  // each team's sport and league, so "baseball" finds the Mariners
+  var SPORT_WORDS = {
+    mariners: 'baseball mlb', storm: 'basketball wnba', seahawks: 'football nfl',
+    reign: 'soccer nwsl', sounders: 'soccer mls', kraken: 'hockey nhl', torrent: 'hockey pwhl',
+  };
+  function matchesSearch(e, q) {
+    var words = String(q || '').toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length) return true;
+    var title = e.title || '';
+    var hay = [e.venue || '', title, TYPE_WORDS[eventType(e)] || ''];
+    TEAMS.forEach(function (t) {
+      if (t.re.test(title)) hay.push(t.label + ' home game ' + (SPORT_WORDS[t.slug] || ''));
+    });
+    hay = hay.join(' ').toLowerCase();
+    return words.every(function (w) { return hay.indexOf(w) !== -1; });
+  }
+  // The search term travels in share links as ?s=CODE: UTF-8 bytes, each
+  // XOR-ed with a rolling key, in URL-safe base64 — unreadable in the URL bar
+  // but fully reversible, so the link opens with the same search applied.
+  var S_KEY = [0x4c, 0x51, 0x41, 0x21, 0x37, 0x6b];
+  function encodeSearch(q) {
+    var bytes = unescape(encodeURIComponent(String(q || '')));
+    var out = '';
+    for (var i = 0; i < bytes.length; i++) out += String.fromCharCode(bytes.charCodeAt(i) ^ S_KEY[i % S_KEY.length]);
+    return btoa(out).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function decodeSearch(code) {
+    try {
+      var bytes = atob(String(code || '').replace(/-/g, '+').replace(/_/g, '/'));
+      var out = '';
+      for (var i = 0; i < bytes.length; i++) out += String.fromCharCode(bytes.charCodeAt(i) ^ S_KEY[i % S_KEY.length]);
+      return decodeURIComponent(escape(out));
+    } catch (e) { return ''; }
+  }
+
   // Event-type hues for dark backgrounds — same values as the calendar's
   // dark --t-* variables; keep in step.
   var TYPE_COLOR = { concert: '#ff9900', sports: '#ffff00', arts: '#ff3333', movie: '#cc9966', community: '#ff66cc' };
@@ -297,6 +341,9 @@
     slugify: slugify,
     eventType: eventType,
     matchesFilter: matchesFilter,
+    matchesSearch: matchesSearch,
+    encodeSearch: encodeSearch,
+    decodeSearch: decodeSearch,
     encodeFilterCode: encodeFilterCode,
     parseFilterCode: parseFilterCode,
   };

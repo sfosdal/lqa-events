@@ -36,6 +36,10 @@ append-only registry in `filter.js`, zero-padded to six digits, so links
 keep working as venues and teams are added and every code is the same
 length.
 Opening one loads with those exclusions instead of your saved local prefs.
+Two optional parameters ride along: `s=` carries the search box's text,
+encoded (UTF-8 bytes XOR-ed with a fixed key, URL-safe base64 — not readable
+in the address bar, but reversible; `LQAFilter.encodeSearch`/`decodeSearch`),
+and `h=1` switches the US & WA holidays rows on.
 `filter.js` exposes `LQAFilter.parseFilterCode`/`encodeFilterCode`/
 `matchesFilter` so another site can apply the same code to its own copy of
 `events.json`.

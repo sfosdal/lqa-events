@@ -90,7 +90,7 @@
   // Kayak-style checkboxes: each filter map holds name → 'ex' for unchecked
   // (hidden); absent = checked (shown). Everything starts checked except SIFF
   // movies — see applyDefaultFilters.
-  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, month: null, showPast: false, pastFrom: null, page: 0, pageByDate: {}, series: [] };
+  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, q: '', holidays: false, month: null, showPast: false, pastFrom: null, series: [] };
 
   function modeKeys(map, mode) {
     return Object.keys(map).filter(function (k) { return map[k] === mode; });
@@ -232,6 +232,7 @@
   function applyDefaultFilters() { state.badgeMode = { movie: 'ex' }; }
   function isDefaultState() {
     if (Object.keys(state.venueMode).length || Object.keys(state.teamMode).length) return false;
+    if (state.q || state.holidays) return false;
     var k = Object.keys(state.badgeMode);
     return k.length === 1 && state.badgeMode.movie === 'ex';
   }
@@ -239,9 +240,59 @@
   // (e.g. river's Neighborhood section) can't drift from these rules.
   function filtered(list) {
     return list.filter(function (e) {
-      return LQAFilter.matchesFilter(e, { venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
+      return LQAFilter.matchesFilter(e, { venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode })
+        && LQAFilter.matchesSearch(e, state.q);
     });
   }
+
+  // ---- holidays (off by default, a switch in the filter panel) ----
+  // Computed from the rules, no feed needed; the actual date, not the
+  // observed weekday shift. One merged list of what the US, Washington and
+  // the City of Seattle observe: the federal set, Indigenous Peoples' Day
+  // (Seattle's name for the October Monday) and the Friday after
+  // Thanksgiving (WA's Native American Heritage Day). Shown as divider rows
+  // in the listing, right above the day's first event.
+  function nthWeekday(y, m, wd, n) { // n-th (1-based) weekday wd of month m; n < 0 counts from the end
+    var d = n > 0 ? new Date(y, m, 1) : new Date(y, m + 1, 0);
+    var step = n > 0 ? 1 : -1;
+    while (d.getDay() !== wd) d.setDate(d.getDate() + step);
+    d.setDate(d.getDate() + (Math.abs(n) - 1) * 7 * step);
+    return d;
+  }
+  function holidaysFor(y) {
+    var thanks = nthWeekday(y, 10, 4, 4);
+    var friday = new Date(thanks); friday.setDate(thanks.getDate() + 1);
+    return [
+      [new Date(y, 0, 1), "New Year's Day"],
+      [nthWeekday(y, 0, 1, 3), 'Martin Luther King Jr. Day'],
+      [nthWeekday(y, 1, 1, 3), "Presidents' Day"],
+      [nthWeekday(y, 4, 1, -1), 'Memorial Day'],
+      [new Date(y, 5, 19), 'Juneteenth'],
+      [new Date(y, 6, 4), 'Independence Day'],
+      [nthWeekday(y, 8, 1, 1), 'Labor Day'],
+      [nthWeekday(y, 9, 1, 2), "Indigenous Peoples' Day"],
+      [new Date(y, 10, 11), 'Veterans Day'],
+      [thanks, 'Thanksgiving'],
+      [friday, 'Native American Heritage Day'],
+      [new Date(y, 11, 25), 'Christmas Day'],
+    ].map(function (h) { return { date: ymd(h[0]), title: h[1] }; });
+  }
+  var holidayCache = {}; // year -> map date -> [rows]
+  function holidayMap() {
+    if (!state.holidays) return {};
+    var years = {};
+    var now = new Date().getFullYear();
+    years[now] = years[now + 1] = true;
+    Object.keys(state.byDate).forEach(function (d) { years[Number(d.slice(0, 4))] = true; });
+    var map = {};
+    Object.keys(years).forEach(function (y) {
+      if (!holidayCache[y]) holidayCache[y] = holidaysFor(Number(y));
+      holidayCache[y].forEach(function (h) { (map[h.date] = map[h.date] || []).push(h); });
+    });
+    return map;
+  }
+  // the feed's events for a day that survive the filter and the search
+  function dayItems(date) { return filtered(state.byDate[date] || []); }
 
   // ---- filter panel ----
   // Kayak-style groups of checkbox rows, dropped open under the bar by the
@@ -352,6 +403,8 @@
     document.querySelectorAll('input[data-team]').forEach(function (c) {
       c.checked = state.teamMode[c.dataset.team] !== 'ex';
     });
+    $('holidaysToggle').checked = state.holidays;
+    if ($('searchBox').value.trim() !== state.q) $('searchBox').value = state.q;
     var any = !isDefaultState();
     $('filterToggle').classList.toggle('is-on', any);
     $('clearAll').disabled = !any;
@@ -359,7 +412,7 @@
   // Filter choices persist per-browser (no login — just localStorage).
   function saveFilters() {
     try {
-      localStorage.setItem('lqa-filters', JSON.stringify({ v: 3, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode }));
+      localStorage.setItem('lqa-filters', JSON.stringify({ v: 3, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode, hol: state.holidays }));
     } catch (e) { /* private mode etc. — filters just won't persist */ }
   }
   function loadFilters() {
@@ -374,6 +427,7 @@
         Object.keys(s.venues || {}).forEach(function (v) { if (s.venues[v] === 'ex') state.venueMode[v] = 'ex'; });
         Object.keys(s.badges || {}).forEach(function (k) { if (TYPE_KEYS[k] && s.badges[k] === 'ex') state.badgeMode[k] = 'ex'; });
         Object.keys(s.teams || {}).forEach(function (k) { if (TEAM_BY_SLUG[k] && s.teams[k] === 'ex') state.teamMode[k] = 'ex'; });
+        state.holidays = !!s.hol;
       } else {
         // v1 arrays: only its team exclusions survive the checkbox model
         (s.teams || []).forEach(function (k) { if (TEAM_BY_SLUG[k]) state.teamMode[k] = 'ex'; });
@@ -383,8 +437,13 @@
   // A link built from "Copy filter link" takes over the initial view instead
   // of your saved prefs — open it, and you see exactly what was shared.
   // Interacting with the panel from there saves normally, like any visit.
+  // ?f=CODE carries the checkboxes, ?s=CODE the (encoded) search term, and
+  // ?h=1 the holidays switch.
   function loadFiltersFromURL() {
-    var code = new URLSearchParams(location.search).get('f');
+    var params = new URLSearchParams(location.search);
+    if (params.get('s')) state.q = LQAFilter.decodeSearch(params.get('s')).trim();
+    if (params.get('h') === '1') state.holidays = true;
+    var code = params.get('f');
     var parsed = code == null ? null : LQAFilter.parseFilterCode(code);
     if (!parsed) return false;
     state.venueMode = parsed.venueMode;
@@ -393,7 +452,7 @@
     return true;
   }
   // a filter change also rewinds the agenda to its first page
-  function applyFilters() { state.page = 0; syncFilters(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
+  function applyFilters() { syncFilters(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
 
   // Each group's map and full key list, for "only" and Select/Clear all.
   function groupInfo(g) {
@@ -482,11 +541,15 @@
     }
     var l = e.target.closest('.fp-link');
     if (l) {
-      var gi = groupInfo(l.dataset.group);
-      gi.keys.forEach(function (k) { setChecked(gi.map, k, l.dataset.act === 'all'); });
-      if (l.dataset.group === 'team' && l.dataset.act === 'all') {
-        TEAMS.forEach(function (t) { ensureTeamVenue(t.slug); });
-      }
+      // a group's own links, or the footer's, which sweep all three groups
+      var groups = l.dataset.group === 'all' ? ['venue', 'team', 'badge'] : [l.dataset.group];
+      groups.forEach(function (g) {
+        var gi = groupInfo(g);
+        gi.keys.forEach(function (k) { setChecked(gi.map, k, l.dataset.act === 'all'); });
+        if (g === 'team' && l.dataset.act === 'all') {
+          TEAMS.forEach(function (t) { ensureTeamVenue(t.slug); });
+        }
+      });
       applyFilters();
     }
   });
@@ -505,10 +568,27 @@
   function clearAllFilters() {
     state.venueMode = {};
     state.teamMode = {};
+    state.q = '';
+    state.holidays = false;
     applyDefaultFilters();
     applyFilters();
   }
   $('clearAll').addEventListener('click', clearAllFilters);
+  $('holidaysToggle').addEventListener('change', function () {
+    state.holidays = this.checked;
+    applyFilters();
+  });
+  // the search applies as you type, a beat after the last keystroke
+  var searchTimer = null;
+  $('searchBox').addEventListener('input', function () {
+    var v = this.value.trim();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function () {
+      if (v === state.q) return;
+      state.q = v;
+      applyFilters();
+    }, 180);
+  });
   // ---- light / system / dark ----
   // The head script already applied the saved choice; this just drives the
   // toggle and swaps <html data-theme> when a stop is picked.
@@ -533,32 +613,26 @@
   });
 
   // ---- the mini calendar: docked or floating ----
-  // Wide layout: docked beside the list, open by default, and a fold is
-  // remembered; folded, the list takes the full width and a floating handle
-  // at the right edge brings it back. Phones: never docked — the handle
+  // Wide layout (the page at its full width): docked beside the list, always
+  // shown, no toggle. Narrower: never docked — beside the list it would
+  // squeeze the cards to a sliver — so a handle at the list's top-right
   // opens it as a floating panel over the list, and it closes again on a
   // day pick or a tap elsewhere (transient, so nothing is stored).
-  var STACKED = '(max-width: 760px)';
+  var STACKED = '(max-width: 1023px)';
   var calFloatOpen = false;
-  function wideCalOpen() {
-    try { return localStorage.getItem('lqa-cal-wide') !== 'closed'; } catch (e) { return true; }
-  }
   function syncCal() {
     var stacked = matchMedia(STACKED).matches;
-    var open = stacked ? calFloatOpen : wideCalOpen();
+    var open = !stacked || calFloatOpen;
     $('calBox').hidden = !open;
     document.querySelector('.cal-side').classList.toggle('is-float', stacked && open);
-    document.querySelector('.agenda-layout').classList.toggle('cal-closed', !stacked && !open);
     var t = $('calToggle');
-    t.classList.toggle('is-fab', stacked || !open);
+    t.hidden = !stacked;
     t.setAttribute('aria-expanded', String(open));
     t.title = open ? 'Hide calendar' : 'Show calendar';
     t.querySelector('span').textContent = t.title;
   }
   $('calToggle').addEventListener('click', function () {
-    var open = $('calBox').hidden;
-    if (matchMedia(STACKED).matches) calFloatOpen = open;
-    else { try { localStorage.setItem('lqa-cal-wide', open ? 'open' : 'closed'); } catch (e) { /* no storage */ } }
+    calFloatOpen = $('calBox').hidden;
     syncCal();
   });
   function closeFloatCal() { if (calFloatOpen) { calFloatOpen = false; syncCal(); } }
@@ -615,6 +689,8 @@
   $('copyFilterLink').addEventListener('click', function () {
     var code = LQAFilter.encodeFilterCode({ venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
     var url = location.origin + location.pathname + '?f=' + code;
+    if (state.q) url += '&s=' + LQAFilter.encodeSearch(state.q);
+    if (state.holidays) url += '&h=1';
     var label = $('copyFilterLabel');
     var original = label.textContent;
     navigator.clipboard.writeText(url).then(function () {
@@ -650,191 +726,184 @@
     $('calPrev').disabled = !bounds || sameMonth(m, new Date(bounds.min.getFullYear(), bounds.min.getMonth(), 1));
     $('calNext').disabled = !bounds ||
       next.getFullYear() * 12 + next.getMonth() >= bounds.max.getFullYear() * 12 + bounds.max.getMonth();
-    $('calToday').disabled = sameMonth(m, new Date());
 
-    var grid = $('calGrid');
-    grid.innerHTML = '';
+    var box = $('calGrid');
+    box.innerHTML = '';
     var today = todayStr();
-    // Two full months at a time — this one and the next — so the near
-    // future is always completely in view. Arrows slide the pair by one.
-    var start = new Date(m.getFullYear(), m.getMonth(), 1);
-    start.setDate(1 - start.getDay()); // back up to Sunday
-    var end = new Date(m.getFullYear(), m.getMonth() + 2, 0); // next month's last day
-    $('calTitle').textContent =
-      m.toLocaleDateString('en-US', m.getFullYear() === next.getFullYear()
-        ? { month: 'short' } : { month: 'short', year: 'numeric' }) +
-      ' – ' + next.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-    var loYm = m.getFullYear() * 12 + m.getMonth();
-    var cells = Math.ceil((Math.round((end - start) / 86400e3) + 1) / 7) * 7;
-    for (var i = 0; i < cells; i++) {
-      var d = new Date(start);
-      d.setDate(start.getDate() + i);
-      var key = ymd(d);
-      var evs = filtered(state.byDate[key] || []);
-      var cell = document.createElement(evs.length ? 'button' : 'div');
-      cell.className = 'cal-day';
-      var ym = d.getFullYear() * 12 + d.getMonth();
-      // only spill days outside the two shown months go faint
-      if (ym < loYm || ym > loYm + 1) cell.className += ' is-out';
-      if (key === today) cell.className += ' is-today';
-      if (key < today) cell.className += ' is-past';
-      // Month differentiation: the card's own border frames the whole
-      // calendar (it follows the rounded corners); cells only draw the
-      // interior month-boundary segments, so each region still reads as
-      // fully enclosed without square corners fighting the card radius.
-      var nb = function (days) {
-        var n = new Date(d); n.setDate(d.getDate() + days); return n.getMonth() !== d.getMonth();
-      };
-      if (i >= 7 && nb(-7)) cell.className += ' mo-t';
-      if (i % 7 !== 0 && nb(-1)) cell.className += ' mo-l';
-      var num = document.createElement('span');
-      num.className = 'num';
-      // each month after the first announces itself on its 1st
-      if (d.getDate() === 1 && ym > loYm) {
-        num.className += ' num-mo';
-        num.textContent = d.toLocaleDateString('en-US', { month: 'short' });
-      } else {
-        num.textContent = d.getDate();
+    // Two months at a time — this one and the next — so the near future is
+    // always completely in view; the ‹ TODAY › bar above slides the pair by
+    // one. Each month is its own card (name, weekday row, grid) holding
+    // only its own days.
+    [m, next].forEach(function (first) {
+      var sec = document.createElement('section');
+      sec.className = 'cal-month';
+      sec.dataset.month = first.getMonth() + 1; // styles.css tints the name row by season
+      var h = document.createElement('h3');
+      h.className = 'cal-mname';
+      h.textContent = first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      sec.appendChild(h);
+      var dow = document.createElement('div');
+      dow.className = 'cal-dow';
+      dow.setAttribute('aria-hidden', 'true');
+      'SMTWTFS'.split('').forEach(function (c) {
+        var s = document.createElement('span'); s.textContent = c; dow.appendChild(s);
+      });
+      sec.appendChild(dow);
+      var days = document.createElement('div');
+      days.className = 'cal-days';
+      var last = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+      var cells = Math.ceil((first.getDay() + last) / 7) * 7;
+      for (var i = 0; i < cells; i++) {
+        var dayN = i - first.getDay() + 1;
+        if (dayN < 1 || dayN > last) { // pad to whole weeks, but no neighbor-month days
+          var blank = document.createElement('div');
+          blank.className = 'cal-day is-blank';
+          days.appendChild(blank);
+          continue;
+        }
+        var d = new Date(first.getFullYear(), first.getMonth(), dayN);
+        var key = ymd(d);
+        var evs = dayItems(key);
+        var cell = document.createElement(evs.length ? 'button' : 'div');
+        cell.className = 'cal-day';
+        if (key === today) cell.className += ' is-today';
+        if (key < today) cell.className += ' is-past';
+        var num = document.createElement('span');
+        num.className = 'num';
+        num.textContent = dayN;
+        cell.appendChild(num);
+        if (evs.length) {
+          cell.type = 'button';
+          cell.setAttribute('aria-label', d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ', ' + evs.length + ' event' + (evs.length > 1 ? 's' : ''));
+          var ticks = document.createElement('span');
+          ticks.className = 'ticks';
+          evs.slice(0, 6).forEach(function (e) {
+            var t = document.createElement('i');
+            t.style.setProperty('--dot', venueColor(e.venue));
+            ticks.appendChild(t);
+          });
+          cell.appendChild(ticks);
+          cell.dataset.date = key;
+        }
+        days.appendChild(cell);
       }
-      cell.appendChild(num);
-      if (evs.length) {
-        cell.type = 'button';
-        cell.setAttribute('aria-label', d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ', ' + evs.length + ' event' + (evs.length > 1 ? 's' : ''));
-        var ticks = document.createElement('span');
-        ticks.className = 'ticks';
-        evs.slice(0, 6).forEach(function (e) {
-          var t = document.createElement('i');
-          t.style.setProperty('--dot', venueColor(e.venue));
-          ticks.appendChild(t);
-        });
-        cell.appendChild(ticks);
-        cell.dataset.date = key;
-      }
-      grid.appendChild(cell);
-    }
+      sec.appendChild(days);
+      box.appendChild(sec);
+    });
   }
   $('calPrev').addEventListener('click', function () { shiftMonth(-1); });
   $('calNext').addEventListener('click', function () { shiftMonth(1); });
+  // TODAY is always live: back to the current month, past days put away,
+  // the list on its first page and scrolled to its first (= nearest) day
   $('calToday').addEventListener('click', function () {
     var now = new Date();
     state.month = new Date(now.getFullYear(), now.getMonth(), 1);
+    state.showPast = false; state.pastFrom = null;
     renderCal();
-    jumpToMonth();
+    renderAgenda();
+    scrollToDate(todayStr());
   });
   function shiftMonth(dir) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + dir, 1);
     renderCal();
     jumpToMonth();
   }
-  // The listing follows the calendar: land on the page holding the shown
-  // month's first listed day (a fully past month opens the past list instead).
+  // Scroll the list to a day: its own row, or the first listed day after it.
+  function scrollToDate(date) {
+    var rows = Array.from(document.querySelectorAll('.day-row'));
+    var row = rows.filter(function (r) { return r.dataset.date >= date; })[0] || rows[rows.length - 1];
+    if (row) row.scrollIntoView({ block: 'start' });
+  }
+  // The listing follows the calendar: scroll to the shown month's first
+  // listed day (a fully past month opens the past list first).
   function jumpToMonth() {
     var target = ymd(state.month);
     if (target < todayStr() && !sameMonth(state.month, new Date())) {
       state.showPast = true;
       state.pastFrom = target; // nothing older than that month
-      gotoPage(0);
-      return;
+      renderAgenda();
     }
-    var dates = Object.keys(state.pageByDate).sort();
-    var hit = null;
-    for (var i = 0; i < dates.length; i++) {
-      if (dates[i] >= target) { hit = dates[i]; break; }
-    }
-    if (hit == null && dates.length) hit = dates[dates.length - 1];
-    if (hit != null && state.pageByDate[hit] !== state.page) gotoPage(state.pageByDate[hit]);
+    scrollToDate(target);
   }
   $('calGrid').addEventListener('click', function (e) {
     var cell = e.target.closest('button.cal-day');
     if (!cell || !cell.dataset.date) return;
     var date = cell.dataset.date;
     if (date < todayStr()) {
-      // past days live above page one, behind the toggle — and a clicked
-      // day is where the past list starts, not the whole year of history
+      // past days are hidden until asked for — and a clicked day is where
+      // the past list starts, not the whole year of history
       state.showPast = true;
       state.pastFrom = date;
-      state.page = 0;
-      renderAgenda();
-    } else if (state.pageByDate[date] != null && state.pageByDate[date] !== state.page) {
-      state.page = state.pageByDate[date];
       renderAgenda();
     }
-    var row = document.querySelector('.day-row[data-date="' + date + '"]');
-    if (row) row.scrollIntoView({ block: 'start' });
+    scrollToDate(date);
   });
 
   // ---- agenda ----
-  // Upcoming days are paged greedily: a page spans at most two weeks AND at
-  // most 15 events, whichever fills first (a day is never split, so one huge
-  // day can overflow a page by itself). Past events stay behind their
-  // toggle, which lives on page one only.
-  var PAGE_DAYS = 14;
-  var PAGE_EVENTS = 15;
+  // One continuous list of every upcoming day (the calendar is the way
+  // around it). Past days are hidden until asked for — from the calendar (a
+  // past day, or ‹ into a past month); TODAY puts them away again.
   function renderAgenda() {
     var ol = $('agenda');
     ol.innerHTML = '';
     var dates = Object.keys(state.byDate).sort();
     var today = todayStr();
-    var pastCount = 0;   // every past event there is
-    var pastListed = 0;  // the ones the past list will actually show
+    var pastCount = 0;
     var inPast = function (d) { return d < today && (!state.pastFrom || d >= state.pastFrom); };
-    var pages = [];
-    var count = 0;
-    state.pageByDate = {};
-    dates.forEach(function (date) {
-      var n = filtered(state.byDate[date]).length;
-      if (!n) return;
-      if (date < today) { pastCount += n; if (inPast(date)) pastListed += n; return; }
-      var start = pages.length ? pages[pages.length - 1][0] : null;
-      // Math.round eats the DST hour before the day count is compared
-      var days = start ? Math.round((parseDate(date) - parseDate(start)) / 86400e3) : 0;
-      if (!pages.length || days >= PAGE_DAYS || count + n > PAGE_EVENTS) {
-        pages.push([date]);
-        count = n;
-      } else {
-        pages[pages.length - 1].push(date);
-        count += n;
-      }
-      state.pageByDate[date] = pages.length - 1;
-    });
-    if (state.page >= pages.length) state.page = Math.max(0, pages.length - 1);
+    dates.forEach(function (date) { if (date < today) pastCount += dayItems(date).length; });
     var shown = 0;
-    if (pastCount && state.page === 0) {
-      var tli = document.createElement('li');
-      tli.className = 'past-toggle';
-      var tb = document.createElement('button');
-      tb.type = 'button';
-      tb.textContent = state.showPast
-        ? 'Hide the ' + pastListed + ' past events'
-        : 'Show ' + pastCount + ' past events';
-      tb.addEventListener('click', function () {
-        state.showPast = !state.showPast;
-        state.pastFrom = null; // the button means all of them
-        renderAgenda();
-      });
-      tli.appendChild(tb);
-      ol.appendChild(tli);
+    var visible = dates.filter(function (d) {
+      return dayItems(d).length && (d >= today || (state.showPast && inPast(d)));
+    });
+    // A month divider opens each month; it sticks to the top until the next
+    // one pushes it out.
+    var lastMonth = null;
+    function divider(cls, text) {
+      var li = document.createElement('li');
+      li.className = cls;
+      var s = document.createElement('span');
+      s.textContent = text;
+      li.appendChild(s);
+      ol.appendChild(li);
     }
-    var visible = pages.length ? pages[state.page] : [];
-    if (state.showPast && state.page === 0) {
-      visible = dates.filter(function (d) {
-        return inPast(d) && filtered(state.byDate[d]).length;
-      }).concat(visible);
+    function ensureMonth(dateStr) {
+      var month = dateStr.slice(0, 7);
+      if (month === lastMonth) return;
+      lastMonth = month;
+      divider('month-row', parseDate(dateStr).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+    }
+    // Holidays (when switched on) are plain dividers — "Labor Day – September
+    // 7" — placed right above the day's first event, and they scroll past.
+    // One that falls on a day with nothing listed still shows, between its
+    // neighbors.
+    var holDates = Object.keys(holidayMap()).sort();
+    var dayBefore = function (s) { var d = parseDate(s); d.setDate(d.getDate() - 1); return ymd(d); };
+    var prevDate = state.showPast ? (state.pastFrom ? dayBefore(state.pastFrom) : '') : dayBefore(today);
+    function holidaysThrough(dateStr) {
+      holDates.forEach(function (hd) {
+        if (hd <= prevDate || hd > dateStr) return;
+        ensureMonth(hd);
+        holidayMap()[hd].forEach(function (h) {
+          divider('holiday-row', h.title + ' – ' + parseDate(hd).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
+        });
+      });
+      prevDate = dateStr;
     }
     visible.forEach(function (date) {
-      var evs = filtered(state.byDate[date]);
+      var evs = dayItems(date);
       shown += evs.length;
+      var d = parseDate(date);
+      holidaysThrough(date);
+      ensureMonth(date);
       var li = document.createElement('li');
       li.className = 'day-row' + (date === today ? ' is-today' : '') + (date < today ? ' is-past' : '');
       li.dataset.date = date;
-      var d = parseDate(date);
 
       var rail = document.createElement('div');
       rail.className = 'date-rail';
       rail.innerHTML =
         '<span class="dnum">' + d.getDate() + '</span>' +
-        '<span class="dmeta">' + d.toLocaleDateString('en-US', { month: 'short' }) + ' · ' +
-        d.toLocaleDateString('en-US', { weekday: 'short' }) + '</span>';
+        '<span class="dmeta">' + d.toLocaleDateString('en-US', { weekday: 'long' }) + '</span>';
       li.appendChild(rail);
 
       var wrap = document.createElement('div');
@@ -904,89 +973,37 @@
       li.textContent = 'No upcoming events for this filter yet — check back after the next refresh.';
       ol.appendChild(li);
     }
-    renderPager(pages);
     drawSeriesGraph();
+    watchFooter();
   }
-
-  // ---- pager: ‹ 1 2 3 › under the list, ellipsized when the year runs long ----
-  function gotoPage(p) {
-    state.page = p;
-    renderAgenda();
-    document.querySelector('.agenda').scrollIntoView({ block: 'start' });
-  }
-  // How many page buttons (numbers plus … gaps) there's room for. Compact:
-  // seven — first, last, current±1 and two gaps. Wide: whatever fits across
-  // the cards' width at the normal spacing, so the extra room shows more
-  // numbers rather than stretching the gaps.
-  function pagerSlots(nav) {
-    if (!nav.classList.contains('pager--wide') || !matchMedia('(min-width: 641px)').matches) return 7;
-    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    var de = $('agenda').querySelector('.day-events');
-    var width = de ? de.clientWidth : $('agenda').clientWidth - 6.2 * rem; // the cards' width — see .pager--wide
-    var slot = 2 * rem + 0.4 * rem;                  // a 2rem button plus the gap
-    var arrows = 2 * (2.4 * rem + 0.4 * rem);
-    return Math.max(7, Math.floor((width - arrows) / slot));
-  }
-  var pagesToShow = LQAFilter.pagesToShow; // first, last, current, then neighbors until the slots run out
-  var lastPages = [];
-  function renderPager(pages) {
-    var nav = $('agendaPager');
-    nav.innerHTML = '';
-    lastPages = pages;
-    var total = pages.length;
-    // with enough pages the pager spans the listing cards' width (see
-    // .pager--wide); a short one stays a compact centered cluster
-    nav.classList.toggle('pager--wide', total >= 5);
-    if (total < 2) return;
-    var show = pagesToShow(total, state.page, pagerSlots(nav));
-    var rangeLabel = function (i) {
-      var ds = pages[i];
-      var fmt = function (s) {
-        return parseDate(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      };
-      return fmt(ds[0]) + ' – ' + fmt(ds[ds.length - 1]);
-    };
-    var arrow = function (txt, target, label) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'pg-arrow';
-      b.textContent = txt;
-      b.setAttribute('aria-label', label);
-      if (target == null) b.disabled = true;
-      else b.addEventListener('click', function () { gotoPage(target); });
-      return b;
-    };
-    nav.appendChild(arrow('‹', state.page > 0 ? state.page - 1 : null, 'Earlier events'));
-    var last = -1;
-    show.forEach(function (i) {
-      if (i - last > 1) {
-        var gap = document.createElement('span');
-        gap.className = 'pg-gap';
-        gap.textContent = '…';
-        nav.appendChild(gap);
-      }
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = i + 1;
-      b.title = rangeLabel(i);
-      if (i === state.page) {
-        b.className = 'pg-cur';
-        b.disabled = true;
-        b.setAttribute('aria-current', 'page');
-      } else {
-        b.addEventListener('click', (function (p) { return function () { gotoPage(p); }; })(i));
-      }
-      nav.appendChild(b);
-      last = i;
-    });
-    nav.appendChild(arrow('›', state.page < total - 1 ? state.page + 1 : null, 'Later events'));
-  }
-  // the wide pager's slot count depends on the window width
+  // the series graph is measured from the rows, so it follows the window
   var resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () { if (lastPages.length) renderPager(lastPages); drawSeriesGraph(); }, 150);
+    resizeTimer = setTimeout(drawSeriesGraph, 150);
   });
+
+  // ---- the footer pins itself once you're into the list ----
+  // The list runs for months, so waiting to reach the footer would be a
+  // long way down. Instead, as soon as the top of the list has scrolled off
+  // (about a screen in) the footer folds into one compact row along the
+  // bottom edge and stays there while the list scrolls behind it. Watching
+  // starts only after the list has rendered.
+  var footerWatched = false;
+  function watchFooter() {
+    if (footerWatched || !document.querySelector('.day-row')) return;
+    footerWatched = true;
+    var foot = document.querySelector('footer');
+    var agenda = document.querySelector('.agenda');
+    var check = function () {
+      if (agenda.getBoundingClientRect().top < -200) {
+        foot.classList.add('is-pinned');
+        window.removeEventListener('scroll', check);
+      }
+    };
+    window.addEventListener('scroll', check, { passive: true });
+    check();
+  }
 
   // ---- subscribe popover ----
   // The feed follows the active filter where a pre-built file exists: the
