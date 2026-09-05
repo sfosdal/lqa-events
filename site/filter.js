@@ -66,9 +66,9 @@
   // Venue hues for dark backgrounds — the same values the calendar's
   // styles.css dark block sets as --v-* variables; keep the two in step.
   var VENUE_COLOR = {
-    'Cornish Playhouse': '#00ff99', 'Climate Pledge Arena': '#0099ff', 'T-Mobile Park': '#ccffff',
-    'Seattle Center': '#3333ff', 'Lumen Field': '#6666ff', 'SIFF Cinema Uptown': '#cc99ff',
-    'The Vera Project': '#9900ff', 'On the Boards': '#ff66ff', 'McCaw Hall': '#cc0099',
+    'Cornish Playhouse': '#3ecf97', 'Climate Pledge Arena': '#4da3f0', 'T-Mobile Park': '#8ad8e0',
+    'Seattle Center': '#6a72e6', 'Lumen Field': '#8b8fe8', 'SIFF Cinema Uptown': '#b596e0',
+    'The Vera Project': '#a26be6', 'On the Boards': '#e07ae0', 'McCaw Hall': '#d158a7',
   };
 
   function slugify(s) {
@@ -178,7 +178,7 @@
 
   // Event-type hues for dark backgrounds — same values as the calendar's
   // dark --t-* variables; keep in step.
-  var TYPE_COLOR = { concert: '#ff9900', sports: '#ffff00', arts: '#ff3333', movie: '#cc9966', community: '#ff66cc' };
+  var TYPE_COLOR = { concert: '#f0806a', sports: '#f2d21b', arts: '#d63a4f', movie: '#8b9db0', community: '#e660a8' };
 
   // ---- series: the same event on nearby days — a homestand, a two-night
   // stand, an opera run. Same venue + same title, occurrences within 2 days
@@ -271,14 +271,46 @@
     svg.setAttribute('width', box.width);
     svg.setAttribute('height', box.height);
     svg.setAttribute('aria-hidden', 'true');
-    items.forEach(function (it) {
+    var defs = null;
+    items.forEach(function (it, idx) {
       var pts = it.els.map(function (el) { var r = el.getBoundingClientRect(); return { x: r.right - box.left - 1, y: r.top + r.height / 2 - box.top }; });
       var x = f(gx + it.lane * laneW + laneW / 2);
       var n = pts.length;
       // one continuous path per series, top to bottom: the pen starts at
       // the page edge (or the first row's edge), and for each row runs the
-      // straight lane down to the row's entry, curves in, and curves back out
-      var d = it.before ? 'M' + x + ' 0' : '';
+      // straight lane down to the row's entry, curves in, and curves back out.
+      // A series whose earlier dates aren't listed (they're in the past)
+      // arrives from the top edge as a lead that fades in, 0% → 100% over
+      // its first few dozen pixels, so it doesn't dead-end against the edge.
+      var d = '';
+      if (it.before) {
+        var leadEnd = f(pts[0].y - b);
+        if (leadEnd > 0) {
+          if (!defs) { defs = document.createElementNS(SVG_NS, 'defs'); svg.appendChild(defs); }
+          var gid = 'sg-fade-' + idx + '-' + Math.round(Math.random() * 1e6);
+          var grad = document.createElementNS(SVG_NS, 'linearGradient');
+          grad.setAttribute('id', gid);
+          grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+          grad.setAttribute('x1', 0); grad.setAttribute('x2', 0);
+          // invisible for most of the way down from the edge; it only comes in
+          // over the last ~36px before the curve into the first listed row
+          grad.setAttribute('y1', Math.max(0, leadEnd - 36)); grad.setAttribute('y2', leadEnd);
+          [[0, 0], [1, 1]].forEach(function (s) {
+            var stop = document.createElementNS(SVG_NS, 'stop');
+            stop.setAttribute('offset', s[0]);
+            stop.setAttribute('stop-color', opts.color(it.s));
+            stop.setAttribute('stop-opacity', s[1]);
+            grad.appendChild(stop);
+          });
+          defs.appendChild(grad);
+          var lead = document.createElementNS(SVG_NS, 'path');
+          lead.setAttribute('class', 'sg-line');
+          lead.setAttribute('d', 'M' + x + ' 0 L' + x + ' ' + leadEnd);
+          lead.style.stroke = 'url(#' + gid + ')';
+          svg.appendChild(lead);
+        }
+        d = 'M' + x + ' ' + Math.max(0, leadEnd);
+      }
       pts.forEach(function (p, i) {
         var starts = i === 0 && !it.before, ends = i === n - 1 && !it.after;
         var px = f(p.x), py = f(p.y);

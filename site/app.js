@@ -16,9 +16,6 @@
     'T-Mobile Park': '--v-tmobile',
     'Lumen Field': '--v-lumen',
   };
-  // Venue marks for agenda rows with no team crest — shared with other
-  // sites via filter.js
-  var VENUE_ICON = LQAFilter.VENUE_ICON;
   // Unexpected venues draw from the same cool, web-safe family as the
   // curated ones, hashed from the name so the pick is stable day to day.
   var VENUE_FALLBACK = ['#66ccff', '#9999ff', '#66ffff', '#cc66cc', '#3399ff', '#ff99ff', '#00cccc', '#6666ff'];
@@ -557,6 +554,7 @@
   function setPanelOpen(open) {
     $('filterPanel').hidden = !open;
     $('filterToggle').setAttribute('aria-expanded', String(open));
+    if (open) fitPops();
   }
   function togglePanel() { setPanelOpen($('filterPanel').hidden); }
   $('filterToggle').addEventListener('click', togglePanel);
@@ -593,14 +591,18 @@
   // ---- light / system / dark ----
   // The head script already applied the saved choice; this just drives the
   // toggle and swaps <html data-theme> when a stop is picked.
-  function applyTheme(t) {
+  function applyTheme(t, persist) {
     if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
     else { t = 'system'; delete document.documentElement.dataset.theme; }
     $('themeToggle').dataset.active = t;
     $('themeToggle').querySelectorAll('button').forEach(function (b) {
       b.setAttribute('aria-checked', String(b.dataset.theme === t));
     });
-    try { if (t === 'system') localStorage.removeItem('lqa-theme'); else localStorage.setItem('lqa-theme', t); } catch (e) { /* no storage */ }
+    // only a click saves: the load-time call mirrors what the head script
+    // applied (on phones that's always "system", and must not erase a choice)
+    if (persist) {
+      try { if (t === 'system') localStorage.removeItem('lqa-theme'); else localStorage.setItem('lqa-theme', t); } catch (e) { /* no storage */ }
+    }
     // browser chrome follows: both theme-color metas take the chosen shade,
     // or go back to their own light/dark values under "system"
     document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) {
@@ -610,7 +612,7 @@
   applyTheme(document.documentElement.dataset.theme || 'system');
   $('themeToggle').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-theme]');
-    if (b) applyTheme(b.dataset.theme);
+    if (b) applyTheme(b.dataset.theme, true);
   });
 
   // ---- the mini calendar: docked or floating ----
@@ -626,6 +628,7 @@
     var open = !stacked || calFloatOpen;
     $('calBox').hidden = !open;
     document.querySelector('.cal-side').classList.toggle('is-float', stacked && open);
+    if (stacked && open) fitPops();
     var t = $('calToggle');
     t.hidden = !stacked;
     t.setAttribute('aria-expanded', String(open));
@@ -641,7 +644,7 @@
     if (e.target.closest('button.cal-day')) closeFloatCal();
   });
   document.addEventListener('click', function (e) {
-    if (!e.target.closest('.cal-side')) closeFloatCal();
+    if (!e.target.closest('.cal-side, #calToggle')) closeFloatCal();
   });
   syncCal();
   window.addEventListener('resize', syncCal);
@@ -687,6 +690,20 @@
       openSheet(e);
     };
   }
+  // copy to the clipboard; falls back to a selection + execCommand where the
+  // async API is missing (older browsers, or the site opened over plain http)
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error('copy failed'));
+    });
+  }
   $('copyFilterLink').addEventListener('click', function () {
     var code = LQAFilter.encodeFilterCode({ venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
     var url = location.origin + location.pathname + '?f=' + code;
@@ -694,7 +711,7 @@
     if (state.holidays) url += '&h=1';
     var label = $('copyFilterLabel');
     var original = label.textContent;
-    navigator.clipboard.writeText(url).then(function () {
+    copyText(url).then(function () {
       label.textContent = 'Copied!';
       // hold, fade out, then bring the normal label back in
       setTimeout(function () {
@@ -913,7 +930,9 @@
         var row = document.createElement('div');
         row.className = 'ev';
         row.addEventListener('click', cardTap(e), true);
-        row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' 9%, transparent)';
+        // the venue's hue over the card at --tint (stronger in light mode, where
+        // a faint wash on white disappears)
+        row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' var(--tint), transparent)';
         // the right edge carries the event type's hue, matching its filter dot
         row.style.borderRight = '1rem solid ' + typeColor(eventType(e));
         var time = document.createElement('span');
@@ -944,7 +963,7 @@
         var titleLine = document.createElement('span');
         titleLine.className = 'ev-title';
         var team = teamFor(e.title);
-        var mark = (team && team.logo) || VENUE_ICON[e.venue];
+        var mark = team && team.logo; // a home game's crest; venues carry no mark
         if (mark) {
           var logo = document.createElement('img');
           logo.className = 'team-mark';
@@ -991,11 +1010,26 @@
   // The month divider that's currently stuck (just under the pinned filter
   // bar) gets a shadow: the last one whose top has reached the bar's bottom
   // edge (rAF-throttled scroll).
+  // The floating panels (filter panel, Add To Calendar pop, the phone's
+  // calendar) hang off the pinned bar, but before the page has scrolled the
+  // bar still sits under the masthead — so a stylesheet max-height measured
+  // from the top of the viewport can run past its bottom. Cap each open
+  // panel at the room it actually has; re-measured as the bar rides up.
+  function fitPops() {
+    [$('filterPanel'), $('subscribePop'), $('calBox')].forEach(function (el) {
+      if (el.hidden) return;
+      if (el === $('calBox') && !document.querySelector('.cal-side.is-float')) { el.style.maxHeight = ''; return; }
+      var room = window.innerHeight - el.getBoundingClientRect().top - 12;
+      el.style.maxHeight = Math.max(200, Math.round(room)) + 'px';
+    });
+  }
+  window.addEventListener('resize', fitPops);
   var stuckPending = false;
   function markStuck() {
     stuckPending = false;
     // the bar's Back-to-top button shows once the masthead has scrolled off
     $('toTop').hidden = document.scrollingElement.scrollTop < 240;
+    fitPops();
     var edge = document.querySelector('.filter-area').getBoundingClientRect().bottom + 1;
     var rows = document.querySelectorAll('.month-row');
     var stuck = null;
@@ -1007,9 +1041,15 @@
     var first = days.filter(function (d) { return d.getBoundingClientRect().bottom > edge; })[0];
     if (first && state.month) {
       var ym = first.dataset.date.slice(0, 7);
-      if (ym !== ymd(state.month).slice(0, 7)) {
+      var cur = ymd(state.month).slice(0, 7);
+      if (ym !== cur) {
         state.month = new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)) - 1, 1);
         renderCal();
+        // the cards slide in the direction the list moved
+        var box = $('calGrid');
+        box.classList.remove('slide-up', 'slide-down');
+        void box.offsetWidth; // restart the animation if one was still running
+        box.classList.add(ym > cur ? 'slide-up' : 'slide-down');
       }
     }
   }
@@ -1018,11 +1058,24 @@
   }, { passive: true });
   $('toTop').addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-  // "Put this on your site" (in the pinned footer) floats open over the
-  // list; a click anywhere else folds it back
+  // The footer keeps to one line: when it wouldn't fit, Sources and Embed
+  // drop to their icons; if it still doesn't, the credit drops to its mark.
+  function fitFooter() {
+    var inner = document.querySelector('.foot-inner');
+    inner.classList.remove('is-tight', 'is-tighter');
+    if (inner.scrollWidth > inner.clientWidth + 1) inner.classList.add('is-tight');
+    if (inner.scrollWidth > inner.clientWidth + 1) inner.classList.add('is-tighter');
+  }
+  fitFooter();
+  window.addEventListener('resize', fitFooter);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitFooter);
+
+  // the footer's Sources and Embed panels float open over the list; a click
+  // anywhere else folds them back
   document.addEventListener('click', function (e) {
-    var share = $('embed');
-    if (share.open && !e.target.closest('#embed')) share.open = false;
+    document.querySelectorAll('footer details[open]').forEach(function (d) {
+      if (!d.contains(e.target)) d.open = false;
+    });
   });
 
   // ---- subscribe popover ----
@@ -1079,10 +1132,7 @@
     var open = pop.hidden;
     pop.hidden = !open;
     this.setAttribute('aria-expanded', String(open));
-    // sit under the chip, but never past the bar's right edge
-    var bar = this.parentNode;
-    pop.style.setProperty('--pop-x', Math.max(0, Math.min(this.offsetLeft, bar.clientWidth - pop.offsetWidth)) + 'px');
-    if (open) { $('qrPanel').hidden = true; $('qrBtn').setAttribute('aria-expanded', 'false'); }
+    if (open) { $('qrPanel').hidden = true; $('qrBtn').setAttribute('aria-expanded', 'false'); fitPops(); }
   });
   document.addEventListener('click', function (e) {
     if (!e.target.closest('#subscribeBtn, #subscribePop')) {
@@ -1092,10 +1142,10 @@
   });
   $('copyIcs').addEventListener('click', function (ev) {
     ev.preventDefault();
-    var label = this.querySelector('span');
-    navigator.clipboard.writeText(icsHref).then(function () {
-      label.textContent = 'Copied';
-      setTimeout(function () { label.textContent = 'Copy link'; }, 1500);
+    var tile = this;
+    copyText(icsHref).then(function () {
+      tile.classList.add('is-done'); // the tile shows a check for a moment
+      setTimeout(function () { tile.classList.remove('is-done'); }, 1500);
     });
   });
 

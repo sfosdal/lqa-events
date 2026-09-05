@@ -5,38 +5,44 @@
   --mist: #ffffff;       /* card surface */
   --ink: #1b2733;        /* Puget ink */
   --ink-soft: #55636f;
+  --ink-bright: #1b2733; /* the logo: pure white in the dark palette, ink here */
   --line: #c9d2da;
   --gold: #e8791d;       /* Space Needle "Galaxy Gold" */
   --gold-soft: #fbe9d8;
-  /* Color coding is web-safe (each channel 00/33/66/99/CC/FF) and each
+  /* Color coding is muted (a step back from the pure primaries) and each
      group keeps to its own family so a dot or stripe reads as what it is:
      venues are cool (blue → violet → teal), event types are warm (yellow →
      orange → red → pink), teams are sea-and-field greens/teals. */
   /* venue hues (chips, grid ticks, agenda tags): a sweep from teal through
      blue and violet to magenta, neighbors alternating light and dark */
-  --v-cornish: #009966;
-  --v-cpa: #0066cc;
-  --v-tmobile: #33cccc;
-  --v-seactr: #0000cc;
-  --v-lumen: #6666cc;
-  --v-siff: #9966cc;
-  --v-vera: #6600cc;
-  --v-otb: #cc33cc;
-  --v-mccaw: #990066;
-  /* event-type hues (filter dots, agenda right edge) */
-  --t-concert: #ff6600;
-  --t-sports: #cc9900;
-  --t-arts: #cc0000;
-  --t-movie: #996633;
-  --t-community: #ff0099;
-  /* team hues (Home games dots): lime through olive to spring green */
-  --tm-mariners: #99cc00;
-  --tm-storm: #336633;
-  --tm-seahawks: #66cc00;
-  --tm-reign: #009966;
-  --tm-sounders: #669900;
-  --tm-kraken: #00cc00;
-  --tm-torrent: #cccc00;
+  /* all three families sit a step back from the pure primaries: the same
+     hues, less glare, so the stripes and ticks read after the titles */
+  --v-cornish: #1a9c6e;
+  --v-cpa: #2f7fd6;
+  --v-tmobile: #3aa8b8;
+  --v-seactr: #4048c8;
+  --v-lumen: #6b6fcf;
+  --v-siff: #8f6fc9;
+  --v-vera: #7a3fc4;
+  --v-otb: #c04fc0;
+  --v-mccaw: #a32a7a;
+  --venue-text: 72%;     /* how much of the venue hue the card's venue label keeps (light mode) */
+  --tint: 22%;           /* the venue wash behind each card (light mode; 9% in the dark palette) */
+  /* event-type hues (filter dots, agenda right edge): concerts salmon and
+     arts crimson keep clear of the brand orange; movies slate = "quiet" */
+  --t-concert: #d9664f;
+  --t-sports: #d4b106;
+  --t-arts: #b8303f;
+  --t-movie: #7a8a99;
+  --t-community: #d63f9c;
+  /* one team green: the dot says "home game", the crest says which team */
+  --tm-mariners: #3f9a4f;
+  --tm-storm: #3f9a4f;
+  --tm-seahawks: #3f9a4f;
+  --tm-reign: #3f9a4f;
+  --tm-sounders: #3f9a4f;
+  --tm-kraken: #3f9a4f;
+  --tm-torrent: #3f9a4f;
   --barh: 3.4rem;        /* the pinned filter bar's height (chips 2.25rem + padding) */
   --rule: color-mix(in srgb, var(--line), var(--ink-soft)); /* list dividers: a step brighter than --line */
   --display: "Big Shoulders", "Arial Narrow", sans-serif;
@@ -51,26 +57,28 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2;
+    --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2; --ink-bright: #ffffff;
     --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
-    --v-cornish: #00ff99; --v-cpa: #0099ff; --v-tmobile: #ccffff; --v-seactr: #3333ff;
-    --v-lumen: #6666ff; --v-siff: #cc99ff; --v-vera: #9900ff; --v-otb: #ff66ff; --v-mccaw: #cc0099;
-    --t-concert: #ff9900; --t-sports: #ffff00; --t-arts: #ff3333;
-    --t-movie: #cc9966; --t-community: #ff66cc;
-    --tm-mariners: #ccff66; --tm-storm: #339933; --tm-seahawks: #99ff00;
-    --tm-reign: #00cc66; --tm-sounders: #669900; --tm-kraken: #00ff00; --tm-torrent: #ccff00;
+    --v-cornish: #3ecf97; --v-cpa: #4da3f0; --v-tmobile: #8ad8e0; --v-seactr: #6a72e6;
+    --v-lumen: #8b8fe8; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
+    --venue-text: 100%; --tint: 9%;
+    --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
+    --t-movie: #8b9db0; --t-community: #e660a8;
+    --tm-mariners: #5fbf6a; --tm-storm: #5fbf6a; --tm-seahawks: #5fbf6a;
+    --tm-reign: #5fbf6a; --tm-sounders: #5fbf6a; --tm-kraken: #5fbf6a; --tm-torrent: #5fbf6a;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2;
+  --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2; --ink-bright: #ffffff;
   --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
-  --v-cornish: #00ff99; --v-cpa: #0099ff; --v-tmobile: #ccffff; --v-seactr: #3333ff;
-  --v-lumen: #6666ff; --v-siff: #cc99ff; --v-vera: #9900ff; --v-otb: #ff66ff; --v-mccaw: #cc0099;
-  --t-concert: #ff9900; --t-sports: #ffff00; --t-arts: #ff3333;
-  --t-movie: #cc9966; --t-community: #ff66cc;
-  --tm-mariners: #ccff66; --tm-storm: #339933; --tm-seahawks: #99ff00;
-  --tm-reign: #00cc66; --tm-sounders: #669900; --tm-kraken: #00ff00; --tm-torrent: #ccff00;
+  --v-cornish: #3ecf97; --v-cpa: #4da3f0; --v-tmobile: #8ad8e0; --v-seactr: #6a72e6;
+  --v-lumen: #8b8fe8; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
+  --venue-text: 100%; --tint: 9%;
+  --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
+  --t-movie: #8b9db0; --t-community: #e660a8;
+  --tm-mariners: #5fbf6a; --tm-storm: #5fbf6a; --tm-seahawks: #5fbf6a;
+  --tm-reign: #5fbf6a; --tm-sounders: #5fbf6a; --tm-kraken: #5fbf6a; --tm-torrent: #5fbf6a;
 }
 :root[data-theme="light"] { color-scheme: light; }
 
@@ -100,15 +108,8 @@ h1 {
 }
 .sub { color: var(--ink-soft); max-width: 34rem; margin: .8rem 0 0; }
 
-.masthead-actions {
-  position: relative; text-align: right; align-self: stretch;
-  display: flex; flex-direction: column;
-  align-items: flex-end;
-}
-.updated {
-  font-family: var(--display); font-weight: 700; font-size: 1.5rem;
-  text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
-  margin: 0 0 .5rem; min-height: 1em;
+.updated { /* the "Updated …" stamp: an eyebrow line under the title, spaced like the one above it */
+  margin: .3rem 0 0; min-height: 1em;
 }
 /* Solid-ink pill with the page background as its text — a dark pill in
    light mode, a light one in dark — softened on hover (the event sheet's
@@ -121,16 +122,20 @@ h1 {
 }
 .btn-cal svg { width: 1.15em; height: 1.15em; flex: none; }
 .btn-cal:hover { background: var(--ink-soft); color: var(--sky); }
-/* the subscribe pop hangs under its chip (app.js sets --pop-x to the chip's
-   offset, pulled back if the pop would run past the bar's right edge) */
+/* the subscribe pop hangs from the bar's right end, the mini calendar's
+   width, its right edge on the calendar's; its top lines up with the filter
+   panel's (that one hangs .5rem under the .filter-area, whose bottom padding
+   is .6rem) */
 .pop {
-  position: absolute; left: var(--pop-x, 0); top: calc(100% + .5rem); z-index: 10;
-  width: min(24rem, 100%); background: var(--mist); border: 1px solid var(--line);
+  position: absolute; right: 0; top: calc(100% + 1.1rem); z-index: 10;
+  width: min(18rem, 100%); background: var(--mist); border: 1px solid var(--line);
   border-radius: 8px; padding: 1rem 1.1rem; box-shadow: 0 8px 28px rgba(15, 25, 35, .18);
   font-size: .92rem;
 }
 .pop p { margin: 0 0 .6rem; }
-.pop-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-bottom: .6rem; }
+/* square logo tiles, three to a row, each row centered; the names live in
+   the tooltips and for screen readers */
+.pop-tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; max-width: 14rem; margin: 0 auto .8rem; }
 .qr-panel { text-align: center; margin-bottom: .6rem; }
 #qrImg {
   display: inline-block; width: 170px; height: 170px;
@@ -139,15 +144,18 @@ h1 {
 #qrImg svg { display: block; width: 100%; height: 100%; }
 .qr-panel .pop-note { text-align: center; }
 .tile {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: .4rem;
-  padding: .75rem .3rem .6rem; border: 1px solid var(--line); border-radius: 8px;
-  background: var(--sky); text-decoration: none;
+  flex: none; width: 4.25rem; height: 4.25rem; display: grid; place-items: center;
+  padding: .7rem; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--sky); text-decoration: none; position: relative;
 }
-.tile svg { width: 26px; height: 26px; color: var(--gold); }
-.tile span {
-  font-family: var(--mono); font-size: .62rem; text-transform: uppercase;
-  letter-spacing: .06em; color: var(--ink-soft); white-space: nowrap;
+.tile svg { width: 100%; height: 100%; color: var(--gold); }
+.tile-logo { width: 100%; height: 100%; border-radius: 8px; object-fit: contain; }
+.tile span { /* screen readers only */
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
+/* Copy link: a check replaces the icon for a moment after copying */
+.tile.is-done svg { display: none; }
+.tile.is-done::after { content: "✓"; font: 700 1.7rem/1 var(--body); color: var(--ink); }
 .tile:hover { border-color: var(--ink-soft); }
 .tile:hover span { color: var(--ink); }
 /* ---- filter bar: one row of matching chips ---- */
@@ -168,19 +176,17 @@ h1 {
 /* the funnel's chevron is the panel's open/closed indicator. Its outline is
    deliberately the same whether or not a filter is active — Reset lighting
    up is the "something's filtered" signal. */
-#filterToggle .chev { width: .85rem; height: .85rem; transition: transform .15s; }
-#filterToggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
 /* The bar can't wrap. When its content wouldn't fit — app.js measures and
    sets .is-tight — the labeled chips keep just their icons; the labels stay
    for screen readers. */
-.filterbar.is-tight #subscribeBtn span {
+.filterbar.is-tight #subscribeBtn span, .filterbar.is-tight #filterToggle span, .filterbar.is-tight #toTop span {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
-.filterbar.is-tight #subscribeBtn { padding: .5em .7em; }
-.filterbar.is-tight #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
+.filterbar.is-tight #subscribeBtn, .filterbar.is-tight #filterToggle, .filterbar.is-tight #toTop { padding: .5em .7em; }
+.filterbar.is-tight #subscribeBtn svg, .filterbar.is-tight #filterToggle svg, .filterbar.is-tight #toTop svg { width: 1.1rem; height: 1.1rem; }
 /* the search box: a chip that takes typing, a magnifier at its right end and
    no placeholder; it gives up width first when the row gets tight */
-.filterbar .search-wrap { position: relative; display: flex; flex: 0 1 15rem; min-width: 7rem; }
+.filterbar .search-wrap { position: relative; display: flex; flex: 1 1 8rem; min-width: 6rem; } /* takes whatever room the row has left */
 #searchBox {
   width: 100%; font: 500 .85rem/1 var(--body); color: var(--ink); background: var(--mist);
   border: 1px solid var(--line); border-radius: 999px; padding: .5em 2.4em .5em .95em; min-height: 2.25rem;
@@ -194,11 +200,12 @@ h1 {
   position: absolute; right: .85rem; top: 50%; width: 1rem; height: 1rem;
   transform: translateY(-50%); color: var(--ink-soft); pointer-events: none;
 }
-.filterbar.is-tight .search-wrap { flex-basis: 9rem; }
 #toTop[hidden] { display: none; }
-/* Add To Calendar sits at the right end, just left of the theme pill (DOM
-   order keeps it with the other actions; flex order moves it) */
-#subscribeBtn { order: 1; margin-left: auto; }
+/* Add To Calendar sits toward the right end, just left of the theme pill
+   (DOM order keeps it with the other actions; flex order moves it); the
+   search box grows to fill the gap before it */
+#subscribeBtn { order: 1; }
+#calToggle { order: 3; } /* the calendar chip: far right, past the theme pill */
 /* light / system / dark: a three-stop pill at the bar's right end, the ink
    knob sliding under the active icon */
 .theme-toggle {
@@ -234,7 +241,7 @@ h1 {
   background: var(--mist); border: 1px solid var(--line);
   border-radius: 10px; padding: 1rem 1.1rem;
   box-shadow: 0 12px 36px rgba(0, 0, 0, .3);
-  max-height: calc(100vh - 8rem); overflow-y: auto;
+  max-height: calc(100vh - 8rem); max-height: calc(100dvh - 8rem); overflow-y: auto;
 }
 /* Kayak-style panel: columns of checkbox rows, Select all | Clear all links
    per group, an "only" link on hover, and an event count on the right. */
@@ -315,7 +322,7 @@ h1 {
   gap: 0 2.5rem; align-items: start;
 }
 .agenda-layout > ol { grid-column: 1; }
-.cal-side { position: sticky; top: calc(var(--barh) + .75rem); grid-column: 2; grid-row: 1; }
+.cal-side { position: sticky; top: calc(var(--barh) + .5rem); grid-column: 2; grid-row: 1; } /* same offset under the bar as the pops */
 /* Below the page's full width (62rem + padding) the calendar never docks —
    beside the list it would squeeze the cards to a sliver — so from here
    down it floats over the list instead. */
@@ -330,16 +337,24 @@ h1 {
      as the list scrolls */
   .cal-side { order: -1; height: 0; top: calc(var(--barh) + .5rem); z-index: 15; }
   .cal-side.is-float .cal {
-    position: absolute; z-index: 14; right: 0; top: 3.1rem; /* under the handle */
+    position: absolute; z-index: 14; right: 0; top: 0; /* right under the pinned bar */
     width: min(22rem, 100%);
-    max-height: calc(100vh - 5rem); overflow-y: auto;
+    max-height: calc(100vh - 5rem); max-height: calc(100dvh - 5rem); overflow-y: auto;
   }
   .cal-side.is-float .cal-month { box-shadow: 0 12px 36px rgba(0, 0, 0, .3); }
 }
 
 /* ---- mini month calendar: a nav bar, then one framed card per month ---- */
 .cal { display: grid; gap: .6rem; }
+.cal[hidden] { display: none; } /* an author display beats the UA [hidden] rule */
 .cal-months { display: grid; gap: 1.1rem; }
+/* when the list scrolls into a new month the cards slide in — up for a later
+   month, down for an earlier one (app.js sets the class for one run) */
+.cal-months.slide-up { animation: cal-slide-up .28s ease-out; }
+.cal-months.slide-down { animation: cal-slide-down .28s ease-out; }
+@keyframes cal-slide-up { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes cal-slide-down { from { transform: translateY(-14px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cal-months.slide-up, .cal-months.slide-down { animation: none; } }
 .cal-month { background: var(--mist); border: 2px solid var(--ink-soft); border-radius: 10px; overflow: hidden; }
 /* ‹ TODAY › as one bar in the cards' own frame — the header card of the
    stack: ‹ flush left, › flush right, TODAY dead center between them */
@@ -426,7 +441,9 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
   padding: .6rem 0 .45rem;
   font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1;
   text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
-  background: var(--sky);
+  /* opaque only above the rule: while stuck, the rows scroll on under the
+     lower half, visible right up to the line */
+  background: linear-gradient(var(--sky) 50%, transparent 50%);
 }
 /* the rule itself: a 1px layer at the row's center, above the shadow */
 .month-row::before, .holiday-row::before {
@@ -436,18 +453,6 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 .month-row > span, .holiday-row > span { position: relative; z-index: 1; background: var(--sky); padding: 0 .9rem; }
 .month-row { position: sticky; top: var(--barh); z-index: 5; }
 .holiday-row { font-size: 1.05rem; }
-/* the shadow it casts while stuck (app.js sets .is-stuck) and as the first
-   thing in the list: a dark gradient starting right at the rule (the row's
-   vertical center) and fading downward past the row, masked with the same
-   15% / 85% stops as the rule so both fade out together toward the sides */
-.month-row::after {
-  content: ""; position: absolute; left: 0; right: 0; top: calc(50% + 1px); bottom: -28px; pointer-events: none;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, .6), transparent);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
-  opacity: 0; transition: opacity .15s;
-}
-.month-row.is-stuck::after, #agenda > .month-row:first-child::after { opacity: 1; }
 .month-row + .day-row, .holiday-row + .day-row { background: none; }
 /* the rule between days fades out toward both edges */
 .day-row {
@@ -500,7 +505,9 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 .ev .time { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); min-width: 5.5rem; padding-top: .15em; display: flex; flex-direction: column; gap: .1rem; }
 .ev .venue {
   font-family: var(--mono); font-size: 1rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .06em; color: var(--dot, var(--ink-soft));
+  /* the venue's hue, pulled toward the ink in light mode so small text on
+     white keeps its contrast (--venue-text is 100% in the dark palette) */
+  letter-spacing: .06em; color: color-mix(in srgb, var(--dot, var(--ink-soft)) var(--venue-text), var(--ink));
 }
 /* the venue link keeps the label's look — .ev a above is for the title */
 .ev .venue a { font-weight: inherit; text-decoration-color: var(--line); }
@@ -515,8 +522,9 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 .b-tbd { color: var(--ink-soft); border-style: dashed; }
 /* notes in the masthead's stamp type (see .updated), small */
 .pop-note {
-  font-family: var(--display); font-weight: 700; font-size: .95rem; line-height: 1.3;
-  text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft);
+  font-family: var(--display); font-weight: 700; font-size: .82rem; line-height: 1.3;
+  text-transform: uppercase; letter-spacing: .05em; color: color-mix(in srgb, var(--ink) 70%, var(--ink-soft));
+  text-align: justify; text-align-last: justify;
 }
 .pop-filter { display: flex; gap: .5em; align-items: center; cursor: pointer; font-weight: 600; }
 .pop-filter input { accent-color: var(--ink); }
@@ -531,6 +539,7 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 .share summary::-webkit-details-marker { display: none; }
 .share summary:hover { color: var(--ink-soft); }
 .share summary .chev { width: .85rem; height: .85rem; transition: transform .15s; } /* up = opens upward */
+.share summary .plug { width: 1.05rem; height: 1.05rem; }
 .share[open] summary .chev { transform: rotate(180deg); }
 /* one column, the mini calendar's width, hanging from the right end */
 .share-body {
@@ -539,7 +548,7 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
   background: var(--mist); border: 1px solid var(--line); border-radius: 10px;
   padding: 1.1rem 1.25rem; text-align: left;
   box-shadow: 0 -12px 36px rgba(0, 0, 0, .3);
-  max-height: calc(100vh - 8rem); overflow-y: auto;
+  max-height: calc(100vh - 8rem); max-height: calc(100dvh - 8rem); overflow-y: auto;
 }
 .share-body .share-cols { grid-template-columns: 1fr; gap: 1.25rem; }
 .share-body .share-cols > div { min-width: 0; } /* let the long code line scroll instead of widening the column */
@@ -567,68 +576,65 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
    site" right. Row two: the sources, a sentence per line, centered. */
 footer {
   position: sticky; bottom: 0; z-index: 12; background: var(--sky);
-  margin: 1.5rem calc(50% - 50vw) 0; padding: .55rem 1.25rem calc(.55rem + env(safe-area-inset-bottom));
+  margin: 1.5rem calc(50% - 50vw) 0; padding: .6rem 1.25rem calc(.6rem + env(safe-area-inset-bottom));
   border-top: 1px solid var(--line);
-  box-shadow: 0 -16px 34px -6px rgba(0, 0, 0, .65);
 }
-/* three columns — credit | sources | Put this on your site — the sides sized
-   up to about the height of the three-line center */
+/* a plain vertical shadow above the footer, edge to edge (a box-shadow
+   would round off at the viewport corners) */
+footer::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 30px; pointer-events: none;
+  background: linear-gradient(to top, rgba(0, 0, 0, .55), transparent);
+}
+/* one line: Ghostwood Labs at the left, Embed then Sources at the right.
+   app.js sets .is-tight (labels off Embed/Sources) and .is-tighter (credit
+   down to its mark) when the line wouldn't fit. */
 .foot-inner {
   position: relative; max-width: calc(62rem - 2.5rem); margin: 0 auto;
-  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1.2rem;
+  display: flex; align-items: center; gap: 1.2rem; white-space: nowrap;
 }
-footer p { color: var(--ink-soft); font-size: .74rem; margin: 0; }
-.gw { display: flex; align-items: center; gap: .7rem; justify-self: start; }
-.gw-logo { width: 40px; height: 40px; color: var(--ink-soft); flex: none; }
-/* the masthead's credit, bottom right under the Updated stamp: the mark
-   with "A Ghostwood Labs / project" stacked beneath it */
-.gw-head { margin-top: auto; align-self: stretch; flex-direction: column; align-items: center; gap: .45rem; }
-.gw-head .gw-logo { width: 52px; height: 52px; }
-.gw-head .gw-credit { font-size: .82rem; line-height: 1.35; text-align: center; }
-/* two fully justified lines: the first <br> in the markup is the line break,
-   the second is dropped; the box is as wide as the longer second line */
-.gw-sources { max-width: 27rem; text-align: justify; text-align-last: justify; line-height: 1.5; }
-.gw-sources br:last-of-type { display: none; }
-footer .share { justify-self: end; }
-footer .share summary { font-size: 1rem; }
-@media (max-width: 640px) {
-  .foot-inner { grid-template-columns: 1fr; justify-items: center; gap: .5rem; }
-  .gw, footer .share { justify-self: center; }
+footer p { color: var(--ink-soft); font-size: .72rem; margin: 0; }
+.gw { display: flex; align-items: center; gap: .7rem; }
+.gw-logo { width: 32px; height: 32px; color: var(--ink-bright); flex: none; } /* pure white on dark */
+footer .gw-credit { font-size: .9rem; letter-spacing: .1em; line-height: 1; } /* same size as Sources / Embed */
+footer .gw { order: 1; }
+footer #embed { order: 2; margin-left: auto; }
+footer .share.info { order: 3; position: relative; }
+footer .info summary svg { width: 1.1rem; height: 1.1rem; }
+.info-body { width: min(22rem, 90vw); text-align: left; }
+.info-body h3 { font-size: 1.05rem; margin: 0 0 .4rem; }
+.info-body p { color: var(--ink-soft); margin: 0 0 .5rem; }
+footer .share summary { font-size: .9rem; white-space: nowrap; }
+.foot-inner.is-tight .share summary span, .foot-inner.is-tighter .gw-credit {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
 .gw-credit {
-  font-family: var(--mono); font-size: 1rem; text-transform: uppercase;
+  font-family: var(--mono); font-size: .9rem; text-transform: uppercase;
   letter-spacing: .1em; color: var(--ink); white-space: nowrap; margin: 0;
 }
 .gw-credit strong { font-weight: 500; color: var(--gold); }
 
-/* ---- the calendar handle (narrow layouts only) ---- */
-/* Icon + chevron, pinned to the right end of the aside's sticky strip, so
-   it starts level with the top of the list (under the theme pill) and then
-   floats at the top of the viewport as the list scrolls. The chevron points
-   left while closed ("opens out over the list") and flips right once open.
-   On the wide layout the calendar is always docked and app.js hides this. */
-.cal-toggle {
-  position: absolute; right: 0; top: 0;
-  display: inline-flex; align-items: center; gap: .45rem;
-  color: var(--ink); background: var(--mist); border: 1px solid var(--line);
-  border-radius: 10px; padding: .6em .8em; min-height: 2.5rem; cursor: pointer;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, .22);
-}
+/* ---- the calendar chip (narrow layouts only) ---- */
+/* Icon + chevron at the far right of the filter bar, a chip like the funnel.
+   The chevron points left while closed ("opens out over the list") and flips
+   right once open. On the wide layout the calendar is docked and app.js
+   hides this. */
 .cal-toggle[hidden] { display: none; }
-.cal-toggle:hover { border-color: var(--ink-soft); }
 .cal-toggle span { /* label for screen readers only */
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
-.cal-toggle svg { width: 1.2rem; height: 1.2rem; flex: none; }
-.cal-toggle .chev { width: .95rem; height: .95rem; transition: transform .15s; }
+.cal-toggle .chev { width: .85rem; height: .85rem; transition: transform .15s; }
 .cal-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+
+/* phones follow the system light/dark setting, so no toggle; the query
+   mirrors PHONE in index.html's head script — keep them in step */
+@media (max-width: 640px), (pointer: coarse) and (max-height: 500px) { .theme-toggle { display: none; } }
 
 /* ---- phones: the event sheet ---- */
 .sheet { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; }
 .sheet[hidden] { display: none; }
 .sheet-back { position: absolute; inset: 0; background: rgba(0, 0, 0, .55); }
 .sheet-card {
-  position: relative; width: 100%; max-height: 85vh; overflow: auto;
+  position: relative; width: 100%; max-height: 85vh; max-height: 85dvh; overflow: auto;
   background: var(--mist); color: var(--ink); border-radius: 16px 16px 0 0;
   padding: 1.1rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
   box-shadow: 0 -8px 30px rgba(0, 0, 0, .35);
@@ -648,8 +654,9 @@ body.sheet-open { overflow: hidden; }
   body {
     padding: 0 max(1rem, env(safe-area-inset-right)) calc(2.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   }
-  .chip { min-height: 2.75rem; }
-  :root { --barh: 3.9rem; }
+  .chip, .filterbar .chip, #searchBox { min-height: 2.75rem; } /* .filterbar .chip would otherwise win */
+  #searchBox { font-size: 1rem; } /* under 16px iOS Safari zooms the page when the box gets focus */
+  :root { --barh: 3.9rem; } /* = 2.75rem chips + the .filter-area padding */
   .theme-toggle { --tt: 2.6rem; }
   .theme-toggle button { height: 2.35rem; }
   .cal-days > * { min-height: 2.75rem; }
@@ -659,11 +666,6 @@ body.sheet-open { overflow: hidden; }
   .fp-link { padding: .5em 0; }
   .masthead { padding: 1.6rem 0 .8rem; gap: 1.1rem; }
   h1 { font-size: clamp(2.4rem, 11vw, 3.2rem); }
-  .masthead-actions {
-    align-self: auto; width: 100%; text-align: left;
-    flex-direction: column; align-items: stretch; gap: .2rem;
-  }
-  .updated { font-size: 1.05rem; margin: 0 0 .4rem; }
   .pop { left: 0; right: 0; width: auto; }
 
   /* day groups: date reads across the top instead of down a rail */

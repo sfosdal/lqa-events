@@ -28,7 +28,7 @@ Options via data-attributes: `data-max`, `data-venue`, `data-target`,
 
 ## Filter links
 
-The "Copy Filter Link" button (under *Put this on your site*) copies a URL that
+The "Copy Filter Link" button (under *Embed* in the footer) copies a URL that
 reproduces the current filter panel state as a short code — e.g.
 `?f=00035S` (the default view, movies hidden). The code is the set of
 excluded venues/types/teams as an upper-case base-36 bitmask over a fixed,

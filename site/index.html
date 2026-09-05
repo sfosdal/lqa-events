@@ -14,10 +14,12 @@
 <script>
   // Apply a saved Light/Dark choice before the first paint; "system" (or
   // nothing saved) leaves it to prefers-color-scheme. The toggle in the
-  // filter bar (app.js) keeps this in sync.
+  // filter bar (app.js) keeps this in sync. Phones (PHONE below) always follow
+  // the system setting — the toggle is hidden there (styles.css).
   try {
     var t = localStorage.getItem('lqa-theme');
-    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    var PHONE = '(max-width: 640px), (pointer: coarse) and (max-height: 500px)'; // mirrored in styles.css
+    if ((t === 'light' || t === 'dark') && !matchMedia(PHONE).matches) document.documentElement.dataset.theme = t;
   } catch (e) { /* no storage — system it is */ }
 </script>
 <!-- Google tag (gtag.js) -->
@@ -62,14 +64,8 @@
 <header class="masthead">
   <div class="masthead-text">
     <p class="eyebrow">Lower Queen Anne · Seattle</p>
-    <h1>Events around<br>Seattle Center</h1>
-  </div>
-  <div class="masthead-actions">
-    <p class="updated" id="updated" aria-live="polite"></p>
-    <div class="gw gw-head">
-      <svg class="gw-logo" aria-hidden="true"><use href="#gw-mark"/></svg>
-      <p class="gw-credit">A <strong>Ghostwood Labs</strong><br>project</p>
-    </div>
+    <h1>Events around<br>Lower Queen Anne</h1>
+    <p class="eyebrow updated" id="updated" aria-live="polite"></p>
   </div>
 </header>
 
@@ -79,17 +75,18 @@
      which stays put) -->
 <div class="filter-area">
 <nav class="filterbar" aria-label="Filters">
-  <button id="filterToggle" class="chip" type="button" aria-expanded="false" aria-controls="filterPanel" aria-label="Filters" title="Filters">
+  <button id="filterToggle" class="chip" type="button" aria-expanded="false" aria-controls="filterPanel" title="Filters">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>
-    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    <span>Filter</span>
   </button>
   <label class="search-wrap">
-    <input id="searchBox" type="search" aria-label="Search events by venue, team, or type" autocomplete="off">
+    <input id="searchBox" type="search" placeholder="Search…" aria-label="Search events by venue, team, or type" autocomplete="off">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
   </label>
   <!-- appears once you've scrolled into the list (app.js) -->
-  <button id="toTop" class="chip" type="button" aria-label="Back to top" title="Back to top" hidden>
+  <button id="toTop" class="chip" type="button" title="Back to top" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    <span>Top</span>
   </button>
   <button id="subscribeBtn" class="chip" type="button" aria-expanded="false" aria-controls="subscribePop" title="Subscribe in your calendar app">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/></svg>
@@ -100,31 +97,22 @@
         <input type="checkbox" id="subUseFilter" checked> Include my filter choices
       </label>
       <div class="pop-tiles">
-        <a id="webcalLink" class="tile" href="#">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="16" rx="2"/>
-            <path d="M8 3v4M16 3v4M3 9h18"/>
-            <path d="M12 12.5v5M9.5 15h5"/>
-          </svg>
-          <span>Calendar app</span>
+        <!-- the webcal: link — Apple Calendar on a Mac, iPhone or iPad (and any
+             other desktop calendar app that claims webcal) -->
+        <a id="webcalLink" class="tile" href="#" title="macOS / iOS Calendar (or whichever calendar app handles webcal links)">
+          <img class="tile-logo" src="https://www.google.com/s2/favicons?domain=www.apple.com&amp;sz=128" alt="" width="64" height="64">
+          <span>macOS</span>
         </a>
-        <a id="gcalLink" class="tile" href="#" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="16" rx="2"/>
-            <path d="M8 3v4M16 3v4M3 9h18"/>
-            <text x="12" y="18" text-anchor="middle" font-size="8.5" font-weight="700" fill="currentColor" stroke="none">G</text>
-          </svg>
+        <!-- each service's own icon (Google's favicon service, as for the venue marks) -->
+        <a id="gcalLink" class="tile" href="#" target="_blank" rel="noopener" title="Google Calendar">
+          <img class="tile-logo" src="https://www.google.com/s2/favicons?domain=calendar.google.com&amp;sz=128" alt="" width="64" height="64">
           <span>Google</span>
         </a>
-        <a id="outlookLink" class="tile" href="#" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="16" rx="2"/>
-            <path d="M8 3v4M16 3v4M3 9h18"/>
-            <text x="12" y="18" text-anchor="middle" font-size="8.5" font-weight="700" fill="currentColor" stroke="none">O</text>
-          </svg>
+        <a id="outlookLink" class="tile" href="#" target="_blank" rel="noopener" title="Outlook">
+          <img class="tile-logo" src="https://www.google.com/s2/favicons?domain=outlook.live.com&amp;sz=128" alt="" width="64" height="64">
           <span>Outlook</span>
         </a>
-        <a id="qrBtn" class="tile" href="#" aria-expanded="false">
+        <a id="qrBtn" class="tile" href="#" aria-expanded="false" title="QR code for your phone">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/>
             <rect x="4" y="14" width="6" height="6"/>
@@ -132,7 +120,7 @@
           </svg>
           <span>QR code</span>
         </a>
-        <a id="copyIcs" class="tile" href="#">
+        <a id="copyIcs" class="tile" href="#" title="Copy the feed link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
@@ -144,8 +132,8 @@
         <div id="qrImg" role="img" aria-label="QR code for the calendar feed"></div>
         <p class="pop-note">Scan with your phone to subscribe there.</p>
       </div>
-      <p class="pop-note">The feed refreshes every few hours; your calendar
-        refreshes it on its own schedule.</p>
+      <p class="pop-note">The events are refreshed every few hours; your calendar
+        refreshes them on its own schedule.</p>
   </div>
   <div id="themeToggle" class="theme-toggle" role="radiogroup" aria-label="Color theme" data-active="system">
     <button type="button" role="radio" aria-checked="false" data-theme="light" title="Light">
@@ -159,6 +147,13 @@
     </button>
     <span class="theme-knob" aria-hidden="true"></span>
   </div>
+  <!-- narrow layouts only (app.js hides it when the calendar is docked):
+       floats the calendar over the list. Chevron left = opens, right = folds. -->
+  <button id="calToggle" class="chip cal-toggle" type="button" aria-expanded="false" aria-controls="calBox" title="Show calendar" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+    <span>Hide calendar</span>
+    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+  </button>
 </nav>
 <!-- the funnel in the bar drops this open below it -->
 <div id="filterPanel" class="filter-panel" hidden>
@@ -215,15 +210,9 @@
   <div class="agenda-layout">
     <ol id="agenda"><li class="empty">Loading events…</li></ol>
     <aside class="cal-side" aria-label="Month calendar">
-      <!-- the handle that floats the calendar over the list on narrow
-           layouts (app.js hides it on the wide layout, where the calendar is
-           always docked). The chevron points left = "opens out over the
-           list", right = "folds away". -->
-      <button id="calToggle" class="cal-toggle" type="button" aria-expanded="false" aria-controls="calBox" title="Show calendar" hidden>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
-        <span>Hide calendar</span>
-        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-      </button>
+      <!-- on narrow layouts this floats over the list (opened from the
+           calendar chip at the right end of the filter bar); on the wide
+           layout it's docked here -->
       <div class="cal" id="calBox">
         <!-- month navigation: its own slim bar above the month cards -->
         <div class="cal-head" id="calHead" aria-label="Change months">
@@ -241,7 +230,7 @@
   </div>
 </section>
 
-<!-- pinned to the bottom edge; "Put this on your site" opens upward from it,
+<!-- pinned to the bottom edge; Sources (the info mark) and Embed open upward from it,
      floating over the list -->
 <footer>
   <div class="foot-inner">
@@ -249,12 +238,22 @@
   <svg class="gw-logo" aria-hidden="true"><use href="#gw-mark"/></svg>
   <p class="gw-credit"><strong>Ghostwood Labs</strong></p>
   </div>
-  <p class="gw-sources">Sources: Ticketmaster Discovery API and venue calendars.<br>
-    Listings link to the venue or ticket page.<br>
-    Check there for the final word.</p>
+  <!-- the sources, behind an info mark that opens upward like Embed -->
+  <details class="share info" id="sources">
+    <summary title="Where the listings come from">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+      <span>Sources</span>
+    </summary>
+    <div class="share-body info-body">
+      <h3>Sources</h3>
+      <p>Ticketmaster, DICE, venue calendars, and MLB/NHL/ESPN schedules.</p>
+      <p>Listings link to the venue or ticket page. Check there for the final word.</p>
+    </div>
+  </details>
   <details class="share" id="embed">
-    <summary>Put this on your site
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+    <summary>
+      <svg class="plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2v5M15 2v5M6 7h12v4a6 6 0 0 1-12 0V7zM12 17v5"/></svg>
+      <span>Embed</span>
     </summary>
     <div class="share-body">
       <div class="share-cols">
