@@ -37,8 +37,10 @@
     'T-Mobile Park': 'concert', 'Lumen Field': 'concert', // non-game stadium bookings are shows
     'McCaw Hall': 'arts', 'Cornish Playhouse': 'arts', 'On the Boards': 'arts',
     'Seattle Center': 'community', 'SIFF Cinema Uptown': 'community', // SIFF specials = festival programming
+    'Convention Center': 'expo',
+    "Children's Theatre": 'arts', 'MoPOP': 'community', 'Pacific Science Center': 'community', 'KEXP': 'concert',
   };
-  var TYPE_KEYS_OK = { concert: 1, sports: 1, arts: 1, movie: 1, community: 1 };
+  var TYPE_KEYS_OK = { concert: 1, sports: 1, arts: 1, movie: 1, community: 1, expo: 1 };
   // Order: the movie flag and a home team / "vs" are certain. Then the
   // source's own classification (feed `type`: Ticketmaster segment, DICE
   // type tags, Seattle Center facility/type tags — scripts/sources.mjs),
@@ -55,6 +57,7 @@
     if (/movie night|\bfilm\b|screening/i.test(title)) return 'movie';
     if (/ballet|opera|symphon|orchestra|philharmon|theatre|theater|musical|broadway|shakespeare|comedy|stand-?up|improv|dance|cirque|on ice|preview performance|opening night|matinee|open caption|sensory-friendly|audio described/i.test(title)) return 'arts';
     if (src) return src;
+    if (/convention|\bexpo\b|\bcon\b|trade ?show|home show|boat show|card show|record show|book fair|gem & jewelry|bridal|craft (fair|show|uprising)|comic ?con/i.test(title)) return 'expo';
     if (/workshop|\bclass(es)?\b|intro to|open session|\b[A-Z]{2}\s?\d{3}:|festival|fest[aá]l|\bfair\b|\bexpo\b|market|convention|summit|celebration|ceremony|\bwalk\b|\brun\b|parade/i.test(title)) return 'community';
     if (/concert|\btour\b|live music|\bdj\b|\blive\b/i.test(title)) return 'concert';
     return TYPE_VENUE_DEFAULT[e.venue] || 'community';
@@ -81,6 +84,21 @@
     'Cornish Playhouse': '#3ecf97', 'Climate Pledge Arena': '#4da3f0', 'T-Mobile Park': '#8ad8e0',
     'Seattle Center': '#6a72e6', 'Lumen Field': '#8b8fe8', 'SIFF Cinema Uptown': '#b596e0',
     'The Vera Project': '#a26be6', 'On the Boards': '#e07ae0', 'McCaw Hall': '#d158a7',
+    'Convention Center': '#7fa7cc',
+    "Children's Theatre": '#6cc9db', 'MoPOP': '#e88ad8', 'Pacific Science Center': '#62b8f7', 'KEXP': '#b48cf5',
+  };
+
+  // How many people each place holds — the one measure of an event's size
+  // the sources agree on (none of them report attendance or sell-outs
+  // except DICE). Round figures: the arena's concert configuration, the
+  // ballpark and stadium's seating, a theatre's house, the Convention
+  // Center's two buildings as a big show fills them, Seattle Center as its
+  // biggest grounds festival.
+  var VENUE_CAPACITY = {
+    'Lumen Field': 68700, 'T-Mobile Park': 47900, 'Convention Center': 20000,
+    'Climate Pledge Arena': 18100, 'Seattle Center': 10000, 'McCaw Hall': 2900,
+    'MoPOP': 800, "Children's Theatre": 480, 'Cornish Playhouse': 460, 'SIFF Cinema Uptown': 450,
+    'Pacific Science Center': 400, 'The Vera Project': 300, 'On the Boards': 300, 'KEXP': 200,
   };
 
   function slugify(s) {
@@ -122,6 +140,9 @@
     ['badge', 'concert'], ['badge', 'sports'], ['badge', 'arts'], ['badge', 'movie'], ['badge', 'community'],
     ['team', 'mariners'], ['team', 'storm'], ['team', 'seahawks'], ['team', 'reign'],
     ['team', 'sounders'], ['team', 'kraken'], ['team', 'torrent'],
+    // appended later (the registry is append-only so old share links keep working)
+    ['badge', 'expo'], ['venue', 'Convention Center'],
+    ['venue', "Children's Theatre"], ['venue', 'MoPOP'], ['venue', 'Pacific Science Center'], ['venue', 'KEXP'],
   ];
   var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode' };
   function encodeFilterCode(mode) {
@@ -152,6 +173,7 @@
     concert: 'concert concerts music show', sports: 'sports game games home game',
     arts: 'arts art theater theatre', movie: 'movie movies film cinema',
     community: 'community festival festivals fair',
+    expo: 'expo expos convention conventions conference trade show',
   };
   // each team's sport and league, so "baseball" finds the Mariners
   var SPORT_WORDS = {
@@ -190,7 +212,7 @@
 
   // Event-type hues for dark backgrounds — same values as the calendar's
   // dark --t-* variables; keep in step.
-  var TYPE_COLOR = { concert: '#f0806a', sports: '#f2d21b', arts: '#d63a4f', movie: '#8b9db0', community: '#e660a8' };
+  var TYPE_COLOR = { concert: '#f0806a', sports: '#f2d21b', arts: '#d63a4f', movie: '#8b9db0', community: '#e660a8', expo: '#4fd1c5' };
 
   // ---- series: the same event on nearby days — a homestand, a two-night
   // stand, an opera run. Same venue + same title, occurrences within 2 days
@@ -385,6 +407,7 @@
     TEAM_BY_SLUG: TEAM_BY_SLUG,
     VENUE_ICON: VENUE_ICON,
     VENUE_COLOR: VENUE_COLOR,
+    VENUE_CAPACITY: VENUE_CAPACITY,
     slugify: slugify,
     eventType: eventType,
     matchesFilter: matchesFilter,

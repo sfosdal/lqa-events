@@ -15,6 +15,11 @@
     'On the Boards': '--v-otb',
     'T-Mobile Park': '--v-tmobile',
     'Lumen Field': '--v-lumen',
+    'Convention Center': '--v-scc',
+    "Children's Theatre": '--v-sct',
+    'MoPOP': '--v-mopop',
+    'Pacific Science Center': '--v-pacsci',
+    'KEXP': '--v-kexp',
   };
   // Unexpected venues draw from the same cool, web-safe family as the
   // curated ones, hashed from the name so the pick is stable day to day.
@@ -43,30 +48,21 @@
     'T-Mobile Park': 'https://www.mlb.com/mariners/ballpark/events', // the ballpark's own list — concerts too, not just Mariners games
     'Lumen Field': 'https://www.lumenfield.com/events',
     'SIFF Cinema Uptown': 'https://www.siff.net/calendar',
+    'Convention Center': 'https://seattlecc.com/upcoming-events/',
+    "Children's Theatre": 'https://www.sct.org/tickets-shows/calendar/',
+    'MoPOP': 'https://www.mopop.org/events',
+    'Pacific Science Center': 'https://pacificsciencecenter.org/events/',
+    'KEXP': 'https://www.kexp.org/events/kexp-events/',
   };
 
-  // Venue list order = usefulness to an LQA bar owner: the campus venues that
-  // actually walk a crowd past the bar come first, the SoDo stadiums last
-  // (huge, but a bus ride away — staffing signal, not foot traffic). The feed
-  // collapses campus micro-locations into "Seattle Center", so these seven are
-  // normally the whole list; anything unexpected slots in before the stadiums,
-  // busiest first.
-  var VENUE_RANK = {
-    'Climate Pledge Arena': 0, // 17k people, right across the street
-    'McCaw Hall': 1,           // pre-show dinner-and-drinks crowd
-    'Seattle Center': 2,       // festivals and grounds events
-    'Cornish Playhouse': 3,
-    'The Vera Project': 4,     // all-ages — least bar crossover of the campus
-    'SIFF Cinema Uptown': 5,   // the Queen Anne Ave movie house
-    'On the Boards': 6,        // contemporary performance, a block off the Center
-    'T-Mobile Park': 90,
-    'Lumen Field': 91,
-  };
+  // Venue list order = how big a crowd the place can hold (LQAFilter.
+  // VENUE_CAPACITY), biggest first; a venue the table doesn't know sorts
+  // after the known ones, busiest first.
+  var VENUE_CAPACITY = LQAFilter.VENUE_CAPACITY;
   function venueOrder(counts) {
     return function (a, b) {
-      var ra = VENUE_RANK[a] != null ? VENUE_RANK[a] : 50;
-      var rb = VENUE_RANK[b] != null ? VENUE_RANK[b] : 50;
-      if (ra !== rb) return ra - rb;
+      var ca = VENUE_CAPACITY[a] || 0, cb = VENUE_CAPACITY[b] || 0;
+      if (ca !== cb) return cb - ca;
       if (counts[a] !== counts[b]) return counts[b] - counts[a];
       return a < b ? -1 : 1;
     };
@@ -218,23 +214,33 @@
     { key: 'sports', label: 'Sports', title: 'Pro and college games' },
     { key: 'arts', label: 'Arts & Theater', title: 'Opera, ballet, plays, comedy, dance' },
     { key: 'movie', label: 'Movies', title: 'Film screenings at SIFF Cinema Uptown — unchecked by default' },
-    { key: 'community', label: 'Festivals', title: 'Grounds events, festivals, fairs, SIFF specials' },
+    { key: 'community', label: 'Festivals', title: 'Grounds events, festivals, walks, celebrations, classes, SIFF specials' },
+    { key: 'expo', label: 'Conventions', title: 'Conventions, conferences, trade and consumer shows — the Convention Center, Exhibition Hall, Fisher Pavilion' },
   ];
   // Type hues mirror the venue hues: a dot on the filter rows, a colored
   // right edge on each agenda row.
   var TYPE_VARS = {
     concert: '--t-concert', sports: '--t-sports', arts: '--t-arts',
-    movie: '--t-movie', community: '--t-community',
+    movie: '--t-movie', community: '--t-community', expo: '--t-expo',
   };
   function typeColor(k) { return 'var(' + TYPE_VARS[k] + ')'; }
   var TYPE_KEYS = {};
   TYPE_LIST.forEach(function (t) { TYPE_KEYS[t.key] = true; });
   // The baseline every visitor starts from (and "Reset filters" returns to):
   // SIFF's daily movie showings unchecked, everything else checked.
-  function applyDefaultFilters() { state.badgeMode = { movie: 'ex' }; }
+  // movies and the Children's Theatre (a hundred-odd school-day matinees a
+  // season) start unchecked
+  var DEFAULT_VENUES_OFF = ["Children's Theatre"];
+  function applyDefaultFilters() {
+    state.badgeMode = { movie: 'ex' };
+    state.venueMode = {};
+    DEFAULT_VENUES_OFF.forEach(function (v) { state.venueMode[v] = 'ex'; });
+  }
   function isDefaultState() {
-    if (Object.keys(state.venueMode).length || Object.keys(state.teamMode).length) return false;
+    if (Object.keys(state.teamMode).length) return false;
     if (state.q || state.holidays) return false;
+    var v = Object.keys(state.venueMode);
+    if (v.length !== DEFAULT_VENUES_OFF.length || !DEFAULT_VENUES_OFF.every(function (x) { return state.venueMode[x] === 'ex'; })) return false;
     var k = Object.keys(state.badgeMode);
     return k.length === 1 && state.badgeMode.movie === 'ex';
   }
@@ -370,7 +376,8 @@
     pv.innerHTML = '';
     state.venues.forEach(function (v) {
       var n = upcoming.filter(function (e) { return e.venue === v; }).length;
-      pv.appendChild(filterRow('venue', v, venueName(v), n));
+      var cap = VENUE_CAPACITY[v];
+      pv.appendChild(filterRow('venue', v, venueName(v), n, cap ? 'Holds about ' + cap.toLocaleString('en-US') : undefined));
     });
     var pt = $('panelTeams');
     pt.innerHTML = '';
@@ -559,7 +566,7 @@
   function setPanelOpen(open) {
     $('filterPanel').hidden = !open;
     $('filterToggle').setAttribute('aria-expanded', String(open));
-    if (open) fitPops();
+    if (open) fitPops(true);
   }
   function togglePanel() { setPanelOpen($('filterPanel').hidden); }
   $('filterToggle').addEventListener('click', togglePanel);
@@ -633,7 +640,7 @@
     var open = !stacked || calFloatOpen;
     $('calBox').hidden = !open;
     document.querySelector('.cal-side').classList.toggle('is-float', stacked && open);
-    if (stacked && open) fitPops();
+    if (stacked && open) fitPops(true);
     var t = $('calToggle');
     t.hidden = !stacked;
     t.setAttribute('aria-expanded', String(open));
@@ -686,7 +693,7 @@
     var barBottom = document.querySelector('.filter-area').getBoundingClientRect().bottom + gap;
     var top = card.bottom + gap;
     if (top + pop.height > window.innerHeight - pad) top = card.top - pop.height - gap; // no room below: above
-    if (top < barBottom) top = Math.max(barBottom, window.innerHeight - pop.height - pad); // nor above: pin
+    if (top < barBottom) top = Math.max(pad, window.innerHeight - pop.height - pad); // nor above: keep it on screen, over the card if it must
     sheet.style.left = Math.round(left) + 'px';
     sheet.style.top = Math.round(top) + 'px';
   }
@@ -1022,6 +1029,9 @@
         // (and when we noticed, if the feed knows)
         if (e.status) {
           row.classList.add('is-off');
+          // the card goes gray — wash and edge alike — so only the note has color
+          row.style.background = 'color-mix(in srgb, var(--ink-soft) 14%, transparent)';
+          row.style.borderRightColor = 'var(--ink-soft)';
           var off = document.createElement('span');
           off.className = 'ev-note';
           off.textContent = e.status.charAt(0).toUpperCase() + e.status.slice(1) + (e.statusSince ? ' ' + fmtSince(e.statusSince) : '');
@@ -1070,11 +1080,21 @@
   // bar still sits under the masthead — so a stylesheet max-height measured
   // from the top of the viewport can run past its bottom. Cap each open
   // panel at the room it actually has; re-measured as the bar rides up.
-  function fitPops() {
+  // On open (opening = true) a panel with almost no room — a landscape phone
+  // with the masthead still on screen — first scrolls the page until the bar
+  // is pinned, which is where the panel would end up anyway.
+  function fitPops(opening) {
     [$('filterPanel'), $('subscribePop'), $('calBox')].forEach(function (el) {
       if (el.hidden) return;
       if (el === $('calBox') && !document.querySelector('.cal-side.is-float')) { el.style.maxHeight = ''; return; }
       var room = window.innerHeight - el.getBoundingClientRect().top - 12;
+      if (opening && room < 240) {
+        var bar = document.querySelector('.filter-area').getBoundingClientRect();
+        if (bar.top > 0) {
+          window.scrollTo({ top: window.scrollY + bar.top, behavior: 'instant' });
+          room = window.innerHeight - el.getBoundingClientRect().top - 12;
+        }
+      }
       el.style.maxHeight = Math.max(200, Math.round(room)) + 'px';
     });
   }
@@ -1188,7 +1208,7 @@
     var open = pop.hidden;
     pop.hidden = !open;
     this.setAttribute('aria-expanded', String(open));
-    if (open) { $('qrPanel').hidden = true; $('qrBtn').setAttribute('aria-expanded', 'false'); fitPops(); }
+    if (open) { $('qrPanel').hidden = true; $('qrBtn').setAttribute('aria-expanded', 'false'); fitPops(true); }
   });
   document.addEventListener('click', function (e) {
     if (!e.target.closest('#subscribeBtn, #subscribePop')) {

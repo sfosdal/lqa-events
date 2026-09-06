@@ -65,11 +65,142 @@ const SC_THEATRES = new Set(['Bagley Wright Theatre', 'Bagley Wright Theatre Pon
 export function scType(tags) {
   const t = (tags || []).map(String);
   if (t.some((x) => SC_THEATRES.has(x))) return 'arts';
+  if (t.includes('Exhibition Hall')) return 'expo'; // home, gem, bridal, record shows, craft fairs
   if (t.includes('Concerts')) return 'concert';
   if (t.includes('Sports & Fitness')) return 'sports';
   if (t.some((x) => /^(Festivals|Walks & Runs|Fundraisers & Auctions)$/.test(x))) return 'community';
   if (t.includes('Arts')) return 'arts';
   return '';
+}
+
+// Convention Center: the Momentus (Ungerboeck) calendar behind
+// seattlecc.com/upcoming-events — api/event/getCalendarEvents rows. Type
+// codes: CTS conventions & trade shows, CNS consumer shows, CTC/CCC/CCO
+// conferences, TRS trade shows → expo; BNQ banquets/galas and SPE special
+// events → community; 1STP/1STEX one-day private meetings and TOU tours
+// are skipped (staff offsites, client tours — nothing to go to). A run is
+// one all-day event per day (capped) so it reads as a series on the site.
+const SCC_EXPO = new Set(['CTS', 'CNS', 'CTC', 'CCC', 'CCO', 'TRS']);
+const SCC_SKIP_TYPE = new Set(['1STP', '1STEX']);
+export function mapSccEvents(rows, venueLabel, maxDays = 7) {
+  const out = [];
+  for (const r of rows || []) {
+    if (!r.title || !r.start) continue;
+    if (SCC_SKIP_TYPE.has(r.type) || r.class === 'TOU' || String(r.private) === 'true') continue;
+    const start = r.start.slice(0, 10), end = (r.end || r.start).slice(0, 10);
+    const url = r.webAddress || `https://seattlecc.com/upcoming-events/?eventid=${r.eventId}`;
+    const type = SCC_EXPO.has(r.type) ? 'expo' : 'community';
+    let d = new Date(`${start}T12:00:00Z`);
+    for (let i = 0; i < maxDays; i++) {
+      const date = d.toISOString().slice(0, 10);
+      if (date > end) break;
+      const ev = { venue: venueLabel, title: r.title, date, time: '', url, type };
+      if (r.venue) ev.building = r.venue; // Arch / Summit
+      out.push(ev);
+      d = new Date(d.getTime() + 86400e3);
+    }
+  }
+  return out;
+}
+
+// McCaw Hall's RSS: one item per production with the venue's own detail
+// page — used as a title → URL map for the Seattle Center sweep's McCaw
+// performances (which carry every date and time, but link to seattlecenter.com)
+export function mccawUrlMap(xml) {
+  const map = new Map();
+  for (const it of String(xml).match(/<item>[\s\S]*?<\/item>/g) || []) {
+    const t = it.match(/<title>([\s\S]*?)<\/title>/), l = it.match(/<link>([\s\S]*?)<\/link>/);
+    if (t && l) map.set(decodeEntities(t[1]).toLowerCase(), l[1].trim());
+  }
+  return map;
+}
+
+// ---- the campus neighbors that aren't on Seattle Center's calendar -------
+
+// "Friday, October 2" on a page for pageYear/pageMonth (1-12) → YYYY-MM-DD;
+// a month grid shows a few days of the neighbouring months, so the year
+// rolls when the day's month is far from the page's.
+function gridDate(text, pageYear, pageMonth) {
+  const m = String(text).match(/([A-Za-z]+)\s+(\d{1,2})\s*$/);
+  const mon = m && MONTHS[m[1].toLowerCase()];
+  if (!mon) return '';
+  let year = pageYear;
+  if (mon - pageMonth > 6) year--; else if (pageMonth - mon > 6) year++;
+  return `${year}-${pad(mon)}-${pad(Number(m[2]))}`;
+}
+
+// Seattle Children's Theatre: sct.org/tickets-shows/calendar/YYYY/month — a
+// month grid; each day carries its full date and a list of entries typed
+// SHOW (mainstage), EVENT, or CLASS (skipped: enrolment, not an outing).
+export function parseSctCalendar(html, pageYear, pageMonth) {
+  const out = [];
+  const days = String(html).split(/<div class="day-of-the-month-full">/).slice(1);
+  for (const seg of days) {
+    const date = gridDate((seg.match(/^([^<]+)</) || [, ''])[1], pageYear, pageMonth);
+    if (!date) continue;
+    const body = seg.split(/<li id="\d+"/)[0]; // up to the next day cell
+    for (const li of body.match(/<li class="event">[\s\S]*?<\/li>/g) || []) {
+      const kind = (li.match(/<span class="(mainstage|event|sct-class)">/) || [])[1];
+      if (!kind || kind === 'sct-class') continue;
+      const a = li.match(/<a href="([^"]+)"[^>]*>\s*([\s\S]*?)\s*<\/a>/);
+      if (!a) continue;
+      out.push({
+        title: decodeEntities(a[2]), date,
+        time: parseClockTime((li.match(/event-time">\s*([^<]*?)\s*</) || [, ''])[1].replace(/\s+/g, ' ')),
+        url: a[1], type: kind === 'mainstage' ? 'arts' : 'community',
+      });
+    }
+  }
+  return out;
+}
+
+// MoPOP: mopop.org/events carries a hidden Webflow list feeding its
+// calendar — one item per event-day with the date, title and detail link;
+// no times on the list, so these are all-day.
+export function parseMopopCalendar(html) {
+  const out = [];
+  const re = /<div data-text="[^"]*" data-date="([^"]*)" data-title="([^"]*)" class="calendar-dot-item">[\s\S]*?href="([^"]*)" class="calendar-dot-link"/g;
+  for (let m; (m = re.exec(String(html))); ) {
+    const d = m[1].match(/([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/);
+    const mon = d && MONTHS[d[1].toLowerCase()];
+    if (!mon) continue;
+    out.push({ title: decodeEntities(m[2]), date: `${d[3]}-${pad(mon)}-${pad(Number(d[2]))}`, time: '', url: new URL(m[3], 'https://www.mopop.org/').href });
+  }
+  return out;
+}
+
+// Pacific Science Center: pacificsciencecenter.org/events, a short list of
+// teaser cards (title link, "September 9, 2026", optional Free).
+export function parsePacsciEvents(html) {
+  const out = [];
+  for (const card of String(html).match(/<article class="event-teaser"[\s\S]*?<\/article>/g) || []) {
+    const a = card.match(/<h2><a href="([^"]+)">([\s\S]*?)<\/a><\/h2>/);
+    const d = card.match(/teaser__date">\s*([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/);
+    const mon = d && MONTHS[d[1].toLowerCase()];
+    if (!a || !mon) continue;
+    const ev = { title: decodeEntities(a[2]), date: `${d[3]}-${pad(mon)}-${pad(Number(d[2]))}`, time: '', url: a[1] };
+    if (/teaser__cost">\s*Free\s*</.test(card)) ev.free = true;
+    out.push(ev);
+  }
+  return out;
+}
+
+// KEXP: kexp.org/events/kexp-events/ — event articles whose Add-to-Calendar
+// widget carries "MM/DD/YYYY HH:MM" start/end; the location line says
+// whether it's at the station (Gathering Space, studio) or somewhere else.
+export function parseKexpEvents(html) {
+  const out = [];
+  for (const art of String(html).match(/<article class="[^"]*EventItem[^"]*">[\s\S]*?<\/article>/g) || []) {
+    const a = art.match(/<h3[^>]*><a href="([^"]+)">([\s\S]*?)<\/a><\/h3>/);
+    const start = art.match(/<span class="start">\s*(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})/);
+    if (!a || !start) continue;
+    const loc = (art.match(/maps\.google\.com[^>]*>\s*([\s\S]*?)\s*<\/a>/) || [, ''])[1].replace(/\s+/g, ' ');
+    const ev = { title: decodeEntities(a[2]), date: `${start[3]}-${start[1]}-${start[2]}`, time: `${start[4]}:${start[5]}:00`, url: new URL(a[1], 'https://www.kexp.org/').href, location: loc };
+    const end = art.match(/<span class="end">\s*(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})/);
+    if (end && `${end[3]}-${end[1]}-${end[2]}` === ev.date && `${end[4]}:${end[5]}:00` > ev.time) ev.end = `${end[4]}:${end[5]}:00`;
+    out.push(ev);
+  }
+  return out;
 }
 
 /**

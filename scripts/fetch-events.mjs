@@ -10,7 +10,7 @@
  */
 import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
-import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, tmType, scType } from './sources.mjs';
+import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents } from './sources.mjs';
 import { mergeWithArchive } from './merge.mjs';
 import { applySchedules } from './schedules.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
@@ -22,7 +22,7 @@ const ICS_OUT = new URL('../site/events.ics', import.meta.url);
 // see mergeWithArchive).
 const WINDOW_DAYS = 365;
 const FEED_URL = process.env.FEED_URL || 'https://fosdal.net/lqa-events/events.json';
-const MAX_EVENTS = 1200; // sanity cap, not a display cap
+const MAX_EVENTS = 4000; // sanity cap, not a display cap — a year back plus a year ahead across 14 venues runs ~2,500
 
 const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
@@ -47,15 +47,22 @@ function decodeEntities(s) {
     .replace(/\s+/g, ' ').trim();
 }
 
-// --- Ticketmaster Discovery API (keyword search, filtered by venue name) ---
-async function ticketmasterVenue({ keyword, venueMatch, label, fallbackUrl, exclude }) {
+// --- Ticketmaster Discovery API, by venue id (a keyword search capped at
+//     100 and silently dropped the arena's spring dates), every page ---
+async function ticketmasterVenue({ venueId, venueMatch, label, fallbackUrl, exclude }) {
   const key = process.env.TICKETMASTER_API_KEY;
   if (!key) { console.warn('No TICKETMASTER_API_KEY set — skipping Ticketmaster.'); return []; }
-  const params = new URLSearchParams({ apikey: key, keyword, city: 'Seattle', sort: 'date,asc', size: '100' });
-  const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params}`);
-  if (!res.ok) { console.error(`Ticketmaster ${label} HTTP ${res.status}`); return []; }
-  const data = await res.json();
-  return (data?._embedded?.events || [])
+  const all = [];
+  for (let page = 0; page < 5; page++) {
+    const params = new URLSearchParams({ apikey: key, venueId, sort: 'date,asc', size: '200', page: String(page) });
+    const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params}`);
+    if (!res.ok) { console.error(`Ticketmaster ${label} page ${page} HTTP ${res.status}`); break; }
+    const data = await res.json();
+    all.push(...(data?._embedded?.events || []));
+    if (page + 1 >= (data?.page?.totalPages || 1)) break;
+  }
+  console.log(`Ticketmaster ${label}: ${all.length} events`);
+  return all
     .filter((e) => (e._embedded?.venues?.[0]?.name || '').toLowerCase().includes(venueMatch))
     .filter((e) => !exclude || !exclude.test(e.name || ''))
     .map((e) => {
@@ -81,24 +88,16 @@ async function ticketmasterVenue({ keyword, venueMatch, label, fallbackUrl, excl
     });
 }
 
-// --- McCaw Hall: the venue's own RSS feed (full calendar, incl. opera/ballet) ---
-async function mccawHallRss() {
-  const res = await fetch('https://www.mccawhall.com/events/rss');
-  if (!res.ok) { console.error('McCaw Hall RSS HTTP', res.status); return []; }
-  const xml = await res.text();
-  const items = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
-  return items.map((it) => {
-    const grab = (re) => { const m = it.match(re); return m ? m[1].trim() : ''; };
-    return {
-      venue: 'McCaw Hall',
-      title: decodeEntities(grab(/<title>([\s\S]*?)<\/title>/)),
-      date: grab(/<ev:startdate>([\s\S]*?)<\/ev:startdate>/).slice(0, 10),
-      time: '',
-      url: grab(/<link>([\s\S]*?)<\/link>/) || 'https://www.mccawhall.com/events',
-    };
-  }).filter((e) => e.title && /^\d{4}-\d{2}-\d{2}$/.test(e.date));
+// --- McCaw Hall: the venue's RSS lists each production once (one date), so
+//     the performances themselves come from the Seattle Center sweep; the RSS
+//     just maps a title to the venue's own detail page ---
+async function mccawUrls() {
+  try {
+    const res = await fetch('https://www.mccawhall.com/events/rss');
+    if (!res.ok) { console.error('McCaw Hall RSS HTTP', res.status); return new Map(); }
+    return mccawUrlMap(await res.text());
+  } catch (err) { console.error('McCaw Hall RSS failed:', err.message); return new Map(); }
 }
-
 // --- Seattle Center's own calendar, every page of the full listing (seven
 //     cards a page, a year runs about a hundred pages), so campus-wide
 //     events with no facility tag — Bumbershoot — are included and no venue
@@ -112,7 +111,9 @@ const SC_MAX_PAGES = 200;
 // standing daily attractions the calendar lists as an event every single day
 const SC_EXCLUDE = /sculpture walk/i;
 
-async function seattleCenterSweep(existingVenues) {
+// facility labels that are venues of their own on the site
+const SC_VENUE_LABEL = { 'Marion Oliver McCaw Hall': 'McCaw Hall' };
+async function seattleCenterSweep(existingVenues, mccawUrl) {
   const covered = (label) => existingVenues.some((v) => {
     const a = v.toLowerCase(), b = label.toLowerCase();
     return a.includes(b) || b.includes(a);
@@ -149,7 +150,10 @@ async function seattleCenterSweep(existingVenues) {
     if (SC_EXCLUDE.test(c.title)) { standing++; continue; }
     const venueTag = c.tags.find((t) => venueLabels.includes(t));
     if (venueTag && covered(venueTag)) { atOwnSource++; continue; }
-    const ev = { venue: venueTag || 'Seattle Center', title: c.title, date: c.date, time: c.time, url: c.url };
+    const venue = SC_VENUE_LABEL[venueTag] || venueTag || 'Seattle Center';
+    let url = c.url;
+    if (venue === 'McCaw Hall' && mccawUrl) url = mccawUrl.get(c.title.toLowerCase()) || url;
+    const ev = { venue, title: c.title, date: c.date, time: c.time, url };
     if (c.free) ev.free = true;
     const type = scType(c.tags);
     if (type) ev.type = type;
@@ -207,16 +211,93 @@ async function onTheBoards() {
   return mapOtbEvents(await res.json(), 'On the Boards');
 }
 
+// --- Convention Center (Arch + Summit, downtown): the Momentus
+//     calendar behind seattlecc.com/upcoming-events, a year ahead ---
+const SCC_TOKEN = '3fe87903-ad1d-49d8-b838-0ec814bf6aa1'; // the public widget token on the page
+async function seattleConventionCenter() {
+  const from = new Date().toISOString().slice(0, 10);
+  const to = new Date(Date.now() + WINDOW_DAYS * 86400e3).toISOString().slice(0, 10);
+  const params = new URLSearchParams({ fromDate: from, toDate: to, token: SCC_TOKEN });
+  const res = await fetch(`https://calendar-us.ungerboeck.io/api/event/getCalendarEvents?${params}`, { headers: { 'user-agent': BROWSER_UA } });
+  if (!res.ok) { console.error('Convention Center HTTP', res.status); return []; }
+  const data = await res.json();
+  const rows = data?.events?.fields || (Array.isArray(data?.events) ? data.events : []); // {events:{fields:[…]}}
+  const events = mapSccEvents(rows, 'Convention Center');
+  console.log(`Convention Center: ${events.length} event-days from ${rows.length} bookings`);
+  return events;
+}
+
+// --- The campus neighbours Seattle Center's calendar doesn't carry ---
+const MONTH_SLUG = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+async function pageText(url) {
+  const res = await fetch(url, { headers: { 'user-agent': BROWSER_UA } });
+  if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
+  return res.text();
+}
+// Children's Theatre (Charlotte Martin + Eve Alvord theatres, on the
+// campus): twelve month grids
+async function seattleChildrensTheatre() {
+  const out = []; const seen = new Set();
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const y = d.getFullYear(), m = d.getMonth() + 1;
+    try {
+      for (const e of parseSctCalendar(await pageText(`https://www.sct.org/tickets-shows/calendar/${y}/${MONTH_SLUG[m - 1]}`), y, m)) {
+        const k = `${e.title}|${e.date}|${e.time}`;
+        if (!seen.has(k)) { seen.add(k); out.push({ venue: "Children's Theatre", ...e }); }
+      }
+    } catch (err) { console.error(`SCT ${y}-${m}:`, err.message); }
+  }
+  console.log(`Children's Theatre: ${out.length} performances`);
+  return out;
+}
+async function mopop() {
+  const evs = parseMopopCalendar(await pageText('https://www.mopop.org/events')).map((e) => ({ venue: 'MoPOP', ...e }));
+  console.log(`MoPOP: ${evs.length} events`);
+  return evs;
+}
+async function pacificScienceCenter() {
+  const evs = parsePacsciEvents(await pageText('https://pacificsciencecenter.org/events/')).map((e) => ({ venue: 'Pacific Science Center', ...e }));
+  console.log(`Pacific Science Center: ${evs.length} events`);
+  return evs;
+}
+// KEXP (the station's home is on the campus): its own list, every page;
+// only what happens at the station — KEXP also lists shows it presents
+// elsewhere in town
+async function kexp() {
+  const out = [];
+  for (let page = 1; page <= 5; page++) {
+    const html = await pageText(`https://www.kexp.org/events/kexp-events/${page > 1 ? `?page=${page}` : ''}`);
+    const evs = parseKexpEvents(html);
+    if (!evs.length) break;
+    for (const e of evs) {
+      if (!/kexp|gathering space|seattle center/i.test(e.location)) continue;
+      const { location, ...ev } = e;
+      out.push({ venue: 'KEXP', ...ev });
+    }
+    if (!/[?&]page=${page + 1}\b/.test(html)) break;
+  }
+  console.log(`KEXP: ${out.length} events at the station`);
+  return out;
+}
+
 // Dedicated per-venue sources run first (better times and ticket links)...
 const sources = [
-  () => ticketmasterVenue({ keyword: 'Climate Pledge Arena', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/', exclude: /arena tours?|all access pass/i }),
+  () => ticketmasterVenue({ venueId: 'KovZ917Ahkk', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/', exclude: /arena tours?|all access pass/i }),
   // The SoDo stadiums: not Seattle Center, but big enough to move the whole city.
-  () => ticketmasterVenue({ keyword: 'T-Mobile Park', venueMatch: 't-mobile park', label: 'T-Mobile Park', fallbackUrl: 'https://www.mlb.com/mariners', exclude: /ballpark tour|flex membership/i }),
-  () => ticketmasterVenue({ keyword: 'Lumen Field', venueMatch: 'lumen field', label: 'Lumen Field', fallbackUrl: 'https://www.lumenfield.com/events', exclude: /stadium tour|notification list/i }),
-  mccawHallRss,
+  () => ticketmasterVenue({ venueId: 'KovZpZAEevAA', venueMatch: 't-mobile park', label: 'T-Mobile Park', fallbackUrl: 'https://www.mlb.com/mariners', exclude: /ballpark tour|flex membership/i }),
+  () => ticketmasterVenue({ venueId: 'KovZpZAEknnA', venueMatch: 'lumen field', label: 'Lumen Field', fallbackUrl: 'https://www.lumenfield.com/events', exclude: /stadium tour|notification list/i }),
+  // McCaw Hall comes from the Seattle Center sweep below (every performance,
+  // with times); its RSS only supplies the venue's own detail-page links.
   veraProjectDice,
   siffUptown,
   onTheBoards,
+  seattleConventionCenter, // downtown, like the stadiums: big enough to matter
+  seattleChildrensTheatre,
+  mopop,
+  pacificScienceCenter,
+  kexp,
 ];
 
 let all = [];
@@ -225,8 +306,8 @@ for (const src of sources) {
   catch (err) { console.error('Source failed:', err.message); }
 }
 
-// ...then the campus-wide sweep fills in every other venue.
-try { all = all.concat(await seattleCenterSweep([...new Set(all.map((e) => e.venue))])); }
+// ...then the campus-wide sweep fills in every other venue (McCaw Hall included).
+try { all = all.concat(await seattleCenterSweep([...new Set(all.map((e) => e.venue))], await mccawUrls())); }
 catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 
 // Collapse the campus's micro-locations (courtyards, lawns, festival stages —
@@ -236,7 +317,8 @@ catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 const CANONICAL_VENUES = new Set([
   'Climate Pledge Arena', 'T-Mobile Park', 'Lumen Field',
   'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
-  'SIFF Cinema Uptown', 'On the Boards',
+  'SIFF Cinema Uptown', 'On the Boards', 'Convention Center',
+  "Children's Theatre", 'MoPOP', 'Pacific Science Center', 'KEXP',
 ]);
 const normalizeVenue = (e) => (CANONICAL_VENUES.has(e.venue) ? e : { ...e, venue: 'Seattle Center' });
 all = all.map(normalizeVenue);

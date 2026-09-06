@@ -26,6 +26,8 @@
   --v-vera: #7a3fc4;
   --v-otb: #c04fc0;
   --v-mccaw: #a32a7a;
+  --v-scc: #4f7ca3;       /* Convention Center: steel blue, a step off the arena's */
+  --v-sct: #2c8c9e; --v-mopop: #b34a9a; --v-pacsci: #2a7fb8; --v-kexp: #6d4fc4; /* the campus neighbours */
   --venue-text: 72%;     /* how much of the venue hue the card's venue label keeps (light mode) */
   --tint: 22%;           /* the venue wash behind each card (light mode; 9% in the dark palette) */
   /* event-type hues (filter dots, agenda right edge): concerts salmon and
@@ -35,6 +37,8 @@
   --t-arts: #b8303f;
   --t-movie: #7a8a99;
   --t-community: #d63f9c;
+  --t-expo: #2a9d8f;      /* conventions & expos: turquoise, the one hue the types didn't use */
+  --alert: #e02b26;       /* cancelled / postponed notes: plain bright red */
   /* one team green: the dot says "home game", the crest says which team */
   --tm-mariners: #3f9a4f;
   --tm-storm: #3f9a4f;
@@ -61,9 +65,10 @@
     --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
     --v-cornish: #3ecf97; --v-cpa: #4da3f0; --v-tmobile: #8ad8e0; --v-seactr: #6a72e6;
     --v-lumen: #8b8fe8; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
+    --v-scc: #7fa7cc; --v-sct: #6cc9db; --v-mopop: #e88ad8; --v-pacsci: #62b8f7; --v-kexp: #b48cf5;
     --venue-text: 100%; --tint: 9%;
     --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
-    --t-movie: #8b9db0; --t-community: #e660a8;
+    --t-movie: #8b9db0; --t-community: #e660a8; --t-expo: #4fd1c5; --alert: #ff4b3e;
     --tm-mariners: #5fbf6a; --tm-storm: #5fbf6a; --tm-seahawks: #5fbf6a;
     --tm-reign: #5fbf6a; --tm-sounders: #5fbf6a; --tm-kraken: #5fbf6a; --tm-torrent: #5fbf6a;
   }
@@ -74,9 +79,10 @@
   --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
   --v-cornish: #3ecf97; --v-cpa: #4da3f0; --v-tmobile: #8ad8e0; --v-seactr: #6a72e6;
   --v-lumen: #8b8fe8; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
+  --v-scc: #7fa7cc; --v-sct: #6cc9db; --v-mopop: #e88ad8; --v-pacsci: #62b8f7; --v-kexp: #b48cf5;
   --venue-text: 100%; --tint: 9%;
   --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
-  --t-movie: #8b9db0; --t-community: #e660a8;
+  --t-movie: #8b9db0; --t-community: #e660a8; --t-expo: #4fd1c5; --alert: #ff4b3e;
   --tm-mariners: #5fbf6a; --tm-storm: #5fbf6a; --tm-seahawks: #5fbf6a;
   --tm-reign: #5fbf6a; --tm-sounders: #5fbf6a; --tm-kraken: #5fbf6a; --tm-torrent: #5fbf6a;
 }
@@ -247,7 +253,7 @@ h1 {
    per group, an "only" link on hover, and an event count on the right. */
 /* the groups sit in columns with a rule between them (a rule above, on
    phones, where they stack) */
-.fp-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1.25rem 0; }
+.fp-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1.25rem 0; } /* wide enough that no name wraps; tablets get two columns */
 .fp-group { padding: 0 1.25rem; }
 .fp-group:first-child { padding-left: 0; }
 .fp-group:last-child { padding-right: 0; }
@@ -287,7 +293,8 @@ h1 {
 .fp-check:hover .cb { border-color: var(--ink); }
 .fp-check:hover input:checked + .cb { background: var(--ink-soft); border-color: var(--ink-soft); }
 .fp-check input:focus-visible + .cb { outline: 2px solid var(--ink-soft); outline-offset: 2px; }
-.fp-name { font-size: .88rem; display: flex; align-items: center; gap: .45rem; overflow-wrap: anywhere; }
+.fp-name { font-size: .88rem; display: flex; align-items: center; gap: .45rem; white-space: nowrap; min-width: 0; }
+.fp-name > :last-child { overflow: hidden; text-overflow: ellipsis; } /* never wraps; a too-narrow column clips with an ellipsis */
 .fp-name a { text-decoration-color: var(--line); }
 .fp-name a:hover { text-decoration-color: var(--ink-soft); }
 .fp-name .dot { flex: none; width: .65rem; height: .65rem; border-radius: 50%; background: var(--dot, var(--ink-soft)); }
@@ -524,7 +531,7 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
    with a third line: "Cancelled Sep 5" */
 .ev.is-off .ev-title a, .ev.is-off .venue { text-decoration: line-through; color: var(--ink-soft); }
 .ev.is-off .time, .ev.is-off .team-mark { opacity: .55; }
-.ev-note { font-family: var(--mono); font-size: .72rem; letter-spacing: .04em; color: var(--t-arts); }
+.ev-note { font-family: var(--mono); font-size: .76rem; letter-spacing: .04em; color: var(--alert); font-weight: 700; }
 /* notes in the masthead's stamp type (see .updated), small */
 .pop-note {
   font-family: var(--display); font-weight: 700; font-size: .82rem; line-height: 1.3;
@@ -551,7 +558,7 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
   position: absolute; right: 0; bottom: calc(100% + .5rem); z-index: 25;
   width: min(18rem, 100%);
   background: var(--mist); border: 1px solid var(--line); border-radius: 10px;
-  padding: 1.1rem 1.25rem; text-align: left;
+  padding: 1.1rem 1.25rem; text-align: left; white-space: normal; /* .foot-inner is nowrap */
   box-shadow: 0 -12px 36px rgba(0, 0, 0, .3);
   max-height: calc(100vh - 8rem); max-height: calc(100dvh - 8rem); overflow-y: auto;
 }
@@ -605,7 +612,7 @@ footer .gw { order: 1; }
 footer #embed { order: 2; margin-left: auto; }
 footer .share.info { order: 3; position: relative; }
 footer .info summary svg { width: 1.1rem; height: 1.1rem; }
-.info-body { width: min(22rem, 90vw); text-align: left; }
+.info-body { width: min(18rem, 90vw); text-align: left; } /* the Embed panel's width; its own details box is only as wide as its label */
 .info-body h3 { font-size: 1.05rem; margin: 0 0 .4rem; }
 .info-body p { color: var(--ink-soft); margin: 0 0 .5rem; }
 footer .share summary { font-size: .9rem; white-space: nowrap; }
