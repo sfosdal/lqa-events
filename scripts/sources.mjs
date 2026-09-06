@@ -30,24 +30,103 @@ export function parseClockTime(s) {
   return `${pad(h)}:${m[2]}:00`;
 }
 
+// ---- event type from what the source itself says -------------------------
+// The feed's optional `type` (concert | sports | arts | movie | community) is
+// the source's own classification; the site's title rules (filter.js
+// eventType) are the fallback when a source has none. Teams/"vs" still win
+// in filter.js, so a mis-tagged game can't be filed under a class.
+
+// Ticketmaster Discovery: classifications[0].segment.name
+export function tmType(classification) {
+  const seg = (classification?.segment?.name || '').toLowerCase();
+  if (seg === 'music') return 'concert';
+  if (seg === 'sports') return 'sports';
+  if (seg.startsWith('arts')) return 'arts'; // "Arts & Theatre"
+  if (seg === 'film') return 'movie';
+  return ''; // "Miscellaneous"/"Undefined": tours, passes — say nothing
+}
+
+// DICE: type_tags like "music:gig", "culture:workshop", "culture:film"
+export function diceType(typeTags) {
+  const tags = (typeTags || []).map((t) => String(t).toLowerCase());
+  if (tags.some((t) => t.startsWith('music:'))) return 'concert';
+  if (tags.some((t) => /^culture:(comedy|theatre|theater|dance|performance)/.test(t))) return 'arts';
+  if (tags.some((t) => t === 'culture:film')) return 'movie';
+  if (tags.some((t) => /^culture:(workshop|talk|class)/.test(t))) return 'community';
+  return '';
+}
+
+// Seattle Center card tags: the facility is the reliable part (a booking in
+// one of the theatres is a play); of the type tags only a few can be trusted
+// — "Classes & Workshops" sits on Kraken games and "Movies/Films" on charity
+// walks in the live calendar, so those are ignored.
+// (exact labels: the Dingwall Courtyard *at* Cornish Playhouse hosts craft fairs)
+const SC_THEATRES = new Set(['Bagley Wright Theatre', 'Bagley Wright Theatre Poncho Forum', 'Leo Kreielsheimer Theatre', 'Cornish Playhouse']);
+export function scType(tags) {
+  const t = (tags || []).map(String);
+  if (t.some((x) => SC_THEATRES.has(x))) return 'arts';
+  if (t.includes('Concerts')) return 'concert';
+  if (t.includes('Sports & Fitness')) return 'sports';
+  if (t.some((x) => /^(Festivals|Walks & Runs|Fundraisers & Auctions)$/.test(x))) return 'community';
+  if (t.includes('Arts')) return 'arts';
+  return '';
+}
+
 /**
  * Parse the event cards out of seattlecenter.com/events/event-calendar HTML.
- * The listing's date headers omit the year (and the list includes past
- * events), so dates come from each card's detail page instead — see
- * parseScDetailDate. Returns [{ title, time, url }].
+ * Returns [{ title, time, url, free, tags }]; tags are the card's footer
+ * labels — an event type ("Festivals", "Arts") and/or the facility it is
+ * booked in ("Fisher Pavilion"), matched against parseScVenueCats by the
+ * caller. Dates are not on the card: see parseScListing.
  */
 export function parseScCards(html) {
   return String(html).split(/event-list__time">/).slice(1).map((seg) => {
     const time = seg.match(/^\s*([^<]*?)\s*</);
     const a = seg.match(/event-list__title">\s*<a href="([^"]+)"[^>]*>\s*([\s\S]*?)\s*<\/a>/);
     if (!a) return null;
+    const tg = seg.match(/event-list__tags">([\s\S]*?)<\/div>/);
     return {
       title: decodeEntities(a[2]),
       time: parseClockTime(time ? time[1] : ''),
       url: new URL(a[1], 'https://www.seattlecenter.com/').href,
       free: /event-list__price">[\s\S]{0,120}?Free Event/.test(seg),
+      tags: tg ? [...tg[1].matchAll(/<span>\s*([^<]*?)\s*<\/span>/g)].map((m) => decodeEntities(m[1])).filter(Boolean) : [],
     };
   }).filter(Boolean);
+}
+
+/**
+ * The listing groups its cards under "September 05" date bars (no year).
+ * Returns every card on the page with the bar it sits under as monthDay
+ * ('' for a card with no bar above it) — feed the accumulated pages to
+ * scListingDates for real dates.
+ */
+export function parseScListing(html) {
+  return String(html).split(/date-bar__date">/).flatMap((seg, i) => {
+    const monthDay = i === 0 ? '' : decodeEntities((seg.match(/^\s*([^<]*?)\s*</) || [, ''])[1]);
+    return parseScCards(seg).map((c) => ({ ...c, monthDay }));
+  });
+}
+
+/**
+ * Give listing cards (in page order, which is date order from today on)
+ * their YYYY-MM-DD: the year starts as today's and rolls over when the
+ * month/day drops back a long way (December → January). A small step back
+ * — an ongoing run that started yesterday listed at the top — is not a new
+ * year. Cards with no parseable date bar get date ''.
+ */
+export function scListingDates(cards, todayISO) {
+  let year = Number(todayISO.slice(0, 4));
+  let prev = Number(todayISO.slice(5, 7)) * 31 + Number(todayISO.slice(8, 10));
+  return cards.map((c) => {
+    const m = String(c.monthDay).match(/^([A-Za-z]+)\.?\s+(\d{1,2})$/);
+    const mon = m && MONTHS[m[1].toLowerCase()];
+    if (!mon) return { ...c, date: '' };
+    const cur = mon * 31 + Number(m[2]);
+    if (prev - cur > 180) year++;
+    prev = cur;
+    return { ...c, date: `${year}-${pad(mon)}-${pad(Number(m[2]))}` };
+  });
 }
 
 /**
@@ -164,11 +243,15 @@ export function mapDiceEvents(data, venueLabel) {
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
   }).format(new Date(iso)); // sv-SE → "2026-08-25 20:00:00"
   return (data?.data || [])
-    .filter((e) => e.name && e.date && e.status !== 'cancelled' && e.status !== 'postponed')
+    .filter((e) => e.name && e.date)
     .map((e) => {
       const tz = e.timezone || 'America/Los_Angeles';
       const [date, time] = fmt(e.date, tz).split(' ');
       const ev = { venue: venueLabel, title: e.name, date, time, url: e.url || '' };
+      // kept, flagged: someone who saw it listed should see it's off
+      if (e.status === 'cancelled' || e.status === 'postponed') ev.status = e.status;
+      const type = diceType(e.type_tags);
+      if (type) ev.type = type;
       if (e.date_end) {
         // keep the end only when the show wraps up the same local day —
         // overnight ends would make "done by" logic lie

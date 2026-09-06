@@ -99,6 +99,11 @@
   var $ = function (id) { return document.getElementById(id); };
   var pad = function (n) { return (n < 10 ? '0' : '') + n; };
 
+  // "2026-09-05T18:27:23.798Z" → "Sep 5"
+  function fmtSince(iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? '' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
   function parseDate(s) {
     var p = s.split('-');
     return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
@@ -661,33 +666,73 @@
   window.addEventListener('resize', fitFilterBar);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitFilterBar);
 
-  // ---- phones: the event sheet ----
-  // A tap anywhere on a card opens it (capture phase, so it wins over the
-  // venue link's own handler); the sheet carries every detail and full-size
-  // links. Desktop keeps its inline links.
+  // ---- the event sheet ----
+  // A click anywhere on a card opens it (capture phase, so it wins over the
+  // venue link's own handler): the details plus the two real choices, the
+  // ticket page and the venue's own list. On phones it's a bottom sheet; on
+  // wider screens the same element is a pop hung under the card (styles.css
+  // ≥641px), placed here and re-placed as the page scrolls. Modifier and
+  // middle clicks on the inline links still open them directly.
   var sheetTouch = '(max-width: 640px)';
-  function openSheet(e) {
+  var sheetAnchor = null;
+  function placeSheet() {
+    var sheet = $('sheet');
+    if (sheet.hidden || !sheetAnchor || matchMedia(sheetTouch).matches) return;
+    if (!document.body.contains(sheetAnchor)) { closeSheet(); return; } // the list re-rendered
+    var card = sheetAnchor.getBoundingClientRect();
+    var pop = sheet.querySelector('.sheet-card').getBoundingClientRect();
+    var gap = 6, pad = 8;
+    var left = Math.max(pad, Math.min(card.left, window.innerWidth - pop.width - pad));
+    var barBottom = document.querySelector('.filter-area').getBoundingClientRect().bottom + gap;
+    var top = card.bottom + gap;
+    if (top + pop.height > window.innerHeight - pad) top = card.top - pop.height - gap; // no room below: above
+    if (top < barBottom) top = Math.max(barBottom, window.innerHeight - pop.height - pad); // nor above: pin
+    sheet.style.left = Math.round(left) + 'px';
+    sheet.style.top = Math.round(top) + 'px';
+  }
+  window.addEventListener('resize', placeSheet);
+  function openSheet(e, anchor) {
     $('sheetVenue').textContent = e.venue;
     $('sheetTitle').textContent = e.title;
     var when = parseDate(e.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' · ' + fmtTime(e.time);
     if (e.series) when += ' · ' + e.series.n + ' of ' + e.series.total;
+    if (e.status) when += ' · ' + e.status.toUpperCase() + (e.statusSince ? ' (noticed ' + fmtSince(e.statusSince) + ')' : '');
     if (e.dateTbd) when += ' · date TBD';
     $('sheetWhen').textContent = when;
     var t = $('sheetTickets'); t.href = e.url || '#'; t.hidden = !e.url;
     var v = $('sheetVenueLink'); v.href = VENUE_URL[e.venue] || '#'; v.hidden = !VENUE_URL[e.venue]; v.textContent = e.venue + ' events';
-    $('sheet').hidden = false;
-    document.body.classList.add('sheet-open');
-    $('sheetClose').focus();
+    var phone = matchMedia(sheetTouch).matches;
+    var sheet = $('sheet');
+    sheetAnchor = anchor || null;
+    sheet.hidden = false;
+    sheet.querySelector('.sheet-card').setAttribute('aria-modal', String(phone));
+    if (phone) {
+      sheet.style.left = sheet.style.top = '';
+      document.body.classList.add('sheet-open');
+      $('sheetClose').focus();
+    } else {
+      placeSheet();
+      sheet.querySelector('.sheet-card').focus();
+    }
   }
-  function closeSheet() { $('sheet').hidden = true; document.body.classList.remove('sheet-open'); }
+  function closeSheet() {
+    $('sheet').hidden = true; sheetAnchor = null;
+    document.body.classList.remove('sheet-open');
+  }
   $('sheetClose').addEventListener('click', closeSheet);
   $('sheetBack').addEventListener('click', closeSheet);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('sheet').hidden) closeSheet(); });
+  // a click anywhere outside the pop closes it (the opening click never gets
+  // here — cardTap stops it in the capture phase)
+  document.addEventListener('click', function (e) {
+    if (!$('sheet').hidden && !e.target.closest('.sheet-card')) closeSheet();
+  });
   function cardTap(e) {
     return function (ev) {
-      if (!matchMedia(sheetTouch).matches) return;
+      // let a deliberate new-tab / middle click on an inline link through
+      if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
       ev.preventDefault(); ev.stopPropagation();
-      openSheet(e);
+      openSheet(e, ev.currentTarget);
     };
   }
   // copy to the clipboard; falls back to a selection + execCommand where the
@@ -973,7 +1018,17 @@
         }
         titleLine.appendChild(a);
         body.appendChild(venue); body.appendChild(titleLine);
-        // the one status worth flagging: a game the league may still move
+        // a show that's off: struck through, with a third line saying so
+        // (and when we noticed, if the feed knows)
+        if (e.status) {
+          row.classList.add('is-off');
+          var off = document.createElement('span');
+          off.className = 'ev-note';
+          off.textContent = e.status.charAt(0).toUpperCase() + e.status.slice(1) + (e.statusSince ? ' ' + fmtSince(e.statusSince) : '');
+          off.title = 'This event has been ' + e.status + ' — check the ticket page for refunds or a new date';
+          body.appendChild(off);
+        }
+        // a game the league may still move
         if (e.dateTbd) {
           var tbd = document.createElement('span');
           tbd.className = 'badge b-tbd';
@@ -1054,6 +1109,7 @@
     }
   }
   window.addEventListener('scroll', function () {
+    placeSheet(); // the event pop rides with its card, same frame as the scroll
     if (!stuckPending) { stuckPending = true; requestAnimationFrame(markStuck); }
   }, { passive: true });
   $('toTop').addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });

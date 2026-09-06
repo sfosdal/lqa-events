@@ -10,7 +10,7 @@
  */
 import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
-import { parseScCards, parseScDetailDate, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents } from './sources.mjs';
+import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, tmType, scType } from './sources.mjs';
 import { mergeWithArchive } from './merge.mjs';
 import { applySchedules } from './schedules.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
@@ -67,9 +67,16 @@ async function ticketmasterVenue({ keyword, venueMatch, label, fallbackUrl, excl
         url: e.url || fallbackUrl,
       };
       if (e.ageRestrictions?.legalAgeEnforced) ev.age21 = true;
+      const type = tmType(e.classifications?.[0]);
+      if (type) ev.type = type;
       // Flex-scheduled games (NFL weekends especially) carry TM's TBD flag:
       // the listed date is a placeholder the league may still move.
       if (e.dates?.start?.dateTBD || e.dates?.start?.dateTBA) ev.dateTbd = true;
+      // Ticketmaster keeps a cancelled or postponed show in its listing for a
+      // while, marked in dates.status — pass that on rather than list it as
+      // if it were still happening (the merge step drops it once it vanishes)
+      const code = e.dates?.status?.code;
+      if (code === 'cancelled' || code === 'postponed') ev.status = code;
       return ev;
     });
 }
@@ -92,58 +99,63 @@ async function mccawHallRss() {
   }).filter((e) => e.title && /^\d{4}-\d{2}-\d{2}$/.test(e.date));
 }
 
-// --- Seattle Center's own calendar: sweep EVERY venue category the filter
-//     offers (discovered at runtime, nothing hardcoded). Venues already
-//     covered by a dedicated source above are skipped so the same show isn't
-//     listed twice under slightly different titles. The listing's date
-//     headers omit the year and include past events, so each card's real
-//     date comes from its detail page (fetched once per unique event). ---
+// --- Seattle Center's own calendar, every page of the full listing (seven
+//     cards a page, a year runs about a hundred pages), so campus-wide
+//     events with no facility tag — Bumbershoot — are included and no venue
+//     is capped at its first page. Each card's date comes from the listing's
+//     date bars (year inferred: scListingDates) and its venue from the card's
+//     facility tag, matched against the page's own Facility/Venue filter;
+//     untagged events are "Seattle Center". Venues with a dedicated source
+//     above are skipped so the same show isn't listed twice. ---
 const SC_CAL = 'https://www.seattlecenter.com/events/event-calendar';
+const SC_MAX_PAGES = 200;
+// standing daily attractions the calendar lists as an event every single day
+const SC_EXCLUDE = /sculpture walk/i;
 
 async function seattleCenterSweep(existingVenues) {
-  const res = await fetch(SC_CAL, { headers: { 'user-agent': BROWSER_UA } });
-  if (!res.ok) { console.error(`Seattle Center calendar HTTP ${res.status}`); return []; }
-  const cats = parseScVenueCats(await res.text());
-  if (!cats.length) { console.error('Seattle Center: no venue categories found — page layout changed?'); return []; }
-
   const covered = (label) => existingVenues.some((v) => {
     const a = v.toLowerCase(), b = label.toLowerCase();
     return a.includes(b) || b.includes(a);
   });
+  const today = new Date().toISOString().slice(0, 10);
+  const horizon = new Date(Date.now() + WINDOW_DAYS * 86400e3).toISOString().slice(0, 10);
 
-  const byUrl = new Map();
-  for (const cat of cats) {
-    if (covered(cat.label)) { console.log(`Seattle Center: skipping ${cat.label} (dedicated source)`); continue; }
-    try {
-      const r = await fetch(`${SC_CAL}?cats=${cat.id}`, { headers: { 'user-agent': BROWSER_UA } });
-      if (!r.ok) { console.error(`Seattle Center cats=${cat.id} HTTP ${r.status}`); continue; }
-      for (const card of parseScCards(await r.text())) {
-        if (!byUrl.has(card.url)) byUrl.set(card.url, { ...card, venue: cat.label });
-      }
-    } catch (err) {
-      console.error(`Seattle Center ${cat.label} failed:`, err.message);
+  let venueLabels = null;
+  const seenUrl = new Set();
+  let cards = [];
+  let pages = 0;
+  for (let page = 1; page <= SC_MAX_PAGES; page++) {
+    const res = await fetch(`${SC_CAL}?page=${page}`, { headers: { 'user-agent': BROWSER_UA } });
+    if (!res.ok) { console.error(`Seattle Center page ${page} HTTP ${res.status}`); break; }
+    const html = await res.text();
+    if (!venueLabels) {
+      venueLabels = parseScVenueCats(html).map((c) => c.label);
+      if (!venueLabels.length) console.error('Seattle Center: no venue categories found — page layout changed? (every event will read as "Seattle Center")');
     }
+    // past the last page the site serves an empty list — or repeats the last one
+    const found = parseScListing(html).filter((c) => !seenUrl.has(c.url));
+    if (!found.length) break;
+    pages++;
+    found.forEach((c) => seenUrl.add(c.url));
+    cards = cards.concat(found);
+    const dated = scListingDates(cards, today);
+    if (dated[dated.length - 1].date > horizon) break;
   }
 
-  const cards = [...byUrl.values()];
   const events = [];
-  const POOL = 6;
-  for (let i = 0; i < cards.length; i += POOL) {
-    await Promise.all(cards.slice(i, i + POOL).map(async (card) => {
-      try {
-        const detail = await fetch(card.url, { headers: { 'user-agent': BROWSER_UA } });
-        if (!detail.ok) { console.error(`Seattle Center detail HTTP ${detail.status}: ${card.url}`); return; }
-        const date = parseScDetailDate(await detail.text());
-        if (!date) { console.error(`No date found on ${card.url}`); return; }
-        const ev = { venue: card.venue, title: card.title, date, time: card.time, url: card.url };
-        if (card.free) ev.free = true;
-        events.push(ev);
-      } catch (err) {
-        console.error(`Seattle Center detail failed (${card.url}):`, err.message);
-      }
-    }));
+  let atOwnSource = 0, standing = 0;
+  for (const c of scListingDates(cards, today)) {
+    if (!c.date) { console.error(`No date bar for ${c.url}`); continue; }
+    if (SC_EXCLUDE.test(c.title)) { standing++; continue; }
+    const venueTag = c.tags.find((t) => venueLabels.includes(t));
+    if (venueTag && covered(venueTag)) { atOwnSource++; continue; }
+    const ev = { venue: venueTag || 'Seattle Center', title: c.title, date: c.date, time: c.time, url: c.url };
+    if (c.free) ev.free = true;
+    const type = scType(c.tags);
+    if (type) ev.type = type;
+    events.push(ev);
   }
-  console.log(`Seattle Center sweep: ${events.length} events from ${cards.length} cards`);
+  console.log(`Seattle Center sweep: ${events.length} events from ${cards.length} cards over ${pages} pages (${atOwnSource} at venues with their own source, ${standing} standing attractions skipped)`);
   return events;
 }
 

@@ -71,6 +71,13 @@
           v.className = 'lqa-ev-venue';
           v.textContent = e.venue;
           li.appendChild(d); li.appendChild(a); li.appendChild(v);
+          if (e.status) { // cancelled / postponed: struck through, labelled
+            a.style.textDecoration = 'line-through';
+            var s = document.createElement('span');
+            s.className = 'lqa-ev-badge';
+            s.textContent = e.status;
+            li.appendChild(s);
+          }
           if (e.dateTbd) {
             var b = document.createElement('span');
             b.className = 'lqa-ev-badge';

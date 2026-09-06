@@ -36,6 +36,18 @@ test('timed event gets local DTSTART and a 3h DTEND', () => {
   assert.match(ics, /DTEND;TZID=America\/Los_Angeles:20260828T220000/);
 });
 
+test('a cancelled event is marked in its summary and STATUS', () => {
+  const ics = buildIcs([{ ...timed, status: 'cancelled' }], NOW);
+  assert.match(ics, /SUMMARY:CANCELLED: The Strokes - Reality Awaits North America/);
+  assert.match(ics, /STATUS:CANCELLED/);
+  assert.match(ics, /DESCRIPTION:This event has been cancelled\. Check/);
+  assert.match(buildIcs([{ ...timed, status: 'cancelled', statusSince: '2026-09-05T18:00:00.000Z' }], NOW), /has been cancelled \(noticed 2026-09-05\)/);
+  const post = buildIcs([{ ...timed, status: 'postponed' }], NOW);
+  assert.match(post, /SUMMARY:POSTPONED: /);
+  assert.match(post, /STATUS:TENTATIVE/);
+  assert.ok(!buildIcs([timed], NOW).includes('STATUS:'));
+});
+
 test('a dateTbd event flags its summary and carries a description', () => {
   const ics = buildIcs([{ ...timed, dateTbd: true }], NOW);
   assert.match(ics, /SUMMARY:The Strokes - Reality Awaits North America \(date TBD\)/);

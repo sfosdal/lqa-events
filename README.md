@@ -11,7 +11,7 @@ the data every ~6 hours and deploys straight to GitHub Pages (no data commits).
 | Path | What |
 |---|---|
 | `/lqa-events/` | Calendar UI — month grid, agenda, venue filters, subscribe |
-| `/lqa-events/events.json` | JSON feed: `{ generated, events: [{venue,title,date,time,url}] }` — plus optional per-event `end` (same-day local end time), `age21`, `soldOut`, `free` |
+| `/lqa-events/events.json` | JSON feed: `{ generated, events: [{venue,title,date,time,url}] }` — plus optional per-event `end` (same-day local end time), `age21`, `soldOut`, `free`, `dateTbd`, `type` (the source's own classification — concert/sports/arts/movie/community — which the site's type rules trust before falling back to title words), and `status` (`cancelled` or `postponed`) with `statusSince` (ISO time the status was first detected; a cancelled show stays in its slot, marked, until its date passes) |
 | `/lqa-events/events.ics` | iCalendar feed — subscribable in Google/Apple Calendar |
 | `/lqa-events/embed.js` | Drop-in widget for other sites |
 | `/lqa-events/filter.js` | Shared filter/classification logic (teams, event types, venue matching) and the share-link code — the single source of truth other sites should use if they filter this feed themselves, instead of re-implementing the rules |
@@ -50,9 +50,12 @@ and `h=1` switches the US & WA holidays rows on.
   `site/events.ics`. Dedicated sources first: Ticketmaster Discovery API
   (Climate Pledge Arena — needs `TICKETMASTER_API_KEY`, skipped without it),
   McCaw Hall's RSS feed, and The Vera Project via the DICE API. Then a
-  campus-wide sweep of seattlecenter.com's calendar covers every venue
-  category its filter lists (discovered at runtime; venues already covered
-  by a dedicated source are skipped). 365-day window, de-duped.
+  campus-wide sweep walks every page of seattlecenter.com's calendar
+  (dates from its date bars, year inferred; venue from each card's facility
+  tag, matched against the calendar's own venue filter — untagged
+  campus-wide events like Bumbershoot become "Seattle Center"; venues with a
+  dedicated source are skipped; standing daily attractions such as the
+  Sculpture Walk are excluded). 365-day window, de-duped.
 - `scripts/ics.mjs` — RFC 5545 generation (stable UIDs, PST/PDT VTIMEZONE,
   all-day vs timed events). Tests: `node --test scripts/ics.test.mjs`.
 - `site/` — the static site; generated feed files land here (gitignored).

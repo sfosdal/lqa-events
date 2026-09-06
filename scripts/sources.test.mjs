@@ -1,15 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseScCards, parseScDetailDate, parseScVenueCats, parseClockTime, mapDiceEvents, parseSiffScreenings, mapOtbEvents } from './sources.mjs';
+import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapDiceEvents, parseSiffScreenings, mapOtbEvents } from './sources.mjs';
 
 // --- Seattle Center calendar HTML (event cards; dates live on detail pages) ---
 
-function card(time, href, title, free) {
+function card(time, href, title, free, tags = []) {
+  const tagHtml = tags.length ? `<div class="event-list__tags">${tags.map((t) => `<span> ${t} </span>`).join('')}</div>` : '';
   return `<div class="event-list__time">\n${time} </div>
     <div class="event-list__details"><h2 class="event-list__title">
     <a href="${href}"    >\n\t\t${title}\n\t</a></h2>
-    <div class="event-list__price"><span>${free ? ' Free Event' : '$25'}</span></div></div>`;
+    <div class="event-list__price"><span>${free ? ' Free Event' : '$25'}</span></div>${tagHtml}
+    <div class="event-list__text">blurb</div></div>`;
 }
+const dateBar = (md) => `<div class="date-bar"><p class="date-bar__date">\n${md}\n</p></div>`;
 
 test('parses listing cards with absolute URLs and 24h times', () => {
   const html = card('8:00 p.m.', 'events/event-calendar/gypsy', 'Gypsy: A Musical Fable')
@@ -21,8 +24,39 @@ test('parses listing cards with absolute URLs and 24h times', () => {
     time: '20:00:00',
     url: 'https://www.seattlecenter.com/events/event-calendar/gypsy',
     free: false,
+    tags: [],
   });
   assert.equal(cards[1].time, '14:00:00');
+});
+
+test('card tags are read (entities decoded); type-only tags leave no venue to match', () => {
+  const html = card('All Day', 'e/b', 'Bumbershoot 2026', false, ['Festivals', 'Grounds / Public Space'])
+    + card('7:00 p.m.', 'e/k', 'Kraken vs Flames', false, ['Classes &amp; Workshops', 'Climate Pledge Arena'])
+    + card('All Day', 'e/m', 'Christmas Market', false, ['Other']);
+  const cards = parseScCards(html);
+  assert.deepEqual(cards[0].tags, ['Festivals', 'Grounds / Public Space']);
+  assert.deepEqual(cards[1].tags, ['Classes & Workshops', 'Climate Pledge Arena']);
+  assert.deepEqual(cards[2].tags, ['Other']);
+});
+
+test('listing cards carry the date bar they sit under', () => {
+  const html = dateBar('September 05') + card('All Day', 'e/1', 'Bumbershoot 2026') + card('8:00 p.m.', 'e/2', 'Late Show')
+    + dateBar('September 06') + card('All Day', 'e/3', 'Bumbershoot 2026');
+  const cards = parseScListing(html);
+  assert.deepEqual(cards.map((c) => [c.title, c.monthDay]), [
+    ['Bumbershoot 2026', 'September 05'], ['Late Show', 'September 05'], ['Bumbershoot 2026', 'September 06'],
+  ]);
+});
+
+test('listing dates start in the current year and roll over at the December → January step', () => {
+  const cards = ['September 05', 'September 06', 'December 31', 'January 03', 'March 06'].map((monthDay) => ({ monthDay }));
+  assert.deepEqual(scListingDates(cards, '2026-09-05').map((c) => c.date),
+    ['2026-09-05', '2026-09-06', '2026-12-31', '2027-01-03', '2027-03-06']);
+});
+
+test('a small step back (an ongoing run listed first) is not a new year; unparseable bars give no date', () => {
+  const cards = ['September 04', 'September 05', 'Sometime', ''].map((monthDay) => ({ monthDay }));
+  assert.deepEqual(scListingDates(cards, '2026-09-05').map((c) => c.date), ['2026-09-04', '2026-09-05', '', '']);
 });
 
 test('free events are flagged from the price span', () => {
@@ -87,6 +121,7 @@ const diceData = {
       sold_out: true,
       age_limit: 'This is a 21+ event.',
       url: 'https://link.dice.fm/abc',
+      type_tags: ['music:gig'],
     },
     {
       name: 'Cancelled Show',
@@ -98,9 +133,34 @@ const diceData = {
   ],
 };
 
+test('event types from what each source says', () => {
+  assert.equal(tmType({ segment: { name: 'Music' }, genre: { name: 'Pop' } }), 'concert');
+  assert.equal(tmType({ segment: { name: 'Sports' } }), 'sports');
+  assert.equal(tmType({ segment: { name: 'Arts & Theatre' } }), 'arts');
+  assert.equal(tmType({ segment: { name: 'Film' } }), 'movie');
+  assert.equal(tmType({ segment: { name: 'Miscellaneous' } }), '', 'tours and passes say nothing');
+  assert.equal(tmType(undefined), '');
+  assert.equal(diceType(['music:gig']), 'concert');
+  assert.equal(diceType(['culture:workshop']), 'community');
+  assert.equal(diceType(['culture:film']), 'movie');
+  assert.equal(diceType(['culture:comedy']), 'arts');
+  assert.equal(diceType([]), '');
+  assert.equal(scType(['Bagley Wright Theatre']), 'arts', 'a booking in a theatre is a play');
+  assert.equal(scType(['Arts', 'Festivals', 'Other', 'Grounds / Public Space']), 'community', 'festival programming');
+  assert.equal(scType(['Classes & Workshops', 'Climate Pledge Arena']), '', 'the mis-used class tag is ignored');
+  assert.equal(scType(['Movies/Films', 'Grounds / Public Space']), '', 'so is the mis-used film tag');
+  assert.equal(scType(['Concerts', 'Mural Amphitheatre']), 'concert');
+  assert.equal(scType(['Walks & Runs']), 'community');
+  assert.equal(scType(['Other', 'Fisher Pavilion']), '');
+  assert.equal(scType(['Dingwall Courtyard at Cornish Playhouse', 'Exhibition Hall']), '', 'the courtyard is not the playhouse');
+  assert.equal(scType(['Bagley Wright Theatre Poncho Forum']), 'arts');
+});
+
 test('DICE UTC instants become local Seattle date/time with end, 21+, sold-out', () => {
   const evs = mapDiceEvents(diceData, 'The Vera Project');
-  assert.equal(evs.length, 1); // cancelled filtered out
+  assert.equal(evs.length, 2);
+  assert.equal(evs[1].status, 'cancelled', 'a cancelled show stays listed, flagged');
+  assert.equal(evs[1].title, 'Cancelled Show');
   assert.deepEqual(evs[0], {
     venue: 'The Vera Project',
     title: 'Cool Show',
@@ -110,6 +170,7 @@ test('DICE UTC instants become local Seattle date/time with end, 21+, sold-out',
     age21: true,
     soldOut: true,
     url: 'https://link.dice.fm/abc',
+    type: 'concert',
   });
 });
 

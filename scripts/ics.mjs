@@ -100,9 +100,18 @@ function eventLines(e, dtstamp) {
     lines.push(`DTSTART;VALUE=DATE:${dateDigits(e.date)}`);
     lines.push(`DTEND;VALUE=DATE:${addHours(e.date, '00:00', 24).slice(0, 8)}`);
   }
-  lines.push(`SUMMARY:${escapeText(e.title)}${e.dateTbd ? ' (date TBD)' : ''}`);
+  // a cancelled/postponed show keeps its slot, marked — calendars vary in
+  // how they show STATUS:CANCELLED, so the summary says it too
+  const prefix = e.status === 'cancelled' ? 'CANCELLED: ' : e.status === 'postponed' ? 'POSTPONED: ' : '';
+  lines.push(`SUMMARY:${prefix}${escapeText(e.title)}${e.dateTbd ? ' (date TBD)' : ''}`);
+  if (e.status === 'cancelled') lines.push('STATUS:CANCELLED');
+  else if (e.status === 'postponed') lines.push('STATUS:TENTATIVE');
   lines.push(`LOCATION:${escapeText(e.venue)}`);
-  if (e.dateTbd) lines.push(`DESCRIPTION:${escapeText('Date not final — the league may still move this game. The feed updates within a few hours of a change.')}`);
+  if (e.status) {
+    const since = e.statusSince ? ` (noticed ${e.statusSince.slice(0, 10)})` : '';
+    lines.push(`DESCRIPTION:${escapeText(`This event has been ${e.status}${since}. Check the ticket page for refunds or a new date.`)}`);
+  }
+  else if (e.dateTbd) lines.push(`DESCRIPTION:${escapeText('Date not final — the league may still move this game. The feed updates within a few hours of a change.')}`);
   if (e.url) lines.push(`URL:${escapeText(e.url)}`);
   lines.push('END:VEVENT');
   return lines;

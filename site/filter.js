@@ -38,12 +38,24 @@
     'McCaw Hall': 'arts', 'Cornish Playhouse': 'arts', 'On the Boards': 'arts',
     'Seattle Center': 'community', 'SIFF Cinema Uptown': 'community', // SIFF specials = festival programming
   };
+  var TYPE_KEYS_OK = { concert: 1, sports: 1, arts: 1, movie: 1, community: 1 };
+  // Order: the movie flag and a home team / "vs" are certain. Then the
+  // source's own classification (feed `type`: Ticketmaster segment, DICE
+  // type tags, Seattle Center facility/type tags — scripts/sources.mjs),
+  // except that a source's "community" is coarse (Seattle Center tags all
+  // of Winterfest "Festivals", movie nights and comedy included), so a
+  // concrete movie/arts word in the title beats it. Then title rules, then
+  // what the venue usually hosts.
   function eventType(e) {
     var title = e.title || '';
     if (e.movie) return 'movie';
     if (TEAMS.some(function (t) { return t.re.test(title); }) || /\bvs\.?\s/i.test(title)) return 'sports';
-    if (/ballet|opera|symphon|orchestra|philharmon|theatre|theater|musical|broadway|shakespeare|comedy|stand-?up|improv|dance|cirque|on ice/i.test(title)) return 'arts';
-    if (/festival|fest[aá]l|\bfair\b|\bexpo\b|market|convention|summit|celebration|ceremony|\bwalk\b|\brun\b|parade/i.test(title)) return 'community';
+    var src = e.type && TYPE_KEYS_OK[e.type] ? e.type : '';
+    if (src && src !== 'community') return src;
+    if (/movie night|\bfilm\b|screening/i.test(title)) return 'movie';
+    if (/ballet|opera|symphon|orchestra|philharmon|theatre|theater|musical|broadway|shakespeare|comedy|stand-?up|improv|dance|cirque|on ice|preview performance|opening night|matinee|open caption|sensory-friendly|audio described/i.test(title)) return 'arts';
+    if (src) return src;
+    if (/workshop|\bclass(es)?\b|intro to|open session|\b[A-Z]{2}\s?\d{3}:|festival|fest[aá]l|\bfair\b|\bexpo\b|market|convention|summit|celebration|ceremony|\bwalk\b|\brun\b|parade/i.test(title)) return 'community';
     if (/concert|\btour\b|live music|\bdj\b|\blive\b/i.test(title)) return 'concert';
     return TYPE_VENUE_DEFAULT[e.venue] || 'community';
   }
@@ -280,21 +292,22 @@
       // the page edge (or the first row's edge), and for each row runs the
       // straight lane down to the row's entry, curves in, and curves back out.
       // A series whose earlier dates aren't listed (they're in the past)
-      // arrives from the top edge as a lead that fades in, 0% → 100% over
-      // its first few dozen pixels, so it doesn't dead-end against the edge.
+      // arrives as a lead that fades in, 0% at the top of the first listed
+      // row's day group → 100% at the curve into the row, so it reads as
+      // "continues from earlier" without dead-ending against anything.
       var d = '';
       if (it.before) {
         var leadEnd = f(pts[0].y - b);
-        if (leadEnd > 0) {
+        var group = it.els[0].closest(opts.groupSelector || '.day-row');
+        var leadStart = group ? f(Math.max(0, group.getBoundingClientRect().top - box.top)) : 0;
+        if (leadEnd > leadStart) {
           if (!defs) { defs = document.createElementNS(SVG_NS, 'defs'); svg.appendChild(defs); }
           var gid = 'sg-fade-' + idx + '-' + Math.round(Math.random() * 1e6);
           var grad = document.createElementNS(SVG_NS, 'linearGradient');
           grad.setAttribute('id', gid);
           grad.setAttribute('gradientUnits', 'userSpaceOnUse');
           grad.setAttribute('x1', 0); grad.setAttribute('x2', 0);
-          // invisible for most of the way down from the edge; it only comes in
-          // over the last ~36px before the curve into the first listed row
-          grad.setAttribute('y1', Math.max(0, leadEnd - 36)); grad.setAttribute('y2', leadEnd);
+          grad.setAttribute('y1', leadStart); grad.setAttribute('y2', leadEnd);
           [[0, 0], [1, 1]].forEach(function (s) {
             var stop = document.createElementNS(SVG_NS, 'stop');
             stop.setAttribute('offset', s[0]);
@@ -305,11 +318,11 @@
           defs.appendChild(grad);
           var lead = document.createElementNS(SVG_NS, 'path');
           lead.setAttribute('class', 'sg-line');
-          lead.setAttribute('d', 'M' + x + ' 0 L' + x + ' ' + leadEnd);
+          lead.setAttribute('d', 'M' + x + ' ' + leadStart + ' L' + x + ' ' + leadEnd);
           lead.style.stroke = 'url(#' + gid + ')';
           svg.appendChild(lead);
         }
-        d = 'M' + x + ' ' + Math.max(0, leadEnd);
+        d = 'M' + x + ' ' + Math.max(leadStart, leadEnd);
       }
       pts.forEach(function (p, i) {
         var starts = i === 0 && !it.before, ends = i === n - 1 && !it.after;
