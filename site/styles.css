@@ -344,13 +344,9 @@ h1 {
 .cal { display: grid; gap: .6rem; }
 .cal[hidden] { display: none; } /* an author display beats the UA [hidden] rule */
 .cal-months { display: grid; gap: 1.1rem; }
-/* when the list scrolls into a new month the cards slide in — up for a later
-   month, down for an earlier one (app.js sets the class for one run) */
-.cal-months.slide-up { animation: cal-slide-up .28s ease-out; }
-.cal-months.slide-down { animation: cal-slide-down .28s ease-out; }
-@keyframes cal-slide-up { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes cal-slide-down { from { transform: translateY(-14px); opacity: 0; } to { transform: none; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .cal-months.slide-up, .cal-months.slide-down { animation: none; } }
+/* when the month changes the cards move like a reel (app.js swapCal):
+   forward, the top card scrolls up and out while the new one rises in from
+   below; backward is the mirror. The box is clipped for the run. */
 .cal-month { background: var(--mist); border: 2px solid var(--ink-soft); border-radius: 10px; overflow: hidden; }
 /* ‹ TODAY › as one bar in the cards' own frame — the header card of the
    stack: ‹ flush left, › flush right, TODAY dead center between them */
@@ -437,10 +433,9 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
   padding: .6rem 0 .45rem;
   font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1;
   text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
-  /* fully opaque: the oval reaches below the rule, so a stuck month must
-     cover the one it slides over (a half-transparent row let the old oval's
-     lower half show through) */
-  background: var(--sky);
+  /* opaque only above the rule: while stuck, the rows scroll on under the
+     lower half, visible right up to the line */
+  background: linear-gradient(var(--sky) 50%, transparent 50%);
 }
 /* the rule itself: a 1px layer at the row's center, above the shadow */
 .month-row::before, .holiday-row::before {
@@ -452,13 +447,14 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
    rule, bent around the name (months and holidays alike) */
 .month-row > span, .holiday-row > span {
   border: 1px solid var(--rule); border-radius: 999px; padding: .4em 1.1em .3em;
-  background: color-mix(in srgb, var(--rule) 40%, var(--sky)); /* filled well between outline and page: clearly darker than the line in dark mode, lighter in light */
+  background: color-mix(in srgb, var(--rule) 15%, var(--sky)); /* a whisper above the page, well clear of the outline */
 }
 /* holiday marks: each holiday's own line icon on its divider, in the
    text's color, a touch faded */
 .hol-mark { width: 1em; height: 1em; flex: none; opacity: .75; }
 .holiday-row > span { display: inline-flex; align-items: center; gap: .5rem; }
 .month-row { position: sticky; top: var(--barh); z-index: 5; }
+.month-group { display: block; } /* one per month: the sticky divider's bounds, so the next month pushes it out */
 .holiday-row { font-size: 1.05rem; }
 .month-row + .day-row, .holiday-row + .day-row { background: none; }
 /* the rule between days fades out toward both edges */

@@ -914,8 +914,37 @@
   });
   function shiftMonth(dir) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + dir, 1);
-    renderCal();
+    swapCal(dir);
     jumpToMonth();
+  }
+  // Re-render the month cards with a reel move: forward (dir > 0) the top
+  // card scrolls up and out and the new one rises in from below; backward is
+  // the mirror. The outgoing card rides along for the run, then goes.
+  var calSwapRun = 0;
+  function swapCal(dir) {
+    var box = $('calGrid');
+    var old = Array.from(box.children);
+    renderCal();
+    if (!old.length || !dir || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var run = ++calSwapRun;
+    var exiting = dir > 0 ? old[0] : old[old.length - 1];
+    box.style.height = box.offsetHeight + 'px'; box.style.overflow = 'hidden'; // clip to the two-card stack
+    if (dir > 0) box.insertBefore(exiting, box.firstChild); else box.appendChild(exiting);
+    var gap = parseFloat(getComputedStyle(box).rowGap) || 0;
+    var shift = (dir > 0 ? exiting : box.firstChild).offsetHeight + gap; // one card's worth
+    var from = dir > 0 ? 0 : -shift, to = dir > 0 ? -shift : 0;
+    var DUR = 340;
+    var anims = Array.from(box.children).map(function (c) {
+      return c.animate([{ transform: 'translateY(' + from + 'px)' }, { transform: 'translateY(' + to + 'px)' }],
+        { duration: DUR, easing: 'cubic-bezier(.2, .7, .2, 1)', fill: 'both' });
+    });
+    // clean up on a timer rather than onfinish (a newer swap will have
+    // re-rendered everything already, so it only runs for the latest run)
+    setTimeout(function () {
+      if (run !== calSwapRun) return;
+      anims.forEach(function (a) { a.cancel(); });
+      exiting.remove(); box.style.height = ''; box.style.overflow = '';
+    }, DUR + 30);
   }
   // Scroll the list to a day: its own row, or the first listed day after it.
   function scrollToDate(date) {
@@ -965,10 +994,17 @@
       return dayItems(d).length && (d >= today || (state.showPast && inPast(d)));
     });
     // A month divider opens each month; it sticks to the top until the next
-    // one pushes it out.
-    var lastMonth = null;
+    // one pushes it out — which needs each month's rows in their own group
+    // (a sticky element only sticks within its parent), so the list is
+    // <li class="month-group"> per month holding the divider and its days.
+    var lastMonth = null, group = null;
     function divider(cls, text, icon) {
-      var li = document.createElement('li');
+      if (cls === 'month-row') {
+        group = document.createElement('li');
+        group.className = 'month-group';
+        ol.appendChild(group);
+      }
+      var li = document.createElement('div');
       li.className = cls;
       var s = document.createElement('span');
       if (icon) { // a holiday's own mark: <use> of the symbol in index.html
@@ -980,7 +1016,7 @@
       }
       s.appendChild(document.createTextNode(text));
       li.appendChild(s);
-      ol.appendChild(li);
+      (group || ol).appendChild(li);
     }
     function ensureMonth(dateStr) {
       var month = dateStr.slice(0, 7);
@@ -1011,7 +1047,7 @@
       var d = parseDate(date);
       holidaysThrough(date);
       ensureMonth(date);
-      var li = document.createElement('li');
+      var li = document.createElement('div');
       li.className = 'day-row' + (date === today ? ' is-today' : '') + (date < today ? ' is-past' : '');
       li.dataset.date = date;
 
@@ -1098,7 +1134,7 @@
         wrap.appendChild(row);
       });
       li.appendChild(wrap);
-      ol.appendChild(li);
+      (group || ol).appendChild(li);
     });
     // holidays after the last listed day (or all of them, when the filter
     // leaves nothing) — the year ahead, so the switch shows something even
@@ -1167,12 +1203,7 @@
       var cur = ymd(state.month).slice(0, 7);
       if (ym !== cur) {
         state.month = new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)) - 1, 1);
-        renderCal();
-        // the cards slide in the direction the list moved
-        var box = $('calGrid');
-        box.classList.remove('slide-up', 'slide-down');
-        void box.offsetWidth; // restart the animation if one was still running
-        box.classList.add(ym > cur ? 'slide-up' : 'slide-down');
+        swapCal(ym > cur ? 1 : -1); // the reel turns the way the list moved
       }
     }
   }
