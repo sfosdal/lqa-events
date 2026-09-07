@@ -998,6 +998,10 @@
     // (a sticky element only sticks within its parent), so the list is
     // <li class="month-group"> per month holding the divider and its days.
     var lastMonth = null, group = null;
+    function ordinal(n) { var t = n % 100; return n + (t >= 11 && t <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'); }
+    // text is the label; a holiday passes { title, date } and reads
+    // "Labor Day – September 7" on its own row, "Labor Day – 7th" when it
+    // joins the month's row (the month is right there)
     function divider(cls, text, icon) {
       if (cls === 'month-row') {
         group = document.createElement('li');
