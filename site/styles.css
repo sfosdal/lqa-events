@@ -449,7 +449,10 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 .month-row > span, .holiday-row > span { position: relative; z-index: 1; background: var(--sky); padding: 0 .9rem; }
 /* the label sits in an oval the rule runs into: the same 1px line as the
    rule, bent around the name (months and holidays alike) */
-.month-row > span, .holiday-row > span { border: 1px solid var(--rule); border-radius: 999px; padding: .4em 1.1em .3em; }
+.month-row > span, .holiday-row > span {
+  border: 1px solid var(--rule); border-radius: 999px; padding: .4em 1.1em .3em;
+  background: color-mix(in srgb, var(--rule) 88%, white); /* filled a smidge lighter than its outline */
+}
 /* holiday marks: each holiday's own line icon on its divider, in the
    text's color, a touch faded */
 .hol-mark { width: 1em; height: 1em; flex: none; opacity: .75; }
