@@ -78,8 +78,9 @@
     'On the Boards': favicon('ontheboards.org'),
     'T-Mobile Park': favicon('www.mlb.com'),
     'Lumen Field': favicon('www.lumenfield.com'),
-    // local bars: the bar's own logo, shown on its agenda rows like a team crest
-    'The Traveling Goat': 'https://static.wixstatic.com/media/3683c2_c984923e2e894545a1285b338e8517f7~mv2.png',
+    // local bars: the bar's logo reduced to line art (scripts/make-mark.py),
+    // shown on its agenda rows like a team crest — a path under site/
+    'The Traveling Goat': 'marks/traveling-goat.png',
   };
   // Venue hues for dark backgrounds — the same values the calendar's
   // styles.css dark block sets as --v-* variables; keep the two in step.

@@ -1065,7 +1065,7 @@
         var mark = (team && team.logo) || (eventType(e) === 'bar' && LQAFilter.VENUE_ICON[e.venue]) || '';
         if (mark) {
           var logo = document.createElement('img');
-          logo.className = 'team-mark' + (team ? '' : ' venue-mark'); // a bar's disc logo isn't inverted in dark mode
+          logo.className = 'team-mark';
           logo.src = mark;
           logo.alt = ''; // decorative — the row already names the team/venue
           row.appendChild(logo);
