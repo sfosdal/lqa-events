@@ -437,9 +437,10 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
   padding: .6rem 0 .45rem;
   font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1;
   text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
-  /* opaque only above the rule: while stuck, the rows scroll on under the
-     lower half, visible right up to the line */
-  background: linear-gradient(var(--sky) 50%, transparent 50%);
+  /* fully opaque: the oval reaches below the rule, so a stuck month must
+     cover the one it slides over (a half-transparent row let the old oval's
+     lower half show through) */
+  background: var(--sky);
 }
 /* the rule itself: a 1px layer at the row's center, above the shadow */
 .month-row::before, .holiday-row::before {
@@ -451,7 +452,7 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
    rule, bent around the name (months and holidays alike) */
 .month-row > span, .holiday-row > span {
   border: 1px solid var(--rule); border-radius: 999px; padding: .4em 1.1em .3em;
-  background: color-mix(in srgb, var(--rule) 88%, white); /* filled a smidge lighter than its outline */
+  background: color-mix(in srgb, var(--rule) 70%, var(--sky)); /* filled between outline and page: darker than the line in dark mode, lighter in light */
 }
 /* holiday marks: each holiday's own line icon on its divider, in the
    text's color, a touch faded */
