@@ -342,7 +342,7 @@
     // each with its own mark for the agenda divider (Lucide symbols in index.html)
     return [
       [new Date(y, 0, 1), "New Year's Day", 'party-popper'],
-      [nthWeekday(y, 0, 1, 3), 'Martin Luther King Jr. Day', 'bird'], // a dove
+      [nthWeekday(y, 0, 1, 3), 'Martin Luther King Jr. Day', 'hand-heart'], // a day of service
       [nthWeekday(y, 1, 1, 3), "Presidents' Day", 'landmark'],
       [nthWeekday(y, 4, 1, -1), 'Memorial Day', 'flower'], // the poppy
       [new Date(y, 5, 19), 'Juneteenth', 'hand-fist'],
