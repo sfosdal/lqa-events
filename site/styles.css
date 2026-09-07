@@ -452,7 +452,7 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
    rule, bent around the name (months and holidays alike) */
 .month-row > span, .holiday-row > span {
   border: 1px solid var(--rule); border-radius: 999px; padding: .4em 1.1em .3em;
-  background: color-mix(in srgb, var(--rule) 70%, var(--sky)); /* filled between outline and page: darker than the line in dark mode, lighter in light */
+  background: color-mix(in srgb, var(--rule) 40%, var(--sky)); /* filled well between outline and page: clearly darker than the line in dark mode, lighter in light */
 }
 /* holiday marks: each holiday's own line icon on its divider, in the
    text's color, a touch faded */
