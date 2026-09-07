@@ -343,7 +343,7 @@ h1 {
 /* ---- mini month calendar: a nav bar, then one framed card per month ---- */
 .cal { display: grid; gap: .6rem; }
 .cal[hidden] { display: none; } /* an author display beats the UA [hidden] rule */
-.cal-months { display: grid; gap: 1.1rem; }
+.cal-months { display: grid; gap: 1.1rem; grid-auto-rows: max-content; } /* rows stay card-sized even while the reel pins the box's height */
 /* when the month changes the cards move like a reel (app.js swapCal):
    forward, the top card scrolls up and out while the new one rises in from
    below; backward is the mirror. The box is clipped for the run. */
