@@ -339,20 +339,20 @@
   function holidaysFor(y) {
     var thanks = nthWeekday(y, 10, 4, 4);
     var friday = new Date(thanks); friday.setDate(thanks.getDate() + 1);
-    // each with its own mark for the agenda divider
+    // each with its own mark for the agenda divider (Lucide symbols in index.html)
     return [
-      [new Date(y, 0, 1), "New Year's Day", '\uD83C\uDF86'],                       // fireworks
-      [nthWeekday(y, 0, 1, 3), 'Martin Luther King Jr. Day', '\uD83D\uDD4A\uFE0F'], // dove
-      [nthWeekday(y, 1, 1, 3), "Presidents' Day", '\uD83C\uDFDB\uFE0F'],           // classical building
-      [nthWeekday(y, 4, 1, -1), 'Memorial Day', '\uD83C\uDF96\uFE0F'],             // military medal
-      [new Date(y, 5, 19), 'Juneteenth', '\u270A\uD83C\uDFFF'],                    // raised fist
-      [new Date(y, 6, 4), 'Independence Day', '\uD83C\uDDFA\uD83C\uDDF8'],        // US flag
-      [nthWeekday(y, 8, 1, 1), 'Labor Day', '\uD83D\uDEE0\uFE0F'],                 // hammer and wrench
-      [nthWeekday(y, 9, 1, 2), "Indigenous Peoples' Day", '\uD83E\uDEB6'],          // feather
-      [new Date(y, 10, 11), 'Veterans Day', '\uD83E\uDEE1'],                         // saluting face
-      [thanks, 'Thanksgiving', '\uD83E\uDD83'],                                      // turkey
-      [friday, 'Native American Heritage Day', '\uD83C\uDF3D'],                     // ear of corn
-      [new Date(y, 11, 25), 'Christmas Day', '\uD83C\uDF84'],                        // tree
+      [new Date(y, 0, 1), "New Year's Day", 'party-popper'],
+      [nthWeekday(y, 0, 1, 3), 'Martin Luther King Jr. Day', 'bird'], // a dove
+      [nthWeekday(y, 1, 1, 3), "Presidents' Day", 'landmark'],
+      [nthWeekday(y, 4, 1, -1), 'Memorial Day', 'flower'], // the poppy
+      [new Date(y, 5, 19), 'Juneteenth', 'hand-fist'],
+      [new Date(y, 6, 4), 'Independence Day', 'flag'],
+      [nthWeekday(y, 8, 1, 1), 'Labor Day', 'hammer'],
+      [nthWeekday(y, 9, 1, 2), "Indigenous Peoples' Day", 'feather'],
+      [new Date(y, 10, 11), 'Veterans Day', 'medal'],
+      [thanks, 'Thanksgiving', 'drumstick'],
+      [friday, 'Native American Heritage Day', 'wheat'], // the harvest
+      [new Date(y, 11, 25), 'Christmas Day', 'tree-pine'],
     ].map(function (h) { return { date: ymd(h[0]), title: h[1], icon: h[2] }; });
   }
   var holidayCache = {}; // year -> map date -> [rows]
@@ -971,10 +971,12 @@
       var li = document.createElement('li');
       li.className = cls;
       var s = document.createElement('span');
-      if (icon) { // a holiday's own mark
-        var mark = document.createElement('span');
-        mark.className = 'hol-mark'; mark.setAttribute('aria-hidden', 'true'); mark.textContent = icon;
-        s.appendChild(mark);
+      if (icon) { // a holiday's own mark: <use> of the symbol in index.html
+        var mark = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        mark.setAttribute('class', 'hol-mark'); mark.setAttribute('aria-hidden', 'true');
+        var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        use.setAttribute('href', '#hol-' + icon);
+        mark.appendChild(use); s.appendChild(mark);
       }
       s.appendChild(document.createTextNode(text));
       li.appendChild(s);

@@ -447,9 +447,9 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
   background: linear-gradient(90deg, transparent, var(--rule) 15%, var(--rule) 85%, transparent);
 }
 .month-row > span, .holiday-row > span { position: relative; z-index: 1; background: var(--sky); padding: 0 .9rem; }
-/* holiday marks: each holiday's own emoji on its divider (the panel's
-   switch carries a party popper), a size down so they sit with the type */
-.hol-mark { font-size: .9em; line-height: 1; flex: none; font-family: system-ui, sans-serif; }
+/* holiday marks: each holiday's own line icon on its divider (the panel's
+   switch carries a calendar-heart), in the text's color, a touch faded */
+.hol-mark { width: 1em; height: 1em; flex: none; opacity: .75; }
 .holiday-row > span { display: inline-flex; align-items: center; gap: .5rem; }
 .month-row { position: sticky; top: var(--barh); z-index: 5; }
 .holiday-row { font-size: 1.05rem; }

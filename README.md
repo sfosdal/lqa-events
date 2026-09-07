@@ -99,3 +99,9 @@ appear — fine for previewing the UI.
 
 `TICKETMASTER_API_KEY` — free Ticketmaster Discovery API key, set as a repo
 Actions secret.
+
+## Credits
+
+Holiday marks in the agenda and the panel's Holidays switch are icons from
+[Lucide](https://lucide.dev) (ISC license, © Lucide Icons and Contributors),
+inlined as SVG symbols in `site/index.html`.
