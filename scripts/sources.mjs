@@ -18,6 +18,7 @@ function decodeEntities(s) {
     .replace(/&(?:#8211|ndash|#45);/g, '-').replace(/&(?:#8212|mdash);/g, '—')
     .replace(/&nbsp;/g, ' ')
     .replace(/&#(\d+);/g, (_, n) => { try { return String.fromCodePoint(Number(n)); } catch { return ''; } })
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => { try { return String.fromCodePoint(parseInt(h, 16)); } catch { return ''; } })
     .replace(/\s+/g, ' ').trim();
 }
 
@@ -393,4 +394,43 @@ export function mapDiceEvents(data, venueLabel) {
       if (e.sold_out) ev.soldOut = true;
       return ev;
     });
+}
+
+/**
+ * The Traveling Goat (a Lower Queen Anne bar) lists its events on a Wix
+ * page: one repeater item per event — a date line ("Sep 7, 2026"), a title
+ * that usually ends in the time ("Guess What? Trivia! @ 7p", "Piffle @
+ * 730p"), and a blurb. Returns [{ title, date, time }]; the time is lifted
+ * out of the title (all-day when there isn't one). Wix renders the list
+ * server-side, so a plain fetch sees it.
+ */
+export function parseGoatEvents(html) {
+  const out = [];
+  const items = String(html).split(/<div role="listitem"/).slice(1);
+  for (const item of items) {
+    const lines = item.replace(/<[^>]+>/g, '\n').split('\n').map((l) => decodeEntities(l).replace(/\s+/g, ' ').trim()).filter(Boolean);
+    const di = lines.findIndex((l) => /^[A-Z][a-z]{2,8}\.? \d{1,2}, \d{4}$/.test(l));
+    if (di < 0 || !lines[di + 1]) continue;
+    const dm = lines[di].match(/^([A-Za-z]+)\.? (\d{1,2}), (\d{4})$/);
+    const abbr = dm[1].slice(0, 3).toLowerCase(); // "Sep" / "Sept" / "September"
+    const mon = MONTHS[Object.keys(MONTHS).find((k) => k.startsWith(abbr))];
+    if (!mon) continue;
+    const date = `${dm[3]}-${String(mon).padStart(2, '0')}-${String(dm[2]).padStart(2, '0')}`;
+    let title = lines[di + 1];
+    let time = '';
+    // "@ 7p", "@730p", "7pm", "@ 7:30 pm" at the end of the title
+    const tm = title.match(/\s*@?\s*(\d{1,2})(?::?(\d{2}))?\s*([ap])\.?m?\.?\s*$/i);
+    if (tm) {
+      let h = Number(tm[1]);
+      const m = tm[2] || '00';
+      if (h <= 12 && Number(m) < 60) {
+        if (tm[3].toLowerCase() === 'p' && h < 12) h += 12;
+        if (tm[3].toLowerCase() === 'a' && h === 12) h = 0;
+        time = `${String(h).padStart(2, '0')}:${m}:00`;
+        title = title.slice(0, tm.index).replace(/[\s@]+$/, '');
+      }
+    }
+    out.push({ title, date, time });
+  }
+  return out;
 }

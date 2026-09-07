@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, mapDiceEvents, parseSiffScreenings, mapOtbEvents } from './sources.mjs';
+import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, mapDiceEvents, parseSiffScreenings, mapOtbEvents, parseGoatEvents } from './sources.mjs';
 
 // --- Seattle Center calendar HTML (event cards; dates live on detail pages) ---
 
@@ -354,4 +354,31 @@ test('OtB runaway date ranges cap at six nights', () => {
   const yearLater = 1789698600424 + 365 * 86400e3;
   const evs = mapOtbEvents({ upcoming: [{ title: 'Broken', fullUrl: '/e', startDate: 1789698600424, endDate: yearLater }] });
   assert.equal(evs.length, 6);
+});
+
+// --- The Traveling Goat (Wix repeater: date line, title with the time, blurb) ---
+
+const goatItem = (date, title, blurb = 'blurb') =>
+  `<div role="listitem" class="_FiCX"><div class="wixui-repeater__item"><p class="font_8"><span>${date}</span></p>` +
+  `<h2 class="font_2"><span><span>${title}</span></span></h2><p class="font_8"><span>${blurb}</span></p></div></div>`;
+
+test('parses Traveling Goat items, lifting the time out of the title', () => {
+  const html = '<div role="list">' + goatItem('Sep 7, 2026', 'Guess What? Trivia! @ 7p')
+    + goatItem('Sep 10, 2026', 'The Traveling Goat Presents: Piffle @ 730p')
+    + goatItem('Oct 12, 2026', 'Guess What? Trivia! 7p')
+    + goatItem('Sep 20, 2026', 'It&#x27;s Negroni Week! Sept 21-27') + '</div>';
+  assert.deepEqual(parseGoatEvents(html), [
+    { title: 'Guess What? Trivia!', date: '2026-09-07', time: '19:00:00' },
+    { title: 'The Traveling Goat Presents: Piffle', date: '2026-09-10', time: '19:30:00' },
+    { title: 'Guess What? Trivia!', date: '2026-10-12', time: '19:00:00' },
+    { title: "It's Negroni Week! Sept 21-27", date: '2026-09-20', time: '' },
+  ]);
+});
+
+test('Traveling Goat: 12 noon / midnight and a.m. times, items without a date skipped', () => {
+  const html = goatItem('Dec 31, 2026', 'NYE Party @ 12a') + goatItem('Jan 1, 2027', 'Brunch @ 11:30 am')
+    + '<div role="listitem"><h2>No date here</h2></div>';
+  assert.deepEqual(parseGoatEvents(html).map((e) => [e.date, e.time, e.title]), [
+    ['2026-12-31', '00:00:00', 'NYE Party'], ['2027-01-01', '11:30:00', 'Brunch'],
+  ]);
 });

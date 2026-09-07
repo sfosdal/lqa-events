@@ -36,6 +36,12 @@ append-only registry in `filter.js`, zero-padded to six digits, so links
 keep working as venues and teams are added and every code is the same
 length.
 Opening one loads with those exclusions instead of your saved local prefs.
+The panel's preset chips (Default, Everything, Nothing, Neighborhood, Big
+nights) are just such filter states applied in one tap — Everything switches
+Holidays on as well, Nothing unchecks every group, and Big nights keeps the
+venues that seat 2,500 or more; the venue list is
+split into Lower Queen Anne and Downtown & SoDo, each with its own
+all / none.
 Two optional parameters ride along: `s=` carries the search box's text,
 encoded (UTF-8 bytes XOR-ed with a fixed key, URL-safe base64 — not readable
 in the address bar, but reversible; `LQAFilter.encodeSearch`/`decodeSearch`),
@@ -56,7 +62,10 @@ and `h=1` switches the US & WA holidays rows on.
   campus neighbours Seattle Center's calendar doesn't carry: Seattle
   Children's Theatre (month grids on sct.org; classes skipped), MoPOP (the
   calendar list on mopop.org/events), Pacific Science Center (its events
-  page) and KEXP (its own list, station events only). Then a
+  page) and KEXP (its own list, station events only), plus the first
+  neighborhood bar, The Traveling Goat (its Wix events page; typed `bar`,
+  which the site shows as "Local bars" — bars get the one type switch and
+  stay out of the venue list). Then a
   campus-wide sweep walks every page of seattlecenter.com's calendar
   (dates from its date bars, year inferred; venue from each card's facility
   tag, matched against the calendar's own venue filter — untagged

@@ -10,7 +10,7 @@
  */
 import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
-import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents } from './sources.mjs';
+import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents } from './sources.mjs';
 import { mergeWithArchive } from './merge.mjs';
 import { applySchedules } from './schedules.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
@@ -282,6 +282,17 @@ async function kexp() {
   return out;
 }
 
+// Neighborhood bars: their nights are typed 'bar' (the site's "Local bars"
+// filter) and the venue stays out of the site's venue list — one type
+// switch covers every bar. The Traveling Goat is the first; each carries
+// its events page as the link, since the listings have none of their own.
+const GOAT_URL = 'https://www.travelinggoatseattle.com/events';
+async function travelingGoat() {
+  const evs = parseGoatEvents(await pageText(GOAT_URL)).map((e) => ({ venue: 'The Traveling Goat', type: 'bar', url: GOAT_URL, ...e }));
+  console.log(`Traveling Goat: ${evs.length} events`);
+  return evs;
+}
+
 // Dedicated per-venue sources run first (better times and ticket links)...
 const sources = [
   () => ticketmasterVenue({ venueId: 'KovZ917Ahkk', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/', exclude: /arena tours?|all access pass/i }),
@@ -298,6 +309,7 @@ const sources = [
   mopop,
   pacificScienceCenter,
   kexp,
+  travelingGoat,
 ];
 
 let all = [];
@@ -319,6 +331,7 @@ const CANONICAL_VENUES = new Set([
   'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
   'SIFF Cinema Uptown', 'On the Boards', 'Convention Center',
   "Children's Theatre", 'MoPOP', 'Pacific Science Center', 'KEXP',
+  'The Traveling Goat',
 ]);
 const normalizeVenue = (e) => (CANONICAL_VENUES.has(e.venue) ? e : { ...e, venue: 'Seattle Center' });
 all = all.map(normalizeVenue);

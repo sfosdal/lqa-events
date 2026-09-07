@@ -40,7 +40,7 @@
     'Convention Center': 'expo',
     "Children's Theatre": 'arts', 'MoPOP': 'community', 'Pacific Science Center': 'community', 'KEXP': 'concert',
   };
-  var TYPE_KEYS_OK = { concert: 1, sports: 1, arts: 1, movie: 1, community: 1, expo: 1 };
+  var TYPE_KEYS_OK = { concert: 1, sports: 1, arts: 1, movie: 1, community: 1, expo: 1, bar: 1 };
   // Order: the movie flag and a home team / "vs" are certain. Then the
   // source's own classification (feed `type`: Ticketmaster segment, DICE
   // type tags, Seattle Center facility/type tags — scripts/sources.mjs),
@@ -50,6 +50,7 @@
   // what the venue usually hosts.
   function eventType(e) {
     var title = e.title || '';
+    if (e.type === 'bar') return 'bar'; // a bar's night is a bar night, trivia or watch party or band
     if (e.movie) return 'movie';
     if (TEAMS.some(function (t) { return t.re.test(title); }) || /\bvs\.?\s/i.test(title)) return 'sports';
     var src = e.type && TYPE_KEYS_OK[e.type] ? e.type : '';
@@ -77,6 +78,8 @@
     'On the Boards': favicon('ontheboards.org'),
     'T-Mobile Park': favicon('www.mlb.com'),
     'Lumen Field': favicon('www.lumenfield.com'),
+    // local bars: the bar's own logo, shown on its agenda rows like a team crest
+    'The Traveling Goat': 'https://static.wixstatic.com/media/3683c2_c984923e2e894545a1285b338e8517f7~mv2.png',
   };
   // Venue hues for dark backgrounds — the same values the calendar's
   // styles.css dark block sets as --v-* variables; keep the two in step.
@@ -86,6 +89,7 @@
     'The Vera Project': '#a26be6', 'On the Boards': '#e07ae0', 'McCaw Hall': '#d158a7',
     'Convention Center': '#7fa7cc',
     "Children's Theatre": '#6cc9db', 'MoPOP': '#e88ad8', 'Pacific Science Center': '#62b8f7', 'KEXP': '#b48cf5',
+    'The Traveling Goat': '#5fb3a1', // bars: a muted sea-green, off the fallback hash's neon
   };
 
   // How many people each place holds — the one measure of an event's size
@@ -100,6 +104,10 @@
     'MoPOP': 800, "Children's Theatre": 480, 'Cornish Playhouse': 460, 'SIFF Cinema Uptown': 450,
     'Pacific Science Center': 400, 'The Vera Project': 300, 'On the Boards': 300, 'KEXP': 200,
   };
+
+  // The campus venues walk a crowd past Lower Queen Anne; these three are a
+  // bus ride away and listed for their size (a venue missing here is campus).
+  var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town' };
 
   function slugify(s) {
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -143,6 +151,7 @@
     // appended later (the registry is append-only so old share links keep working)
     ['badge', 'expo'], ['venue', 'Convention Center'],
     ['venue', "Children's Theatre"], ['venue', 'MoPOP'], ['venue', 'Pacific Science Center'], ['venue', 'KEXP'],
+    ['badge', 'bar'],
   ];
   var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode' };
   function encodeFilterCode(mode) {
@@ -174,6 +183,7 @@
     arts: 'arts art theater theatre', movie: 'movie movies film cinema',
     community: 'community festival festivals fair',
     expo: 'expo expos convention conventions conference trade show',
+    bar: 'bar bars pub nightlife trivia karaoke happy hour watch party',
   };
   // each team's sport and league, so "baseball" finds the Mariners
   var SPORT_WORDS = {
@@ -212,7 +222,7 @@
 
   // Event-type hues for dark backgrounds — same values as the calendar's
   // dark --t-* variables; keep in step.
-  var TYPE_COLOR = { concert: '#f0806a', sports: '#f2d21b', arts: '#d63a4f', movie: '#8b9db0', community: '#e660a8', expo: '#4fd1c5' };
+  var TYPE_COLOR = { concert: '#f0806a', sports: '#f2d21b', arts: '#d63a4f', movie: '#8b9db0', community: '#e660a8', expo: '#4fd1c5', bar: '#e3ad3c' };
 
   // ---- series: the same event on nearby days — a homestand, a two-night
   // stand, an opera run. Same venue + same title, occurrences within 2 days
@@ -408,6 +418,7 @@
     VENUE_ICON: VENUE_ICON,
     VENUE_COLOR: VENUE_COLOR,
     VENUE_CAPACITY: VENUE_CAPACITY,
+    VENUE_AREA: VENUE_AREA,
     slugify: slugify,
     eventType: eventType,
     matchesFilter: matchesFilter,

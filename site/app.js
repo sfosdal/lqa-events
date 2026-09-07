@@ -20,6 +20,7 @@
     'MoPOP': '--v-mopop',
     'Pacific Science Center': '--v-pacsci',
     'KEXP': '--v-kexp',
+    'The Traveling Goat': '--v-goat',
   };
   // Unexpected venues draw from the same cool, web-safe family as the
   // curated ones, hashed from the name so the pick is stable day to day.
@@ -30,7 +31,6 @@
     for (var i = 0; i < v.length; i++) h = (h * 31 + v.charCodeAt(i)) % 360;
     return VENUE_FALLBACK[h % VENUE_FALLBACK.length];
   }
-  function teamColor(slug) { return 'var(--tm-' + slug + ')'; }
   // Each venue's own events listing — not a ticket vendor. An event's own
   // link (the agenda row's title) still goes to wherever tickets are
   // sold; this is for the venue name in the panel and the agenda. A venue
@@ -51,6 +51,7 @@
     'Convention Center': 'https://seattlecc.com/upcoming-events/',
     "Children's Theatre": 'https://www.sct.org/tickets-shows/calendar/',
     'MoPOP': 'https://www.mopop.org/events',
+    'The Traveling Goat': 'https://www.travelinggoatseattle.com/events',
     'Pacific Science Center': 'https://pacificsciencecenter.org/events/',
     'KEXP': 'https://www.kexp.org/events/kexp-events/',
   };
@@ -167,7 +168,20 @@
           (state.byDate[e.date] = state.byDate[e.date] || []).push(e);
           vs[e.venue] = (vs[e.venue] || 0) + 1;
         });
-        state.venues = Object.keys(vs).sort(venueOrder(vs));
+        // within a day: all-day items first, then by clock time (a stable
+        // sort keeps the feed's order among equals)
+        Object.keys(state.byDate).forEach(function (dt) {
+          state.byDate[dt].sort(function (a, b) {
+            var ta = a.time || '', tb = b.time || '';
+            return (ta ? 1 : 0) - (tb ? 1 : 0) || (ta < tb ? -1 : ta > tb ? 1 : 0);
+          });
+        });
+        // Bars (every event typed 'bar') stay out of the venue list: the one
+        // "Local bars" type switch covers them all, so they're never in
+        // venueMode and the venue presets and "only" links don't see them.
+        var barOnly = {};
+        list.forEach(function (e) { barOnly[e.venue] = (barOnly[e.venue] !== false) && e.type === 'bar'; });
+        state.venues = Object.keys(vs).filter(function (v) { return !barOnly[v]; }).sort(venueOrder(vs));
         if (!Array.isArray(data) && data.generated) {
           var gen = new Date(data.generated);
           // Relative stamp, re-rendered every minute so it never goes stale
@@ -216,18 +230,73 @@
     { key: 'movie', label: 'Movies', title: 'Film screenings at SIFF Cinema Uptown — unchecked by default' },
     { key: 'community', label: 'Festivals', title: 'Grounds events, festivals, walks, celebrations, classes, SIFF specials' },
     { key: 'expo', label: 'Conventions', title: 'Conventions, conferences, trade and consumer shows — the Convention Center, Exhibition Hall, Fisher Pavilion' },
+    { key: 'bar', label: 'Local bars', title: 'Trivia, live music, watch parties and specials at neighborhood bars — The Traveling Goat so far' },
   ];
   // Type hues mirror the venue hues: a dot on the filter rows, a colored
   // right edge on each agenda row.
   var TYPE_VARS = {
     concert: '--t-concert', sports: '--t-sports', arts: '--t-arts',
-    movie: '--t-movie', community: '--t-community', expo: '--t-expo',
+    movie: '--t-movie', community: '--t-community', expo: '--t-expo', bar: '--t-bar',
   };
   function typeColor(k) { return 'var(' + TYPE_VARS[k] + ')'; }
   var TYPE_KEYS = {};
   TYPE_LIST.forEach(function (t) { TYPE_KEYS[t.key] = true; });
   // The baseline every visitor starts from (and "Reset filters" returns to):
   // SIFF's daily movie showings unchecked, everything else checked.
+  function venueArea(v) { return LQAFilter.VENUE_AREA[v] || 'campus'; }
+  // Presets: each names what's OFF in every group; `holidays` (when given)
+  // sets the switch too, and the search box is left alone. Venue lists that
+  // depend on the feed are functions of the venues present. `teamsOff`
+  // unchecks every team (only Nothing does; the rest leave teams checked).
+  var BIG_NIGHT_SEATS = 2500; // McCaw Hall (2,900) is the smallest "big night"
+  var PRESETS = [
+    { key: 'default', label: 'Default', title: 'Everything on except Movies and the Children\'s Theatre',
+      venuesOff: function () { return DEFAULT_VENUES_OFF.slice(); }, typesOff: ['movie'], holidays: false },
+    { key: 'all', label: 'Everything', title: 'Every venue, type and team, holidays too', venuesOff: function () { return []; }, typesOff: [], holidays: true },
+    { key: 'none', label: 'Nothing', title: 'Everything off — build your own view from scratch',
+      venuesOff: function () { return state.venues.slice(); }, typesOff: TYPE_LIST.map(function (t) { return t.key; }), teamsOff: true, holidays: false },
+    { key: 'neighborhood', label: 'Neighborhood', title: 'Just Lower Queen Anne — no stadiums or Convention Center',
+      venuesOff: function () { return DEFAULT_VENUES_OFF.concat(state.venues.filter(function (v) { return venueArea(v) === 'town'; })); }, typesOff: ['movie'] },
+    { key: 'big', label: 'Big nights', title: 'Only the places that hold 2,500 or more — the stadiums, the arena, McCaw Hall',
+      venuesOff: function () { return state.venues.filter(function (v) { return (VENUE_CAPACITY[v] || 0) < BIG_NIGHT_SEATS; }); }, typesOff: ['bar'] },
+  ];
+  function applyPreset(p) {
+    state.venueMode = {}; state.badgeMode = {}; state.teamMode = {};
+    p.venuesOff().forEach(function (v) { state.venueMode[v] = 'ex'; });
+    p.typesOff.forEach(function (t) { state.badgeMode[t] = 'ex'; });
+    if (p.teamsOff) groupInfo('team').keys.forEach(function (t) { state.teamMode[t] = 'ex'; });
+    if (p.holidays !== undefined) state.holidays = p.holidays;
+  }
+  // Does the panel's current state equal this preset? Compares what's off in
+  // each group against the preset's lists (only keys the panel shows count,
+  // so a saved exclusion for a venue that left the feed can't spoil a match).
+  function presetMatches(p) {
+    var off = function (g) {
+      var gi = groupInfo(g);
+      return gi.keys.filter(function (k) { return gi.map[k] === 'ex'; }).sort().join('|');
+    };
+    var sorted = function (a) { return a.slice().sort().join('|'); };
+    if (off('team') !== (p.teamsOff ? sorted(groupInfo('team').keys) : '')) return false;
+    if (p.holidays !== undefined && state.holidays !== p.holidays) return false;
+    return off('venue') === sorted(p.venuesOff()) && off('badge') === sorted(p.typesOff);
+  }
+  function renderPresets() {
+    var box = $('fpPresets');
+    box.innerHTML = '';
+    PRESETS.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip fp-preset'; b.textContent = p.label; b.title = p.title; b.dataset.preset = p.key;
+      b.addEventListener('click', function () { applyPreset(p); applyFilters(); });
+      box.appendChild(b);
+    });
+  }
+  function syncPresets() {
+    document.querySelectorAll('.fp-preset').forEach(function (b) {
+      var p = PRESETS.filter(function (x) { return x.key === b.dataset.preset; })[0];
+      b.classList.toggle('is-on', !!p && presetMatches(p));
+      b.setAttribute('aria-pressed', String(!!p && presetMatches(p)));
+    });
+  }
   // movies and the Children's Theatre (a hundred-odd school-day matinees a
   // season) start unchecked
   var DEFAULT_VENUES_OFF = ["Children's Theatre"];
@@ -333,13 +402,11 @@
     row.appendChild(lab); row.appendChild(only); row.appendChild(cnt);
     return row;
   }
-  function dottedName(label, color) {
+  // Panel rows are plain text: the venue / type / team colours show on the
+  // calendar and agenda, not here.
+  function plainName(label) {
     var name = document.createElement('span');
     name.className = 'fp-name';
-    var dot = document.createElement('i');
-    dot.className = 'dot';
-    dot.style.setProperty('--dot', color);
-    name.appendChild(dot);
     name.appendChild(document.createTextNode(label));
     return name;
   }
@@ -360,34 +427,27 @@
   function venueName(v) {
     var name = document.createElement('span');
     name.className = 'fp-name';
-    var dot = document.createElement('i');
-    dot.className = 'dot';
-    dot.style.setProperty('--dot', venueColor(v));
-    name.appendChild(dot);
     name.appendChild(extLink(v, VENUE_URL[v], "See " + v + "’s own events list"));
     return name;
   }
   function renderFilters() {
+    renderPresets();
     // Counts play the role of Kayak's price column: upcoming events each row
     // would govern, unaffected by the current filter so they stay stable.
     var today = todayStr();
     var upcoming = state.events.filter(function (e) { return e.date >= today; });
-    var pv = $('panelVenues');
-    pv.innerHTML = '';
+    var pv = $('panelVenues'), pt = $('panelVenuesTown');
+    pv.innerHTML = ''; pt.innerHTML = '';
     state.venues.forEach(function (v) {
       var n = upcoming.filter(function (e) { return e.venue === v; }).length;
       var cap = VENUE_CAPACITY[v];
-      pv.appendChild(filterRow('venue', v, venueName(v), n, cap ? 'Holds about ' + cap.toLocaleString('en-US') : undefined));
+      (venueArea(v) === 'town' ? pt : pv).appendChild(filterRow('venue', v, venueName(v), n, cap ? 'Holds about ' + cap.toLocaleString('en-US') : undefined));
     });
     var pt = $('panelTeams');
     pt.innerHTML = '';
     TEAMS.forEach(function (t) {
       var name = document.createElement('span');
       name.className = 'fp-name';
-      var dot = document.createElement('i');
-      dot.className = 'dot';
-      dot.style.setProperty('--dot', teamColor(t.slug));
-      name.appendChild(dot);
       name.appendChild(extLink(t.label, t.schedule, t.label + ' schedule'));
       var n = upcoming.filter(function (e) { return t.re.test(e.title || ''); }).length;
       pt.appendChild(filterRow('team', t.slug, name, n, t.label + ' home games'));
@@ -396,13 +456,15 @@
     pb.innerHTML = '';
     TYPE_LIST.forEach(function (t) {
       var n = upcoming.filter(function (e) { return eventType(e) === t.key; }).length;
-      pb.appendChild(filterRow('badge', t.key, dottedName(t.label, typeColor(t.key)), n, t.title));
+      pb.appendChild(filterRow('badge', t.key, plainName(t.label), n, t.title));
     });
     syncFilters();
+    syncPresets(); // the chips are new; light the one that matches
   }
-  // Every checkbox in the panel syncs from state in one pass, so Select all /
-  // only / Reset all land in the same place.
+  // Every checkbox in the panel syncs from state in one pass, so presets and
+  // "only" land in the same place.
   function syncFilters() {
+    syncPresets();
     document.querySelectorAll('input[data-venue]').forEach(function (c) {
       c.checked = state.venueMode[c.dataset.venue] !== 'ex';
     });
@@ -416,7 +478,6 @@
     if ($('searchBox').value.trim() !== state.q) $('searchBox').value = state.q;
     var any = !isDefaultState();
     $('filterToggle').classList.toggle('is-on', any);
-    $('clearAll').disabled = !any;
   }
   // Filter choices persist per-browser (no login — just localStorage).
   function saveFilters() {
@@ -548,20 +609,6 @@
       applyFilters();
       return;
     }
-    var l = e.target.closest('.fp-link');
-    if (l && l.dataset.group) { // Reset all is an .fp-link too, with its own handler
-      // a group's own links, or the footer's, which sweep all three groups
-      var groups = l.dataset.group === 'all' ? ['venue', 'team', 'badge'] : [l.dataset.group];
-      if (l.dataset.group === 'all') state.holidays = l.dataset.act === 'all'; // the footer's sweep takes Holidays along
-      groups.forEach(function (g) {
-        var gi = groupInfo(g);
-        gi.keys.forEach(function (k) { setChecked(gi.map, k, l.dataset.act === 'all'); });
-        if (g === 'team' && l.dataset.act === 'all') {
-          TEAMS.forEach(function (t) { ensureTeamVenue(t.slug); });
-        }
-      });
-      applyFilters();
-    }
   });
   function setPanelOpen(open) {
     $('filterPanel').hidden = !open;
@@ -576,15 +623,6 @@
       setPanelOpen(false);
     }
   });
-  function clearAllFilters() {
-    state.venueMode = {};
-    state.teamMode = {};
-    state.q = '';
-    state.holidays = false;
-    applyDefaultFilters();
-    applyFilters();
-  }
-  $('clearAll').addEventListener('click', clearAllFilters);
   $('holidaysToggle').addEventListener('change', function () {
     state.holidays = this.checked;
     applyFilters();
@@ -932,7 +970,14 @@
       var li = document.createElement('li');
       li.className = cls;
       var s = document.createElement('span');
-      s.textContent = text;
+      if (cls === 'holiday-row') { // the star from the panel's switch, so the two read as one thing
+        var star = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        star.setAttribute('class', 'hol-mark'); star.setAttribute('aria-hidden', 'true');
+        var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        use.setAttribute('href', '#holiday-mark');
+        star.appendChild(use); s.appendChild(star);
+      }
+      s.appendChild(document.createTextNode(text));
       li.appendChild(s);
       ol.appendChild(li);
     }
@@ -980,7 +1025,7 @@
       wrap.className = 'day-events';
       evs.forEach(function (e) {
         var row = document.createElement('div');
-        row.className = 'ev';
+        row.className = 'ev' + (e.time ? '' : ' is-allday');
         row.addEventListener('click', cardTap(e), true);
         // the venue's hue over the card at --tint (stronger in light mode, where
         // a faint wash on white disappears)
@@ -1015,10 +1060,12 @@
         var titleLine = document.createElement('span');
         titleLine.className = 'ev-title';
         var team = teamFor(e.title);
-        var mark = team && team.logo; // a home game's crest; venues carry no mark
+        // a home game's crest; a local bar's night carries the bar's own logo
+        // the same way (other venues carry no mark)
+        var mark = (team && team.logo) || (eventType(e) === 'bar' && LQAFilter.VENUE_ICON[e.venue]) || '';
         if (mark) {
           var logo = document.createElement('img');
-          logo.className = 'team-mark';
+          logo.className = 'team-mark' + (team ? '' : ' venue-mark'); // a bar's disc logo isn't inverted in dark mode
           logo.src = mark;
           logo.alt = ''; // decorative — the row already names the team/venue
           row.appendChild(logo);
