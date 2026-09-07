@@ -177,7 +177,7 @@
           });
         });
         // Bars (every event typed 'bar') stay out of the venue list: the one
-        // "Local bars" type switch covers them all, so they're never in
+        // "Local Bars" type switch covers them all, so they're never in
         // venueMode and the venue presets and "only" links don't see them.
         var barOnly = {};
         list.forEach(function (e) { barOnly[e.venue] = (barOnly[e.venue] !== false) && e.type === 'bar'; });
@@ -230,7 +230,7 @@
     { key: 'movie', label: 'Movies', title: 'Film screenings at SIFF Cinema Uptown — unchecked by default' },
     { key: 'community', label: 'Festivals', title: 'Grounds events, festivals, walks, celebrations, classes, SIFF specials' },
     { key: 'expo', label: 'Conventions', title: 'Conventions, conferences, trade and consumer shows — the Convention Center, Exhibition Hall, Fisher Pavilion' },
-    { key: 'bar', label: 'Local bars', title: 'Trivia, live music, watch parties and specials at neighborhood bars — The Traveling Goat so far' },
+    { key: 'bar', label: 'Local Bars', title: 'Trivia, live music, watch parties and specials at neighborhood bars — The Traveling Goat so far' },
   ];
   // Type hues mirror the venue hues: a dot on the filter rows, a colored
   // right edge on each agenda row.
@@ -257,7 +257,7 @@
       venuesOff: function () { return state.venues.slice(); }, typesOff: TYPE_LIST.map(function (t) { return t.key; }), teamsOff: true, holidays: false },
     { key: 'neighborhood', label: 'Neighborhood', title: 'Just Lower Queen Anne — no stadiums or Convention Center',
       venuesOff: function () { return DEFAULT_VENUES_OFF.concat(state.venues.filter(function (v) { return venueArea(v) === 'town'; })); }, typesOff: ['movie'] },
-    { key: 'big', label: 'Big nights', title: 'Only the places that hold 2,500 or more — the stadiums, the arena, McCaw Hall',
+    { key: 'big', label: 'Big Nights', title: 'Only the places that hold 2,500 or more — the stadiums, the arena, McCaw Hall',
       venuesOff: function () { return state.venues.filter(function (v) { return (VENUE_CAPACITY[v] || 0) < BIG_NIGHT_SEATS; }); }, typesOff: ['bar'] },
   ];
   function applyPreset(p) {
@@ -339,20 +339,21 @@
   function holidaysFor(y) {
     var thanks = nthWeekday(y, 10, 4, 4);
     var friday = new Date(thanks); friday.setDate(thanks.getDate() + 1);
+    // each with its own mark for the agenda divider
     return [
-      [new Date(y, 0, 1), "New Year's Day"],
-      [nthWeekday(y, 0, 1, 3), 'Martin Luther King Jr. Day'],
-      [nthWeekday(y, 1, 1, 3), "Presidents' Day"],
-      [nthWeekday(y, 4, 1, -1), 'Memorial Day'],
-      [new Date(y, 5, 19), 'Juneteenth'],
-      [new Date(y, 6, 4), 'Independence Day'],
-      [nthWeekday(y, 8, 1, 1), 'Labor Day'],
-      [nthWeekday(y, 9, 1, 2), "Indigenous Peoples' Day"],
-      [new Date(y, 10, 11), 'Veterans Day'],
-      [thanks, 'Thanksgiving'],
-      [friday, 'Native American Heritage Day'],
-      [new Date(y, 11, 25), 'Christmas Day'],
-    ].map(function (h) { return { date: ymd(h[0]), title: h[1] }; });
+      [new Date(y, 0, 1), "New Year's Day", '\uD83C\uDF86'],                       // fireworks
+      [nthWeekday(y, 0, 1, 3), 'Martin Luther King Jr. Day', '\uD83D\uDD4A\uFE0F'], // dove
+      [nthWeekday(y, 1, 1, 3), "Presidents' Day", '\uD83C\uDFDB\uFE0F'],           // classical building
+      [nthWeekday(y, 4, 1, -1), 'Memorial Day', '\uD83C\uDF96\uFE0F'],             // military medal
+      [new Date(y, 5, 19), 'Juneteenth', '\u270A\uD83C\uDFFF'],                    // raised fist
+      [new Date(y, 6, 4), 'Independence Day', '\uD83C\uDDFA\uD83C\uDDF8'],        // US flag
+      [nthWeekday(y, 8, 1, 1), 'Labor Day', '\uD83D\uDEE0\uFE0F'],                 // hammer and wrench
+      [nthWeekday(y, 9, 1, 2), "Indigenous Peoples' Day", '\uD83E\uDEB6'],          // feather
+      [new Date(y, 10, 11), 'Veterans Day', '\uD83E\uDEE1'],                         // saluting face
+      [thanks, 'Thanksgiving', '\uD83E\uDD83'],                                      // turkey
+      [friday, 'Native American Heritage Day', '\uD83C\uDF3D'],                     // ear of corn
+      [new Date(y, 11, 25), 'Christmas Day', '\uD83C\uDF84'],                        // tree
+    ].map(function (h) { return { date: ymd(h[0]), title: h[1], icon: h[2] }; });
   }
   var holidayCache = {}; // year -> map date -> [rows]
   function holidayMap() {
@@ -966,16 +967,14 @@
     // A month divider opens each month; it sticks to the top until the next
     // one pushes it out.
     var lastMonth = null;
-    function divider(cls, text) {
+    function divider(cls, text, icon) {
       var li = document.createElement('li');
       li.className = cls;
       var s = document.createElement('span');
-      if (cls === 'holiday-row') { // the star from the panel's switch, so the two read as one thing
-        var star = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        star.setAttribute('class', 'hol-mark'); star.setAttribute('aria-hidden', 'true');
-        var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-        use.setAttribute('href', '#holiday-mark');
-        star.appendChild(use); s.appendChild(star);
+      if (icon) { // a holiday's own mark
+        var mark = document.createElement('span');
+        mark.className = 'hol-mark'; mark.setAttribute('aria-hidden', 'true'); mark.textContent = icon;
+        s.appendChild(mark);
       }
       s.appendChild(document.createTextNode(text));
       li.appendChild(s);
@@ -999,7 +998,7 @@
         if (hd <= prevDate || hd > dateStr) return;
         ensureMonth(hd);
         holidayMap()[hd].forEach(function (h) {
-          divider('holiday-row', h.title + ' – ' + parseDate(hd).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
+          divider('holiday-row', h.title + ' – ' + parseDate(hd).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }), h.icon);
         });
       });
       prevDate = dateStr;

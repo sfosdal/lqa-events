@@ -38,7 +38,7 @@ length.
 Opening one loads with those exclusions instead of your saved local prefs.
 The panel's preset chips (Default, Everything, Nothing, Neighborhood, Big
 nights) are just such filter states applied in one tap — Everything switches
-Holidays on as well, Nothing unchecks every group, and Big nights keeps the
+Holidays on as well, Nothing unchecks every group, and Big Nights keeps the
 venues that seat 2,500 or more; the venue list is
 split into Lower Queen Anne and Downtown & SoDo, each with its own
 all / none.
@@ -64,7 +64,7 @@ and `h=1` switches the US & WA holidays rows on.
   calendar list on mopop.org/events), Pacific Science Center (its events
   page) and KEXP (its own list, station events only), plus the first
   neighborhood bar, The Traveling Goat (its Wix events page; typed `bar`,
-  which the site shows as "Local bars" — bars get the one type switch and
+  which the site shows as "Local Bars" — bars get the one type switch and
   stay out of the venue list). Then a
   campus-wide sweep walks every page of seattlecenter.com's calendar
   (dates from its date bars, year inferred; venue from each card's facility

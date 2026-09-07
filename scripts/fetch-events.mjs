@@ -282,7 +282,7 @@ async function kexp() {
   return out;
 }
 
-// Neighborhood bars: their nights are typed 'bar' (the site's "Local bars"
+// Neighborhood bars: their nights are typed 'bar' (the site's "Local Bars"
 // filter) and the venue stays out of the site's venue list — one type
 // switch covers every bar. The Traveling Goat is the first; each carries
 // its events page as the link, since the listings have none of their own.
