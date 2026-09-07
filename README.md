@@ -36,9 +36,9 @@ append-only registry in `filter.js`, zero-padded to six digits, so links
 keep working as venues and teams are added and every code is the same
 length.
 Opening one loads with those exclusions instead of your saved local prefs.
-The panel's preset chips (Default, Everything, Nothing, Neighborhood, Big
-nights) are just such filter states applied in one tap — Everything switches
-Holidays on as well, Nothing unchecks every group, and Big Nights keeps the
+The panel's preset chips (Default, Everything, Nothing, Neighborhood,
+Capacity > 2,500) are just such filter states applied in one tap — Everything switches
+Holidays on as well, Nothing unchecks every group, and Capacity keeps the
 venues that seat 2,500 or more; the venue list is
 split into Lower Queen Anne and Downtown & SoDo, each with its own
 all / none.
@@ -102,6 +102,6 @@ Actions secret.
 
 ## Credits
 
-Holiday marks in the agenda and the panel's Holidays switch are icons from
+Holiday marks in the agenda are icons from
 [Lucide](https://lucide.dev) (ISC license, © Lucide Icons and Contributors),
 inlined as SVG symbols in `site/index.html`.

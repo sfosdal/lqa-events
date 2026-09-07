@@ -248,7 +248,7 @@
   // sets the switch too, and the search box is left alone. Venue lists that
   // depend on the feed are functions of the venues present. `teamsOff`
   // unchecks every team (only Nothing does; the rest leave teams checked).
-  var BIG_NIGHT_SEATS = 2500; // McCaw Hall (2,900) is the smallest "big night"
+  var BIG_NIGHT_SEATS = 2500; // the Capacity preset's floor; McCaw Hall (2,900) is the smallest venue in
   var PRESETS = [
     { key: 'default', label: 'Default', title: 'Everything on except Movies and the Children\'s Theatre',
       venuesOff: function () { return DEFAULT_VENUES_OFF.slice(); }, typesOff: ['movie'], holidays: false },
@@ -257,7 +257,7 @@
       venuesOff: function () { return state.venues.slice(); }, typesOff: TYPE_LIST.map(function (t) { return t.key; }), teamsOff: true, holidays: false },
     { key: 'neighborhood', label: 'Neighborhood', title: 'Just Lower Queen Anne — no stadiums or Convention Center',
       venuesOff: function () { return DEFAULT_VENUES_OFF.concat(state.venues.filter(function (v) { return venueArea(v) === 'town'; })); }, typesOff: ['movie'] },
-    { key: 'big', label: 'Big Nights', title: 'Only the places that hold 2,500 or more — the stadiums, the arena, McCaw Hall',
+    { key: 'big', label: 'Capacity > ' + BIG_NIGHT_SEATS.toLocaleString('en-US'), title: 'Only the places that hold ' + BIG_NIGHT_SEATS.toLocaleString('en-US') + ' or more — the stadiums, the arena, McCaw Hall',
       venuesOff: function () { return state.venues.filter(function (v) { return (VENUE_CAPACITY[v] || 0) < BIG_NIGHT_SEATS; }); }, typesOff: ['bar'] },
   ];
   function applyPreset(p) {
