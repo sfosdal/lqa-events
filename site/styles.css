@@ -433,9 +433,10 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
   padding: .6rem 0 .45rem;
   font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1;
   text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
-  /* opaque only above the rule: while stuck, the rows scroll on under the
-     lower half, visible right up to the line */
-  background: linear-gradient(var(--sky) 50%, transparent 50%);
+  /* opaque above the rule, fading out below it: while stuck, the rows
+     scroll on under the lower half and dissolve as they near the line, so
+     they never run into the oval that hangs below it */
+  background: linear-gradient(var(--sky) 50%, transparent);
 }
 /* the rule itself: a 1px layer at the row's center, above the shadow */
 .month-row::before, .holiday-row::before {
