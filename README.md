@@ -78,11 +78,11 @@ and `h=1` switches the US & WA holidays rows on.
 - `scripts/ics.mjs` — RFC 5545 generation (stable UIDs, PST/PDT VTIMEZONE,
   all-day vs timed events). Tests: `node --test scripts/ics.test.mjs`.
 - `site/` — the static site; generated feed files land here (gitignored).
-  `site/marks/` holds agenda-row marks for local bars: each bar's logo
-  reduced to dark line art on transparent by `scripts/make-mark.py` (keeps
-  the logo's light strokes as an alpha mask, drops the disc, thickens the
-  lines), so the same crest filters as the team logos render it in both
-  themes.
+  `site/marks/` holds agenda-row marks for local bars, made from logos
+  supplied by hand (not fetched) by `scripts/make-mark.py`: the logo's look
+  kept but muted — charcoal disc, desaturated gold strokes, lines thickened
+  a touch for ~46px. The site shows them unfiltered in both themes
+  (`.venue-mark`), unlike the team crests.
 - `.github/workflows/events.yml` — cron + push → test, fetch, deploy to Pages.
 
 ## Run locally

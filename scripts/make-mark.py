@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Turn a bar's logo into an agenda-row mark: keep its light strokes as an
-alpha mask, drop the dark disc, thicken the lines so they survive at ~46px,
-and paint them near-black so the site's crest filters (grayscale in light
-mode, invert in dark) treat it like a team crest. Pure Python (no PIL).
+"""Turn a bar's logo (supplied by hand, not fetched) into an agenda-row
+mark that keeps the logo's look, muted: the dark disc stays a soft
+charcoal, the gold strokes a desaturated gold, and the lines are
+thickened a touch so they survive at ~46px. Pure Python (no PIL). The
+site shows these marks unfiltered (.venue-mark), unlike the team crests.
 
   sips -z 256 256 -s format png logo.png --out /tmp/logo256.png
-  python3 scripts/make-mark.py /tmp/logo256.png site/marks/<slug>.png [dilate=2]
+  python3 scripts/make-mark.py /tmp/logo256.png site/marks/<slug>.png [dilate=1]
 """
 import sys, zlib, struct
 src, dst = sys.argv[1], sys.argv[2]
-R = int(sys.argv[3]) if len(sys.argv) > 3 else 2
+R = int(sys.argv[3]) if len(sys.argv) > 3 else 1
 data = open(src, 'rb').read()
 pos = 8; idat = b''; w = h = 0; ctype = 0
 while pos < len(data):
@@ -56,11 +57,16 @@ def dilate(m, r):
             out[y][x] = best
     return out
 mask = dilate(mask, R)
+DISC, GOLD = (38, 38, 40), (176, 140, 92)   # charcoal, and the logo's gold pulled toward gray
 out = bytearray()
 for y in range(h):
     out.append(0)
+    line = rows[y]
     for x in range(w):
-        out += bytes((34, 34, 34, int(round(mask[y][x] * 255))))
+        k = mask[y][x]
+        a = (line[x*bpp+3] if bpp == 4 else 255) / 255.0
+        out += bytes((int(DISC[0] + (GOLD[0] - DISC[0]) * k), int(DISC[1] + (GOLD[1] - DISC[1]) * k), int(DISC[2] + (GOLD[2] - DISC[2]) * k),
+                      int(round(max(a, k) * 255))))
 def chunk(t, b): return struct.pack('>I', len(b)) + t + b + struct.pack('>I', zlib.crc32(t + b) & 0xffffffff)
 png = b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 6, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(bytes(out), 9)) + chunk(b'IEND', b'')
 open(dst, 'wb').write(png); print(f'{dst}: {w}x{h}, dilate {R}, {len(png)} bytes')
