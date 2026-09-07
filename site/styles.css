@@ -429,7 +429,7 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 /* the name sits on a rule that fades out toward both edges (the rule is the
    row's background; the name's own background knocks it out behind the text) */
 .month-row, .holiday-row {
-  position: relative; display: flex; justify-content: center; align-items: center;
+  position: relative; display: flex; justify-content: center; align-items: center; gap: .6rem; flex-wrap: wrap;
   padding: .6rem 0 .45rem;
   font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1;
   text-transform: uppercase; letter-spacing: .08em; color: var(--ink);
@@ -453,7 +453,11 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 /* holiday marks: each holiday's own line icon on its divider, in the
    text's color, a touch faded */
 .hol-mark { width: 1em; height: 1em; flex: none; opacity: .75; }
-.holiday-row > span { display: inline-flex; align-items: center; gap: .5rem; }
+.holiday-row > span, .month-row > .hol-pill { display: inline-flex; align-items: center; gap: .5rem; }
+/* a holiday sharing the month's row: its own pill beside the month's, a
+   size down like a holiday row, gone while the month is stuck up top */
+.month-row > .hol-pill { font-size: 1.05rem; }
+.month-row.is-stuck > .hol-pill { display: none; }
 .month-row { position: sticky; top: var(--barh); z-index: 5; }
 .month-group { display: block; } /* one per month: the sticky divider's bounds, so the next month pushes it out */
 .holiday-row { font-size: 1.05rem; }

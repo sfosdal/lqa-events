@@ -1004,9 +1004,17 @@
         group.className = 'month-group';
         ol.appendChild(group);
       }
-      var li = document.createElement('div');
-      li.className = cls;
       var s = document.createElement('span');
+      // A holiday falling on a month's first listed day would put two
+      // dividers back to back; instead its pill joins the month's row (and
+      // hides while that row is stuck, so the sticky header stays the month).
+      var joinMonth = cls === 'holiday-row' && group && group.children.length === 1 && group.lastChild.classList.contains('month-row');
+      var li = joinMonth ? group.lastChild : document.createElement('div');
+      if (!joinMonth) li.className = cls; else s.className = 'hol-pill';
+      if (typeof text !== 'string') {
+        var hd = parseDate(text.date);
+        text = text.title + ' – ' + (joinMonth ? ordinal(hd.getDate()) : hd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }));
+      }
       if (icon) { // a holiday's own mark: <use> of the symbol in index.html
         var mark = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         mark.setAttribute('class', 'hol-mark'); mark.setAttribute('aria-hidden', 'true');
@@ -1016,13 +1024,13 @@
       }
       s.appendChild(document.createTextNode(text));
       li.appendChild(s);
-      (group || ol).appendChild(li);
+      if (!joinMonth) (group || ol).appendChild(li);
     }
     function ensureMonth(dateStr) {
       var month = dateStr.slice(0, 7);
       if (month === lastMonth) return;
       lastMonth = month;
-      divider('month-row', parseDate(dateStr).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+      divider('month-row', parseDate(dateStr).toLocaleDateString('en-US', { month: 'long' }));
     }
     // Holidays (when switched on) are plain dividers — "Labor Day – September
     // 7" — placed right above the day's first event, and they scroll past.
@@ -1036,7 +1044,7 @@
         if (hd <= prevDate || hd > dateStr) return;
         ensureMonth(hd);
         holidayMap()[hd].forEach(function (h) {
-          divider('holiday-row', h.title + ' – ' + parseDate(hd).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }), h.icon);
+          divider('holiday-row', { title: h.title, date: hd }, h.icon);
         });
       });
       prevDate = dateStr;
