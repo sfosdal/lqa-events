@@ -11,7 +11,7 @@ the data every ~6 hours and deploys straight to GitHub Pages (no data commits).
 | Path | What |
 |---|---|
 | `/lqa-events/` | Calendar UI — month grid, agenda, venue filters, subscribe |
-| `/lqa-events/events.json` | JSON feed: `{ generated, events: [{venue,title,date,time,url}] }` — plus optional per-event `end` (same-day local end time), `age21`, `soldOut`, `free`, `dateTbd`, `type` (the source's own classification — concert/sports/arts/movie/community/expo — which the site's type rules trust before falling back to title words), and `status` (`cancelled` or `postponed`) with `statusSince` (ISO time the status was first detected; a cancelled show stays in its slot, marked, until its date passes) |
+| `/lqa-events/events.json` | JSON feed: `{ generated, events: [{venue,title,date,time,url}] }` — plus optional per-event `end` (same-day local end time), `age21`, `soldOut`, `free`, `dateTbd`, `type` (the source's own classification — concert/sports/arts/movie/community/expo — which the site's type rules trust before falling back to title words), and `status` (`cancelled` or `postponed`) with `statusSince` (ISO time the status was first detected; a cancelled show stays in its slot, marked, until its date passes), and `watch` on a home game (`{ tv: [...], radio: [...] }` — the national and home-market broadcasts its league lists, when it lists any) |
 | `/lqa-events/events.ics` | iCalendar feed — subscribable in Google/Apple Calendar |
 | `/lqa-events/embed.js` | Drop-in widget for other sites |
 | `/lqa-events/filter.js` | Shared filter/classification logic (teams, event types, venue matching, venue capacities — the site's venue list is ordered by them) and the share-link code — the single source of truth other sites should use if they filter this feed themselves, instead of re-implementing the rules |
@@ -102,6 +102,6 @@ Actions secret.
 
 ## Credits
 
-Holiday marks in the agenda are icons from
+The toolbar icons (filter, search, calendar, link, back to top) are from
 [Lucide](https://lucide.dev) (ISC license, © Lucide Icons and Contributors),
-inlined as SVG symbols in `site/index.html`.
+inlined as SVG in `site/index.html`.

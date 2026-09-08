@@ -229,7 +229,12 @@
   // stand, an opera run. Same venue + same title, occurrences within 2 days
   // of each other. Movies sit this out: SIFF's daily showtimes would make
   // everything a series. Returns the series (sorted by start, with ids) and
-  // stamps each member event with e.series = { s, n, total }. ----
+  // stamps each member event with e.series = { s, n, total }.
+  // s.lane says whether the gutter graph draws it: a run that is on day
+  // after day for longer than a week (a theatre run, a seasonal village —
+  // dark Mondays included, "day after day" is at least 4 dates in 7) is
+  // wallpaper, not something a reader traces, and only clutters the
+  // gutter; its "n of N" label under the time still says it's a run. ----
   function parseYmd(s) { var p = String(s).split('-'); return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])); }
   function seriesKey(e) { return e.venue + '|' + String(e.title || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
   function seriesLabel(s) {
@@ -248,6 +253,9 @@
     var flush = function (run) {
       if (run.length < 2) return;
       var s = { venue: run[0].venue, start: run[0].date, end: run[run.length - 1].date, events: run };
+      var span = Math.round((parseYmd(s.end) - parseYmd(s.start)) / 86400e3); // days between first and last
+      var daily = run.length / (span + 1) >= 4 / 7;
+      s.lane = !(daily && span >= 7);
       run.forEach(function (e, i) { e.series = { s: s, n: i + 1, total: run.length }; });
       all.push(s);
     };
@@ -265,6 +273,26 @@
     all.sort(function (a, b) { return a.start < b.start ? -1 : a.start > b.start ? 1 : 0; });
     all.forEach(function (s, i) { s.id = i; });
     return all;
+  }
+
+  // Lanes are assigned on row order, not pixels, so the gutter can be
+  // sized before anything is measured: each series takes the first free
+  // lane whose last series ended above it. With maxLanes, anything that
+  // would need a lane past the cap is merged into the last lane instead
+  // (it.merged), and the graph draws that lane as one shared trunk with
+  // each series' own coloured branches into its cards, git-client style.
+  // items: [{ from, to, ... }] sorted by from; returns laneEnd (its length
+  // is the lane count) and sets it.lane / it.merged on each.
+  function assignLanes(items, maxLanes) {
+    var laneEnd = [];
+    var cap = maxLanes > 0 ? maxLanes : Infinity;
+    items.forEach(function (it) {
+      for (var l = 0; ; l++) {
+        if (l >= cap) { it.lane = cap - 1; it.merged = true; laneEnd[it.lane] = Math.max(laneEnd[it.lane], it.to); break; }
+        if (laneEnd[l] == null || laneEnd[l] < it.from) { laneEnd[l] = it.to; it.lane = l; break; }
+      }
+    });
+    return laneEnd;
   }
 
   // The series graph: a vertical line per series in a gutter to the right
@@ -299,12 +327,7 @@
       it.from = it.before ? -1 : it.idx[0]; it.to = it.after ? rows.length : it.idx[it.idx.length - 1];
       return it;
     }).sort(function (a, b) { return a.from - b.from; });
-    var laneEnd = [];
-    items.forEach(function (it) {
-      for (var l = 0; ; l++) {
-        if (laneEnd[l] == null || laneEnd[l] < it.from) { laneEnd[l] = it.to; it.lane = l; break; }
-      }
-    });
+    var laneEnd = assignLanes(items, opts.maxLanes);
     if (opts.onLanes) opts.onLanes(laneEnd.length);
     if (!items.length) return 0;
     var box = container.getBoundingClientRect(); // after the caller sized its gutter
@@ -317,6 +340,9 @@
     svg.setAttribute('height', box.height);
     svg.setAttribute('aria-hidden', 'true');
     var defs = null;
+    var trunk = {}; // lane -> [[top, bottom], ...] the stretch of the lane each merged-lane series occupies
+    var merged = {};
+    items.forEach(function (it) { if (it.merged) merged[it.lane] = true; });
     items.forEach(function (it, idx) {
       var pts = it.els.map(function (el) { var r = el.getBoundingClientRect(); return { x: r.right - box.left - 1, y: r.top + r.height / 2 - box.top }; });
       var x = f(gx + it.lane * laneW + laneW / 2);
@@ -367,6 +393,10 @@
       });
       if (it.after) d += ' L' + x + ' ' + f(box.height);
       if (d.indexOf('C') < 0 && d.indexOf('L') < 0) return; // a lone row with nothing to connect
+      if (merged[it.lane]) { // where this series runs along the lane: from its first curve out to its last curve in
+        var t0 = it.before ? 0 : pts[0].y + b, t1 = it.after ? box.height : pts[n - 1].y - b;
+        if (t1 > t0) (trunk[it.lane] = trunk[it.lane] || []).push([t0, t1]);
+      }
       var path = document.createElementNS(SVG_NS, 'path');
       path.setAttribute('class', 'sg-line');
       path.setAttribute('d', d);
@@ -377,6 +407,28 @@
         path.appendChild(tip);
       }
       svg.appendChild(path);
+    });
+    // merged lanes: where two or more series run along the lane at once, a
+    // neutral trunk is drawn over their verticals so the stretch reads as
+    // shared; a series alone in the lane keeps its colour, and only the
+    // branches into the cards are ever coloured on a shared stretch
+    Object.keys(trunk).forEach(function (l) {
+      var x = f(gx + Number(l) * laneW + laneW / 2);
+      var edges = [];
+      trunk[l].forEach(function (iv) { edges.push([iv[0], 1]); edges.push([iv[1], -1]); });
+      edges.sort(function (a, b) { return a[0] - b[0] || b[1] - a[1]; }); // a start before an end at the same y
+      var depth = 0, from = null;
+      edges.forEach(function (e) {
+        var was = depth; depth += e[1];
+        if (was < 2 && depth >= 2) from = e[0];
+        else if (was >= 2 && depth < 2 && from != null) {
+          var t = document.createElementNS(SVG_NS, 'path');
+          t.setAttribute('class', 'sg-line sg-trunk');
+          t.setAttribute('d', 'M' + x + ' ' + f(from) + ' L' + x + ' ' + f(e[0]));
+          svg.appendChild(t);
+          from = null;
+        }
+      });
     });
     container.appendChild(svg);
     return laneEnd.length;
@@ -411,6 +463,7 @@
   global.LQAFilter = {
     TYPE_COLOR: TYPE_COLOR,
     findSeries: findSeries,
+    assignLanes: assignLanes,
     seriesLabel: seriesLabel,
     drawSeriesGraph: drawSeriesGraph,
     pagesToShow: pagesToShow,
@@ -429,4 +482,4 @@
     encodeFilterCode: encodeFilterCode,
     parseFilterCode: parseFilterCode,
   };
-})(window);
+})(typeof window !== 'undefined' ? window : globalThis); // globalThis: the node tests
