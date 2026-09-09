@@ -850,7 +850,7 @@
     if (!m) return;
     var bounds = monthBounds();
     var next = new Date(m.getFullYear(), m.getMonth() + 1, 1);
-    var single = matchMedia(STACKED).matches; // floating over the list: one month is plenty
+    var single = true; // one month, docked or floating (Steve's call 2026-09-08)
     var last = single ? m : next; // the last month shown; › stops when it reaches the feed's last month
     $('calPrev').disabled = !bounds || sameMonth(m, new Date(bounds.min.getFullYear(), bounds.min.getMonth(), 1));
     $('calNext').disabled = !bounds ||
@@ -863,11 +863,8 @@
     // and "Today" only shows once you've paged away from this month
     $('calToday').querySelector('.cal-cur').textContent = m.toLocaleDateString('en-US', { month: 'long' });
     $('calBox').classList.toggle('is-away', !sameMonth(m, new Date()));
-    // Docked: two months at a time — this one and the next — so the near
-    // future is always completely in view; the ‹ Today › bar above slides
-    // the pair by one. Floating over the list on a small screen: just this
-    // month. Each month is its own card (name, grid) holding only its own
-    // days.
+    // One month at a time; the ‹ Today › bar above pages by one. The card
+    // (name, grid) holds only its own days.
     (single ? [m] : [m, next]).forEach(function (first) {
       var sec = document.createElement('section');
       sec.className = 'cal-month';
@@ -891,8 +888,13 @@
         var d = new Date(first.getFullYear(), first.getMonth(), dayN);
         var key = ymd(d);
         var evs = dayItems(key);
-        var cell = document.createElement(evs.length ? 'button' : 'div');
-        cell.className = 'cal-day';
+        // every real day is a button: one with nothing on jumps the list to
+        // the next listed day (a past one opens the past from there)
+        var cell = document.createElement('button');
+        cell.type = 'button';
+        cell.dataset.date = key;
+        cell.setAttribute('aria-label', d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ', ' + (evs.length ? evs.length + ' event' + (evs.length > 1 ? 's' : '') : 'nothing listed'));
+        cell.className = 'cal-day' + (evs.length ? '' : ' is-empty');
         if (key === today) cell.className += ' is-today';
         if (key < today) cell.className += ' is-past';
         var num = document.createElement('span');
@@ -900,8 +902,6 @@
         num.textContent = dayN;
         cell.appendChild(num);
         if (evs.length) {
-          cell.type = 'button';
-          cell.setAttribute('aria-label', d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) + ', ' + evs.length + ' event' + (evs.length > 1 ? 's' : ''));
           var ticks = document.createElement('span');
           ticks.className = 'ticks';
           evs.slice(0, 6).forEach(function (e) {
@@ -910,7 +910,6 @@
             ticks.appendChild(t);
           });
           cell.appendChild(ticks);
-          cell.dataset.date = key;
         }
         days.appendChild(cell);
       }

@@ -407,19 +407,22 @@ html.is-scrolled { --barh: calc(var(--barh-base) + var(--titleh)); }
    padded to whole weeks with blank cells, never with the neighbor months'
    dates; the columns run Sunday to Saturday)  */
 .cal-mname { padding: .45rem .6rem .3rem; border-bottom: 1px solid var(--line); font-size: .95rem; letter-spacing: .12em; }
-.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--line); }
 .cal-days > * {
-  min-height: 2.1rem; border-top: 1px solid var(--line); padding: .2rem .25rem;
+  aspect-ratio: 1; padding: .2rem .25rem; /* square cells */
   font-family: var(--mono); font-size: .68rem; text-align: left; vertical-align: top;
 }
-.cal-days > :nth-child(-n+7) { border-top: 0; } /* no hairline doubling the name's rule */
-.cal-days > :nth-child(7n+2), .cal-days > :nth-child(7n+3), .cal-days > :nth-child(7n+4),
-.cal-days > :nth-child(7n+5), .cal-days > :nth-child(7n+6), .cal-days > :nth-child(7n+7) {
-  border-left: 1px solid var(--line);
-}
-/* days with events are <button>s: strip the UA border on every side the grid
-   doesn't draw itself (the column rule above re-adds the left one) */
-.cal-day { background: none; border-left: 0; border-right: 0; border-bottom: 0; color: var(--ink); display: block; width: 100%; }
+/* The hairlines are the 1px gaps of the grid showing the container's line
+   color through — so every horizontal and vertical line is one continuous
+   stroke on the same pixel row/column. Each real day is an opaque cell, so
+   it comes out boxed on all four sides. The padding slots before the 1st
+   and after the last day are opaque too and stretch one pixel into the gap
+   beside them (leading ones to the left, trailing ones to the right and
+   down) so no lines are drawn between padding slots — only where they meet
+   a day, plus the rule under the month's name, which runs the full width. */
+.cal-day { background: var(--mist); border: 0; color: var(--ink); display: block; width: 100%; }
+.cal-day.is-blank { width: auto; aspect-ratio: auto; margin: 0 0 0 -1px; } /* stretches with its margins; the row's height comes from its days */
+.cal-day:not(.is-blank) ~ .cal-day.is-blank { margin: 0 -1px -1px 0; }
 button.cal-day { cursor: pointer; }
 /* inset ring rather than a border so the cell doesn't shift; the fill is a
    touch of ink over the card (lighter in dark mode, darker in light), so
