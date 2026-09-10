@@ -304,9 +304,10 @@
   //   container: positioned element the rows sit in (gets the <svg>)
   //   rows: [{ el, series }] in document order, only rows in a series
   //   opts: firstDate/lastDate of the page, laneWidth (px), bend (px),
-  //         onLanes(n) called before measuring so the caller can size its
-  //         gutter, gutterX(containerBox) → x of the first lane's left edge
-  //         relative to the container, color(series), label(series)
+  //         dot (px radius; 0 or unset for none) drawn where the line meets
+  //         each row, onLanes(n) called before measuring so the caller can
+  //         size its gutter, gutterX(containerBox) → x of the first lane's
+  //         left edge relative to the container, color(series), label(series)
   // Returns the number of lanes used.
   var SVG_NS = 'http://www.w3.org/2000/svg';
   function drawSeriesGraph(container, rows, opts) {
@@ -340,6 +341,8 @@
     svg.setAttribute('height', box.height);
     svg.setAttribute('aria-hidden', 'true');
     var defs = null;
+    var dots = null; // the join tails, kept above every line
+    var tailGrad = {}; // .id of the one gradient the tails share
     var trunk = {}; // lane -> [[top, bottom], ...] the stretch of the lane each merged-lane series occupies
     var merged = {};
     items.forEach(function (it) { if (it.merged) merged[it.lane] = true; });
@@ -370,7 +373,7 @@
           [[0, 0], [1, 1]].forEach(function (s) {
             var stop = document.createElementNS(SVG_NS, 'stop');
             stop.setAttribute('offset', s[0]);
-            stop.setAttribute('stop-color', opts.color(it.s));
+            stop.style.stopColor = opts.color(it.s); // a style, so a CSS var works
             stop.setAttribute('stop-opacity', s[1]);
             grad.appendChild(stop);
           });
@@ -407,6 +410,40 @@
         path.appendChild(tip);
       }
       svg.appendChild(path);
+      // at each join a tight arc hugs the inside of the card's edge, meeting
+      // the lane's curves on the edge and fading out toward both its ends,
+      // so the line blends into the card rather than stopping at a node
+      // (one gradient, in the arc's own box, serves every tail). Kept in a
+      // group moved to the end so nothing drawn later covers them.
+      if (opts.tail) {
+        if (!dots) { dots = document.createElementNS(SVG_NS, 'g'); dots.setAttribute('class', 'sg-tails'); }
+        if (!tailGrad.id) {
+          if (!defs) { defs = document.createElementNS(SVG_NS, 'defs'); svg.appendChild(defs); }
+          var tg = document.createElementNS(SVG_NS, 'linearGradient');
+          tailGrad.id = 'sg-tail-' + Math.round(Math.random() * 1e6);
+          tg.setAttribute('id', tailGrad.id);
+          tg.setAttribute('x1', 0); tg.setAttribute('x2', 0); tg.setAttribute('y1', 0); tg.setAttribute('y2', 1); // top to bottom of each arc
+          [[0, 0], [0.5, 0.85], [1, 0]].forEach(function (st) {
+            var stop = document.createElementNS(SVG_NS, 'stop');
+            stop.setAttribute('offset', st[0]);
+            stop.style.stopColor = opts.color(it.s);
+            stop.setAttribute('stop-opacity', st[1]);
+            tg.appendChild(stop);
+          });
+          defs.appendChild(tg);
+        }
+        var depth = opts.tail; // how far inside the edge the arc reaches
+        pts.forEach(function (p) {
+          var px = f(p.x), py = f(p.y);
+          var ix = f(px - depth), cx = f(px - depth * 0.55);
+          var t = document.createElementNS(SVG_NS, 'path');
+          t.setAttribute('class', 'sg-line sg-tail');
+          t.setAttribute('d', 'M' + ix + ' ' + f(py - b) + ' C' + ix + ' ' + f(py - b / 3) + ' ' + cx + ' ' + py + ' ' + px + ' ' + py
+            + ' C' + cx + ' ' + py + ' ' + ix + ' ' + f(py + b / 3) + ' ' + ix + ' ' + f(py + b));
+          t.style.stroke = 'url(#' + tailGrad.id + ')';
+          dots.appendChild(t);
+        });
+      }
     });
     // merged lanes: where two or more series run along the lane at once, a
     // neutral trunk is drawn over their verticals so the stretch reads as
@@ -430,6 +467,7 @@
         }
       });
     });
+    if (dots) svg.appendChild(dots);
     container.appendChild(svg);
     return laneEnd.length;
   }

@@ -362,8 +362,15 @@ try {
 
 const merged = mergeWithArchive(fresh, archived, today, cutoff).slice(-MAX_EVENTS);
 
-// League schedules flag floating dates Ticketmaster doesn't know yet
-try { await applySchedules(merged); } catch (err) { console.error('Schedules step failed:', err.message); }
+// League schedules flag floating dates Ticketmaster doesn't know yet, and
+// the full seasons (home and away) feed the site's Teams view
+let seasons = {};
+try { seasons = await applySchedules(merged); } catch (err) { console.error('Schedules step failed:', err.message); }
+if (Object.keys(seasons).length) {
+  writeFileSync(new URL('../site/teams.json', import.meta.url), JSON.stringify({ generated: new Date().toISOString(), teams: seasons }, null, 1) + '\n');
+} else {
+  console.error('teams.json: no season fetched this run, the last one stands');
+}
 
 writeFileSync(JSON_OUT, JSON.stringify({ generated: new Date().toISOString(), events: merged }, null, 2) + '\n');
 writeFileSync(ICS_OUT, buildIcs(merged));

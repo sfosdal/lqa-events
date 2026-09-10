@@ -86,10 +86,10 @@
     <input id="searchBox" type="search" placeholder="Search…" aria-label="Search events by venue, team, or type" autocomplete="off">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
   </label>
-  <!-- appears once you've scrolled into the list (app.js) -->
-  <button id="toTop" class="chip" type="button" title="Back to top" hidden>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-    <span>Top</span>
+  <!-- the home teams' seasons, home and away (the Teams view below the bar) -->
+  <button id="teamsBtn" class="chip" type="button" aria-pressed="false" aria-controls="teamsView" title="Season schedules for the home teams — every game, home and away">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 3M17 6h3a3 3 0 0 1-3 3"/></svg>
+    <span>Teams</span>
   </button>
   <button id="subscribeBtn" class="chip" type="button" aria-expanded="false" aria-controls="subscribePop" title="Subscribe in your calendar app">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/></svg>
@@ -99,44 +99,48 @@
       <label class="pop-filter" id="subFilterRow" hidden>
         <input type="checkbox" id="subUseFilter" checked> Include my filter choices
       </label>
+      <!-- one row of three: the calendar you'd add to, each with its own
+           icon and name -->
       <div class="pop-tiles">
         <!-- the webcal: link — Apple Calendar on a Mac, iPhone or iPad (and any
              other desktop calendar app that claims webcal) -->
         <a id="webcalLink" class="tile" href="#" title="macOS / iOS Calendar (or whichever calendar app handles webcal links)">
           <img class="tile-logo" src="https://www.google.com/s2/favicons?domain=www.apple.com&amp;sz=128" alt="" width="64" height="64">
-          <span>macOS</span>
+          <span>Apple</span>
         </a>
-        <!-- each service's own icon (Google's favicon service, as for the venue marks) -->
+        <!-- Google Calendar's own icon (its favicon is a small upscaled one); Outlook's favicon, as for the venue marks -->
         <a id="gcalLink" class="tile" href="#" target="_blank" rel="noopener" title="Google Calendar">
-          <img class="tile-logo" src="https://www.google.com/s2/favicons?domain=calendar.google.com&amp;sz=128" alt="" width="64" height="64">
+          <img class="tile-logo" src="https://ssl.gstatic.com/calendar/images/dynamiclogo_2020q4/calendar_31_2x.png" alt="" width="64" height="64">
           <span>Google</span>
         </a>
         <a id="outlookLink" class="tile" href="#" target="_blank" rel="noopener" title="Outlook">
           <img class="tile-logo" src="https://www.google.com/s2/favicons?domain=outlook.live.com&amp;sz=128" alt="" width="64" height="64">
           <span>Outlook</span>
         </a>
-        <a id="qrBtn" class="tile" href="#" aria-expanded="false" title="QR code for your phone">
+      </div>
+      <!-- the other ways in, as chips under the row -->
+      <div class="pop-tools">
+        <a id="qrBtn" class="chip" href="#" aria-expanded="false" title="QR code for your phone">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/>
             <rect x="4" y="14" width="6" height="6"/>
             <path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 20h1M20 14v1"/>
           </svg>
-          <span>QR code</span>
+          <span>QR Code</span>
         </a>
-        <a id="copyIcs" class="tile" href="#" title="Copy the feed link">
+        <a id="copyIcs" class="chip" href="#" title="Copy the feed link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
           </svg>
-          <span>Copy link</span>
+          <span>Copy Link</span>
         </a>
       </div>
       <div id="qrPanel" class="qr-panel" hidden>
         <div id="qrImg" role="img" aria-label="QR code for the calendar feed"></div>
         <p class="pop-note">Scan with your phone to subscribe there.</p>
       </div>
-      <p class="pop-note">The events are refreshed every few hours; your calendar
-        refreshes them on its own schedule.</p>
+      <p class="pop-note">Refreshed every few hours. Your calendar picks up changes on its own schedule.</p>
   </div>
   <div id="themeToggle" class="theme-toggle" role="radiogroup" aria-label="Color theme" data-active="system">
     <button type="button" role="radio" aria-checked="false" data-theme="light" title="Light">
@@ -200,14 +204,12 @@
            calendar chip at the right end of the filter bar); on the wide
            layout it's docked here -->
       <div class="cal" id="calBox">
-        <!-- month navigation: its own slim bar above the month cards -->
+        <!-- the card's header: ‹ month name › (Today is a floater at the lower right, shown when the list has left today) -->
         <div class="cal-head" id="calHead" aria-label="Change months">
           <button id="calPrev" type="button" aria-label="Previous month">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
           </button>
-          <!-- docked: "Today". Floating over the list (one month): the month's own
-               name, which is also the way back to this month -->
-          <button id="calToday" type="button" title="Back to the current month"><span class="cal-cur"></span><span class="cal-back">Today</span></button>
+          <span class="cal-cur" aria-live="polite"></span>
           <button id="calNext" type="button" aria-label="Next month">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
           </button>
@@ -218,9 +220,33 @@
   </div>
 </section>
 
+<!-- the Teams view: in place of the agenda while the Teams chip is on. A
+     strip of the home teams, a bar naming a picked opponent, then the season
+     in the agenda's own day/card markup (app.js renderTeams) -->
+<section class="teams" id="teamsView" aria-label="Team schedules" hidden>
+  <div class="team-strip" id="teamStrip" aria-label="Teams"></div>
+  <div class="team-focus" id="teamFocus" hidden></div>
+  <ol id="teamSched" class="team-sched"></ol>
+</section>
+
 <!-- pinned to the bottom edge; Sources (the info mark) and Embed open upward from it,
      floating over the list -->
 <footer>
+  <!-- Two floaters centred just above this pinned footer, styled like the
+       bar's chips. Today: back to now (the current month, past days put
+       away, the list at its nearest day), shown only while the list has
+       left today. Top: shown once the masthead has scrolled off. app.js
+       toggles hidden on both; on narrow screens they drop their labels. -->
+  <div class="floaters">
+    <button id="calToday" type="button" class="chip" title="Back to today: the current month, past days put away" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><circle cx="12" cy="15.5" r="1.6" fill="currentColor" stroke="none"/></svg>
+      <span>Today</span>
+    </button>
+    <button id="toTop" type="button" class="chip" title="Back to top" aria-label="Back to top" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      <span>Top</span>
+    </button>
+  </div>
   <div class="foot-inner">
   <div class="gw">
   <svg class="gw-logo" aria-hidden="true"><use href="#gw-mark"/></svg>

@@ -10,9 +10,10 @@ the data every ~6 hours and deploys straight to GitHub Pages (no data commits).
 
 | Path | What |
 |---|---|
-| `/lqa-events/` | Calendar UI — month grid, agenda, venue filters, subscribe |
+| `/lqa-events/` | Calendar UI — month grid, agenda, venue filters, subscribe, the Teams view. The default filter leaves the stadiums (over 20,000 seats: Lumen Field, T-Mobile Park) unchecked, like Movies and the Children's Theatre |
 | `/lqa-events/events.json` | JSON feed: `{ generated, events: [{venue,title,date,time,url}] }` — plus optional per-event `end` (same-day local end time), `age21`, `soldOut`, `free`, `dateTbd`, `type` (the source's own classification — concert/sports/arts/movie/community/expo — which the site's type rules trust before falling back to title words), and `status` (`cancelled` or `postponed`) with `statusSince` (ISO time the status was first detected; a cancelled show stays in its slot, marked, until its date passes), and `watch` on a home game (`{ tv: [...], radio: [...] }` — the national and home-market broadcasts its league lists, when it lists any) |
 | `/lqa-events/events.ics` | iCalendar feed — subscribable in Google/Apple Calendar |
+| `/lqa-events/teams.json` | The home teams' seasons, home and away: `{ generated, teams: { mariners: [{ date, time, tbd, home, opp: { name, short, abbrev, logo, site }, venue, watch?, playoff? }], … } }` — from the leagues' own schedule APIs (`scripts/schedules.mjs`; preseason left out), Seattle-local dates and times, the opponent's crest and club page. Feeds the site's **Teams** view (the Teams chip, or `?team=kraken`): a strip of the home teams, then one team's whole season with played games folded away; tap an opponent's crest and only their games stay lit. Never filtered by the venue/capacity settings |
 | `/lqa-events/embed.js` | Drop-in widget for other sites |
 | `/lqa-events/filter.js` | Shared filter/classification logic (teams, event types, venue matching, venue capacities — the site's venue list is ordered by them) and the share-link code — the single source of truth other sites should use if they filter this feed themselves, instead of re-implementing the rules |
 

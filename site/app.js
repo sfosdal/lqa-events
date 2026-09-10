@@ -126,8 +126,8 @@
     state.series = LQAFilter.findSeries(list);
   }
   // The gutter column right of the cards is sized per page for the lanes
-  // the graph needs; lines are in the series' event-type color and curve
-  // into each card's type stripe.
+  // the graph needs; lines are in the mini calendar's border colour and
+  // curve into each card's right edge, fanning into the card at the join.
   function drawSeriesGraph() {
     var ol = $('agenda');
     var layout = document.querySelector('.agenda-layout');
@@ -147,16 +147,21 @@
     var dates = Array.from(ol.querySelectorAll('.day-row')).map(function (li) { return li.dataset.date; });
     LQAFilter.drawSeriesGraph(ol, rows, {
       firstDate: dates[0], lastDate: dates[dates.length - 1],
-      laneWidth: 0.9 * rem,
+      laneWidth: 0.75 * rem,
+      bend: 14, // the elbow's height: a tight quarter-turn out of the card
+      tail: 7,  // at each join a tight arc hugs the card's edge inside, fading at its ends
       maxLanes: 2, // deeper than that, series share the second lane as one grey trunk
       // the gutter column exists only while a lane needs it: no lanes on
-      // this page, no column, and the cards take the width
+      // this page, no column, and the cards take the width. The lanes start
+      // half a rem past the cards, inside the grid's 1rem gap, so the column
+      // only has to hold what runs past the gap.
       onLanes: function (n) {
         layout.classList.toggle('has-series', n > 0);
-        if (n > 0) layout.style.setProperty('--gutter', (n * 0.9 + 0.3) + 'rem'); else layout.style.removeProperty('--gutter');
+        if (n > 0) layout.style.setProperty('--gutter', Math.max(0.3, n * 0.75 - 0.3) + 'rem'); else layout.style.removeProperty('--gutter');
       },
-      gutterX: function (box) { return de.getBoundingClientRect().right - box.left + rem; }, // past the cards and the grid gap
-      color: function (s) { return typeColor(eventType(s.events[0])); },
+      gutterX: function (box) { return de.getBoundingClientRect().right - box.left + rem / 2; },
+      // one quiet colour for every lane: the mini calendar's border
+      color: function () { return 'var(--ink-soft)'; },
       label: seriesLabel,
     });
   }
@@ -239,8 +244,7 @@
     { key: 'expo', label: 'Conventions', title: 'Conventions, conferences, trade and consumer shows — the Convention Center, Exhibition Hall, Fisher Pavilion' },
     { key: 'bar', label: 'Neighborhood', title: 'Trivia, live music, watch parties and specials at neighborhood bars — The Traveling Goat so far' },
   ];
-  // Type hues mirror the venue hues: a dot on the filter rows, a colored
-  // right edge on each agenda row.
+  // Type hues mirror the venue hues: a dot on the filter rows.
   var TYPE_VARS = {
     concert: '--t-concert', sports: '--t-sports', arts: '--t-arts',
     movie: '--t-movie', community: '--t-community', expo: '--t-expo', bar: '--t-bar',
@@ -255,15 +259,23 @@
   // sets the switch too, and the search box is left alone. Venue lists that
   // depend on the feed are functions of the venues present. `teamsOff`
   // unchecks every team (only Nothing does; the rest leave teams checked).
+  // Movies, the Children's Theatre (a hundred-odd school-day matinees a
+  // season) and the stadiums start unchecked: a place holding more than
+  // DEFAULT_MAX_SEATS is off by default (Lumen Field and T-Mobile Park; the
+  // Convention Center's 20,000 sits exactly on the line and stays on). The
+  // Teams view is never filtered — every game shows there, whatever the
+  // building holds.
+  var DEFAULT_MAX_SEATS = 20000;
+  var DEFAULT_VENUES_OFF = ["Children's Theatre"].concat(Object.keys(VENUE_CAPACITY).filter(function (v) { return VENUE_CAPACITY[v] > DEFAULT_MAX_SEATS; }));
   var BIG_NIGHT_SEATS = 2000; // the Capacity preset's floor; McCaw Hall (2,900) is the smallest venue in
   var PRESETS = [
-    { key: 'default', label: 'Default', title: 'Everything on except Movies and the Children\'s Theatre',
+    { key: 'default', label: 'Default', title: 'Everything on except Movies, the Children\'s Theatre and the stadiums (over ' + DEFAULT_MAX_SEATS.toLocaleString('en-US') + ' seats)',
       venuesOff: function () { return DEFAULT_VENUES_OFF.slice(); }, typesOff: ['movie'], holidays: false },
     { key: 'all', label: 'Everything', title: 'Every venue, type and team, holidays too', venuesOff: function () { return []; }, typesOff: [], holidays: true },
     { key: 'none', label: 'Nothing', title: 'Everything off — build your own view from scratch',
       venuesOff: function () { return state.venues.slice(); }, typesOff: TYPE_LIST.map(function (t) { return t.key; }), teamsOff: true, holidays: false },
     { key: 'neighborhood', label: 'Neighborhood', title: 'Just Lower Queen Anne — no stadiums or Convention Center',
-      venuesOff: function () { return DEFAULT_VENUES_OFF.concat(state.venues.filter(function (v) { return venueArea(v) === 'town'; })); }, typesOff: ['movie'] },
+      venuesOff: function () { return DEFAULT_VENUES_OFF.concat(state.venues.filter(function (v) { return venueArea(v) === 'town' && DEFAULT_VENUES_OFF.indexOf(v) < 0; })); }, typesOff: ['movie'] },
     { key: 'big', label: 'Capacity > 2K', title: 'Only the places that hold ' + BIG_NIGHT_SEATS.toLocaleString('en-US') + ' or more — the stadiums, the arena, McCaw Hall',
       venuesOff: function () { return state.venues.filter(function (v) { return (VENUE_CAPACITY[v] || 0) < BIG_NIGHT_SEATS; }); }, typesOff: ['bar'] },
   ];
@@ -285,7 +297,8 @@
     var sorted = function (a) { return a.slice().sort().join('|'); };
     if (off('team') !== (p.teamsOff ? sorted(groupInfo('team').keys) : '')) return false;
     if (p.holidays !== undefined && state.holidays !== p.holidays) return false;
-    return off('venue') === sorted(p.venuesOff()) && off('badge') === sorted(p.typesOff);
+    var shown = groupInfo('venue').keys;
+    return off('venue') === sorted(p.venuesOff().filter(function (v) { return shown.indexOf(v) >= 0; })) && off('badge') === sorted(p.typesOff);
   }
   function renderPresets() {
     var box = $('fpPresets');
@@ -304,9 +317,6 @@
       b.setAttribute('aria-pressed', String(!!p && presetMatches(p)));
     });
   }
-  // movies and the Children's Theatre (a hundred-odd school-day matinees a
-  // season) start unchecked
-  var DEFAULT_VENUES_OFF = ["Children's Theatre"];
   function applyDefaultFilters() {
     state.badgeMode = { movie: 'ex' };
     state.venueMode = {};
@@ -720,6 +730,211 @@
   window.addEventListener('resize', fitFilterBar);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitFilterBar);
 
+
+  // ---- Teams: each home team's season, home and away ----
+  // The Teams chip swaps the agenda (list and calendar) for a schedule view:
+  // a strip of the home teams' crests, then the chosen team's whole season
+  // from teams.json (scripts/schedules.mjs, home and away, never filtered).
+  // Rows reuse the agenda's day/card markup. Each opponent's crest is a
+  // button: tap it and only that opponent's games stay lit, a bar above the
+  // list names them (with the club's own site for more) and the page jumps
+  // to the next one; tap again, or the bar's ✕, for the whole season. The
+  // view is linkable (?team=mariners) and lives in history like a page.
+  var teamsData = null, teamsLoading = null;
+  var teamView = { slug: null, opp: null, showPast: false }; // played games fold away behind a button
+  function loadTeams() {
+    if (teamsData) return Promise.resolve(teamsData);
+    if (!teamsLoading) {
+      teamsLoading = fetch('teams.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : { teams: {} }; })
+        .catch(function () { return { teams: {} }; })
+        .then(function (d) { teamsData = d; return d; });
+    }
+    return teamsLoading;
+  }
+  function teamsUrl(slug) {
+    var params = new URLSearchParams(location.search);
+    if (slug) params.set('team', slug); else params.delete('team');
+    var q = params.toString();
+    return location.pathname + (q ? '?' + q : '') + location.hash;
+  }
+  // open (slug) or close (null) the view; push = a history entry (a chip
+  // tap), else the URL is only kept in step (load, back/forward)
+  function setTeamsView(slug, push) {
+    var open = !!slug;
+    document.documentElement.classList.toggle('teams-open', open);
+    $('teamsView').hidden = !open;
+    document.querySelector('.agenda').hidden = open;
+    $('teamsBtn').setAttribute('aria-pressed', String(open));
+    if (push) history.pushState(null, '', teamsUrl(slug));
+    if (open) {
+      // the floating panels close: they belong to the agenda
+      $('filterPanel').hidden = true; $('filterToggle').setAttribute('aria-expanded', 'false');
+      if (!$('subscribePop').hidden) setSubscribeOpen(false);
+      teamView.opp = null;
+      loadTeams().then(function () { if (!$('teamsView').hidden) renderTeams(slug); });
+    } else {
+      teamView.slug = null;
+    }
+    fitFilterBar();
+  }
+  function teamGames(slug) { return (teamsData && teamsData.teams && teamsData.teams[slug]) || null; }
+  function oppKey(g) { return g.opp && (g.opp.abbrev || g.opp.name) || '?'; }
+  function renderTeams(slug) {
+    // every home team from the filter gets a tab, schedule loaded or not
+    var teams = LQAFilter.TEAMS.slice();
+    var strip = $('teamStrip'); strip.innerHTML = '';
+    var list = $('teamSched'); list.innerHTML = '';
+    if (!teams.some(function (t) { return t.slug === slug; })) slug = teams[0].slug;
+    teamView.slug = slug;
+    teams.forEach(function (t) {
+      var b = document.createElement('button');
+      var n = (teamGames(t.slug) || []).length;
+      b.type = 'button'; b.className = 'team-tab'; b.setAttribute('aria-pressed', String(t.slug === slug));
+      b.title = t.label + (n ? ' — ' + n + ' games' : ' — schedule not loaded yet');
+      if (t.logo) { var img = document.createElement('img'); img.src = t.logo; img.alt = ''; img.width = 40; img.height = 40; b.appendChild(img); }
+      var l = document.createElement('span'); l.textContent = t.label; b.appendChild(l);
+      b.addEventListener('click', function () { if (t.slug !== teamView.slug) { teamView.opp = null; teamView.showPast = false; history.replaceState(null, '', teamsUrl(t.slug)); renderTeams(t.slug); } });
+      strip.appendChild(b);
+    });
+    var team = LQAFilter.TEAMS.filter(function (t) { return t.slug === slug; })[0];
+    if (!teamGames(slug)) { // no season data for this one (yet): say so, point at the club's own schedule
+      var none = document.createElement('li'); none.className = 'empty';
+      none.appendChild(document.createTextNode('No ' + team.label + ' schedule loaded yet' + (team.schedule ? ' — ' : '.')));
+      if (team.schedule) { var a = document.createElement('a'); a.href = team.schedule; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'their schedule ↗'; none.appendChild(a); }
+      list.appendChild(none);
+      renderTeamFocus(null); return;
+    }
+    var all = teamGames(slug).slice().sort(function (a, b) { return (a.date + (a.time || '')) < (b.date + (b.time || '')) ? -1 : 1; });
+    var today = todayStr(), lastMonth = null, group = null, dayBox = null, lastDate = null;
+    // the season so far folds away: a line at the top says how many games
+    // have been played and opens them (this team, this visit)
+    var played = all.filter(function (g) { return g.date < today; });
+    var games = teamView.showPast ? all : all.filter(function (g) { return g.date >= today; });
+    if (played.length) {
+      var fold = document.createElement('li'); fold.className = 'team-fold';
+      var fb = document.createElement('button'); fb.type = 'button'; fb.className = 'chip';
+      fb.textContent = (teamView.showPast ? 'Hide the ' : 'Show the ') + played.length + ' played game' + (played.length === 1 ? '' : 's');
+      fb.addEventListener('click', function () { teamView.showPast = !teamView.showPast; renderTeams(teamView.slug); });
+      fold.appendChild(fb); list.appendChild(fold);
+    }
+    if (!games.length) {
+      var done = document.createElement('li'); done.className = 'empty'; done.textContent = 'Season over — nothing left on the schedule.'; list.appendChild(done);
+    }
+    // the feed's own listing for a home game, when it has one: its ticket link
+    var feedByDate = {};
+    state.events.forEach(function (e) { if (team.re.test(e.title || '') && e.venue === team.venue) feedByDate[e.date] = e; });
+    games.forEach(function (g) {
+      var month = g.date.slice(0, 7);
+      if (month !== lastMonth) {
+        lastMonth = month;
+        group = document.createElement('li'); group.className = 'month-group';
+        var mr = document.createElement('div'); mr.className = 'month-row';
+        var ms = document.createElement('span'); ms.textContent = parseDate(g.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        mr.appendChild(ms); group.appendChild(mr); list.appendChild(group);
+        lastDate = null;
+      }
+      if (g.date !== lastDate) {
+        lastDate = g.date;
+        var d = parseDate(g.date);
+        var li = document.createElement('div');
+        li.className = 'day-row' + (g.date === today ? ' is-today' : '') + (g.date < today ? ' is-past' : '');
+        li.dataset.date = g.date;
+        var rail = document.createElement('div');
+        rail.className = 'date-rail';
+        rail.innerHTML = '<span class="dnum">' + d.getDate() + '</span><span class="dmeta">' + d.toLocaleDateString('en-US', { weekday: 'long' }) + '</span>';
+        li.appendChild(rail);
+        dayBox = document.createElement('div'); dayBox.className = 'day-events';
+        li.appendChild(dayBox); group.appendChild(li);
+      }
+      var row = document.createElement('div');
+      row.className = 'ev' + (g.home ? ' is-home' : ' is-away');
+      row.dataset.opp = oppKey(g);
+      // the home building's wash for a home game; away games stay on the page
+      if (g.home) row.style.background = 'color-mix(in srgb, ' + venueColor(team.venue) + ' var(--tint), transparent)';
+      var time = document.createElement('span'); time.className = 'time';
+      time.textContent = g.tbd || !g.time ? 'TBD' : fmtTime(g.time);
+      row.appendChild(time);
+      var body = document.createElement('div'); body.className = 'ev-body';
+      var where = document.createElement('span'); where.className = 'venue' + (g.home ? '' : ' is-away');
+      if (g.home) { where.style.setProperty('--dot', venueColor(team.venue)); where.textContent = team.venue; }
+      else where.textContent = '@ ' + (g.venue || g.opp.name);
+      body.appendChild(where);
+      var title = document.createElement('span'); title.className = 'ev-title';
+      var a = document.createElement('a');
+      var feed = g.home && feedByDate[g.date];
+      a.href = feed && feed.url ? feed.url : (g.home ? team.schedule : (g.opp.site || team.schedule));
+      a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = (g.home ? 'vs ' : 'at ') + g.opp.name;
+      a.title = g.home ? (feed && feed.url ? 'Tickets' : team.label + ' schedule') : (g.opp.site ? g.opp.name + ' — their site' : team.label + ' schedule');
+      title.appendChild(a);
+      if (g.playoff) { var pb = document.createElement('span'); pb.className = 'badge b-playoff'; pb.textContent = 'playoff'; title.appendChild(pb); }
+      if (g.tbd) { var tb = document.createElement('span'); tb.className = 'badge b-tbd'; tb.textContent = 'time tbd'; title.appendChild(tb); }
+      body.appendChild(title);
+      if (g.watch && ((g.watch.tv || []).length || (g.watch.radio || []).length)) {
+        var w = document.createElement('span'); w.className = 'ev-watch';
+        [['tv', 'TV'], ['radio', 'Radio']].forEach(function (k) {
+          if (!g.watch[k[0]] || !g.watch[k[0]].length) return;
+          if (w.childNodes.length) w.appendChild(document.createTextNode(' · '));
+          var b = document.createElement('b'); b.textContent = k[1] + ' ';
+          w.appendChild(b); w.appendChild(document.createTextNode(g.watch[k[0]].join(', ')));
+        });
+        body.appendChild(w);
+      }
+      row.appendChild(body);
+      // the opponent's crest: a button that lights up just their games
+      var ob = document.createElement('button');
+      ob.type = 'button'; ob.className = 'opp-btn'; ob.title = 'Just the games against the ' + (g.opp.short || g.opp.name);
+      if (g.opp.logo) { var om = document.createElement('img'); om.className = 'team-mark opp-mark'; om.src = g.opp.logo; om.alt = ''; om.width = 46; om.height = 46; ob.appendChild(om); }
+      else { var ot = document.createElement('span'); ot.className = 'opp-abbr'; ot.textContent = g.opp.abbrev || '?'; ob.appendChild(ot); }
+      var key = oppKey(g);
+      ob.addEventListener('click', function () { focusOpp(teamView.opp === key ? null : key, g.opp); });
+      row.appendChild(ob);
+      dayBox.appendChild(row);
+    });
+    renderTeamFocus(null);
+    // land on the next game, under the bar (with the played games folded
+    // that is the top of the list)
+    var next = list.querySelector('.day-row:not(.is-past)');
+    if (next && teamView.showPast) next.scrollIntoView({ block: 'start', behavior: 'instant' });
+    else if (!teamView.showPast) window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  // one opponent: dim every other row, name them above the list, jump to the
+  // next meeting. null lights the whole season again.
+  function focusOpp(key, opp) {
+    teamView.opp = key;
+    var rows = $('teamSched').querySelectorAll('.ev');
+    var first = null;
+    Array.prototype.forEach.call(rows, function (r) {
+      var on = !key || r.dataset.opp === key;
+      r.classList.toggle('is-dim', !on);
+      if (on && key && !first && !r.closest('.day-row').classList.contains('is-past')) first = r;
+    });
+    renderTeamFocus(key ? opp : null, key);
+    if (first) first.closest('.day-row').scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+  function renderTeamFocus(opp, key) {
+    var bar = $('teamFocus'); bar.innerHTML = '';
+    bar.hidden = !opp;
+    if (!opp) { $('teamsView').style.removeProperty('--focus-h'); return; }
+    var n = $('teamSched').querySelectorAll('.ev[data-opp="' + key + '"]').length;
+    if (opp.logo) { var im = document.createElement('img'); im.src = opp.logo; im.alt = ''; im.width = 28; im.height = 28; bar.appendChild(im); }
+    var t = document.createElement('span'); t.className = 'focus-name'; t.textContent = opp.name; bar.appendChild(t);
+    var c = document.createElement('span'); c.className = 'focus-n'; c.textContent = n + ' game' + (n === 1 ? '' : 's'); bar.appendChild(c);
+    if (opp.site) { var a = document.createElement('a'); a.className = 'chip'; a.href = opp.site; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Their site ↗'; bar.appendChild(a); }
+    var x = document.createElement('button'); x.type = 'button'; x.className = 'chip'; x.textContent = '✕ All games'; x.title = 'Back to the whole season';
+    x.addEventListener('click', function () { focusOpp(null); });
+    bar.appendChild(x);
+    $('teamsView').style.setProperty('--focus-h', (bar.offsetHeight + 8) + 'px'); // the month rows stick below it
+  }
+  $('teamsBtn').addEventListener('click', function () {
+    if (!$('teamsView').hidden) setTeamsView(null, true);
+    else setTeamsView(teamView.slug || new URLSearchParams(location.search).get('team') || LQAFilter.TEAMS[0].slug, true);
+  });
+  window.addEventListener('popstate', function () {
+    var slug = new URLSearchParams(location.search).get('team');
+    if (!!slug !== !$('teamsView').hidden || (slug && slug !== teamView.slug)) setTeamsView(slug, false);
+  });
+
   // ---- the event sheet ----
   // A click anywhere on a card opens it (capture phase, so it wins over the
   // venue link's own handler): the details plus the two real choices, the
@@ -859,10 +1074,8 @@
     var box = $('calGrid');
     box.innerHTML = '';
     var today = todayStr();
-    // floating: the month's name sits in the bar (which joins the card),
-    // and "Today" only shows once you've paged away from this month
-    $('calToday').querySelector('.cal-cur').textContent = m.toLocaleDateString('en-US', { month: 'long' });
-    $('calBox').classList.toggle('is-away', !sameMonth(m, new Date()));
+    // the month's name sits in the card's header between ‹ and ›
+    $('calHead').querySelector('.cal-cur').textContent = m.toLocaleDateString('en-US', { month: 'long' });
     // One month at a time; the ‹ Today › bar above pages by one. The card
     // (name, grid) holds only its own days.
     (single ? [m] : [m, next]).forEach(function (first) {
@@ -919,8 +1132,10 @@
   }
   $('calPrev').addEventListener('click', function () { shiftMonth(-1); });
   $('calNext').addEventListener('click', function () { shiftMonth(1); });
-  // TODAY is always live: back to the current month, past days put away,
-  // the list on its first page and scrolled to its first (= nearest) day
+  // TODAY (the floater at the lower right): back to the current month, past
+  // days put away, the list on its first page and scrolled to its first
+  // (= nearest) day. It only shows while there is somewhere to come back
+  // from — see syncTodayFloat.
   $('calToday').addEventListener('click', function () {
     var now = new Date();
     state.month = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -928,6 +1143,7 @@
     renderCal();
     renderAgenda();
     scrollToDate(todayStr());
+    syncTodayFloat(); // no scroll event if the list was already there
   });
   function shiftMonth(dir) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + dir, 1);
@@ -1105,8 +1321,6 @@
         // the venue's hue over the card at --tint (stronger in light mode, where
         // a faint wash on white disappears)
         row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' var(--tint), transparent)';
-        // the right edge carries the event type's hue, matching its filter dot
-        row.style.borderRight = '1rem solid ' + typeColor(eventType(e));
         var time = document.createElement('span');
         time.className = 'time';
         time.textContent = fmtTime(e.time);
@@ -1151,9 +1365,8 @@
         // (and when we noticed, if the feed knows)
         if (e.status) {
           row.classList.add('is-off');
-          // the card goes gray — wash and edge alike — so only the note has color
+          // the card's wash goes gray so only the note has color
           row.style.background = 'color-mix(in srgb, var(--ink-soft) 14%, transparent)';
-          row.style.borderRightColor = 'var(--ink-soft)';
           var off = document.createElement('span');
           off.className = 'ev-note';
           off.textContent = e.status.charAt(0).toUpperCase() + e.status.slice(1) + (e.statusSince ? ' ' + fmtSince(e.statusSince) : '');
@@ -1186,6 +1399,7 @@
       ol.appendChild(li);
     }
     drawSeriesGraph();
+    syncTodayFloat();
   }
   // the series graph is measured from the rows, so it follows the window
   var resizeTimer = null;
@@ -1221,22 +1435,35 @@
     });
   }
   window.addEventListener('resize', fitPops);
+  // The Today floater shows only when it would do something: past days are
+  // open, the calendar is on another month, or the list has scrolled off the
+  // day Today would return to (the nearest listed day from today on).
+  function syncTodayFloat() {
+    var btn = $('calToday');
+    var today = todayStr();
+    var edge = document.querySelector('.filter-area').getBoundingClientRect().bottom + 1;
+    var rows = Array.from(document.querySelectorAll('#agenda .day-row'));
+    var home = rows.filter(function (r) { return r.dataset.date >= today; })[0] || rows[rows.length - 1];
+    var first = rows.filter(function (r) { return r.getBoundingClientRect().bottom > edge; })[0];
+    var away = state.showPast ||
+      (state.month && !sameMonth(state.month, new Date())) ||
+      (home && first && first !== home);
+    btn.hidden = !away;
+  }
   var stuckPending = false;
   function markStuck() {
     stuckPending = false;
-    // the bar's Back-to-top button and title line show once the masthead
-    // has scrolled off; the button changes the row's width, so the label
-    // folding is re-measured
+    // the Back-to-top floater (lower right, above the footer) and the bar's
+    // title line show once the masthead has scrolled off
     var atTop = document.scrollingElement.scrollTop < 240;
     if ($('toTop').hidden !== atTop) {
       $('toTop').hidden = atTop;
       document.querySelector('.bar-title').hidden = atTop;
       document.documentElement.classList.toggle('is-scrolled', !atTop); // raises --barh by the title line
-      fitFilterBar();
     }
     fitPops();
     var edge = document.querySelector('.filter-area').getBoundingClientRect().bottom + 1;
-    var rows = document.querySelectorAll('.month-row');
+    var rows = document.querySelectorAll('section:not([hidden]) .month-row'); // the list on show: agenda or Teams
     var stuck = null;
     rows.forEach(function (r) { if (r.getBoundingClientRect().top <= edge) stuck = r; });
     rows.forEach(function (r) { r.classList.toggle('is-stuck', r === stuck && document.scrollingElement.scrollTop > 0); });
@@ -1252,6 +1479,7 @@
         swapCal(ym > cur ? 1 : -1); // the reel turns the way the list moved
       }
     }
+    syncTodayFloat();
   }
   window.addEventListener('scroll', function () {
     placeSheet(); // the event pop rides with its card, same frame as the scroll
@@ -1328,28 +1556,30 @@
   });
   $('subUseFilter').addEventListener('change', updateSubscribe);
   updateSubscribe();
-  $('subscribeBtn').addEventListener('click', function () {
-    var pop = $('subscribePop');
-    var open = pop.hidden;
-    pop.hidden = !open;
-    this.setAttribute('aria-expanded', String(open));
+  // the pop floats over the docked mini calendar and is shorter than it,
+  // so while it's open the calendar fades out (styles.css: html.pop-open)
+  // rather than showing a strip of days under the pop's bottom edge
+  function setSubscribeOpen(open) {
+    $('subscribePop').hidden = !open;
+    $('subscribeBtn').setAttribute('aria-expanded', String(open));
+    document.documentElement.classList.toggle('pop-open', open);
     if (open) { $('qrPanel').hidden = true; $('qrBtn').setAttribute('aria-expanded', 'false'); fitPops(true); }
-  });
+  }
+  $('subscribeBtn').addEventListener('click', function () { setSubscribeOpen($('subscribePop').hidden); });
   document.addEventListener('click', function (e) {
-    if (!e.target.closest('#subscribeBtn, #subscribePop')) {
-      $('subscribePop').hidden = true;
-      $('subscribeBtn').setAttribute('aria-expanded', 'false');
-    }
+    if (!e.target.closest('#subscribeBtn, #subscribePop') && !$('subscribePop').hidden) setSubscribeOpen(false);
   });
   $('copyIcs').addEventListener('click', function (ev) {
     ev.preventDefault();
-    var tile = this;
+    var chip = this;
     copyText(icsHref).then(function () {
-      tile.classList.add('is-done'); // the tile shows a check for a moment
-      setTimeout(function () { tile.classList.remove('is-done'); }, 1500);
+      chip.classList.add('is-done'); // the chip shows a check for a moment
+      setTimeout(function () { chip.classList.remove('is-done'); }, 1500);
     });
   });
 
   if (!loadFiltersFromURL()) loadFilters();
   load();
+  // a ?team= link opens the Teams view straight away
+  if (new URLSearchParams(location.search).get('team')) setTeamsView(new URLSearchParams(location.search).get('team'), false);
 })();
