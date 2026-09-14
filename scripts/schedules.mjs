@@ -152,6 +152,7 @@ export function normalizeEspn(d, teamId, keepWeek, forcePre) { // forcePre: the 
       opp: { name: o.displayName, short: o.shortDisplayName || o.displayName, abbrev: o.abbreviation,
         logo: o.logos?.[0]?.href, site: (o.links || []).find((l) => (l.rel || []).includes('clubhouse'))?.href },
       venue: c.venue?.fullName,
+      ...(home && c.venue?.address?.city ? { city: [c.venue.address.city, c.venue.address.state].filter(Boolean).join(', ').replace(/, Washington$/, ', WA') } : {}), // where the home ground is (not assumed to be Seattle: the Huskies are, the Seawolves are not)
     }, (c.broadcasts || []).map((b) => ({
       kind: /radio/i.test(b.type?.shortName || '') ? 'radio' : 'tv', name: b.media?.shortName || b.media?.name,
       home: /home/i.test(b.market?.type || ''), national: /national/i.test(b.market?.type || ''),
@@ -206,6 +207,7 @@ export function normalizePwhl(games, teamId, playoff, pre) {
       opp: { name: oname, short: onick || oname, abbrev: home ? g.visiting_team_code : g.home_team_code,
         logo: `https://assets.leaguestat.com/pwhl/logos/${oid}.png`, site: `https://www.thepwhl.com/en/teams/${pwhlSlug(oname)}` },
       venue: String(g.venue_name || '').split('|')[0].trim(),
+      ...(home && g.venue_location ? { city: String(g.venue_location).trim() } : {}),
     }, final ? { us: usG, them: themG, won: usG > themG, ...(ot ? { ot } : {}) } : null);
   });
 }
@@ -257,16 +259,33 @@ async function pwhl(teamId) {
 // home?: 'W-L' }. ESPN's team endpoint carries a record summary and a
 // standing line for every league but the PWHL, whose standings come from
 // the same HockeyTech feed as its schedule (PWHL records read RW-OTW-OTL-L).
+// The home ground's city and state, as ESPN's schedule lists the club's
+// home games (the commonest, for a club with a neutral-site "home" game) —
+// for the clubs whose schedules come from their own leagues' feeds (MLB,
+// NHL), which carry no venue address.
+async function espnHomeCity(sport, league, teamId) {
+  const d = await getJson(`https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/teams/${teamId}/schedule`, true);
+  const n = {};
+  for (const e of d.events || []) {
+    const c = e.competitions?.[0], us = c?.competitors?.find((x) => String(x.team?.id) === String(teamId)), a = c?.venue?.address;
+    if (!us || us.homeAway !== 'home' || !a?.city) continue;
+    const k = [a.city, a.state].filter(Boolean).join(', ').replace(/, Washington$/, ', WA');
+    n[k] = (n[k] || 0) + 1;
+  }
+  return Object.keys(n).sort((a, b) => n[b] - n[a])[0] || null;
+}
 async function espnForm(sport, league, teamId, name, slug) {
-  const [t, news, prev] = await Promise.all([
+  const [t, news, prev, city] = await Promise.all([
     getJson(`https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/teams/${teamId}`, true).then((d) => d.team || {}),
     clubNews(slug, name, espnNews(sport, league, teamId, name).catch((e) => { console.error(`news: ${league}/${teamId} skipped — ${e.message}`); return []; })),
     espnPrev(sport, league, teamId).catch((e) => { console.error(`prev: ${league}/${teamId} skipped — ${e.message}`); return null; }),
+    espnHomeCity(sport, league, teamId).catch((e) => { console.error(`city: ${league}/${teamId} skipped — ${e.message}`); return null; }),
   ]);
   const items = t.record?.items || [];
   const total = items.find((i) => i.type === 'total') || items[0];
   const home = items.find((i) => i.type === 'home');
-  return { record: total?.summary, standing: t.standingSummary, ...(home?.summary ? { home: home.summary } : {}), ...(news.length ? { news } : {}), ...(prev ? { prev } : {}) };
+  const club = { ...(t.displayName ? { name: t.displayName } : {}), ...(t.abbreviation ? { abbr: t.abbreviation } : {}), ...(city ? { city } : {}) }; // as the league lists them: "Washington Huskies", WASH, Seattle, WA
+  return { record: total?.summary, standing: t.standingSummary, ...(home?.summary ? { home: home.summary } : {}), ...(news.length ? { news } : {}), ...(prev ? { prev } : {}), ...(Object.keys(club).length ? { club } : {}) };
 }
 // ESPN names a season by the year it starts in; hockey and football seasons
 // start in the autumn, so from January to June the season in progress is
@@ -385,7 +404,8 @@ async function pwhlForm(teamId) {
   if (!r) throw new Error('team not in standings');
   const n = Number(r.rank || r.overall_rank);
   const news = await clubNews('torrent', 'Torrent', Promise.resolve([]));
-  return { record: [r.regulation_wins, r.non_reg_wins, r.non_reg_losses, r.losses].join('-'), standing: n ? `${ordinal(n)} in the PWHL` : undefined, ...(news.length ? { news } : {}) };
+  const club = { ...(r.name ? { name: String(r.name).replace(/^[a-z]+ - /i, '') } : {}), ...(r.team_code ? { abbr: r.team_code } : {}) }; // the standings row's name carries a clinch prefix ("x - ") in season
+  return { record: [r.regulation_wins, r.non_reg_wins, r.non_reg_losses, r.losses].join('-'), standing: n ? `${ordinal(n)} in the PWHL` : undefined, ...(news.length ? { news } : {}), club };
 }
 // The season's Wikipedia page, whose lead paragraph is the form block's
 // summary (CC BY-SA — the site links the page). One page per season:
@@ -435,8 +455,9 @@ export function parseSeawolvesNews(html, n = 8) {
 async function seawolvesForm() {
   const r = await fetch('https://www.seawolves.rugby/news', { headers: { 'user-agent': UA, accept: 'text/html' } });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  const news = parseSeawolvesNews(await r.text());
-  return news.length ? { news } : {};
+  const html = await r.text(), news = parseSeawolvesNews(html);
+  const title = (html.match(/<title>([^<|]+)/) || [])[1] || '', name = title.replace(/\s+Rugby Club.*$/i, '').trim(); // "Seattle Seawolves Rugby Club | …" → Seattle Seawolves
+  return { ...(news.length ? { news } : {}), ...(name ? { club: { name } } : {}) };
 }
 
 export const FORM = [
@@ -460,6 +481,7 @@ export const FORM = [
 // like every other league's preseason. The year is the page's heading.
 const SEAWOLVES_URL = 'https://www.seawolves.rugby/schedule';
 const SEAWOLVES_HOME = 'Starfire Stadium';
+const SEAWOLVES_CITY = 'Tukwila, WA'; // Starfire Sports is in Tukwila, on the Green River just south of Seattle (en.wikipedia.org/wiki/Starfire_Sports, checked 2026-09-14)
 const MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
 // The MLR clubs of 2026 — six — each with its own site and the crest the
 // Seawolves' site carries for it; the names the schedule page uses vary
@@ -510,7 +532,7 @@ export function parseSeawolves(html) {
     games.push({
       date, time: time || null, tbd: !time, home, ...(round === 0 ? { pre: true } : {}),
       opp: mlrOpp(opp, (c.match(/<img title="(?:[^"]+)" src="([^"]+)"[^>]*>\s*<p[^>]*>VS\.<\/p>\s*<img title="[^"]+" src="([^"]+)"/) || [])[home ? 2 : 1]),
-      venue,
+      venue, ...(home && venue === SEAWOLVES_HOME ? { city: SEAWOLVES_CITY } : {}),
     });
   }
   // a played match with no fixture in the list (the playoffs are only ever
@@ -582,6 +604,9 @@ export async function applySchedules(events) {
     if (r.status === 'fulfilled') {
       seasons[slug] = r.value;
       bySlug[slug] = r.value.filter((g) => g.home);
+      const cities = {}; bySlug[slug].forEach((g) => { if (g.city) cities[g.city] = (cities[g.city] || 0) + 1; }); // the home ground's city, as the league lists it (the commonest, for a club with a neutral-site "home" game)
+      const city = Object.keys(cities).sort((a, b) => cities[b] - cities[a])[0];
+      if (city) form[slug] = { ...(form[slug] || {}), club: { ...((form[slug] || {}).club || {}), city } };
       const tbd = bySlug[slug].filter((g) => g.tbd).length;
       console.error(`schedules: ${slug} ${r.value.length} games, ${bySlug[slug].length} home, ${tbd} TBD`);
     } else {

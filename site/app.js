@@ -625,6 +625,15 @@
   });
   // …while the "only" links and group links are buttons.
   document.addEventListener('click', function (e) {
+    var ab = e.target.closest('.fp-set'); // a group's All / None (Steve, 2026-09-14)
+    if (ab) {
+      var on = ab.dataset.on === '1', scope = ab.dataset.scope;
+      if (scope === 'campus' || scope === 'town') state.venues.forEach(function (v) { if ((venueArea(v) === 'town') === (scope === 'town')) setChecked(state.venueMode, v, on); });
+      else if (scope === 'team') TEAMS.forEach(function (t) { setChecked(state.teamMode, t.slug, on); });
+      else TYPE_LIST.forEach(function (t) { setChecked(state.badgeMode, t.key, on); });
+      applyFilters();
+      return;
+    }
     var o = e.target.closest('.fp-only');
     if (o) {
       if (o.dataset.group === 'team') {
@@ -806,6 +815,7 @@
         if ($('teamsView').hidden) return;
         if (slug === 'auto') { slug = defaultTeamSlug(); history.replaceState(null, '', teamsUrl(slug)); }
         renderTeams(slug);
+        warmTeams(); // every club's crests and odds fetched now, so a switch draws its block whole the first time
       });
     } else {
       teamView.slug = null;
@@ -816,6 +826,14 @@
     updateSubscribe();
   }
   function teamGames(slug) { return (teamsData && teamsData.teams && teamsData.teams[slug]) || null; }
+  // The club as its league lists it — name, abbreviation, the home
+  // ground's city — from the build (teams.json form[slug].club, read from
+  // the league's own feed each run), else filter.js's fallback. Nothing is
+  // assumed to be Seattle's.
+  function clubInfo(t) { var f = teamsData && teamsData.form && teamsData.form[t.slug]; return (f && f.club) || {}; }
+  function clubName(t) { return clubInfo(t).name || t.name || t.label; }
+  function clubAbbr(t) { return clubInfo(t).abbr || t.abbr || t.label.slice(0, 3).toUpperCase(); }
+  function clubCity(t) { return clubInfo(t).city || t.city || ''; }
   // Which clubs are in season: a game within the last three weeks or the
   // next six (a preseason counts, a postseason too). The rest — off-season,
   // or a season just over — show in the strip as a crest alone, at its
@@ -1025,7 +1043,7 @@
         var pbody = document.createElement('div'); pbody.className = 'ev-body'; prow.appendChild(pbody);
         var pwhere = document.createElement('span'); pwhere.className = 'venue is-away'; pwhere.textContent = r.site || roundSpan(r); pbody.appendChild(pwhere);
         var ptitle = document.createElement('span'); ptitle.className = 'ev-title'; ptitle.textContent = r.name + ' '; pbody.appendChild(ptitle);
-        var badge = document.createElement('span'); badge.className = 'badge b-post'; badge.textContent = r.tbd ? 'if they qualify · dates TBA' : 'if they qualify'; ptitle.appendChild(badge);
+        if (r.tbd) { var badge = document.createElement('span'); badge.className = 'badge b-post'; badge.textContent = 'Dates TBA'; ptitle.appendChild(badge); } // a round whose dates are the usual calendar, not yet announced (Steve, 2026-09-14: no "if they qualify")
         pg.appendChild(li);
       });
       list.appendChild(pg);
@@ -1165,7 +1183,7 @@
     var box = document.createElement('div'); box.className = 'team-form is-live is-season has-bug is-' + stage;
     var main = document.createElement('div'); main.className = 'tf-main'; box.appendChild(main);
     var row = document.createElement('div'); row.className = 'tf-row'; main.appendChild(row);
-    if (team.logo) { var im = document.createElement('img'); im.src = team.logo; im.alt = ''; im.width = 56; im.height = 56; im.title = 'Seattle ' + team.label; row.appendChild(crestLink(im, teamSite(team), 'Seattle ' + team.label)); }
+    if (team.logo) { var im = document.createElement('img'); im.src = team.logo; im.alt = ''; im.width = 56; im.height = 56; im.title = clubName(team); row.appendChild(crestLink(im, teamSite(team), clubName(team))); }
     var body = document.createElement('div'); body.className = 'tf-body'; row.appendChild(body);
     var inner = document.createElement('div'); inner.className = 'tf-inner'; body.appendChild(inner);
     var cluster = document.createElement('div'); cluster.className = 'tf-cluster'; inner.appendChild(cluster);
@@ -1182,7 +1200,7 @@
     var odds = od && od.date === next.date && od.chance ? od : null;
     if (odds) {
       var oppT = { abbreviation: (odds.them && odds.them.abbr) || next.opp.abbrev || '', color: odds.them && odds.them.color, alternateColor: odds.them && odds.them.alt, name: next.opp.short || next.opp.name, displayName: next.opp.name, shortDisplayName: next.opp.short || next.opp.name };
-      var usS = { team: { abbreviation: 'SEA', color: String((team.colors || [])[0] || '555').replace(/^#/, '') }, homeAway: next.home ? 'home' : 'away', isUs: true };
+      var usS = { team: { abbreviation: clubAbbr(team), color: String((team.colors || [])[0] || '555').replace(/^#/, '') }, homeAway: next.home ? 'home' : 'away', isUs: true };
       var themS = { team: oppT, homeAway: next.home ? 'away' : 'home' };
       var rel = parseDate(next.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
       bugwrap.appendChild(buildPregameBug(team, null, usS, themS, { chance: odds.chance }, rel, next.time && !next.tbd ? next.date + 'T' + next.time : null));
@@ -1192,7 +1210,7 @@
     // the top of the news column: the next game (or the last), last season, the outlook
     var lead = document.createElement('div'); lead.className = 'tf-lines tf-lead';
     var hl = document.createElement('a'); hl.textContent = team.venue; hl.target = '_blank'; hl.rel = 'noopener'; hl.title = 'On Google Maps';
-    hl.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(team.venue + ', Seattle, WA'); home.appendChild(hl);
+    hl.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(team.venue + (clubCity(team) ? ', ' + clubCity(team) : '')); home.appendChild(hl); // the ground's own city, from the league (Tukwila for the Seawolves)
     function line(cls, html) { var p = document.createElement('p'); p.className = cls; p.innerHTML = html; lead.appendChild(p); return p; }
     if (next) line('tf-next', '<b>' + (stage === 'pre' ? (next.pre ? 'Preseason' : 'Opens') : 'Next') + '</b> ' + esc(gameLine(next)) + (next.time && !next.tbd ? ', ' + esc(fmtTime(next.time)) : '')); // before the season: the next game, named for what it is (a preseason game, or the opener)
     if (next && team.espn) { // the series so far, under the next game's line, once it has come (fetchNextOdds redraws the block quietly when the odds and the series land)
@@ -1332,8 +1350,8 @@
   function foldWatch() {
     document.querySelectorAll('#teamHead .tf-watch').forEach(function (w) {
       if (w.classList.contains('is-open')) return;
-      var ch = w.querySelector('.tf-channels');
-      w.classList.toggle('has-more', !!ch && ch.scrollHeight > ch.clientHeight + 2);
+      var more = Array.prototype.some.call(w.querySelectorAll('.tf-channels'), function (ch) { return ch.scrollHeight > ch.clientHeight + 2; });
+      w.classList.toggle('has-more', more);
     });
   }
   // The scorebug is drawn at its natural width and never wider than the
@@ -1345,6 +1363,13 @@
       var over = function (el) { return el.scrollWidth > el.clientWidth + 1; };
       // the grid past the frame, or a trimming cell (the run of results, the top row's pieces) with more than it can show
       if (over(b) || Array.prototype.some.call(b.querySelectorAll('.bug-ev, .bug-top > span'), over)) b.classList.add('is-tight');
+      // the ODDS tab under the pregame bug sits exactly under the percentages' column: measured here, handed to styles.css as --tab-l / --tab-w (in the tab's own zoomed pixels)
+      var cell = b.querySelector('.bug-odds'), wrap = b.parentNode;
+      if (cell && wrap) {
+        var z = parseFloat(getComputedStyle(b).zoom) || 1, wr = wrap.getBoundingClientRect(), cr = cell.getBoundingClientRect();
+        wrap.style.setProperty('--tab-l', ((cr.left - wr.left) / z).toFixed(1) + 'px');
+        wrap.style.setProperty('--tab-w', (cr.width / z).toFixed(1) + 'px');
+      }
     });
   }
   function settleBlock() { fitBug(); foldNews(); alignCrests(); foldWatch(); }
@@ -1383,10 +1408,9 @@
     if (lead) lead.querySelectorAll('p').forEach(function (p) { if (!p.classList.contains('tf-blurb')) brief.appendChild(p.cloneNode(true)); });
     if (watch) {
       var tv = [], radio = [];
-      watch.querySelectorAll('.tf-channels > li').forEach(function (li) {
-        var name = li.querySelector('b') ? li.querySelector('b').textContent : '';
-        if (name === 'Radio') li.querySelectorAll('span').forEach(function (sp) { radio.push(sp.textContent); }); else if (name) tv.push(name);
-      });
+      watch.querySelectorAll('.tf-channels[data-kind="tv"] > li > b').forEach(function (b) { tv.push(b.textContent); });
+      if (!tv.length) watch.querySelectorAll('.tf-channels[data-kind="stream"] > li > b').forEach(function (b) { tv.push(b.textContent); }); // streaming only: the services stand in
+      watch.querySelectorAll('.tf-channels[data-kind="radio"] span').forEach(function (sp) { radio.push(sp.textContent); });
       if (tv.length) { var t = document.createElement('p'); t.className = 'tf-brief-watch'; t.innerHTML = '<b>TV</b> '; t.appendChild(document.createTextNode(tv.join(' · '))); brief.appendChild(t); }
       if (radio.length) { var r = document.createElement('p'); r.className = 'tf-brief-watch'; r.innerHTML = '<b>Radio</b> '; r.appendChild(document.createTextNode(radio.join(' · '))); brief.appendChild(r); }
     }
@@ -1404,12 +1428,13 @@
     radio = (radio || []).slice();
     (club.radio || []).forEach(function (r) { if (radio.indexOf(r) < 0) radio.push(r); });
     var wl = document.createElement('div'); wl.className = 'tf-watch';
-    var wh = document.createElement('span'); wh.className = 'tf-tv'; wh.title = label ? 'Where to watch the next game' : 'Where to watch';
-    wh.innerHTML = CAST_SVG + '<span class="sr-only">Watch</span>';
-    wl.appendChild(wh);
     if (label) { var lb = document.createElement('b'); lb.className = 'tf-watch-label'; lb.textContent = label; wl.appendChild(lb); }
-    if (names.length || (radio && radio.length)) wl.appendChild(buildWatchList(names, radio));
-    else { var none = document.createElement('span'); none.className = 'tf-watch-none'; none.textContent = 'Broadcast to be announced'; wl.appendChild(none); }
+    // three sections (Steve, 2026-09-14): streaming at the left, TV centred, radio at the right, each behind its own mark
+    var parts = splitWatch(names), any = parts.tv.length || parts.stream.length || (radio && radio.length);
+    if (!any) { var none = document.createElement('span'); none.className = 'tf-watch-none'; none.textContent = 'Broadcast to be announced'; wl.appendChild(none); }
+    wl.appendChild(watchSection('stream', CAST_SVG, 'Streaming', parts.stream.length ? buildWatchList(parts.stream, null, 'stream', parts.own) : null));
+    wl.appendChild(watchSection('tv', TV_SVG, 'TV', parts.tv.length ? buildWatchList(parts.tv, null, 'tv') : null));
+    wl.appendChild(watchSection('radio', RADIO_SVG, 'Radio', radio && radio.length ? buildWatchList([], radio, 'radio') : null));
     var more = document.createElement('button'); more.type = 'button'; more.className = 'tf-wmore'; // the rest of the ways, when one line can't hold them (foldWatch shows the chevron)
     more.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
     function setWatchOpen(open) { wl.classList.toggle('is-open', open); more.title = open ? 'Fewer' : 'More ways to watch'; more.setAttribute('aria-label', more.title); more.setAttribute('aria-expanded', open ? 'true' : 'false'); }
@@ -1424,26 +1449,55 @@
     });
     return wl;
   }
-  // a list: each network with how to get it — DirecTV / Dish numbers, the
-  // over-the-air station, the streaming services — plus the radio call;
-  // every entry a link where the table has one
-  function buildWatchList(names, radio) {
-    var ul = document.createElement('ul'); ul.className = 'tf-channels';
+  // The league's names sorted into the strip's sections: a network that
+  // reaches a set (an antenna, DirecTV, Dish, Xfinity) is TV, and the
+  // services that carry it join the streaming section; a name with no set
+  // behind it (Peacock, NWSL+, Mariners.TV) is streaming itself. Each
+  // service once.
+  function splitWatch(names) {
+    var tv = [], stream = [], seen = {}, own = {};
+    var add = function (x) { var k = String(x).toLowerCase(); if (!seen[k]) { seen[k] = true; stream.push(x); } };
+    names.forEach(function (n) {
+      var info = channelInfo(n), set = info && (info.ota || info.directv || info.dish || info.xfinity);
+      if (set || !info) tv.push(n); else { add(n); own[String(n).toLowerCase()] = true; } // own: named by the league, so its entry's ways show (free at…)
+    });
+    names.forEach(function (n) { // the networks' services, after the services named outright
+      var info = channelInfo(n), set = info && (info.ota || info.directv || info.dish || info.xfinity);
+      if (set) (info.stream || []).forEach(add);
+    });
+    return { tv: tv, stream: stream, own: own };
+  }
+  var TV_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 21h8M12 18v3M8 3l4 3 4-3"/></svg>';
+  var RADIO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="12" rx="2"/><circle cx="8.5" cy="15" r="2.5"/><path d="M14 13h4M14 17h4M6 9l12-6"/></svg>';
+  function watchSection(kind, svg, title, list) { // a section: its mark, then its list — empty when the game has none of that kind (it keeps its place, so TV stays centred)
+    var sec = document.createElement('div'); sec.className = 'tf-sect tf-sect-' + kind; sec.dataset.kind = kind;
+    if (!list) { sec.classList.add('is-empty'); return sec; }
+    var ico = document.createElement('span'); ico.className = 'tf-ico'; ico.title = title; ico.innerHTML = svg + '<span class="sr-only">' + title + '</span>'; sec.appendChild(ico);
+    sec.appendChild(list);
+    return sec;
+  }
+  // a list for a section — TV: each network with the ways to a set (the
+  // antenna, DirecTV, Xfinity); streaming: each service, with how to reach
+  // it where the table says (NWSL+); radio: the stations. Every entry a
+  // link where the table has one.
+  function buildWatchList(names, radio, kind, own) {
+    var ul = document.createElement('ul'); ul.className = 'tf-channels'; ul.dataset.kind = kind || 'tv';
     names.forEach(function (n) {
       var li = document.createElement('li'), info = channelInfo(n);
       li.appendChild(watchEntry('b', n));
       var how = [];
-      if (info) { // a streaming-only service is just its name; a network gets the ways to reach it — the strip has two lines, so: the antenna, DirecTV, Xfinity, and the first two services
+      if (info && kind === 'tv') {
         if (info.ota) how.push('over the air ' + info.ota);
         if (info.directv) how.push('DirecTV ' + info.directv);
         if (info.xfinity) how.push('Xfinity ' + info.xfinity);
-        (info.stream || []).filter(function (x) { return x.toLowerCase() !== String(n).toLowerCase(); }).slice(0, 2).forEach(function (x) { how.push(x); }); // not the network itself (Apple TV)
+      } else if (info && kind === 'stream' && own && own[String(n).toLowerCase()]) { // a service the league named: its own ways, as its entry lists them (free at…, the app on…)
+        (info.stream || []).filter(function (x) { return x.toLowerCase() !== String(n).toLowerCase(); }).slice(0, 2).forEach(function (x) { how.push(x); });
       }
       how.forEach(function (h) { li.appendChild(watchEntry('span', h)); });
       ul.appendChild(li);
     });
     if (radio && radio.length) {
-      var rl = document.createElement('li'); var rb = document.createElement('b'); rb.textContent = 'Radio'; rl.appendChild(rb);
+      var rl = document.createElement('li');
       radio.forEach(function (r) { rl.appendChild(watchEntry('span', r)); }); ul.appendChild(rl);
     }
     return ul;
@@ -1493,7 +1547,7 @@
   // feed's next run brings the result — no live score, no odds.
   function synthEvent(team, g) {
     var when = new Date(g.date + 'T' + (g.tbd || !g.time ? '12:00:00' : g.time));
-    var us = { team: { id: 'us', abbreviation: 'SEA', displayName: 'Seattle ' + team.label, shortDisplayName: team.label, color: String((team.colors || [])[0] || '').replace('#', '') }, score: g.res ? String(g.res.us) : '', homeAway: g.home ? 'home' : 'away' };
+    var us = { team: { id: 'us', abbreviation: clubAbbr(team), displayName: clubName(team), shortDisplayName: team.label, color: String((team.colors || [])[0] || '').replace('#', '') }, score: g.res ? String(g.res.us) : '', homeAway: g.home ? 'home' : 'away' };
     var them = { team: { id: 'them', abbreviation: g.opp.abbrev || String(g.opp.short || g.opp.name).slice(0, 3).toUpperCase(), displayName: g.opp.name, shortDisplayName: g.opp.short || g.opp.name, name: g.opp.short || g.opp.name, logo: g.opp.logo }, score: g.res ? String(g.res.them) : '', homeAway: g.home ? 'away' : 'home' };
     var detail = g.res ? 'Final' + (g.res.ot ? '/' + g.res.ot : '') : '';
     return { id: 'sched-' + g.date, date: when.toISOString(), links: [], competitions: [{ competitors: [us, them], status: { type: { state: g.res ? 'post' : 'pre', detail: detail, shortDetail: detail } }, venue: { fullName: g.home ? team.venue : (g.venue || '') }, broadcasts: g.watch && g.watch.tv ? [{ market: 'national', names: g.watch.tv }] : [], details: [] }] };
@@ -1692,6 +1746,19 @@
   // Asked once an hour per club, for a game inside the next two weeks; the
   // season block is redrawn quietly when the odds land.
   var ODDS_DAYS = 14;
+  // Warming, on opening the Teams view: every club's crest and its next
+  // opponent's, and the odds for every club's next game (fetchNextOdds keeps
+  // them an hour), so switching clubs draws the block complete at once
+  // instead of once for the season bug and again when the odds land.
+  var warmed = [];
+  function warmTeams() {
+    var today = todayStr();
+    LQAFilter.TEAMS.forEach(function (t) {
+      var gs = teamGames(t.slug) || [], next = gs.filter(function (g) { return g.date >= today; })[0];
+      [t.logo, next && next.opp && next.opp.logo].forEach(function (src) { if (src) { var im = new Image(); im.src = src; warmed.push(im); } });
+      if (next && t.espn) fetchNextOdds(t, next);
+    });
+  }
   function fetchNextOdds(team, g) {
     if (!team.espn || !g || g.date > dayAfter(todayStr(), ODDS_DAYS)) return;
     var have = live.odds[team.slug];
@@ -1872,15 +1939,14 @@
     var draw = m.chance.draw || 0, src = m.chance.source || 'ESPN Matchup Predictor';
     var box = document.createElement('div'); box.className = 'tf-pred'; box.title = 'Win chance — ' + src + (draw ? ' · draw ' + draw + '%' : '');
     // the ring: theirs all round, ours from the top clockwise as much as our chance, then the draw's share (grey) after ours
-    var tilde = m.chance.est ? '~' : ''; // an estimate says so
-    box.innerHTML = '<span class="tp-side"><b>' + tilde + m.chance.us + '%</b>' + esc(us.team.abbreviation || team.label) + '</span>' + // the numbers in the page's ink: a navy on the dark card would vanish
+    box.innerHTML = '<span class="tp-side"><b>' + m.chance.us + '%</b>' + esc(us.team.abbreviation || team.label) + '</span>' + // the numbers in the page's ink: a navy on the dark card would vanish
       // a disc all but a pinhole (the band runs from 4 to 19.4 of 21); pathLength 100 so the dashes are percentages whatever the radius
       '<span class="tp-ring"><svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="11.7" pathLength="100" fill="none" stroke="' + theirs + '" stroke-width="15.4"/>' +
       '<circle cx="21" cy="21" r="11.7" pathLength="100" fill="none" stroke="' + ours + '" stroke-width="15.4" stroke-dasharray="' + m.chance.us + ' ' + (100 - m.chance.us) + '" transform="rotate(-90 21 21)"/>' +
       (draw ? '<circle cx="21" cy="21" r="11.7" pathLength="100" fill="none" stroke="#8a8f95" stroke-width="15.4" stroke-dasharray="' + draw + ' ' + (100 - draw) + '" transform="rotate(' + (-90 + m.chance.us * 3.6) + ' 21 21)"/>' : '') +
       '<circle cx="21" cy="21" r="20.1" fill="none" stroke="#f4f4f4" stroke-width="1"/><circle cx="21" cy="21" r="3.6" fill="none" stroke="#f4f4f4" stroke-width="1"/></svg>' + // a hairline either side of the band
       (draw ? '<i>draw ' + draw + '%</i>' : '') + '</span>' +
-      '<span class="tp-side"><b>' + tilde + m.chance.them + '%</b>' + esc(them.team.abbreviation || them.team.shortDisplayName) + '</span>';
+      '<span class="tp-side"><b>' + m.chance.them + '%</b>' + esc(them.team.abbreviation || them.team.shortDisplayName) + '</span>';
     return box;
   }
   // A baseball game in progress, drawn the way a broadcast draws it: the
@@ -1972,7 +2038,7 @@
     var chance = mu && mu.chance ? mu.chance : null;
     var rows = order.map(function (side) {
       var rec = (side.records || []).filter(function (r) { return !r.type || r.type === 'total'; })[0]; // no odds yet: each side's season record where the chance would go
-      var pct = chance ? (chance.est ? '~' : '') + (side === us ? chance.us : chance.them) + '%' : (rec && rec.summary) || '–';
+      var pct = chance ? (side === us ? chance.us : chance.them) + '%' : (rec && rec.summary) || '–';
       return teamCell(side, team, col(side)) + '<span class="bug-score bug-odds">' + esc(pct) + '</span>';
     });
     var ring = '';
@@ -1980,7 +2046,7 @@
       var pg = buildPredictor(mu, team, us, them, { us: col(us), them: col(them) }), svg = pg && pg.querySelector('svg'); // the ring in the rows' own colours
       if (svg) ring = '<span class="bug-ring" title="' + esc(pg.title) + '">' + svg.outerHTML + '</span>'; // the ring alone: the rows' colours say whose share is whose (the title names the source and any draw share) // the label sits with the ring, in the room beside it, not in the top row
     }
-    var b = document.createElement('div'); b.className = 'tf-bug is-generic is-pregame' + (ring ? '' : ' no-ev'); b.title = 'Before the game';
+    var b = document.createElement('div'); b.className = 'tf-bug is-generic is-pregame' + (ring ? '' : ' no-ev') + (chance && chance.est ? ' is-est' : ''); b.title = 'Before the game'; // is-est: the tab under the bug says ESTIMATE instead of ODDS
     b.innerHTML = '<div class="bug-top"><span class="bug-pitcher">' + esc(start) + '</span></div>' +
       '<div class="bug-grid bug-grid-2' + (ring ? ' has-ring' : ' no-ev') + '">' + rows[0] + ring + rows[1] + '</div>';
     return b;
@@ -2020,7 +2086,7 @@
   }
   function teamCell(side, team, color) { // the abbreviation on the block, the nickname on the compact bar (styles.css .bug-abbr / .bug-nick)
     function esc(x) { return String(x).replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; }); }
-    var abbr = side.team.abbreviation || side.team.shortDisplayName, nick = side.isUs ? team.label : nickname(side.team);
+    var abbr = (side.isUs && clubAbbr(team)) || side.team.abbreviation || side.team.shortDisplayName, nick = side.isUs ? team.label : nickname(side.team); // our side as the league lists it
     return '<span class="bug-team" style="background:' + color + '"><i class="bug-abbr">' + esc(abbr) + '</i><i class="bug-nick">' + esc(nick || abbr) + '</i></span>';
   }
   function renderTeamLive(team, ev) {
@@ -2037,7 +2103,7 @@
     // the left section: the crests either side of the cluster, then the venue line and the watch strip across it, centred; the news column beside
     var main = document.createElement('div'); main.className = 'tf-main'; box.appendChild(main);
     var row = document.createElement('div'); row.className = 'tf-row'; main.appendChild(row);
-    if (team.logo) { var im = document.createElement('img'); im.src = team.logo; im.alt = ''; im.width = 56; im.height = 56; im.title = 'Seattle ' + team.label; row.appendChild(crestLink(im, teamSite(team), 'Seattle ' + team.label)); }
+    if (team.logo) { var im = document.createElement('img'); im.src = team.logo; im.alt = ''; im.width = 56; im.height = 56; im.title = clubName(team); row.appendChild(crestLink(im, teamSite(team), clubName(team))); }
     var body = document.createElement('div'); body.className = 'tf-body'; row.appendChild(body);
     var inner = document.createElement('div'); inner.className = 'tf-inner'; body.appendChild(inner); // the cluster (the score) beside a column of the rest, all within the crests' height
     var cluster = document.createElement('div'); cluster.className = 'tf-cluster'; inner.appendChild(cluster);
@@ -2235,7 +2301,7 @@
         var num = document.createElement('span'); num.className = 'num'; num.textContent = dayN; cell.appendChild(num);
         if (!gs.length) { // a postseason day: shaded, named on hover
           var rd = rounds.filter(function (r) { return key >= r.start && key <= r.end; })[0];
-          if (rd) { cell.className += ' is-post' + (rd.final ? ' is-final' : ''); cell.title = rd.name + (rd.tbd ? ' (dates to be announced)' : '') + ' — if they qualify'; }
+          if (rd) { cell.className += ' is-post' + (rd.final ? ' is-final' : ''); cell.title = rd.name + (rd.tbd ? ' — dates TBA' : ''); }
         }
         if (gs.length) {
           var g = gs[0];
@@ -2267,6 +2333,7 @@
   // prepPrint sets the page up as the poster (also from ?print=1 on a
   // ?team= link, for a headless print-to-PDF); it hands back the undo
   function prepPrint(team) {
+    function esc(x) { return String(x).replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; }); }
     var games = teamGames(team.slug) || [];
     if (!games.length) return null;
     var wasCal = teamView.cal, title = document.title;
@@ -2280,9 +2347,13 @@
     var pt = document.createElement('div'); pt.className = 'ph-text';
     var played = games.filter(function (g) { return g.res; });
     var rec = played.length ? recordFrom(played) : '';
-    pt.innerHTML = '<span class="ph-team">Seattle ' + team.label + '</span><span class="ph-season">' + season + ' season' + (rec ? ' · ' + rec : '') + '</span>';
+    pt.innerHTML = '<span class="ph-team">' + esc(clubName(team)) + '</span><span class="ph-season">' + season + ' season' + (rec ? ' · ' + rec : '') + '</span>';
     ph.appendChild(pt);
-    var pf = $('printFoot'); pf.innerHTML = '<span class="pf-home">Home</span><span class="pf-away">Away</span><span>Start times Pacific, subject to change</span><span>fosdal.net/lqa-events</span>';
+    // the legend: home, away, then the hatched cells — the playoff windows and the final — when the league's rounds are on the calendar
+    var rounds = teamPostseason(team.slug), fin = rounds.filter(function (r) { return r.final; })[0];
+    var pf = $('printFoot'); pf.innerHTML = '<span class="pf-home">Home</span><span class="pf-away">Away</span>' +
+      (rounds.length ? '<span class="pf-post">Playoffs</span>' : '') + (fin ? '<span class="pf-final">' + esc(fin.name) + (fin.site ? ' · ' + esc(fin.site) : '') + '</span>' : '') +
+      '<span>Start times Pacific, subject to change</span><span>fosdal.net/lqa-events</span>';
     // the sheet: square months on one portrait page (like the wall posters),
     // two, three or four across — whichever leaves them biggest. Letter
     // less 8mm margins is 200 × 263mm; the banner and legend take ~36mm.

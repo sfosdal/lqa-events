@@ -227,7 +227,7 @@ test('Seawolves: fixtures from Upcoming, results from Previous by date, home = S
   assert.deepEqual({ date: g[0].date, pre: g[0].pre, opp: g[0].opp.name }, { date: '2026-03-28', pre: true, opp: 'Hartford Harpooners' });
   g = g.slice(1); // the season proper
   assert.deepEqual({ date: g[2].date, playoff: g[2].playoff, res: g[2].res, opp: g[2].opp.name }, { date: '2026-06-14', playoff: true, res: { us: 34, them: 43, won: false }, opp: 'California Legion' });
-  assert.deepEqual(g[0], { date: '2026-04-03', time: '19:30:00', tbd: false, home: true, opp: { name: 'Old Glory DC', short: 'Old Glory', abbrev: 'DC', logo: 'https://www.seawolves.rugby/images/teams/O.png', site: 'https://oldglorydc.com/' }, venue: 'Starfire Stadium', res: { us: 31, them: 20, won: true } });
+  assert.deepEqual(g[0], { date: '2026-04-03', time: '19:30:00', tbd: false, home: true, opp: { name: 'Old Glory DC', short: 'Old Glory', abbrev: 'DC', logo: 'https://www.seawolves.rugby/images/teams/O.png', site: 'https://oldglorydc.com/' }, venue: 'Starfire Stadium', city: 'Tukwila, WA', res: { us: 31, them: 20, won: true } });
   assert.equal(g[1].home, false); assert.equal(g[1].venue, 'Anthem Rugby Carolina'); assert.deepEqual(g[1].res, { us: 24, them: 27, won: false });
   assert.equal(wikiTitle('seawolves', [{ date: '2026-04-03' }, { date: '2026-06-14' }]), '2026 Seattle Seawolves season');
 });

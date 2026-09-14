@@ -21,6 +21,11 @@
   // Order = the Teams strip, left to right (Steve, 2026-09-10); Sounders
   // were not on his list and sit last rather than being dropped. sport keys
   // the little icon after the name in the strip (app.js SPORT_ICONS); colors =
+  // name / abbr: the club's full name and scoreboard abbreviation as its
+  // league lists them, for a first paint before teams.json arrives — the
+  // feed's own values (form[slug].club, from the build) take precedence.
+  // Nothing here assumes a club is Seattle's: the Huskies are Washington
+  // (WASH), the Seawolves play in Tukwila.
   // [primary, accent] — the season calendar's home cells and card frames;
   // espn = the club on ESPN's scoreboard, for the live game block (the PWHL
   // feed refuses browser requests, so the Torrent have none).
@@ -36,7 +41,7 @@
     // Seattle Seawolves: Major League Rugby (since 2018), Starfire Stadium in Tukwila; no ESPN coverage
     { slug: 'seawolves', colors: ['#003057', '#6cbe45'], sport: 'rugby', label: 'Seawolves', re: /seawolves/i, venue: 'Starfire Stadium', logo: 'https://www.seawolves.rugby/images/seawolves-logo.png', schedule: 'https://www.seawolves.rugby/schedule' },
     // Washington Huskies football (Big Ten), Husky Stadium on Montlake; ESPN's college-football feeds cover them like a pro club
-    { slug: 'huskies', espn: { sport: 'football', league: 'college-football', id: '264' }, colors: ['#4b2e83', '#b7a57a'], sport: 'football', label: 'Huskies', re: /huskies/i, venue: 'Husky Stadium', logo: 'https://a.espncdn.com/i/teamlogos/ncaa/500/264.png', schedule: 'https://gohuskies.com/sports/football/schedule' },
+    { slug: 'huskies', espn: { sport: 'football', league: 'college-football', id: '264' }, colors: ['#4b2e83', '#b7a57a'], sport: 'football', label: 'Huskies', name: 'Washington Huskies', abbr: 'WASH', re: /huskies/i, venue: 'Husky Stadium', logo: 'https://a.espncdn.com/i/teamlogos/ncaa/500/264.png', schedule: 'https://gohuskies.com/sports/football/schedule' },
     { slug: 'sounders', espn: { sport: 'soccer', league: 'usa.1', id: '9726' }, colors: ['#236192', '#5d9741'], sport: 'soccer', label: 'Sounders', re: /sounders/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/9726.png', schedule: 'https://www.soundersfc.com/schedule/' },
   ];
   var TEAM_BY_SLUG = {};

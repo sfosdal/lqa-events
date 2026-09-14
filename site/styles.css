@@ -231,7 +231,7 @@ html.teams-open #calToday { display: none; }
    grows to fill the gap before them */
 #subscribeBtn { order: 3; } /* always just left of the view switch, in either mode: the small icon chip (the mini calendar, or the poster) sits before it */
 #calToggle { order: 2; }
-#viewToggle { order: 4; } /* #teamPdfBtn sits just left of it while Teams is open */
+#viewToggle { order: -1; } /* the view switch leads the bar in either mode (Steve, 2026-09-14) */
 /* light / dark: a two-stop pill at the bar's right end, the ink knob
    sliding under the stop in effect (the system's side until a click) */
 .theme-toggle {
@@ -307,7 +307,13 @@ html.is-scrolled { --barh: calc(var(--barh-base) + var(--titleh)); }
 .fp-group h3 {
   font-family: var(--mono); font-size: .68rem; text-transform: uppercase;
   letter-spacing: .1em; color: var(--ink-soft); margin: 0 0 .35rem; font-weight: 500;
+  display: flex; align-items: baseline; gap: .6rem;
 }
+/* All · None at the heading's right end: plain words in the heading's own face, not chips */
+.fp-allnone { margin-left: auto; display: inline-flex; align-items: baseline; gap: .35rem; }
+.fp-allnone i { font-style: normal; opacity: .6; }
+.fp-set { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ink-soft); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--ink-soft) 50%, transparent); text-underline-offset: 2px; }
+.fp-set:hover { color: var(--ink); text-decoration-color: currentColor; }
 .fp-list { display: flex; flex-direction: column; }
 .fp-list + h3 { margin-top: 1rem; } /* a second group stacked in the same column */
 .fp-row { display: flex; align-items: center; gap: .5rem; padding: .3rem .35rem; border-radius: 6px; }
@@ -963,10 +969,13 @@ html { overflow-anchor: none; }
 /* compact: the scorebug stays, slimmed — no pitcher rows, no last out — in place of the score and the state line */
 /* the odds bug wears a small tab out of its foot saying so (Steve, 2026-09-14) — room for it below, none on the compact bar */
 .tf-bugwrap { position: relative; }
-.tf-bugwrap:has(> .is-pregame) { margin-bottom: .95rem; }
-.tf-bugwrap:has(> .is-pregame)::after { content: "ODDS"; position: absolute; left: 50%; bottom: -.95rem; transform: translateX(-50%); font: 700 .6rem/1 var(--mono); letter-spacing: .14em; color: #f4f4f4; background: #2b2d30; border: 2px solid #c9cdd2; border-top: 0; border-radius: 0 0 6px 6px; padding: .22rem .6rem .18rem; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
+.tf-bugwrap:has(> .is-pregame) { margin-bottom: 1.5rem; }
+.tf-bugwrap:has(> .is-pregame)::after { content: "ODDS"; position: absolute; left: var(--tab-l, 0); width: var(--tab-w, max-content); box-sizing: border-box; text-align: center; top: 100%; zoom: 1.25; font: 700 .6rem/1 var(--mono); letter-spacing: .14em; color: #f4f4f4; background: #2b2d30; border: 2px solid #c9cdd2; border-top: 0; border-radius: 0 0 6px 6px; padding: .22rem .6rem .18rem; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); } /* hung from the frame's bottom edge (top: 100%), so the frame's own line runs on unbroken above it; the bug's zoom, border and face */
+.tf-bugwrap:has(> .is-pregame.is-tight) { margin-bottom: 1.2rem; }
+.tf-bugwrap:has(> .is-pregame.is-tight)::after { zoom: 1; }
 #teamHead.is-compact .tf-bugwrap { margin: 0; }
 #teamHead.is-compact .tf-bugwrap::after { display: none; }
+.tf-bugwrap:has(> .is-pregame.is-est)::after { content: "ESTIMATE"; font-size: .5rem; letter-spacing: .08em; padding-top: .28rem; } /* no line for this game: the chances come from the clubs' records — a longer word, set tighter to keep the column's width */
 #teamHead.is-compact .tf-bugwrap .tf-out, #teamHead.is-compact .bug-top, #teamHead.is-compact .has-bug .tf-head .tf-score, #teamHead.is-compact .has-bug .tf-lines .tf-state { display: none; }
 .tf-bug:not(.is-generic) { zoom: 1.02; } /* baseball's live bug has three rows on top: no room to grow */
 #teamHead.is-compact .tf-bug, #teamHead.is-compact .tf-bug:not(.is-generic) { zoom: 1; border-width: 1px; border-radius: 5px; box-shadow: none; }
@@ -993,8 +1002,22 @@ html { overflow-anchor: none; }
 .tf-channels a { color: inherit; text-decoration: none; border-bottom: 1px dotted color-mix(in srgb, var(--ink-soft) 60%, transparent); }
 .tf-channels a:hover { color: var(--team-2); border-bottom-color: currentColor; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.tf-tv { flex: none; position: relative; color: var(--ink-soft); display: inline-flex; }
-.tf-tv svg { width: 1.5rem; height: 1.5rem; }
+/* the strip's three sections (app.js buildWatchStrip): streaming at the left, TV centred, radio at the right — a grid of three equal tracks so the middle stays centred whatever the ends hold; an empty section keeps its track */
+.tf-sect { display: flex; align-items: center; gap: .5rem; min-width: 0; }
+.tf-sect-stream { justify-self: start; }
+.tf-sect-tv { justify-self: center; }
+.tf-sect-radio { justify-self: end; }
+.tf-sect.is-empty { visibility: hidden; }
+.tf-ico { flex: none; position: relative; color: var(--ink-soft); display: inline-flex; }
+.tf-ico svg { width: 1.5rem; height: 1.5rem; }
+.tf-sect-tv .tf-channels { justify-content: flex-start; } /* the list starts at its mark; the section as a whole is what sits centred */
+.tf-sect-radio .tf-channels { justify-content: flex-end; }
+.tf-watch.has-more { padding-right: 2.2rem; } /* the chevron's room at the right end, clear of the radio section */
+@media (min-width: 641px) {
+  .tf-watch { display: grid; grid-template-columns: minmax(7rem, 1fr) minmax(0, auto) minmax(7rem, 1fr); align-items: center; column-gap: 1rem; } /* the ends keep a floor, so a long TV list wraps behind the chevron rather than crushing them; a section never spills into its neighbour */
+  .tf-sect { min-width: 0; overflow: hidden; }
+  .tf-watch > .tf-watch-label, .tf-watch > .tf-watch-none { grid-column: 1 / -1; }
+}
 .tf-channels { list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-start; gap: .25rem 2rem; font-family: var(--mono); font-size: .74rem; line-height: 1.5; color: var(--ink-soft); max-height: 1.2rem; overflow: hidden; } /* one line; the rest unfolds behind the chevron (app.js foldWatch sets has-more when there is more) */
 .tf-watch.is-open { height: auto; padding-top: .7rem; padding-bottom: .7rem; }
 .tf-watch.is-open .tf-channels { max-height: none; }
@@ -1003,7 +1026,8 @@ html { overflow-anchor: none; }
 .tf-wmore:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 10%, transparent); }
 .tf-watch.has-more .tf-wmore { display: grid; }
 .tf-watch.is-open .tf-wmore svg { transform: rotate(180deg); }
-.team-form.has-refresh .tf-watch { padding-right: 3.2rem; } /* the refresh control's room in the strip's right end, on a game in progress */
+.team-form.has-refresh .tf-watch, .team-form.has-refresh .tf-watch.has-more { padding-right: 3.2rem; } /* the refresh control's room in the strip's right end, on a game in progress */
+.team-form.has-refresh .tf-watch.has-more { padding-right: 5.2rem; } /* both the chevron and the refresh control */
 .team-form.has-refresh .tf-wmore { right: 3.4rem; } /* left of the refresh button on a game block */ /* the entries flow from the left, evenly spaced, rather than spread to the ends */
 .tf-channels li { display: flex; flex-wrap: wrap; column-gap: .45rem; } /* the network, then each way, on one line */
 .tf-channels li span + span::before { content: "· "; }
@@ -1141,7 +1165,7 @@ html:not(.teams-open) #teamPdfBtn { display: none; }
    if it must; when the names won't fit the row app.js flags is-crests and
    the pills shrink to their crests */
 html:not(.teams-open) .team-strip { display: none; }
-.filterbar .team-strip { order: 1; flex: 1 1 0; min-width: 0; display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; padding: .1rem 0; } /* order: where the search box was, so Home Teams (3) keeps its place beside the theme pill (5) */
+.filterbar .team-strip { order: 1; flex: 1 1 0; min-width: 0; display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; padding: 0; } /* no vertical padding: the strip is exactly a pill tall, so the bar keeps one height in both modes */ /* order: where the search box was, so Home Teams (3) keeps its place beside the theme pill (5) */
 .team-strip::-webkit-scrollbar { display: none; }
 .team-tab {
   flex: none; display: inline-flex; align-items: center; gap: .4rem; min-height: 2.25rem;
@@ -1378,10 +1402,14 @@ body.sheet-open { overflow: hidden; }
   html.print-team .cal-day.is-pre { opacity: .55; } /* preseason, faded */
   html.print-team .cal-day, html.print-team .cal-mname, html.print-team .cal-wd, html.print-team .print-head, html.print-team .print-foot { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   /* the legend */
-  html.print-team .print-foot { display: flex; align-items: center; gap: 6mm; margin-top: 3mm; font: 500 7pt/1 var(--mono); color: var(--ink-soft); text-transform: uppercase; letter-spacing: .08em; }
+  html.print-team .print-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 2mm 6mm; margin-top: 3mm; font: 500 7pt/1 var(--mono); color: var(--ink-soft); text-transform: uppercase; letter-spacing: .08em; }
+  html.print-team .print-foot span { white-space: nowrap; } /* each legend entry whole; the row wraps between entries instead */
   html.print-team .print-foot span:last-child { margin-left: auto; text-transform: none; letter-spacing: 0; }
   html.print-team .pf-home::before, html.print-team .pf-away::before { content: ""; display: inline-block; width: 3.5mm; height: 3.5mm; margin-right: 1.5mm; vertical-align: -0.8mm; border: .3mm solid var(--team); }
   html.print-team .pf-home::before { background: var(--team); }
+  html.print-team .pf-post::before, html.print-team .pf-final::before { content: ""; display: inline-block; width: 3.5mm; height: 3.5mm; margin-right: 1.5mm; vertical-align: -0.8mm; border: .3mm solid #b4b9be; }
+  html.print-team .pf-post::before { background: repeating-linear-gradient(-45deg, #fff 0 .6mm, #b4b9be .6mm 1mm); } /* the playoff windows' hatch */
+  html.print-team .pf-final::before { background: repeating-linear-gradient(-45deg, #fff 0 .6mm, color-mix(in srgb, var(--team-2) 60%, #fff) .6mm 1mm); } /* the final's, in the club's accent */
 }
 
 /* ---- small screens (a phone, or a narrow window): the news column sits under the row, so it is low priority — one headline, no summary line, the rest behind the arrow (app.js foldNews, NEWS_SHOWN_NARROW) ---- */
@@ -1402,6 +1430,14 @@ body.sheet-open { overflow: hidden; }
   .tf-cluster { padding: 0; }
   .tf-inner, .tf-cluster, .tf-bugwrap, .is-live .tf-row > .tf-body { min-width: 0; max-width: 100%; width: 100%; } /* nothing wider than the block: the bug's long cells trim instead */
   .tf-bug, .tf-bug:not(.is-generic) { zoom: 1; width: 100%; max-width: 100%; }
+  .tf-bugwrap:has(> .is-pregame) { margin-bottom: 1.2rem; }
+  .tf-bugwrap:has(> .is-pregame)::after { zoom: 1; }
+  /* the watch strip's sections stack on a phone, each a full row from the left; the strip grows to hold them (blocks stack here, so nothing needs one height) */
+  .tf-watch { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: .3rem; height: auto; padding: .4rem 0 .55rem; }
+  .tf-sect { width: 100%; }
+  .tf-sect.is-empty { display: none; }
+  .tf-sect-tv .tf-channels, .tf-sect-radio .tf-channels { justify-content: flex-start; }
+  .tf-channels { max-height: none; gap: .25rem 1rem; }
   .filterbar .search-wrap { flex: 1 1 4rem; min-width: 3rem; } /* the box gives way first: on a 375px phone the icon row needs the room */
   /* a phone's bar is always the icon-only row: measured, the labelled one runs past the edge and the view switch with it */
   .filterbar #subscribeBtn span, .filterbar #filterToggle span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
