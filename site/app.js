@@ -599,10 +599,11 @@
       setChecked(state.teamMode, t.slug, plays);
     });
   }
-  function onlyVenue(v) {
+  function onlyVenue(v, everything) { // everything: every type and every club on, so nothing at the venue is hidden (the event sheet's Only)
     state.venues.forEach(function (x) { state.venueMode[x] = 'ex'; });
     delete state.venueMode[v];
-    TEAMS.forEach(function (t) { setChecked(state.teamMode, t.slug, t.venue === v); });
+    TEAMS.forEach(function (t) { setChecked(state.teamMode, t.slug, everything || t.venue === v); });
+    if (everything) { TYPE_LIST.forEach(function (ty) { setChecked(state.badgeMode, ty.key, ty.key !== 'bar'); }); return; } // every type but the bars' nights, which are not at the venue
     var today = todayStr();
     var present = {};
     state.events.forEach(function (e) { if (e.venue === v && e.date >= today) present[eventType(e)] = true; });
@@ -2407,7 +2408,7 @@
     w.hidden = !w.childNodes.length;
     var t = $('sheetTickets'); t.href = e.url || '#'; t.hidden = !e.url;
     var v = $('sheetVenueLink'); v.href = VENUE_URL[e.venue] || '#'; v.hidden = !VENUE_URL[e.venue]; v.textContent = 'What\u2019s on at ' + e.venue + ' \u2197'; // the venue's own calendar
-    var ov = $('sheetOnlyVenue'); ov.textContent = 'Only ' + e.venue; ov.hidden = state.venues.indexOf(e.venue) < 0; ov.dataset.venue = e.venue; // the filter, narrowed to this venue
+    var ov = $('sheetOnlyVenue'); ov.textContent = 'Only ' + e.venue; ov.hidden = state.venues.indexOf(e.venue) < 0 || eventType(e) === 'bar'; ov.dataset.venue = e.venue; // the filter, narrowed to this venue (bars are a type, not a venue)
     var team = TEAMS.filter(function (t) { return t.re.test(e.title || '') && t.venue === e.venue; })[0]; // a home game: the club's season, in the Teams view
     var tb = $('sheetTeam'); tb.hidden = !team; if (team) { tb.textContent = team.label + ' season'; tb.dataset.slug = team.slug; }
     var phone = matchMedia(sheetTouch).matches;
@@ -2429,7 +2430,11 @@
     document.body.classList.remove('sheet-open');
   }
   $('sheetClose').addEventListener('click', closeSheet);
-  $('sheetOnlyVenue').addEventListener('click', function () { var v = this.dataset.venue; closeSheet(); onlyVenue(v); applyFilters(); });
+  $('sheetOnlyVenue').addEventListener('click', function () { // the events list, narrowed to this venue with everything at it showing
+    var v = this.dataset.venue; closeSheet();
+    if (!$('teamsView').hidden) setTeamsView(null, true);
+    onlyVenue(v, true); applyFilters();
+  });
   $('sheetTeam').addEventListener('click', function () { var slug = this.dataset.slug; closeSheet(); setTeamsView(slug, true); });
   $('sheetBack').addEventListener('click', closeSheet);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('sheet').hidden) closeSheet(); });
