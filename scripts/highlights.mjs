@@ -27,7 +27,7 @@ export const CHANNELS = { // YouTube channel ids: the club's, then the league's
   torrent: ['UC3NYPPud40AIuTNrV9uU6Fw', 'UCuocIhnQvPAhk6eOopf0CfA'], // @PWHL__Seattle, @thepwhlofficial
   seawolves: ['UCPcMc2KfvSO0YGfxzrbzy3w', 'UCIynwDVqRK7KTUy72_kSBhA'], // @seattleseawolvesrugby, @USMLR
 };
-const LABEL = { seahawks: 'Seahawks', mariners: 'Mariners', kraken: 'Kraken', storm: 'Storm', sounders: 'Sounders', reign: 'Reign', torrent: 'Torrent', seawolves: 'Seawolves' };
+const LABEL = { seahawks: 'Seahawks', mariners: 'Mariners', kraken: 'Kraken', storm: 'Storm', sounders: 'Sounders', reign: 'Reign', torrent: 'Torrent', seawolves: 'Seawolves', huskies: 'Huskies' }; // the Huskies have no channel on file yet: no clips
 const unesc = (s) => String(s || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&#(\d+);/g, (m, n) => String.fromCharCode(n));
 const seattleDay = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
 const addDays = (ymd, n) => { const d = new Date(ymd + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };

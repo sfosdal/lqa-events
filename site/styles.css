@@ -22,6 +22,7 @@
   --v-tmobile: #3aa8b8;
   --v-seactr: #4048c8;
   --v-lumen: #6b6fcf;
+  --v-husky: #8a5fd0;
   --v-siff: #8f6fc9;
   --v-vera: #7a3fc4;
   --v-otb: #c04fc0;
@@ -60,7 +61,7 @@
     --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2; --ink-bright: #ffffff;
     --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
     --v-cornish: #3ecf97; --v-cpa: #4da3f0; --v-tmobile: #8ad8e0; --v-seactr: #6a72e6;
-    --v-lumen: #8b8fe8; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
+    --v-lumen: #8b8fe8; --v-husky: #c4a0f0; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
     --v-scc: #7fa7cc; --v-sct: #6cc9db; --v-mopop: #e88ad8; --v-pacsci: #62b8f7; --v-kexp: #b48cf5; --v-goat: #5fb3a1;
     --venue-text: 100%; --tint: 13%;
     --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
@@ -72,7 +73,7 @@
   --sky: #141a20; --mist: #1d252e; --ink: #e8edf1; --ink-soft: #9aa7b2; --ink-bright: #ffffff;
   --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
   --v-cornish: #3ecf97; --v-cpa: #4da3f0; --v-tmobile: #8ad8e0; --v-seactr: #6a72e6;
-  --v-lumen: #8b8fe8; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
+  --v-lumen: #8b8fe8; --v-husky: #c4a0f0; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
   --v-scc: #7fa7cc; --v-sct: #6cc9db; --v-mopop: #e88ad8; --v-pacsci: #62b8f7; --v-kexp: #b48cf5; --v-goat: #5fb3a1;
   --venue-text: 100%; --tint: 13%;
   --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
@@ -194,11 +195,11 @@ h1 {
 /* The bar can't wrap. When its content wouldn't fit — app.js measures and
    sets .is-tight — the labeled chips keep just their icons; the labels stay
    for screen readers. */
-.filterbar.is-tight #subscribeBtn span, .filterbar.is-tight #filterToggle span, .filterbar.is-tight #teamViewBtn span {
+.filterbar.is-tight #subscribeBtn span, .filterbar.is-tight #filterToggle span {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
-.filterbar.is-tight #subscribeBtn, .filterbar.is-tight #filterToggle, .filterbar.is-tight #teamViewBtn { padding: .5em .7em; }
-.filterbar.is-tight #subscribeBtn svg, .filterbar.is-tight #filterToggle svg, .filterbar.is-tight #teamViewBtn svg { width: 1.1rem; height: 1.1rem; }
+.filterbar.is-tight #subscribeBtn, .filterbar.is-tight #filterToggle { padding: .5em .7em; }
+.filterbar.is-tight #subscribeBtn svg, .filterbar.is-tight #filterToggle svg { width: 1.1rem; height: 1.1rem; }
 /* the Teams chip is a switch: solid while its view is on show */
 /* the view switch: agenda | home teams, a two-stop pill like the theme's (same rules, .view-toggle) */
 .view-toggle[data-active="teams"] .theme-knob { left: calc(3px + var(--tt)); }
@@ -206,7 +207,7 @@ h1 {
 /* while the Teams view is up the agenda's own controls step aside — the
    filters, search, the Today floater, Add To Calendar and the phone's calendar chip */
 html.teams-open #filterToggle, html.teams-open .search-wrap,
-html.teams-open #subscribeBtn, html.teams-open .cal-toggle { display: none; }
+html.teams-open .cal-toggle { display: none; } /* Add To Calendar stays: in Teams mode it offers the club's season feed */
 html.teams-open #calToday { display: none; }
 /* the search box: a chip that takes typing, a magnifier at its right end and
    no placeholder; it gives up width first when the row gets tight */
@@ -228,9 +229,9 @@ html.teams-open #calToday { display: none; }
    (narrow layouts only), Home Teams, then the theme pill always last (DOM
    order keeps the chips together; flex order places them); the search box
    grows to fill the gap before them */
-#subscribeBtn { order: 1; }
+#subscribeBtn { order: 3; } /* always just left of the view switch, in either mode: the small icon chip (the mini calendar, or the poster) sits before it */
 #calToggle { order: 2; }
-#viewToggle { order: 4; } /* #teamViewBtn (3) sits just left of it while Teams is open */
+#viewToggle { order: 4; } /* #teamPdfBtn sits just left of it while Teams is open */
 /* light / dark: a two-stop pill at the bar's right end, the ink knob
    sliding under the stop in effect (the system's side until a click) */
 .theme-toggle {
@@ -604,6 +605,7 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 }
 .pop-filter { display: flex; justify-content: center; gap: .5em; align-items: center; cursor: pointer; font-weight: 600; font-size: .88rem; margin: 0 0 .8rem; }
 .pop-filter input { accent-color: var(--ink); }
+.pop-filter[hidden] { display: none; } /* an author display beats the hidden attribute: say it outright (Teams mode has no filter to include) */
 
 /* ---- share / embed: a <details> in the footer that opens UPWARD, its body
    floating over the list ---- */
@@ -959,7 +961,12 @@ html { overflow-anchor: none; }
 #teamHead.is-compact .bug-ev { display: none; }
 #teamHead.is-compact .bug-grid.bug-grid-2 { grid-template-columns: minmax(2.7rem, max-content) 1.6rem; }
 /* compact: the scorebug stays, slimmed — no pitcher rows, no last out — in place of the score and the state line */
+/* the odds bug wears a small tab out of its foot saying so (Steve, 2026-09-14) — room for it below, none on the compact bar */
+.tf-bugwrap { position: relative; }
+.tf-bugwrap:has(> .is-pregame) { margin-bottom: .95rem; }
+.tf-bugwrap:has(> .is-pregame)::after { content: "ODDS"; position: absolute; left: 50%; bottom: -.95rem; transform: translateX(-50%); font: 700 .6rem/1 var(--mono); letter-spacing: .14em; color: #f4f4f4; background: #2b2d30; border: 2px solid #c9cdd2; border-top: 0; border-radius: 0 0 6px 6px; padding: .22rem .6rem .18rem; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
 #teamHead.is-compact .tf-bugwrap { margin: 0; }
+#teamHead.is-compact .tf-bugwrap::after { display: none; }
 #teamHead.is-compact .tf-bugwrap .tf-out, #teamHead.is-compact .bug-top, #teamHead.is-compact .has-bug .tf-head .tf-score, #teamHead.is-compact .has-bug .tf-lines .tf-state { display: none; }
 .tf-bug:not(.is-generic) { zoom: 1.02; } /* baseball's live bug has three rows on top: no room to grow */
 #teamHead.is-compact .tf-bug, #teamHead.is-compact .tf-bug:not(.is-generic) { zoom: 1; border-width: 1px; border-radius: 5px; box-shadow: none; }
@@ -1122,14 +1129,12 @@ html { overflow-anchor: none; }
 .team-cal .cal-day.is-past:not(.is-blank) { opacity: .5; }
 .team-cal .cal-day.is-past .num { color: inherit; }
 /* the PDF and list ⇄ calendar chips: only while the Teams view is open, just left of Home Teams */
-html:not(.teams-open) #teamViewBtn, html:not(.teams-open) #teamPdfBtn { display: none; }
-#teamViewBtn:disabled, #teamPdfBtn:disabled { opacity: .35; cursor: default; } /* every club's list (teams-all) has no calendar or poster: the chips stay put, dimmed, so the bar never shifts */
+html:not(.teams-open) #teamPdfBtn { display: none; }
+#teamPdfBtn:disabled { opacity: .35; cursor: default; } /* every club's list (teams-all) has no calendar or poster: the chips stay put, dimmed, so the bar never shifts */
 #teamPdfBtn { order: 2; }
-#teamViewBtn { order: 3; }
-#teamViewBtn, #teamPdfBtn { padding: .5em .7em; } /* icon only (the label stays for screen readers): the strip needs the room for its names */
-#teamViewBtn span, #teamPdfBtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-#teamViewBtn svg, #teamPdfBtn svg { width: 1.1rem; height: 1.1rem; }
-#teamViewBtn[aria-pressed="true"] { background: var(--ink); color: var(--sky); border-color: var(--ink); }
+#teamPdfBtn { padding: .5em .7em; } /* icon only (the label stays for screen readers): the strip needs the room for its names */
+#teamPdfBtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#teamPdfBtn svg { width: 1.1rem; height: 1.1rem; }
 /* the strip: one tab per team, crest over name, the chosen one solid */
 /* the strip lives in the bar, right of the theme toggle, only while the
    Teams view is open: one pill per club, crest and name, scrolling sideways
@@ -1158,6 +1163,9 @@ html:not(.teams-open) .team-strip { display: none; }
 .team-tab.is-live[aria-pressed="true"] { animation-name: tab-pulse-on; } /* the chosen club's pill is solid ink: it breathes in brightness instead */
 @keyframes tab-pulse-on { 50% { opacity: .78; transform: scale(1.03); } }
 @media (prefers-reduced-motion: reduce) { .team-tab.is-live { animation: none; border-color: var(--ink); } }
+/* out of season (app.js teamActive): the crest alone, after the clubs in season */
+.team-tab.is-off { order: 1; padding: .3rem .45rem; }
+.team-tab.is-off span, .team-tab.is-off .sport { display: none; }
 .team-strip.is-nosport .team-tab .sport { display: none; } /* the first thing to go when the row is tight */
 .team-strip.is-crests .team-tab { padding: .3rem .45rem; }
 .team-strip.is-crests .team-tab span, .team-strip.is-crests .team-tab .sport { display: none; }
@@ -1396,9 +1404,9 @@ body.sheet-open { overflow: hidden; }
   .tf-bug, .tf-bug:not(.is-generic) { zoom: 1; width: 100%; max-width: 100%; }
   .filterbar .search-wrap { flex: 1 1 4rem; min-width: 3rem; } /* the box gives way first: on a 375px phone the icon row needs the room */
   /* a phone's bar is always the icon-only row: measured, the labelled one runs past the edge and the view switch with it */
-  .filterbar #subscribeBtn span, .filterbar #filterToggle span, .filterbar #teamViewBtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .filterbar #subscribeBtn, .filterbar #filterToggle, .filterbar #teamViewBtn { padding: .5em .7em; }
-  .filterbar #subscribeBtn svg, .filterbar #filterToggle svg, .filterbar #teamViewBtn svg { width: 1.1rem; height: 1.1rem; }
+  .filterbar #subscribeBtn span, .filterbar #filterToggle span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .filterbar #subscribeBtn, .filterbar #filterToggle { padding: .5em .7em; }
+  .filterbar #subscribeBtn svg, .filterbar #filterToggle svg { width: 1.1rem; height: 1.1rem; }
   /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
   .filterbar { gap: .4rem; }
   .filterbar #calToggle .chev { display: none; }

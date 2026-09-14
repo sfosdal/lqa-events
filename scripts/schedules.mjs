@@ -209,6 +209,33 @@ export function normalizePwhl(games, teamId, playoff, pre) {
     }, final ? { us: usG, them: themG, won: usG > themG, ...(ot ? { ot } : {}) } : null);
   });
 }
+// No sportsbook or predictor prices the PWHL, so the site's estimate is
+// made here for every game still to play: log5 on the two clubs' points
+// shares from the standings (this season's once six games are in, else
+// last season's), the home side nudged up a little; an opponent with no
+// standings row yet (an expansion side) counts as a .500 club. app.js shows
+// it as it shows ESPN's, with a tilde. games: normalizePwhl's; rows: the standings
+// (team_id, games_played, points); returns the games, odds attached.
+export function pwhlOdds(games, rows, teamId) {
+  const share = {};
+  for (const r of rows || []) { const gp = Number(r.games_played); if (gp) share[String(r.team_id)] = Number(r.points) / (2 * gp); }
+  const us = share[String(teamId)];
+  return (games || []).map((g) => {
+    const oid = (String(g.opp?.logo || '').match(/logos\/(\d+)\.png/) || [])[1], them = share[oid] ?? 0.5; // a club with no row (an expansion side) is taken as league-average
+    if (g.res || us == null) return g;
+    const edge = 0.03, a = Math.min(0.97, Math.max(0.03, us + (g.home ? edge : -edge))), b = Math.min(0.97, Math.max(0.03, them + (g.home ? -edge : edge)));
+    const p = Math.round((a - a * b) / (a + b - 2 * a * b) * 100);
+    return { ...g, odds: { us: p, them: 100 - p, draw: 0, est: true, source: "an estimate from the two clubs' records — no line for the PWHL" } };
+  });
+}
+async function pwhlStandings(seasons, teamId) { // the newest regular season with six of the club's games in it, else the one before
+  for (const s of seasons.filter((x) => /regular season/i.test(x.name))) {
+    const rows = (await getJson(`${PWHL}&view=statviewtype&type=standings&stat=conference&season_id=${s.id}`)).SiteKit?.Statviewtype || [];
+    const mine = rows.find((x) => String(x.team_id) === String(teamId));
+    if (mine && Number(mine.games_played) >= 6) return rows;
+  }
+  return [];
+}
 async function pwhl(teamId) {
   const seasons = (await getJson(`${PWHL}&view=seasons`)).SiteKit.Seasons.map((x) => ({ id: Number(x.season_id), name: x.season_name }))
     .sort((a, b) => b.id - a.id);
@@ -221,7 +248,9 @@ async function pwhl(teamId) {
     const d = await getJson(`${PWHL}&view=schedule&season_id=${r.id}&team_id=${teamId}`);
     out.push(...normalizePwhl(d.SiteKit?.Schedule, teamId, /playoffs/i.test(r.name), /pre-?season/i.test(r.name)));
   }
-  return out.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+  let rows = [];
+  try { rows = await pwhlStandings(seasons, teamId); } catch (e) { console.error(`schedules: pwhl standings skipped — ${e.message}`); }
+  return pwhlOdds(out, rows, teamId).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
 }
 
 // Where each club stands: { record: 'W-L', standing: '3rd in AL West',
@@ -321,6 +350,7 @@ const FEEDS = {
   storm: [ST('storm')],
   sounders: [ST('sounders'), ['https://www.sounderatheart.com/feed', 'Sounder at Heart']],
   reign: [ST('reign')],
+  huskies: [ST('uw-husky-football'), ['https://www.uwdawgpound.com/rss/current.xml', 'UW Dawg Pound']],
   torrent: [ST('torrent')],
 };
 // Every source's pieces in one list, newest first by the time of posting
@@ -364,11 +394,13 @@ async function pwhlForm(teamId) {
 // (NFL seasons are titled by the year they start in, though they run into
 // January.)
 const WIKI = { mariners: 'Seattle Mariners', kraken: 'Seattle Kraken', seahawks: 'Seattle Seahawks', storm: 'Seattle Storm',
-  reign: 'Seattle Reign FC', sounders: 'Seattle Sounders FC', torrent: 'Seattle Torrent', seawolves: 'Seattle Seawolves' };
+  reign: 'Seattle Reign FC', sounders: 'Seattle Sounders FC', torrent: 'Seattle Torrent', seawolves: 'Seattle Seawolves', huskies: 'Washington Huskies football' };
 const WIKI_START_YEAR = { seahawks: true };
 const WIKI_CLUB = {}; // clubs with no season pages: their own article instead
+const WIKI_TEAM_PAGE = { huskies: true }; // college seasons are titled "2026 Washington Huskies football team", not "… season"
 export function wikiTitle(slug, games) {
   if (WIKI_CLUB[slug]) return WIKI_CLUB[slug];
+  if (WIKI_TEAM_PAGE[slug]) return games?.length ? `${games[0].date.slice(0, 4)} ${WIKI[slug]} team` : null;
   if (!WIKI[slug] || !games?.length) return null;
   const y1 = games[0].date.slice(0, 4), y2 = games[games.length - 1].date.slice(0, 4);
   return `${y1 === y2 || WIKI_START_YEAR[slug] ? y1 : `${y1}–${y2.slice(2)}`} ${WIKI[slug]} season`;
@@ -414,6 +446,7 @@ export const FORM = [
   { slug: 'storm', fetch: () => espnForm('basketball', 'wnba', 14, 'Storm', 'storm') },
   { slug: 'sounders', fetch: () => espnForm('soccer', 'usa.1', 9726, 'Sounders', 'sounders') },
   { slug: 'reign', fetch: () => espnForm('soccer', 'usa.nwsl', 15363, 'Reign', 'reign') },
+  { slug: 'huskies', fetch: () => espnForm('football', 'college-football', 264, 'Huskies', 'huskies') },
   { slug: 'torrent', fetch: () => pwhlForm(8) },
   { slug: 'seawolves', fetch: () => seawolvesForm() },
 ];
@@ -508,6 +541,7 @@ export const SOURCES = [
   { slug: 'storm', fetch: () => espn('basketball', 'wnba', 14) },
   { slug: 'sounders', fetch: () => espn('soccer', 'usa.1', 9726) },
   { slug: 'reign', fetch: () => espn('soccer', 'usa.nwsl', 15363) },
+  { slug: 'huskies', fetch: () => espn('football', 'college-football', 264) },
   { slug: 'torrent', fetch: () => pwhl(8) },
   { slug: 'seawolves', fetch: () => seawolves() },
 ];

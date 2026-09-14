@@ -35,6 +35,8 @@
     { slug: 'torrent', colors: ['#0b2340', '#3fb6c4'], sport: 'hockey', label: 'Torrent', re: /seattle torrent/i, venue: 'Climate Pledge Arena', logo: 'https://assets.leaguestat.com/pwhl/logos/8.png', schedule: 'https://www.thepwhl.com/en/teams/seattle-torrent' },
     // Seattle Seawolves: Major League Rugby (since 2018), Starfire Stadium in Tukwila; no ESPN coverage
     { slug: 'seawolves', colors: ['#003057', '#6cbe45'], sport: 'rugby', label: 'Seawolves', re: /seawolves/i, venue: 'Starfire Stadium', logo: 'https://www.seawolves.rugby/images/seawolves-logo.png', schedule: 'https://www.seawolves.rugby/schedule' },
+    // Washington Huskies football (Big Ten), Husky Stadium on Montlake; ESPN's college-football feeds cover them like a pro club
+    { slug: 'huskies', espn: { sport: 'football', league: 'college-football', id: '264' }, colors: ['#4b2e83', '#b7a57a'], sport: 'football', label: 'Huskies', re: /huskies/i, venue: 'Husky Stadium', logo: 'https://a.espncdn.com/i/teamlogos/ncaa/500/264.png', schedule: 'https://gohuskies.com/sports/football/schedule' },
     { slug: 'sounders', espn: { sport: 'soccer', league: 'usa.1', id: '9726' }, colors: ['#236192', '#5d9741'], sport: 'soccer', label: 'Sounders', re: /sounders/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/9726.png', schedule: 'https://www.soundersfc.com/schedule/' },
   ];
   var TEAM_BY_SLUG = {};
@@ -42,7 +44,7 @@
 
   var TYPE_VENUE_DEFAULT = {
     'Climate Pledge Arena': 'concert', 'The Vera Project': 'concert',
-    'T-Mobile Park': 'concert', 'Lumen Field': 'concert', // non-game stadium bookings are shows
+    'T-Mobile Park': 'concert', 'Lumen Field': 'concert', 'Husky Stadium': 'concert', // non-game stadium bookings are shows
     'McCaw Hall': 'arts', 'Cornish Playhouse': 'arts', 'On the Boards': 'arts',
     'Seattle Center': 'community', 'SIFF Cinema Uptown': 'community', // SIFF specials = festival programming
     'Convention Center': 'expo',
@@ -86,6 +88,7 @@
     'On the Boards': favicon('ontheboards.org'),
     'T-Mobile Park': favicon('www.mlb.com'),
     'Lumen Field': favicon('www.lumenfield.com'),
+    'Husky Stadium': favicon('gohuskies.com'),
     // local bars: the bar's logo reduced to line art (scripts/make-mark.py),
     // shown on its agenda rows like a team crest — a path under site/
     'The Traveling Goat': 'marks/traveling-goat.png',
@@ -96,7 +99,7 @@
     'Cornish Playhouse': '#3ecf97', 'Climate Pledge Arena': '#4da3f0', 'T-Mobile Park': '#8ad8e0',
     'Seattle Center': '#6a72e6', 'Lumen Field': '#8b8fe8', 'SIFF Cinema Uptown': '#b596e0',
     'The Vera Project': '#a26be6', 'On the Boards': '#e07ae0', 'McCaw Hall': '#d158a7',
-    'Convention Center': '#7fa7cc',
+    'Convention Center': '#7fa7cc', 'Husky Stadium': '#c4a0f0',
     "Children's Theatre": '#6cc9db', 'MoPOP': '#e88ad8', 'Pacific Science Center': '#62b8f7', 'KEXP': '#b48cf5',
     'The Traveling Goat': '#5fb3a1', // bars: a muted sea-green, off the fallback hash's neon
   };
@@ -108,7 +111,7 @@
   // Center's two buildings as a big show fills them, Seattle Center as its
   // biggest grounds festival.
   var VENUE_CAPACITY = {
-    'Lumen Field': 68700, 'T-Mobile Park': 47900, 'Convention Center': 20000,
+    'Husky Stadium': 70000, 'Lumen Field': 68700, 'T-Mobile Park': 47900, 'Convention Center': 20000,
     'Climate Pledge Arena': 18100, 'Seattle Center': 10000, 'McCaw Hall': 2900,
     'MoPOP': 800, "Children's Theatre": 480, 'Cornish Playhouse': 460, 'SIFF Cinema Uptown': 450,
     'Pacific Science Center': 400, 'The Vera Project': 300, 'On the Boards': 300, 'KEXP': 200,
@@ -116,7 +119,7 @@
 
   // The campus venues walk a crowd past Lower Queen Anne; these three are a
   // bus ride away and listed for their size (a venue missing here is campus).
-  var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town', 'Starfire Stadium': 'town' };
+  var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town', 'Starfire Stadium': 'town', 'Husky Stadium': 'town' };
 
   function slugify(s) {
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -161,6 +164,7 @@
     ['badge', 'expo'], ['venue', 'Convention Center'],
     ['venue', "Children's Theatre"], ['venue', 'MoPOP'], ['venue', 'Pacific Science Center'], ['venue', 'KEXP'],
     ['badge', 'bar'],
+    ['venue', 'Husky Stadium'], ['team', 'huskies'],
   ];
   var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode' };
   function encodeFilterCode(mode) {

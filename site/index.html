@@ -89,12 +89,8 @@
   </label>
   <!-- the home teams' seasons, home and away (the Teams view below the bar) -->
   <button id="teamPdfBtn" class="chip" type="button" title="Download the season calendar as a PDF">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-    <span>PDF</span>
-  </button>
-  <button id="teamViewBtn" class="chip" type="button" aria-pressed="false" title="Season calendar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M13 13h3M8 17h3M13 17h3"/></svg>
-    <span>Calendar</span>
+    <span>PDF</span>
   </button>
   <!-- the view switch: the events list | the home teams' seasons, a two-stop pill like the theme's -->
   <div id="viewToggle" class="theme-toggle view-toggle" role="radiogroup" aria-label="View" data-active="events">
@@ -190,20 +186,20 @@
       <span class="fp-name">Holidays</span>
     </label>
   </div>
-  <!-- three even columns: the 11 campus venues; the 3 downtown venues over
-       the 7 teams (the stadiums and the teams that play in them); the 7 types -->
+  <!-- three even columns: the 11 campus venues; the teams; the downtown
+       venues over the 7 types (Steve, 2026-09-14: Downtown & SoDo above Event Type) -->
   <div class="fp-cols">
     <div class="fp-group">
       <h3>Lower Queen Anne</h3>
       <div id="panelVenues" class="fp-list"><!-- campus venue rows injected by app.js --></div>
     </div>
     <div class="fp-group">
-      <h3>Downtown &amp; SoDo</h3>
-      <div id="panelVenuesTown" class="fp-list"><!-- downtown venue rows injected by app.js --></div>
       <h3>Home Games</h3>
       <div id="panelTeams" class="fp-list"><!-- team rows injected by app.js --></div>
     </div>
     <div class="fp-group">
+      <h3>Downtown &amp; SoDo</h3>
+      <div id="panelVenuesTown" class="fp-list"><!-- downtown venue rows injected by app.js --></div>
       <h3>Event Type</h3>
       <div id="panelBadges" class="fp-list"><!-- type rows injected by app.js --></div>
     </div>
@@ -359,8 +355,10 @@
     <p class="sheet-when" id="sheetWhen"></p>
     <p class="sheet-watch" id="sheetWatch" hidden><!-- a home game's TV / radio, from the league (app.js) --></p>
     <div class="sheet-actions">
-      <a id="sheetTickets" class="btn-cal" href="#" target="_blank" rel="noopener">Tickets &amp; details</a>
+      <a id="sheetTickets" class="btn-cal" href="#" target="_blank" rel="noopener">Tickets</a>
       <a id="sheetVenueLink" class="chip" href="#" target="_blank" rel="noopener"></a>
+      <button id="sheetOnlyVenue" class="chip" type="button" title="Show only this venue's events"></button>
+      <button id="sheetTeam" class="chip" type="button" title="This club's whole season in the Teams view" hidden></button>
       <button id="sheetClose" class="chip" type="button">Close</button>
     </div>
   </div>

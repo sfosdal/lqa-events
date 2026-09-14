@@ -33,6 +33,7 @@ export const TEAMS = [
   { slug: 'kraken', label: 'Kraken', re: /kraken/i },
   { slug: 'torrent', label: 'Torrent', re: /seattle torrent/i },
   { slug: 'seawolves', label: 'Seawolves', re: /seawolves/i }, // MLR; its Starfire home matches enter the feed from its schedule
+  { slug: 'huskies', label: 'Huskies', re: /huskies/i }, // UW football; its Husky Stadium games enter the feed from ESPN's schedule
 ];
 
 // key → [label for the calendar name, predicate]

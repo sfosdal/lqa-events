@@ -15,6 +15,7 @@
     'On the Boards': '--v-otb',
     'T-Mobile Park': '--v-tmobile',
     'Lumen Field': '--v-lumen',
+    'Husky Stadium': '--v-husky',
     'Convention Center': '--v-scc',
     "Children's Theatre": '--v-sct',
     'MoPOP': '--v-mopop',
@@ -47,6 +48,7 @@
     'Cornish Playhouse': 'https://www.seattlecenter.com/events/event-calendar?cats=173',
     'T-Mobile Park': 'https://www.mlb.com/mariners/ballpark/events', // the ballpark's own list — concerts too, not just Mariners games
     'Lumen Field': 'https://www.lumenfield.com/events',
+    'Husky Stadium': 'https://gohuskies.com/sports/football/schedule', // the stadium's bookings are the football schedule
     'SIFF Cinema Uptown': 'https://www.siff.net/calendar',
     'Convention Center': 'https://seattlecc.com/upcoming-events/',
     "Children's Theatre": 'https://www.sct.org/tickets-shows/calendar/',
@@ -274,7 +276,7 @@
   // untouched. The Teams view is never filtered — every game shows there.
   var DEFAULT_VENUES_ON = ['Climate Pledge Arena', 'Seattle Center', 'McCaw Hall', 'Lumen Field', 'T-Mobile Park'];
   var DEFAULT_VENUES_OFF = ['MoPOP', "Children's Theatre", 'Cornish Playhouse', 'SIFF Cinema Uptown', 'Pacific Science Center',
-    'The Vera Project', 'On the Boards', 'KEXP', 'Convention Center', 'Starfire Stadium'];
+    'The Vera Project', 'On the Boards', 'KEXP', 'Convention Center', 'Starfire Stadium', 'Husky Stadium'];
   var BIG_NIGHT_SEATS = 2000; // the Capacity preset's floor; McCaw Hall (2,900) is the smallest venue in
   var PRESETS = [
     { key: 'default', label: 'Default', title: 'The big rooms — ' + DEFAULT_VENUES_ON.join(', ') + ' — every team and type except Movies',
@@ -762,7 +764,6 @@
   // view is linkable (?team=mariners) and lives in history like a page.
   var teamsData = null, teamsLoading = null;
   var teamView = { slug: null, opp: null, showPast: false, cal: false }; // played games fold away behind a button; cal = the season calendar in place of the list
-  try { teamView.cal = localStorage.getItem('lqa-teams-view') === 'cal'; } catch (e) { /* no storage: the list */ } // the list/calendar choice is remembered per browser
   function loadTeams() {
     if (teamsData) return Promise.resolve(teamsData);
     if (!teamsLoading) {
@@ -811,8 +812,18 @@
       clearTimeout(live.timer);
     }
     fitFilterBar();
+    updateSubscribe();
   }
   function teamGames(slug) { return (teamsData && teamsData.teams && teamsData.teams[slug]) || null; }
+  // Which clubs are in season: a game within the last three weeks or the
+  // next six (a preseason counts, a postseason too). The rest — off-season,
+  // or a season just over — show in the strip as a crest alone, at its
+  // right end (styles.css .team-tab.is-off).
+  var ACTIVE_BACK = 21, ACTIVE_AHEAD = 45;
+  function teamActive(slug) {
+    var gs = teamGames(slug) || [], today = todayStr(), lo = dayAfter(today, -ACTIVE_BACK), hi = dayAfter(today, ACTIVE_AHEAD);
+    return gs.some(function (g) { return g.date >= lo && g.date <= hi; });
+  }
   // The view's own choice on open: a club with a game on today — one in
   // progress first, then one still to come — taking the strip's order (left
   // to right) between two; with nobody playing, every club's schedule in one
@@ -865,7 +876,8 @@
     if (!allMode && !teams.some(function (t) { return t.slug === slug; })) slug = teams[0].slug;
     teamView.slug = slug;
     document.documentElement.classList.toggle('teams-all', allMode);
-    $('teamViewBtn').disabled = allMode; $('teamPdfBtn').disabled = allMode; // no calendar or poster for every club's list; the chips stay in place, dimmed
+    updateSubscribe(); // the calendar chip offers this club's season
+    $('teamPdfBtn').disabled = allMode; // no poster for every club's list; the chip stays in place, dimmed
     applyTeamView();
     // The strip is built once and kept: a switch only moves the pressed
     // state (and refreshes the game counts), so the crests never reload or
@@ -888,6 +900,7 @@
       var b = strip.querySelector('.team-tab[data-slug="' + t.slug + '"]');
       var n = (teamGames(t.slug) || []).length;
       b.setAttribute('aria-pressed', String(t.slug === slug));
+      b.classList.toggle('is-off', !teamActive(t.slug)); // out of season: the crest alone, after the clubs that are playing
       b.title = t.label + (n ? ' — ' + n + ' games' : ' — schedule not loaded yet');
     });
     fitTeamStrip();
@@ -1164,7 +1177,8 @@
     // the frame: the next game's win chance (the pregame's bug — the day and time along the top, a row per side, the ring) as soon as
     // the odds are in (fetchNextOdds); until then, and with no game ahead, the season's numbers. With the odds up, the season's numbers
     // move to a line in the column beside (record, standing, home record, the last five)
-    var od = next && team.espn ? live.odds[team.slug] : null, odds = od && od.date === next.date && od.chance ? od : null;
+    var od = next && team.espn ? live.odds[team.slug] : next && next.odds ? { date: next.date, chance: next.odds, them: null } : null; // ESPN's (fetched) or the schedule's own (the build prices the PWHL)
+    var odds = od && od.date === next.date && od.chance ? od : null;
     if (odds) {
       var oppT = { abbreviation: (odds.them && odds.them.abbr) || next.opp.abbrev || '', color: odds.them && odds.them.color, alternateColor: odds.them && odds.them.alt, name: next.opp.short || next.opp.name, displayName: next.opp.name, shortDisplayName: next.opp.short || next.opp.name };
       var usS = { team: { abbreviation: 'SEA', color: String((team.colors || [])[0] || '555').replace(/^#/, '') }, homeAway: next.home ? 'home' : 'away', isUs: true };
@@ -1561,7 +1575,7 @@
     var leagues = {};
     playing.forEach(function (t) { leagues[t.espn.sport + '/' + t.espn.league] = true; });
     Promise.all(Object.keys(leagues).map(function (k) {
-      return fetch('https://site.api.espn.com/apis/site/v2/sports/' + k + '/scoreboard?dates=' + span, { cache: 'no-store' })
+      return fetch(scoreboardUrl(k, span), { cache: 'no-store' })
         .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
         .then(function (j) { return [k, j]; });
     })).then(function (pairs) {
@@ -1597,6 +1611,8 @@
     });
   }
   function seattleDay(iso) { return new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }); }
+  // a league's scoreboard for a day or a span (college football's lists every FBS game only when asked for the group, and enough of them)
+  function scoreboardUrl(k, dates) { return 'https://site.api.espn.com/apis/site/v2/sports/' + k + '/scoreboard?dates=' + dates + (/college/.test(k) ? '&groups=80&limit=300' : ''); }
   function swapFormBlock(team, quiet) {
     var old = $('teamHead').querySelector('.team-form');
     if (!old) return;
@@ -1682,7 +1698,7 @@
     var keep = have && have.date === g.date ? have : {};
     live.odds[team.slug] = { date: g.date, at: Date.now(), chance: keep.chance || null, series: keep.series || null, them: keep.them || null }; // claimed: one fetch at a time
     var base = 'https://site.api.espn.com/apis/site/v2/sports/' + team.espn.sport + '/' + team.espn.league;
-    fetch(base + '/scoreboard?dates=' + g.date.replace(/-/g, ''), { cache: 'no-store' })
+    fetch(scoreboardUrl(team.espn.sport + '/' + team.espn.league, g.date.replace(/-/g, '')), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
         var ev = ((j && j.events) || []).filter(function (e) { return (e.competitions[0].competitors || []).some(function (c) { return String(c.team.id) === team.espn.id; }); })[0];
@@ -2144,7 +2160,10 @@
   function renderTeamCal(team, games, today) {
     var box = $('teamCal'); box.innerHTML = '';
     if (!games.length) return;
-    if (!team.espn) { var sg = liveGameToday(team.slug); live.events[team.slug] = sg ? synthEvent(team, sg) : null; } // no feed: the block from the schedule
+    if (!team.espn) { // no feed: the block from the schedule, and its odds (the build's estimate) as the matchup
+      var sg = liveGameToday(team.slug); live.events[team.slug] = sg ? synthEvent(team, sg) : null;
+      if (sg && sg.odds && !sg.res) live.matchup[team.slug] = { id: 'sched-' + sg.date, stage: 'pre', at: Date.now(), data: { chance: sg.odds, series: null, starters: {}, leaders: {}, injured: {} } };
+    }
     if (live.slug !== team.slug || !team.espn) { // a switch: whatever the last poll knew about this club
       live.slug = team.slug; live.event = live.events[team.slug] || null;
       live.shown = (live.event && live.event.competitions[0].status.type.state) || null;
@@ -2234,20 +2253,13 @@
       m = new Date(m.getFullYear(), m.getMonth() + 1, 1);
     }
   }
-  // list ⇄ calendar: the section shows one or the other, the chip is lit
-  // while the calendar is up
+  // the season calendar is the poster's layout only (the in-page toggle was
+  // removed 2026-09-14): prepPrint turns it on for the print, off after
   function applyTeamView() {
-    var cal = teamView.cal && teamView.slug !== 'all'; // every club's list has no calendar
+    var cal = teamView.cal && teamView.slug !== 'all';
     $('teamsView').classList.toggle('is-cal', cal);
     $('teamCal').hidden = !cal;
-    $('teamViewBtn').setAttribute('aria-pressed', String(teamView.cal));
-    $('teamViewBtn').title = teamView.cal ? 'Back to the list' : 'Season calendar';
   }
-  $('teamViewBtn').addEventListener('click', function () {
-    teamView.cal = !teamView.cal; applyTeamView();
-    try { localStorage.setItem('lqa-teams-view', teamView.cal ? 'cal' : 'list'); } catch (e) { /* no storage */ }
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  });
   // PDF: the browser's own print-to-PDF of the calendar view alone (styles.css
   // @media print, html.print-team). The list view is switched to the calendar
   // for the print and back after; the document title names the file.
@@ -2351,7 +2363,7 @@
   // ≥641px), placed here and re-placed as the page scrolls. Modifier and
   // middle clicks on the inline links still open them directly.
   var sheetTouch = '(max-width: 640px)';
-  var sheetAnchor = null;
+  var sheetAnchor = null, sheetPoint = null; // the card, and where on it the click landed (the pop centres there; a keyboard opening has no point and hangs under the card)
   function placeSheet() {
     var sheet = $('sheet');
     if (sheet.hidden || !sheetAnchor || matchMedia(sheetTouch).matches) return;
@@ -2359,16 +2371,23 @@
     var card = sheetAnchor.getBoundingClientRect();
     var pop = sheet.querySelector('.sheet-card').getBoundingClientRect();
     var gap = 6, pad = 8;
-    var left = Math.max(pad, Math.min(card.left, window.innerWidth - pop.width - pad));
     var barBottom = document.querySelector('.filter-area').getBoundingClientRect().bottom + gap;
-    var top = card.bottom + gap;
-    if (top + pop.height > window.innerHeight - pad) top = card.top - pop.height - gap; // no room below: above
-    if (top < barBottom) top = Math.max(pad, window.innerHeight - pop.height - pad); // nor above: keep it on screen, over the card if it must
+    var left, top;
+    if (sheetPoint) { // centred on the click, kept on screen and under the bar
+      left = sheetPoint.x - pop.width / 2; top = sheetPoint.y - pop.height / 2;
+      left = Math.max(pad, Math.min(left, window.innerWidth - pop.width - pad));
+      top = Math.max(barBottom, Math.min(top, window.innerHeight - pop.height - pad));
+    } else {
+      left = Math.max(pad, Math.min(card.left, window.innerWidth - pop.width - pad));
+      top = card.bottom + gap;
+      if (top + pop.height > window.innerHeight - pad) top = card.top - pop.height - gap; // no room below: above
+      if (top < barBottom) top = Math.max(pad, window.innerHeight - pop.height - pad); // nor above: keep it on screen, over the card if it must
+    }
     sheet.style.left = Math.round(left) + 'px';
     sheet.style.top = Math.round(top) + 'px';
   }
   window.addEventListener('resize', placeSheet);
-  function openSheet(e, anchor) {
+  function openSheet(e, anchor, point) {
     $('sheetVenue').textContent = e.venue;
     $('sheetTitle').textContent = e.title;
     var when = parseDate(e.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' · ' + fmtTime(e.time);
@@ -2387,10 +2406,13 @@
     });
     w.hidden = !w.childNodes.length;
     var t = $('sheetTickets'); t.href = e.url || '#'; t.hidden = !e.url;
-    var v = $('sheetVenueLink'); v.href = VENUE_URL[e.venue] || '#'; v.hidden = !VENUE_URL[e.venue]; v.textContent = e.venue + ' events';
+    var v = $('sheetVenueLink'); v.href = VENUE_URL[e.venue] || '#'; v.hidden = !VENUE_URL[e.venue]; v.textContent = 'What\u2019s on at ' + e.venue + ' \u2197'; // the venue's own calendar
+    var ov = $('sheetOnlyVenue'); ov.textContent = 'Only ' + e.venue; ov.hidden = state.venues.indexOf(e.venue) < 0; ov.dataset.venue = e.venue; // the filter, narrowed to this venue
+    var team = TEAMS.filter(function (t) { return t.re.test(e.title || '') && t.venue === e.venue; })[0]; // a home game: the club's season, in the Teams view
+    var tb = $('sheetTeam'); tb.hidden = !team; if (team) { tb.textContent = team.label + ' season'; tb.dataset.slug = team.slug; }
     var phone = matchMedia(sheetTouch).matches;
     var sheet = $('sheet');
-    sheetAnchor = anchor || null;
+    sheetAnchor = anchor || null; sheetPoint = point && (point.x || point.y) ? point : null;
     sheet.hidden = false;
     sheet.querySelector('.sheet-card').setAttribute('aria-modal', String(phone));
     if (phone) {
@@ -2403,10 +2425,12 @@
     }
   }
   function closeSheet() {
-    $('sheet').hidden = true; sheetAnchor = null;
+    $('sheet').hidden = true; sheetAnchor = null; sheetPoint = null;
     document.body.classList.remove('sheet-open');
   }
   $('sheetClose').addEventListener('click', closeSheet);
+  $('sheetOnlyVenue').addEventListener('click', function () { var v = this.dataset.venue; closeSheet(); onlyVenue(v); applyFilters(); });
+  $('sheetTeam').addEventListener('click', function () { var slug = this.dataset.slug; closeSheet(); setTeamsView(slug, true); });
   $('sheetBack').addEventListener('click', closeSheet);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('sheet').hidden) closeSheet(); });
   // a click anywhere outside the pop closes it (the opening click never gets
@@ -2419,7 +2443,7 @@
       // let a deliberate new-tab / middle click on an inline link through
       if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
       ev.preventDefault(); ev.stopPropagation();
-      openSheet(e, ev.currentTarget);
+      openSheet(e, ev.currentTarget, { x: ev.clientX, y: ev.clientY });
     };
   }
   // copy to the clipboard; falls back to a selection + execCommand where the
@@ -2963,6 +2987,11 @@
   // else falls back to the full feed.
   var icsHref = '';
   function updateSubscribe() {
+    if (document.documentElement.classList.contains('teams-open')) { // Teams mode: the club's season (home and away), or every club's
+      $('subFilterRow').hidden = true;
+      setSubscribeFile(teamView.slug && teamView.slug !== 'all' ? 'team-' + teamView.slug + '.ics' : 'teams.ics');
+      return;
+    }
     var filteredFile = null;
     var vEx = modeKeys(state.venueMode, 'ex');
     var bEx = modeKeys(state.badgeMode, 'ex');
@@ -2980,7 +3009,9 @@
       filteredFile = 'events-venue-' + slugify(vOn[0]) + '.ics';
     }
     $('subFilterRow').hidden = !filteredFile;
-    var file = (filteredFile && $('subUseFilter').checked) ? filteredFile : 'events.ics';
+    setSubscribeFile((filteredFile && $('subUseFilter').checked) ? filteredFile : 'events.ics');
+  }
+  function setSubscribeFile(file) {
     icsHref = new URL(file, location.href).href;
     var webcal = icsHref.replace(/^https?:/, 'webcal:');
     $('webcalLink').href = webcal;

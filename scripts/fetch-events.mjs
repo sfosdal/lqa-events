@@ -327,7 +327,7 @@ catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 // A dozen filter chips for the same lawn helps nobody; only venues with an
 // identity of their own keep their name.
 const CANONICAL_VENUES = new Set([
-  'Climate Pledge Arena', 'T-Mobile Park', 'Lumen Field',
+  'Climate Pledge Arena', 'T-Mobile Park', 'Lumen Field', 'Husky Stadium',
   'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
   'SIFF Cinema Uptown', 'On the Boards', 'Convention Center',
   "Children's Theatre", 'MoPOP', 'Pacific Science Center', 'KEXP',
@@ -374,6 +374,12 @@ for (const g of (seasons.seawolves || []).filter((x) => x.home && x.date >= cuto
   if (merged.some((e) => e.date === g.date && e.venue === g.venue)) continue;
   merged.push({ venue: g.venue, title: `Seattle Seawolves vs ${g.opp.name}`, date: g.date, time: g.time, url: 'https://tickets.seawolves.rugby/events', type: 'sports' });
 }
+// The Huskies' home games likewise: no ticket feed for Husky Stadium, so
+// ESPN's schedule supplies them, with the athletic department's ticket page
+for (const g of (seasons.huskies || []).filter((x) => x.home && x.date >= cutoff)) {
+  if (merged.some((e) => e.date === g.date && e.venue === g.venue)) continue;
+  merged.push({ venue: g.venue, title: `Washington Huskies vs ${g.opp.name}`, date: g.date, time: g.time, url: 'https://gohuskies.com/sports/football/tickets', type: 'sports', ...(g.tbd ? { dateTbd: true } : {}), ...(g.watch ? { watch: g.watch } : {}) });
+}
 merged.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
 if (Object.keys(seasons).length) {
   const postseason = JSON.parse(readFileSync(new URL('./data/postseason.json', import.meta.url), 'utf8')); // each league's playoff rounds (hand-kept), shown until the real games land
@@ -412,6 +418,25 @@ for (const t of TEAMS) {
     buildIcs(merged.filter((e) => !t.re.test(e.title || '')), new Date(), { calname: `LQA Events — no ${t.label}` }));
   nFeeds++;
 }
+// Season feeds for the Teams view: each club's whole season, home and away
+// (team-<slug>.ics), and every club's in one (teams.ics). Each game links to
+// the club's page on the site.
+const seasonEvents = (slug, label, games) => games.map((g) => ({
+  title: `${label} ${g.home ? 'vs' : 'at'} ${g.opp.name}${g.pre ? ' (preseason)' : g.playoff ? ' (playoff)' : ''}`,
+  venue: g.venue || (g.home ? '' : g.opp.name), date: g.date, time: g.tbd ? null : g.time, ...(g.tbd ? { dateTbd: true } : {}),
+  url: `https://fosdal.net/lqa-events/?team=${slug}`,
+}));
+const allSeasons = [];
+for (const t of TEAMS) {
+  if (!seasons[t.slug]) continue;
+  const evs = seasonEvents(t.slug, t.label, seasons[t.slug]);
+  allSeasons.push(...evs);
+  writeFileSync(new URL(`team-${t.slug}.ics`, siteDir), buildIcs(evs, new Date(), { calname: `${t.label} season` }));
+  nFeeds++;
+}
+allSeasons.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+writeFileSync(new URL('teams.ics', siteDir), buildIcs(allSeasons, new Date(), { calname: 'Seattle home teams — every season' }));
+nFeeds++;
 
 const nPast = merged.filter((e) => e.date < today).length;
 console.log(`Wrote ${merged.length} events (${nPast} past, ${merged.length - nPast} upcoming) + ${nFeeds} filtered feeds`);

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseYoutube, matchYoutube, parseNflPage, titleDate } from './highlights.mjs';
-import { applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, wikiTitle, pickNews, seasonStartYear, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
+import { applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, pwhlOdds, wikiTitle, pickNews, seasonStartYear, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
 
 const feed = () => [
   { venue: 'Lumen Field', title: 'Seattle Seahawks vs. Dallas Cowboys', date: '2026-12-07', time: '17:15:00' },
@@ -291,4 +291,21 @@ test('highlights: a title dated another day of the series is not this game\'s', 
   const xml = ['Rangers vs. Mariners Full Game Highlights (9/10/26)~b1~2026-09-11T05:00:00+00:00', 'Rangers vs. Mariners Full Game Highlights (9/9/26)~b2~2026-09-10T05:00:00+00:00']
     .map((l) => { const [t, id, at] = l.split('~'); return `<entry><title>${t}</title><yt:videoId>${id}</yt:videoId><published>${at}</published></entry>`; }).join('');
   assert.deepEqual(matchYoutube(parseYoutube(xml), { date: '2026-09-09', opp: { name: 'Texas Rangers', short: 'Rangers' } }, 'mariners').map((c) => c.url.slice(-2)), ['b2']);
+});
+
+test('PWHL odds: log5 on points shares with a home nudge, played games and unknown opponents left alone', () => {
+  const rows = [{ team_id: '8', games_played: '30', points: '30' }, { team_id: '3', games_played: '30', points: '45' }];
+  const games = [
+    { date: '2026-11-29', home: false, opp: { logo: 'https://assets.leaguestat.com/pwhl/logos/3.png' } },
+    { date: '2026-11-30', home: true, opp: { logo: 'https://assets.leaguestat.com/pwhl/logos/3.png' } },
+    { date: '2026-12-02', home: true, opp: { logo: 'https://assets.leaguestat.com/pwhl/logos/99.png' } },
+    { date: '2026-01-05', home: true, opp: { logo: 'https://assets.leaguestat.com/pwhl/logos/3.png' }, res: { us: 2, them: 1, won: true } },
+  ];
+  const out = pwhlOdds(games, rows, 8);
+  assert.equal(out[0].odds.us + out[0].odds.them, 100);
+  assert.ok(out[0].odds.us < 50 && out[1].odds.us > out[0].odds.us, 'the weaker club, better at home'); // .5 vs .75: away 0.47/0.78 → 26%, home 0.53/0.72 → 30%
+  assert.equal(out[0].odds.est, true);
+  assert.ok(out[2].odds && out[2].odds.us === 56, 'no standings row for the opponent: taken as .500 (home: .53 vs .47 → 56%)');
+  assert.equal(out[3].odds, undefined, 'a played game');
+  assert.deepEqual(pwhlOdds(games, [], 8).map((g) => g.odds), [undefined, undefined, undefined, undefined]);
 });
