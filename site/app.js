@@ -1165,7 +1165,7 @@
   // on the page; three until then), the rest behind the arrow at the lower
   // right (open stays open across redraws). `lead` is a block for the top of
   // the column — the pregame's starters and the leaders out.
-  var NEWS_SHOWN = 3, newsOpen = false;
+  var NEWS_SHOWN = 3, NEWS_SHOWN_NARROW = 1, newsOpen = false; // a small screen (the column under the row) shows one headline: the news is low priority there
   function buildFormSide(form, lead) {
     if (lead || (form.news && form.news.length) || (form.wiki && form.wiki.text)) {
       var side = document.createElement('div'); side.className = 'tf-wiki';
@@ -1218,7 +1218,7 @@
     var wrapped = !!mainEl && side.getBoundingClientRect().top >= mainEl.getBoundingClientRect().bottom - 1;
     box.classList.toggle('is-wrapped', wrapped);
     if (narrow) {
-      items.forEach(function (li, i) { li.classList.toggle('is-more', i >= NEWS_SHOWN); if (i >= NEWS_SHOWN) hidden++; });
+      items.forEach(function (li, i) { li.classList.toggle('is-more', i >= NEWS_SHOWN_NARROW); if (i >= NEWS_SHOWN_NARROW) hidden++; });
     } else {
       var limit = 0; // the tallest thing beside the column
       box.querySelectorAll(':scope > img, :scope > .tf-body, :scope > .tf-main').forEach(function (el) { limit = Math.max(limit, el.offsetHeight); });

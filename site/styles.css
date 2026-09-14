@@ -119,6 +119,7 @@ h1 {
   font-family: var(--display); font-weight: 700; font-size: clamp(2.6rem, 7vw, 4.2rem);
   line-height: .92; text-transform: uppercase; letter-spacing: .01em; margin: 0;
 }
+.masthead-text { min-width: 0; max-width: 100%; } /* a flex item would grow to its widest line and push past a phone's edge */
 .sub { color: var(--ink-soft); max-width: 34rem; margin: .8rem 0 0; }
 
 .updated { /* the "Updated …" stamp: an eyebrow line under the title, spaced like the one above it */
@@ -1349,6 +1350,11 @@ body.sheet-open { overflow: hidden; }
   html.print-team .pf-home::before { background: var(--team); }
 }
 
+/* ---- small screens (a phone, or a narrow window): the news column sits under the row, so it is low priority — one headline, no summary line, the rest behind the arrow (app.js foldNews, NEWS_SHOWN_NARROW) ---- */
+@media (max-width: 760px) {
+  .tf-wiki:not(.is-open) .tf-news p { display: none; }
+}
+
 /* ---- phones: the game block stacked (kept at the end of the file so it outranks the desktop rules above) ---- */
 @media (max-width: 640px) {
   /* a phone (these come last, after every desktop rule they override): the crests on one line, small, at either end; the scorebug under them at its natural size; the news and the strip below */
@@ -1366,3 +1372,7 @@ body.sheet-open { overflow: hidden; }
   .filterbar #subscribeBtn span, .filterbar #filterToggle span, .filterbar #teamViewBtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .filterbar #subscribeBtn, .filterbar #filterToggle, .filterbar #teamViewBtn { padding: .5em .7em; }
   .filterbar #subscribeBtn svg, .filterbar #filterToggle svg, .filterbar #teamViewBtn svg { width: 1.1rem; height: 1.1rem; }
+  /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
+  .filterbar { gap: .4rem; }
+  .filterbar #calToggle .chev { display: none; }
+  .filterbar #calToggle { padding: .5em .7em; }
