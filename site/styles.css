@@ -497,6 +497,13 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
    size down like a holiday row, gone while the month is stuck up top */
 .month-row > .hol-pill { font-size: 1.05rem; }
 .month-row.is-stuck > .hol-pill { display: none; }
+/* a month with only holidays: the month oval ends on the page's centre line,
+   every month's the same, and its holidays stack to the right of it — so the
+   months line up down the page instead of drifting with the pills beside them */
+.month-row.has-hol:not(.is-stuck) { display: grid; grid-template-columns: 11.5rem minmax(0, 1fr); gap: .4rem .6rem; align-items: center; } /* a fixed month column from the left: the ovals line up on its edge and the pills get the rest of the row, no empty half on the left */
+@media (max-width: 640px) { .month-row.has-hol:not(.is-stuck) { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); } }
+.month-row.has-hol:not(.is-stuck) > span:not(.hol-pill) { grid-column: 1; grid-row: 1 / span var(--hols, 1); justify-self: end; align-self: center; } /* centred on the pills' rows: no more rows than pills, or the gaps of empty rows would pull it down */
+.month-row.has-hol:not(.is-stuck) > .hol-pill { grid-column: 2; justify-self: start; }
 .month-row { position: sticky; top: var(--barh); z-index: 5; }
 .month-group { display: block; } /* one per month: the sticky divider's bounds, so the next month pushes it out */
 .holiday-row { font-size: 1.05rem; }
@@ -779,19 +786,21 @@ html { overflow-anchor: none; }
 .team-form img { width: var(--crest); height: var(--crest); object-fit: contain; flex: none; }
 .tf-body { min-width: 0; flex: 1 1 22rem; }
 /* the season's Wikipedia lead, at the right; under the rest when the row is narrow */
-.tf-wiki { position: relative; flex: 1 1 24rem; min-width: 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; max-height: var(--crest); overflow: hidden; padding-left: 1.1rem; border-left: 1px solid var(--line); font-size: .85rem; line-height: 1.45; color: var(--ink); } /* the rule runs the block's height; the text sits centred */
-/* the fold: the pieces that fit beside the crests show (app.js foldNews measures which); the arrow at the lower right opens the rest (the column grows past the crest) */
-.tf-wiki.has-more { padding-bottom: 1.1rem; } /* ARROW_ROOM in app.js */
-.tf-wiki.is-open, .tf-wiki.is-measuring { max-height: none; justify-content: flex-start; }
+.tf-wiki { position: relative; flex: 1 1 24rem; min-width: 0; align-self: stretch; display: flex; flex-direction: column; max-height: var(--crest); overflow: hidden auto; scrollbar-width: thin; padding-left: 1.1rem; border-left: 1px solid var(--line); font-size: .85rem; line-height: 1.45; color: var(--ink); } /* the rule runs the block's height; beside the crests the column scrolls inside it */
+.tf-wiki > .tf-cols, .tf-wiki > p { margin-block: auto; } /* short: centred on the row; tall: scrolls from the top (justify-content: center would clip the top) */
+/* beside the crests every story shows; a fade at the foot says there is more below (app.js foldNews sets is-scroll; is-at-end once scrolled to the end) */
+.tf-wiki.is-scroll:not(.is-at-end) { -webkit-mask-image: linear-gradient(#000 calc(100% - 1.4rem), transparent); mask-image: linear-gradient(#000 calc(100% - 1.4rem), transparent); }
+/* the fold, under the row and on phones: the rest of the stories behind a button that says how many (app.js foldNews) */
+.tf-wiki.is-open { max-height: none; }
 .tf-news li.is-more { display: none; }
-.tf-wiki.is-open .tf-news li.is-more, .tf-wiki.is-measuring .tf-news li.is-more { display: grid; }
+.tf-wiki.is-open .tf-news li.is-more { display: grid; }
 .tf-wiki:not(.has-more) .tf-more { display: none; }
 /* the pregame's starters and the leaders out, at the top of the column */
 .tf-wiki .tf-lead { margin-bottom: .55rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
 .tf-wiki .tf-lead p:first-child { margin-top: 0; }
-.tf-more { position: absolute; right: 0; bottom: 0; width: 1.5rem; height: 1.5rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink-soft); cursor: pointer; display: grid; place-items: center; }
-.tf-more svg { width: 1.1rem; height: 1.1rem; transition: transform .2s; }
-.tf-more:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.tf-more { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; margin: .6rem auto 0; flex: none; font-size: .78rem; padding: .45em .9em .45em 1.05em; color: var(--ink-soft); }
+.tf-more svg { width: .9rem; height: .9rem; transition: transform .2s; }
+.tf-more:hover { color: var(--ink); border-color: var(--ink-soft); }
 .tf-wiki.is-open .tf-more svg { transform: rotate(180deg); }
 .tf-wiki > p { margin: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; } /* the Wikipedia fallback: four lines */
 .tf-lines .tf-wikilink { display: inline-block; margin-top: .35rem; font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); text-decoration: none; }
@@ -867,7 +876,8 @@ html { overflow-anchor: none; }
 #teamHead.is-compact .team-form.is-live .tf-at { display: none; } /* the bar keeps the refresh button, not the stamp */
 .tf-info .tf-blurb { margin: .15rem 0 0; font-family: var(--body); font-size: .85rem; line-height: 1.4; color: var(--ink); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 /* the season's bug and the pregame's, in the same frame */
-.is-season .tf-head { display: none; } /* the record is in the bug; the head serves the compact bar */
+.is-season .tf-head { display: none; } /* the record is in the bug (or, with the odds up, on a line beside); the head serves the compact bar */
+.tf-lead .tf-season .tf-run { margin-left: .15rem; } .tf-lead .tf-season .tf-run i { font-size: .6rem; line-height: 1.25rem; width: 1.25rem; } /* the last five, small, at the end of the season line */
 #teamHead.is-compact .is-season .tf-head { display: flex; }
 .bug-team-soft { background: #4a4f56; font-size: .8rem; letter-spacing: .1em; }
 .bug-team i { font-style: normal; }
@@ -877,8 +887,13 @@ html { overflow-anchor: none; }
 .bug-ev .tf-run { vertical-align: middle; }
 .bug-score.bug-odds { font-size: 1.05rem; letter-spacing: .02em; }
 .bug-grid.bug-grid-2.has-ring { grid-template-columns: 6.6rem minmax(3.6rem, max-content) auto; }
-.bug-ring { grid-area: 1 / 3 / 3 / 4; display: grid; place-items: center; padding: .15rem .8rem; border-left: 2px solid #c9cdd2; }
-.bug-ring svg { width: 3.1rem; height: 3.1rem; }
+.is-pregame .bug-grid.no-ev > :nth-child(3) { grid-area: 2 / 1; } .is-pregame .bug-grid.no-ev > :nth-child(4) { grid-area: 2 / 2; } /* no odds yet, no ring: four cells, two rows */
+.is-pregame .bug-grid.no-ev > :nth-child(3), .is-pregame .bug-grid.no-ev > :nth-child(4) { border-bottom: 0; }
+.bug-grid.bug-grid-2.has-ring > .bug-ring { grid-area: 1 / 3 / 3 / 4; } /* both rows (outranks the per-cell pinning below, which puts the third cell in row 1) */
+.bug-ring { display: flex; align-items: center; justify-content: center; gap: .55rem; padding: .15rem .8rem; border-left: 2px solid #c9cdd2; }
+.bug-ring svg { width: 3.1rem; height: 3.1rem; flex: none; }
+/* squeezed (app.js fitBug: the grid runs wider than the frame): the ring's label goes, then the desktop's zoom */
+.tf-bug.is-tight, .tf-bug.is-tight:not(.is-generic) { zoom: 1; }
 #teamHead.is-compact .bug-ring, #teamHead.is-compact .is-season-bug .bug-ev { display: none; }
 #teamHead.is-compact .bug-grid.bug-grid-2.has-ring { grid-template-columns: minmax(2.7rem, max-content) 2rem; }
 .is-live .tf-wiki { max-height: calc(var(--crest) + 1rem); } /* the news column no taller than the row */
@@ -964,7 +979,7 @@ html { overflow-anchor: none; }
    columns — the cast mark, then each network with the ways to get it
    inline, dotted apart, each a link where channels.json names one */
 .team-form.is-live { flex-wrap: wrap; }
-.tf-watch { flex: 1 1 100%; display: flex; align-items: center; gap: .5rem 1rem; margin-top: .3rem; padding: 0 3.2rem 0 0; height: 2.9rem; overflow: hidden; box-sizing: border-box; } /* two lines' room, its contents centred in it (the refresh control in its right end), so every block is the same height; the block's own bottom padding is folded into it so the centring is true */
+.tf-watch { flex: 1 1 100%; display: flex; align-items: center; gap: .5rem 1rem; margin-top: .3rem; padding: 0; height: 2.9rem; overflow: hidden; box-sizing: border-box; } /* two lines' room, its contents centred in it (the refresh control in its right end), so every block is the same height; the block's own bottom padding is folded into it so the centring is true */
 .team-form.is-live { padding-bottom: 0; } /* the strip's height carries the bottom padding (above) */
 .tf-watch-label { font-family: var(--mono); font-size: .74rem; color: var(--ink); }
 .tf-watch-none { font-family: var(--mono); font-size: .74rem; color: var(--ink-soft); }
@@ -981,7 +996,8 @@ html { overflow-anchor: none; }
 .tf-wmore:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 10%, transparent); }
 .tf-watch.has-more .tf-wmore { display: grid; }
 .tf-watch.is-open .tf-wmore svg { transform: rotate(180deg); }
-.team-form.is-live:not(.is-season) .tf-wmore { right: 3.4rem; } /* left of the refresh button on a game block */ /* the entries flow from the left, evenly spaced, rather than spread to the ends */
+.team-form.has-refresh .tf-watch { padding-right: 3.2rem; } /* the refresh control's room in the strip's right end, on a game in progress */
+.team-form.has-refresh .tf-wmore { right: 3.4rem; } /* left of the refresh button on a game block */ /* the entries flow from the left, evenly spaced, rather than spread to the ends */
 .tf-channels li { display: flex; flex-wrap: wrap; column-gap: .45rem; } /* the network, then each way, on one line */
 .tf-channels li span + span::before { content: "· "; }
 .tf-channels b { color: var(--ink); font-weight: 700; }
@@ -1012,6 +1028,11 @@ html { overflow-anchor: none; }
 .tf-bug { --bug-ink: #f4f4f4; --bug-on: #e5342b; zoom: 1.25; margin: 0 auto; width: max-content; max-width: 100%; font-family: var(--mono); color: var(--bug-ink); border: 2px solid #c9cdd2; border-radius: 8px; overflow: hidden; background: #2b2d30; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
 .bug-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1.5rem; padding: .2rem .8rem .15rem; border-bottom: 2px solid #c9cdd2; font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .bug-top > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; } /* one line, trimmed, never wrapped */
+/* the pregame's and the season's top rows: the right-hand piece is a label (first pitch; last season's record) — when the frame is too narrow for both it goes, whole, rather than both trimming to nothing: the row wraps and the second line is clipped */
+.is-pregame .bug-top, .is-season-bug .bug-top { flex-wrap: wrap; max-height: calc(1.55em + .35rem); overflow: hidden; }
+.is-pregame .bug-top { justify-content: center; } /* the day and the time, centred over the rows */
+.is-pregame .bug-top > span, .is-season-bug .bug-top > span { flex: 0 1 auto; }
+.is-pregame .bug-top .bug-pc, .is-season-bug .bug-top .bug-pc { flex: 0 0 auto; margin-left: auto; }
 .bug-pc { font-size: .85rem; }
 .bug-top.bug-bat { font-weight: 400; font-size: .8rem; padding-top: .15rem; color: #d5d8dc; } /* the batter's row under the pitcher's */
 .bug-top.bug-bat .bug-pc { font-size: .75rem; }
@@ -1045,13 +1066,17 @@ html { overflow-anchor: none; }
 .is-live .tf-lines .tf-next { text-align: center; }
 .tf-pred { display: flex; align-items: center; gap: .6rem; margin-top: .5rem; font-family: var(--mono); font-size: .74rem; color: var(--ink-soft); }
 .tf-pred svg { width: 3.4rem; height: 3.4rem; flex: none; }
+.tp-ring { display: flex; flex-direction: column; align-items: center; gap: .1rem; }
+.tp-ring i { font-style: normal; font-size: .62rem; letter-spacing: .04em; color: var(--ink-soft); } /* soccer: the draw's share, under the ring */
 .tf-pred .tp-side { display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
-.tf-pred .tp-side b { font-family: var(--display); font-size: 1.35rem; font-weight: 700; letter-spacing: .02em; }
+.tf-pred .tp-side b { font-family: var(--display); font-size: 1.35rem; font-weight: 700; letter-spacing: .02em; color: var(--ink); } /* the ring carries the colours; the numbers stay legible */
 .is-live .tf-wiki { justify-content: flex-start; } /* beside a game the news sits at the top */
 /* the column wrapped under the row (app.js foldNews sets is-wrapped on the
    block when it measures the column below the row): as tall as it needs,
    the lead — the highlights, the last out — in a column of its own beside the news */
 .team-form.is-live.is-wrapped > .tf-wiki { max-height: none; }
+/* the row alone across the block (the news column wrapped under it, or none): as wide as its content, centred, so the crests sit close by the bug instead of at the block's far ends */
+.team-form.is-live.is-wrapped > .tf-main, .team-form.is-live > .tf-main:not(:has(+ .tf-wiki)) { flex: 0 1 auto; max-width: 100%; margin-inline: auto; }
 @media (min-width: 641px) {
   .team-form.is-live.is-wrapped .tf-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 1.2rem; align-items: start; }
   .team-form.is-live.is-wrapped .tf-cols .tf-lead { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; padding-right: 1.2rem; border-right: 1px solid var(--line); align-self: stretch; }
@@ -1098,6 +1123,7 @@ html { overflow-anchor: none; }
 .team-cal .cal-day.is-past .num { color: inherit; }
 /* the PDF and list ⇄ calendar chips: only while the Teams view is open, just left of Home Teams */
 html:not(.teams-open) #teamViewBtn, html:not(.teams-open) #teamPdfBtn { display: none; }
+#teamViewBtn:disabled, #teamPdfBtn:disabled { opacity: .35; cursor: default; } /* every club's list (teams-all) has no calendar or poster: the chips stay put, dimmed, so the bar never shifts */
 #teamPdfBtn { order: 2; }
 #teamViewBtn { order: 3; }
 #teamViewBtn, #teamPdfBtn { padding: .5em .7em; } /* icon only (the label stays for screen readers): the strip needs the room for its names */
@@ -1353,6 +1379,7 @@ body.sheet-open { overflow: hidden; }
 /* ---- small screens (a phone, or a narrow window): the news column sits under the row, so it is low priority — one headline, no summary line, the rest behind the arrow (app.js foldNews, NEWS_SHOWN_NARROW) ---- */
 @media (max-width: 760px) {
   .tf-wiki:not(.is-open) .tf-news p { display: none; }
+  .tf-more { width: 100%; margin-top: .5rem; min-height: 2.25rem; font-size: .85rem; }
 }
 
 /* ---- phones: the game block stacked (kept at the end of the file so it outranks the desktop rules above) ---- */
