@@ -18,16 +18,24 @@
   // Mirrors TEAMS in scripts/badges.mjs. venue = the team's home building;
   // schedule = the team's own schedule page (a game's link still goes to
   // wherever its tickets are sold).
+  // Order = the Teams strip, left to right (Steve, 2026-09-10); Sounders
+  // were not on his list and sit last rather than being dropped. sport keys
+  // the little icon after the name in the strip (app.js SPORT_ICONS); colors =
+  // [primary, accent] — the season calendar's home cells and card frames;
+  // espn = the club on ESPN's scoreboard, for the live game block (the PWHL
+  // feed refuses browser requests, so the Torrent have none).
   var TEAMS = [
-    { slug: 'mariners', label: 'Mariners', re: /mariners/i, venue: 'T-Mobile Park', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/sea.png', schedule: 'https://www.mlb.com/mariners/schedule' },
-    { slug: 'storm', label: 'Storm', re: /seattle storm/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/wnba/500/sea.png', schedule: 'https://storm.wnba.com/schedule/' },
-    { slug: 'seahawks', label: 'Seahawks', re: /seahawks/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/sea.png', schedule: 'https://www.seahawks.com/schedule/' },
-    { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/15363.png', schedule: 'https://www.reignfc.com/schedule' },
-    { slug: 'sounders', label: 'Sounders', re: /sounders/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/9726.png', schedule: 'https://www.soundersfc.com/schedule/' },
-    { slug: 'kraken', label: 'Kraken', re: /kraken/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/sea.png', schedule: 'https://www.nhl.com/kraken/schedule' },
-    // PWHL, first season 2025-26. No public crest image to hotlink yet, and
+    { slug: 'seahawks', espn: { sport: 'football', league: 'nfl', id: '26' }, colors: ['#002244', '#69be28'], sport: 'football', label: 'Seahawks', re: /seahawks/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/sea.png', schedule: 'https://www.seahawks.com/schedule/' },
+    { slug: 'mariners', espn: { sport: 'baseball', league: 'mlb', id: '12' }, colors: ['#0c2c56', '#005c5c'], sport: 'baseball', label: 'Mariners', re: /mariners/i, venue: 'T-Mobile Park', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/sea.png', schedule: 'https://www.mlb.com/mariners/schedule' },
+    { slug: 'kraken', espn: { sport: 'hockey', league: 'nhl', id: '124292' }, colors: ['#001628', '#99d9d9'], sport: 'hockey', label: 'Kraken', re: /kraken/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/sea.png', schedule: 'https://www.nhl.com/kraken/schedule' },
+    { slug: 'storm', espn: { sport: 'basketball', league: 'wnba', id: '14' }, colors: ['#2c5234', '#fee11a'], sport: 'basketball', label: 'Storm', re: /seattle storm/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/wnba/500/sea.png', schedule: 'https://storm.wnba.com/schedule/' },
+    { slug: 'reign', espn: { sport: 'soccer', league: 'usa.nwsl', id: '15363' }, colors: ['#0a2240', '#c5a05a'], sport: 'soccer', label: 'Reign', re: /reign fc|seattle reign/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/15363.png', schedule: 'https://www.reignfc.com/schedule' },
+    // PWHL, first season 2025-26. The crest is the league's stat-feed copy;
     // the league site has no per-team schedule URL — the team page holds it.
-    { slug: 'torrent', label: 'Torrent', re: /seattle torrent/i, venue: 'Climate Pledge Arena', schedule: 'https://www.thepwhl.com/en/teams/seattle-torrent' },
+    { slug: 'torrent', colors: ['#0b2340', '#3fb6c4'], sport: 'hockey', label: 'Torrent', re: /seattle torrent/i, venue: 'Climate Pledge Arena', logo: 'https://assets.leaguestat.com/pwhl/logos/8.png', schedule: 'https://www.thepwhl.com/en/teams/seattle-torrent' },
+    // Seattle Seawolves: Major League Rugby (since 2018), Starfire Stadium in Tukwila; no ESPN coverage
+    { slug: 'seawolves', colors: ['#003057', '#6cbe45'], sport: 'rugby', label: 'Seawolves', re: /seawolves/i, venue: 'Starfire Stadium', logo: 'https://www.seawolves.rugby/images/seawolves-logo.png', schedule: 'https://www.seawolves.rugby/schedule' },
+    { slug: 'sounders', espn: { sport: 'soccer', league: 'usa.1', id: '9726' }, colors: ['#236192', '#5d9741'], sport: 'soccer', label: 'Sounders', re: /sounders/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/9726.png', schedule: 'https://www.soundersfc.com/schedule/' },
   ];
   var TEAM_BY_SLUG = {};
   TEAMS.forEach(function (t) { TEAM_BY_SLUG[t.slug] = t; });
@@ -108,7 +116,7 @@
 
   // The campus venues walk a crowd past Lower Queen Anne; these three are a
   // bus ride away and listed for their size (a venue missing here is campus).
-  var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town' };
+  var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town', 'Starfire Stadium': 'town' };
 
   function slugify(s) {
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -333,7 +341,8 @@
     if (!items.length) return 0;
     var box = container.getBoundingClientRect(); // after the caller sized its gutter
     var gx = typeof opts.gutterX === 'function' ? opts.gutterX(box) : opts.gutterX;
-    var laneW = opts.laneWidth, b = opts.bend || 24;
+    var laneW = opts.laneWidth, b = opts.bend || 24, h = opts.hug || 0;
+    var top = h + b, bot = h + b; // a join's reach above and below the row's centre
     var f = function (v) { return Math.round(v * 10) / 10; };
     var svg = document.createElementNS(SVG_NS, 'svg');
     svg.setAttribute('class', 'series-graph');
@@ -341,8 +350,6 @@
     svg.setAttribute('height', box.height);
     svg.setAttribute('aria-hidden', 'true');
     var defs = null;
-    var dots = null; // the join tails, kept above every line
-    var tailGrad = {}; // .id of the one gradient the tails share
     var trunk = {}; // lane -> [[top, bottom], ...] the stretch of the lane each merged-lane series occupies
     var merged = {};
     items.forEach(function (it) { if (it.merged) merged[it.lane] = true; });
@@ -359,7 +366,7 @@
       // "continues from earlier" without dead-ending against anything.
       var d = '';
       if (it.before) {
-        var leadEnd = f(pts[0].y - b);
+        var leadEnd = f(pts[0].y - top);
         var group = it.els[0].closest(opts.groupSelector || '.day-row');
         var leadStart = group ? f(Math.max(0, group.getBoundingClientRect().top - box.top)) : 0;
         if (leadEnd > leadStart) {
@@ -386,64 +393,53 @@
         }
         d = 'M' + x + ' ' + Math.max(leadStart, leadEnd);
       }
+      // Each join is a merge, not a hairpin: an S-curve from the lane that
+      // arrives running along the card's edge, a short straight hug of the
+      // edge either side of the row's centre, and an S-curve back out — so
+      // the tangent is the edge's own at the join and nothing kinks.
       pts.forEach(function (p, i) {
         var starts = i === 0 && !it.before, ends = i === n - 1 && !it.after;
         var px = f(p.x), py = f(p.y);
-        var rx = f(p.x + (x - p.x) * 0.45); // where the curve levels out toward the row
-        if (starts) d += 'M' + px + ' ' + py;
-        else d += ' L' + x + ' ' + f(py - b) + ' C' + x + ' ' + f(py - b / 3) + ' ' + rx + ' ' + py + ' ' + px + ' ' + py;
-        if (!ends) d += ' C' + rx + ' ' + py + ' ' + x + ' ' + f(py + b / 3) + ' ' + x + ' ' + f(py + b);
+        var hi = f(py - h), lo = f(py + h);
+        if (starts) d += 'M' + px + ' ' + py + ' L' + px + ' ' + lo;
+        else d += ' L' + x + ' ' + f(py - top) + ' C' + x + ' ' + f(py - h - b / 2) + ' ' + px + ' ' + f(py - h - b / 2) + ' ' + px + ' ' + hi
+          + ' L' + px + ' ' + (ends ? py : lo);
+        if (!ends) d += ' C' + px + ' ' + f(py + h + b / 2) + ' ' + x + ' ' + f(py + h + b / 2) + ' ' + x + ' ' + f(py + bot);
       });
       if (it.after) d += ' L' + x + ' ' + f(box.height);
       if (d.indexOf('C') < 0 && d.indexOf('L') < 0) return; // a lone row with nothing to connect
       if (merged[it.lane]) { // where this series runs along the lane: from its first curve out to its last curve in
-        var t0 = it.before ? 0 : pts[0].y + b, t1 = it.after ? box.height : pts[n - 1].y - b;
+        var t0 = it.before ? 0 : pts[0].y + bot, t1 = it.after ? box.height : pts[n - 1].y - top;
         if (t1 > t0) (trunk[it.lane] = trunk[it.lane] || []).push([t0, t1]);
       }
       var path = document.createElementNS(SVG_NS, 'path');
       path.setAttribute('class', 'sg-line');
       path.setAttribute('d', d);
       path.style.stroke = opts.color(it.s);
+      // with an edge colour, the stroke fades across the bend from the lane's
+      // colour to the card's own, so at the join it dissolves into the card
+      if (opts.edgeColor) {
+        if (!defs) { defs = document.createElementNS(SVG_NS, 'defs'); svg.appendChild(defs); }
+        var eid = 'sg-edge-' + idx + '-' + Math.round(Math.random() * 1e6);
+        var eg = document.createElementNS(SVG_NS, 'linearGradient');
+        eg.setAttribute('id', eid);
+        eg.setAttribute('gradientUnits', 'userSpaceOnUse');
+        eg.setAttribute('x1', f(pts[0].x)); eg.setAttribute('x2', x); eg.setAttribute('y1', 0); eg.setAttribute('y2', 0);
+        [[0, opts.edgeColor(it.s)], [1, opts.color(it.s)]].forEach(function (st) {
+          var stop = document.createElementNS(SVG_NS, 'stop');
+          stop.setAttribute('offset', st[0]);
+          stop.style.stopColor = st[1];
+          eg.appendChild(stop);
+        });
+        defs.appendChild(eg);
+        path.style.stroke = 'url(#' + eid + ')';
+      }
       if (opts.label) {
         var tip = document.createElementNS(SVG_NS, 'title');
         tip.textContent = opts.label(it.s);
         path.appendChild(tip);
       }
       svg.appendChild(path);
-      // at each join a tight arc hugs the inside of the card's edge, meeting
-      // the lane's curves on the edge and fading out toward both its ends,
-      // so the line blends into the card rather than stopping at a node
-      // (one gradient, in the arc's own box, serves every tail). Kept in a
-      // group moved to the end so nothing drawn later covers them.
-      if (opts.tail) {
-        if (!dots) { dots = document.createElementNS(SVG_NS, 'g'); dots.setAttribute('class', 'sg-tails'); }
-        if (!tailGrad.id) {
-          if (!defs) { defs = document.createElementNS(SVG_NS, 'defs'); svg.appendChild(defs); }
-          var tg = document.createElementNS(SVG_NS, 'linearGradient');
-          tailGrad.id = 'sg-tail-' + Math.round(Math.random() * 1e6);
-          tg.setAttribute('id', tailGrad.id);
-          tg.setAttribute('x1', 0); tg.setAttribute('x2', 0); tg.setAttribute('y1', 0); tg.setAttribute('y2', 1); // top to bottom of each arc
-          [[0, 0], [0.5, 0.85], [1, 0]].forEach(function (st) {
-            var stop = document.createElementNS(SVG_NS, 'stop');
-            stop.setAttribute('offset', st[0]);
-            stop.style.stopColor = opts.color(it.s);
-            stop.setAttribute('stop-opacity', st[1]);
-            tg.appendChild(stop);
-          });
-          defs.appendChild(tg);
-        }
-        var depth = opts.tail; // how far inside the edge the arc reaches
-        pts.forEach(function (p) {
-          var px = f(p.x), py = f(p.y);
-          var ix = f(px - depth), cx = f(px - depth * 0.55);
-          var t = document.createElementNS(SVG_NS, 'path');
-          t.setAttribute('class', 'sg-line sg-tail');
-          t.setAttribute('d', 'M' + ix + ' ' + f(py - b) + ' C' + ix + ' ' + f(py - b / 3) + ' ' + cx + ' ' + py + ' ' + px + ' ' + py
-            + ' C' + cx + ' ' + py + ' ' + ix + ' ' + f(py + b / 3) + ' ' + ix + ' ' + f(py + b));
-          t.style.stroke = 'url(#' + tailGrad.id + ')';
-          dots.appendChild(t);
-        });
-      }
     });
     // merged lanes: where two or more series run along the lane at once, a
     // neutral trunk is drawn over their verticals so the stretch reads as
@@ -467,7 +463,6 @@
         }
       });
     });
-    if (dots) svg.appendChild(dots);
     container.appendChild(svg);
     return laneEnd.length;
   }

@@ -32,6 +32,7 @@ export const TEAMS = [
   { slug: 'sounders', label: 'Sounders', re: /sounders/i },
   { slug: 'kraken', label: 'Kraken', re: /kraken/i },
   { slug: 'torrent', label: 'Torrent', re: /seattle torrent/i },
+  { slug: 'seawolves', label: 'Seawolves', re: /seawolves/i }, // MLR; its Starfire home matches enter the feed from its schedule
 ];
 
 // key → [label for the calendar name, predicate]

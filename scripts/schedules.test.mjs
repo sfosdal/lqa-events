@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn } from './schedules.mjs';
+import { parseYoutube, matchYoutube, parseNflPage, titleDate } from './highlights.mjs';
+import { applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, wikiTitle, pickNews, seasonStartYear, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
 
 const feed = () => [
   { venue: 'Lumen Field', title: 'Seattle Seahawks vs. Dallas Cowboys', date: '2026-12-07', time: '17:15:00' },
@@ -38,6 +39,14 @@ test('broadcasts: national first, then the home market; away feeds dropped; name
     { kind: 'radio', name: '105.3 The Fan', home: false, national: false },
   ]);
   assert.deepEqual(w, { tv: ['FOX', 'Mariners.TV'], radio: ['Seattle Sports (710 AM)'] });
+  // on the road our feeds are the away-market ones; the hosts' regional network is the one to drop
+  const away = pickBroadcasts([
+    { kind: 'tv', name: 'NBC Sports CA', home: true, national: false },
+    { kind: 'tv', name: 'Mariners.TV', home: false, national: false },
+    { kind: 'radio', name: 'Seattle Sports (710 AM)', home: false, national: false },
+    { kind: 'radio', name: "Talk 650 KSTE", home: true, national: false },
+  ], false);
+  assert.deepEqual(away, { tv: ['Mariners.TV'], radio: ['Seattle Sports (710 AM)'] });
 });
 
 test('broadcasts: nothing usable means no watch at all, and a missing kind is left out', () => {
@@ -68,8 +77,9 @@ test('MLB: home and away games, Seattle times, the opponent\'s crest and club si
     { date: '2026-03-01', games: [{ gameDate: '2026-03-01T20:00:00Z', officialDate: '2026-03-01', gameType: 'S', teams: { away: { team: bos }, home: { team: sea } } }] },
     { date: '2026-10-01', games: [{ gameDate: '2026-10-02T02:00:00Z', officialDate: '2026-10-01', gameType: 'F', teams: { away: { team: bos }, home: { team: sea } } }] },
   ] }, 136);
-  assert.equal(games.length, 3, 'only our games, spring training left out');
-  assert.equal(games[2].playoff, true, 'a wild-card game is a playoff');
+  assert.equal(games.length, 4, 'only our games, spring training kept');
+  assert.equal(games.filter((g) => g.pre).length, 1, 'spring training flagged pre'); assert.equal(games.find((g) => g.pre).date, '2026-03-01');
+  assert.equal(games[3].playoff, true, 'a wild-card game is a playoff'); assert.equal(games[2].playoff, undefined, 'spring training is not one');
   assert.equal(games[0].playoff, undefined);
   assert.deepEqual(games[0], { date: '2026-09-01', time: '15:45:00', tbd: false, home: false, venue: 'Fenway Park',
     opp: { name: 'Boston Red Sox', short: 'Red Sox', abbrev: 'BOS', logo: 'https://www.mlbstatic.com/team-logos/111.svg', site: 'https://www.mlb.com/redsox' } });
@@ -90,8 +100,9 @@ test('NHL: home and away, opponent from place + nickname, nhl.com/<nickname>', (
     { gameDate: '2026-09-25', gameType: 1, startTimeUTC: '2026-09-26T02:00:00Z', homeTeam: { abbrev: 'SEA' }, awayTeam: { abbrev: 'VAN' } },
     { gameDate: '2027-04-20', gameType: 3, startTimeUTC: '2027-04-21T02:00:00Z', homeTeam: { abbrev: 'SEA' }, awayTeam: { abbrev: 'VAN' } },
   ] }, 'SEA');
-  assert.equal(games.length, 3, 'preseason left out');
-  assert.equal(games[2].playoff, true);
+  assert.equal(games.length, 4, 'preseason kept');
+  assert.equal(games[2].pre, true, 'flagged pre'); assert.equal(games[2].playoff, undefined);
+  assert.equal(games[3].playoff, true);
   assert.deepEqual(games[0], { date: '2026-10-08', time: '19:00:00', tbd: false, home: false, venue: 'Rogers Arena',
     opp: { name: 'Vancouver Canucks', short: 'Canucks', abbrev: 'VAN', logo: 'https://assets.nhle.com/logos/nhl/svg/VAN_light.svg', site: 'https://www.nhl.com/canucks' } });
   assert.equal(games[1].home, true);
@@ -114,12 +125,170 @@ test('ESPN: home and away from homeAway, opponent crest + clubhouse link, flexed
     { date: '2026-08-10T00:00Z', season: { type: 1 }, competitions: [{ competitors: [{ homeAway: 'home', team: ne }, { homeAway: 'away', team: sea }] }] },
     { date: '2027-01-10T00:00Z', season: { type: 3 }, competitions: [{ competitors: [{ homeAway: 'home', team: ne }, { homeAway: 'away', team: sea }] }] },
   ] }, 26);
-  assert.equal(games.length, 3, 'preseason left out');
-  assert.equal(games[2].playoff, true);
+  assert.equal(games.length, 4, 'preseason kept');
+  assert.equal(games[2].pre, true, 'flagged pre'); assert.equal(games[2].playoff, undefined);
+  assert.equal(games[3].playoff, true);
   assert.deepEqual(games[0], { date: '2026-09-09', time: '17:20:00', tbd: false, home: true, venue: 'Lumen Field',
     opp: { name: 'New England Patriots', short: 'Patriots', abbrev: 'NE', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/ne.png', site: 'https://www.espn.com/nfl/team/_/name/ne/new-england-patriots' } });
   assert.equal(games[1].home, false);
   assert.equal(games[1].tbd, true);
   assert.equal(games[1].time, null);
   assert.equal(games[1].venue, 'Gillette Stadium');
+});
+
+test('PWHL: home and away from the team ids, venue-zone time to Seattle, league crest + club page', () => {
+  const games = [
+    { home_team: '9', visiting_team: '8', date_played: '2025-11-21', GameDateISO8601: '2025-11-21T22:00:00-05:00', schedule_time: '22:00:00',
+      home_team_name: 'Vancouver Goldeneyes', home_team_nickname: 'Goldeneyes', home_team_code: 'VAN', visiting_team_name: 'Seattle Torrent',
+      venue_name: 'Pacific Coliseum | Vancouver', date_tbd: '0', time_tbd: '0' },
+    { home_team: '8', visiting_team: '3', date_played: '2025-12-05', GameDateISO8601: '2025-12-05T19:00:00-08:00', schedule_time: '19:00:00',
+      home_team_name: 'Seattle Torrent', visiting_team_name: 'Montréal Victoire', visiting_team_nickname: 'Victoire', visiting_team_code: 'MTL',
+      venue_name: 'Climate Pledge Arena | Seattle', date_tbd: '0', time_tbd: '1' },
+    { home_team: '1', visiting_team: '2', date_played: '2025-12-06', home_team_name: 'Boston Fleet', visiting_team_name: 'Minnesota Frost' },
+  ];
+  const out = normalizePwhl(games, 8, true);
+  assert.equal(out.length, 2);
+  assert.deepEqual(out[0], { date: '2025-11-21', time: '19:00:00', tbd: false, home: false, playoff: true,
+    opp: { name: 'Vancouver Goldeneyes', short: 'Goldeneyes', abbrev: 'VAN', logo: 'https://assets.leaguestat.com/pwhl/logos/9.png', site: 'https://www.thepwhl.com/en/teams/vancouver-goldeneyes' },
+    venue: 'Pacific Coliseum' });
+  assert.equal(out[1].home, true);
+  assert.equal(out[1].time, null); // time TBD
+  assert.equal(out[1].opp.site, 'https://www.thepwhl.com/en/teams/montreal-victoire'); // accent folded
+  assert.equal(out[1].venue, 'Climate Pledge Arena');
+});
+
+// ---- results: a final game carries its line, an unplayed one nothing ----
+test('results: MLB final → us/them/won; NHL OT and PWHL SO marked; ESPN draw is won:false; unplayed games have no res', () => {
+  const mlb = normalizeMlb({ dates: [{ date: '2026-09-08', games: [
+    { gamePk: 1, gameType: 'R', officialDate: '2026-09-08', gameDate: '2026-09-09T02:10:00Z', status: { abstractGameState: 'Final' },
+      teams: { home: { team: { id: 136, name: 'Seattle Mariners' }, score: 2, isWinner: false }, away: { team: { id: 140, name: 'Texas Rangers', teamName: 'Rangers', abbreviation: 'TEX' }, score: 6, isWinner: true } }, venue: { name: 'T-Mobile Park' } },
+    { gamePk: 2, gameType: 'R', officialDate: '2026-09-10', gameDate: '2026-09-10T20:10:00Z', status: { abstractGameState: 'Preview' },
+      teams: { home: { team: { id: 136, name: 'Seattle Mariners' } }, away: { team: { id: 140, name: 'Texas Rangers', teamName: 'Rangers', abbreviation: 'TEX' } } }, venue: { name: 'T-Mobile Park' } },
+  ] }] }, 136);
+  assert.deepEqual(mlb[0].res, { us: 2, them: 6, won: false });
+  assert.equal(mlb[1].res, undefined);
+  const nhl = normalizeNhl({ games: [{ gameType: 2, gameDate: '2026-04-16', startTimeUTC: '2026-04-17T02:00:00Z', gameState: 'OFF', gameOutcome: { lastPeriodType: 'OT' },
+    homeTeam: { abbrev: 'SEA', score: 3 }, awayTeam: { abbrev: 'COL', score: 2, commonName: { default: 'Avalanche' }, placeName: { default: 'Colorado' } }, venue: { default: 'Climate Pledge Arena' } }] }, 'SEA');
+  assert.deepEqual(nhl[0].res, { us: 3, them: 2, won: true, ot: 'OT' });
+  const espn = normalizeEspn({ events: [{ date: '2026-08-30T21:00Z', season: { type: 2 }, competitions: [{ status: { type: { completed: true } }, venue: { fullName: 'Lumen Field' },
+    competitors: [{ team: { id: '9726', displayName: 'Seattle Sounders FC' }, homeAway: 'home', score: { displayValue: '1' }, winner: false },
+      { team: { id: '1', displayName: 'LA Galaxy' }, homeAway: 'away', score: { displayValue: '1' }, winner: false }] }] }] }, 9726);
+  assert.deepEqual(espn[0].res, { us: 1, them: 1, won: false });
+  const pwhl = normalizePwhl([{ home_team: '8', visiting_team: '3', home_team_name: 'Seattle Torrent', visiting_team_name: 'Montréal Victoire', date_played: '2026-04-25',
+    GameDateISO8601: '2026-04-25T19:00:00-07:00', final: '1', game_status: 'Final SO', home_goal_count: '1', visiting_goal_count: '2', venue_name: 'Climate Pledge Arena' }], 8, false);
+  assert.deepEqual(pwhl[0].res, { us: 1, them: 2, won: false, ot: 'SO' });
+});
+
+test('wikiTitle: one year for a summer season, en-dash span for one that straddles the new year, null with nothing', () => {
+  assert.equal(wikiTitle('mariners', [{ date: '2026-03-26' }, { date: '2026-09-27' }]), '2026 Seattle Mariners season');
+  assert.equal(wikiTitle('kraken', [{ date: '2026-10-01' }, { date: '2027-04-10' }]), '2026–27 Seattle Kraken season');
+  assert.equal(wikiTitle('torrent', [{ date: '2025-11-21' }, { date: '2026-04-25' }]), '2025–26 Seattle Torrent season');
+  assert.equal(wikiTitle('seahawks', [{ date: '2026-09-09' }, { date: '2027-01-09' }]), '2026 Seattle Seahawks season'); // the NFL names a season by its first year
+  assert.equal(wikiTitle('kraken', []), null);
+});
+
+test('pickNews: written pieces only, the ones naming the club first, newest first, eight at most', () => {
+  const art = (type, headline, published, description = '') => ({ type, headline, published, description, links: { web: { href: 'https://espn.com/' + headline.replace(/\W+/g, '-') } } });
+  const out = pickNews([
+    art('Media', 'Seahawks clip', '2026-09-10T12:00Z'),
+    art('Story', 'What is the oldest NFL stadium?', '2026-09-10T10:00Z'),
+    art('Story', 'Seahawks lose Darnold', '2026-09-09T10:00Z'),
+    art('Recap', 'Seahawks beat Patriots', '2026-09-08T10:00Z'),
+    art('Story', 'League power rankings', '2026-09-07T10:00Z', 'Seahawks up to fourth'),
+    art('Story', 'No link', '2026-09-11T10:00Z'),
+  ].map((a) => (a.headline === 'No link' ? { ...a, links: {} } : a)), 'Seahawks');
+  assert.deepEqual(out.map((a) => a.headline), ['Seahawks lose Darnold', 'Seahawks beat Patriots', 'League power rankings', 'What is the oldest NFL stadium?']);
+  assert.equal(pickNews(Array.from({ length: 12 }, (_, i) => art('Story', 'Seahawks ' + i, '2026-09-' + String(10 + i))), 'Seahawks').length, 8);
+  assert.equal(out[0].date, '2026-09-09');
+  assert.equal(out[0].url, 'https://espn.com/Seahawks-lose-Darnold');
+});
+
+test('seasonStartYear: summer leagues take the calendar year; hockey and football take last year until July', () => {
+  assert.equal(seasonStartYear('baseball', new Date(2026, 2, 1)), 2026);
+  assert.equal(seasonStartYear('hockey', new Date(2026, 8, 10)), 2026);
+  assert.equal(seasonStartYear('hockey', new Date(2027, 2, 1)), 2026);
+  assert.equal(seasonStartYear('football', new Date(2027, 0, 9)), 2026);
+});
+
+
+test('Seawolves: fixtures from Upcoming, results from Previous by date, home = Seawolves first, preseason round 0 kept and flagged', () => {
+  const card = (round, a, b, ground, date, time, extra = '') => `<div class=" relative mb-4 p-4 shadow-sm rounded-md bg-blue-50 "><span>Round <!-- -->${round}</span><img title="${a}" src="/images/teams/${a[0]}.png" alt="${a}" class="w-16"/><p class="mr-2">VS.</p><img title="${b}" src="/images/teams/${b[0]}.png" alt="${b}"/><span class="font-semibold">${ground}</span><span class="font-semibold">${date}</span><span>${time}<!-- --> PT</span>${extra}</div>`;
+  const html = '<h1 class="text-3xl font-bold">2026<!-- --> <!-- -->Seawolves<!-- --> Schedule</h1><h2>Upcoming Matches</h2>' +
+    card(0, 'Seattle Seawolves', 'Hartford Harpooners', 'Starfire Stadium', 'Sat, Mar 28', '4:00 PM') +
+    card(1, 'Seattle Seawolves', 'Old Glory DC', 'Starfire Stadium', 'Fri, Apr 3', '7:30 PM') +
+    card(2, 'Anthem Rugby Carolina', 'Seattle Seawolves', 'Away', 'Sun, Apr 12', '1:00 PM') +
+    '<h2>Previous Matches</h2>' +
+    card(2, 'Seattle Seawolves', 'Old Glory DC', 'Starfire Stadium', 'Fri, Apr 3', '7:30 PM', '<p class="s">31 - 20</p><span>Win</span>') +
+    card(3, 'Anthem RC', 'Seattle Seawolves', 'American Legion Memorial Stadium', 'Sun, Apr 12', '1:00 PM', '<p>27 - 24</p><span>Loss</span>') +
+    card(12, 'Seattle Seawolves', 'California Legion', 'Starfire Stadium', 'Sun, Jun 14', '7:30 PM', '<p>34 - 43</p><span>Loss</span>') + // a playoff: only in the results
+    '<h2>Upcoming Matches</h2>' + card(1, 'Seattle Seawolves', 'Old Glory DC', 'Starfire Stadium', 'Fri, Apr 3', '7:30 PM'); // the hydration copy: not a second fixture
+  let g = parseSeawolves(html);
+  assert.equal(g.length, 4);
+  assert.deepEqual({ date: g[0].date, pre: g[0].pre, opp: g[0].opp.name }, { date: '2026-03-28', pre: true, opp: 'Hartford Harpooners' });
+  g = g.slice(1); // the season proper
+  assert.deepEqual({ date: g[2].date, playoff: g[2].playoff, res: g[2].res, opp: g[2].opp.name }, { date: '2026-06-14', playoff: true, res: { us: 34, them: 43, won: false }, opp: 'California Legion' });
+  assert.deepEqual(g[0], { date: '2026-04-03', time: '19:30:00', tbd: false, home: true, opp: { name: 'Old Glory DC', short: 'Old Glory', abbrev: 'DC', logo: 'https://www.seawolves.rugby/images/teams/O.png', site: 'https://oldglorydc.com/' }, venue: 'Starfire Stadium', res: { us: 31, them: 20, won: true } });
+  assert.equal(g[1].home, false); assert.equal(g[1].venue, 'Anthem Rugby Carolina'); assert.deepEqual(g[1].res, { us: 24, them: 27, won: false });
+  assert.equal(wikiTitle('seawolves', [{ date: '2026-04-03' }, { date: '2026-06-14' }]), '2026 Seattle Seawolves season');
+});
+
+test('Seawolves news: date, headline and summary per post, newest first, eight at most', () => {
+  const post = (h, d, t, p) => `<a href="/news/${h}"><div><div class="tag">news</div><div class="text-sm">${d}</div><h2 class="x">${t}</h2><p class="y">${p}</p></div></a>`;
+  const out = parseSeawolvesNews(post('old', 'JUL 21, 2026', 'Old', 'x') + post('bob', 'SEP 1, 2026', 'Battle of the Border', 'Rugby Day comes to Ferndale') + post('draft', 'AUG 27, 2026', 'Three prospects &amp; more', '') + post('camp', 'AUG 12, 2026', 'Camp', 'k'));
+  assert.deepEqual(out.map((a) => a.headline), ['Battle of the Border', 'Three prospects & more', 'Camp', 'Old']);
+  assert.deepEqual(out[0], { date: '2026-09-01', headline: 'Battle of the Border', text: 'Rugby Day comes to Ferndale', url: 'https://www.seawolves.rugby/news/bob', source: 'Seawolves' });
+});
+
+test('RSS and Atom feeds: title, link, Seattle day, one line of summary, the source; utm stripped', () => {
+  const rss = `<rss><channel><item><title>Julio&#8217;s homer &amp; more</title><link>https://www.seattletimes.com/sports/mariners/x/?utm_source=RSS&amp;utm_medium=Referral</link><pubDate>Thu, 10 Sep 2026 15:52:03 -0700</pubDate><description><![CDATA[<img src="a.jpg"><br/>Julio Rodríguez found some answers.]]></description></item>
+    <item><title><![CDATA[Late one]]></title><link>https://www.mlb.com/mariners/news/y</link><pubDate>Fri, 11 Sep 2026 00:38:41 GMT</pubDate></item><item><title>No link</title></item></channel></rss>`;
+  const out = parseFeed(rss, 'Seattle Times');
+  assert.deepEqual(out.map(({ at, ...a }) => a), [
+    { date: '2026-09-10', headline: 'Julio’s homer & more', text: 'Julio Rodríguez found some answers.', url: 'https://www.seattletimes.com/sports/mariners/x/', source: 'Seattle Times' },
+    { date: '2026-09-10', headline: 'Late one', text: '', url: 'https://www.mlb.com/mariners/news/y', source: 'Seattle Times' },
+  ]);
+  const atom = `<feed><entry><title type="html"><![CDATA[Mad Hatters]]></title><link rel="alternate" type="text/html" href="https://www.lookoutlanding.com/a/1" /><published>2026-09-10T20:07:41-04:00</published><summary type="html"><![CDATA[So often <b>duels</b> fizzle.]]></summary></entry></feed>`;
+  assert.deepEqual(parseFeed(atom, 'Lookout Landing').map(({ at, ...a }) => a), [{ date: '2026-09-10', headline: 'Mad Hatters', text: 'So often duels fizzle.', url: 'https://www.lookoutlanding.com/a/1', source: 'Lookout Landing' }]);
+  assert.equal(parseFeed(`<rss><item><title>T</title><link>u</link><description>${'word '.repeat(60)}</description></item></rss>`, 'x')[0].text.length <= 240, true);
+});
+
+test('merged news: newest first by the time posted, ties keep the given order, each URL once, only pieces naming the club, no filler, eight at most', () => {
+  const a = (d, u, s, at, h) => ({ date: d, headline: h || 'Mariners ' + u, text: '', url: u, source: s, ...(at ? { at } : {}) });
+  const out = mergeNews([[a('2026-09-11', 'https://espn.com/1', 'ESPN', '2026-09-11T05:00:00Z'), a('2026-09-09', 'https://espn.com/2', 'ESPN')], [a('2026-09-10', 'https://st.com/1', 'ST'), a('2026-09-11', 'https://espn.com/1/', 'ST'), a('2026-09-11', 'https://st.com/2', 'ST', '2026-09-11T09:00:00Z')]], 'Seattle Mariners');
+  assert.deepEqual(out.map((x) => x.url), ['https://st.com/2', 'https://espn.com/1', 'https://st.com/1', 'https://espn.com/2']);
+  assert.equal('at' in out[0], false);
+  assert.equal(mergeNews([Array.from({ length: 20 }, (_, i) => a('2026-09-01', 'https://x/' + i, 'x'))], 'Mariners').length, 8);
+  const junk = [a('2026-09-01', 'https://x/t', 'x', null, '2026 MLB ABS challenge system tracker: Team rankings'), a('2026-09-01', 'https://x/p', 'x', null, 'Photos: Seattle Mariners at Rangers'),
+    a('2026-09-01', 'https://x/o', 'x', null, 'Burning questions for all 32 NHL teams'), { date: '2026-09-01', headline: 'Julio homers', text: 'The Mariners won 4-3', url: 'https://x/ok', source: 'x' }];
+  assert.deepEqual(mergeNews([junk], 'Mariners').map((x) => x.url), ['https://x/ok']);
+});
+
+test('highlights: a YouTube upload from the game\'s window naming the opponent, reels first, pressers left out', () => {
+  const xml = ['HIGHLIGHTS: LA Galaxy vs. Seattle Sounders FC | September 12, 2026~a1~2026-09-13T05:58:22+00:00',
+    'Press Conference: Brian Schmetzer post-match vs LA Galaxy~a2~2026-09-13T05:58:17+00:00',
+    'Interview: Andrew Thomas on facing LA Galaxy~a3~2026-09-11T20:01:15+00:00',
+    'Jordan Morris goal vs. LA Galaxy~a4~2026-09-13T06:10:00+00:00',
+    'HIGHLIGHTS: Seattle Sounders FC vs. Portland Timbers | August 30, 2026~a5~2026-08-31T05:00:00+00:00',
+  ].map((l) => { const [t, id, at] = l.split('~'); return `<entry><title>${t}</title><yt:videoId>${id}</yt:videoId><published>${at}</published></entry>`; }).join('');
+  const got = matchYoutube(parseYoutube(xml), { date: '2026-09-12', opp: { name: 'LA Galaxy', short: 'LA Galaxy' } }, 'sounders');
+  assert.deepEqual(got.map((c) => c.url.slice(-2)), ['a1', 'a4']);
+  assert.equal(got[0].title, 'HIGHLIGHTS: LA Galaxy vs. Seattle Sounders FC | September 12, 2026');
+});
+
+test('highlights: nfl.com\'s game page yields the reel first, then the can\'t-miss plays, each once', () => {
+  const html = '{\\"title\\":\\"Derick Hall sack\\",\\"videos\\":[],\\"webLink\\":\\"https://www.nfl.com/videos/hall-sack\\"}' +
+    '{\\"title\\":\\"Can\'t-Miss Play: Jobe INT\\",\\"videos\\":[],\\"webLink\\":\\"https://www.nfl.com/videos/jobe-int\\"}' +
+    '{\\"title\\":\\"Patriots vs. Seahawks highlights | Week 1\\",\\"videos\\":[],\\"webLink\\":\\"https://www.nfl.com/videos/pats-sea-x1\\"}' +
+    '{\\"title\\":\\"Derick Hall sack\\",\\"videos\\":[],\\"webLink\\":\\"https://www.nfl.com/videos/hall-sack\\"}';
+  assert.deepEqual(parseNflPage(html).map((c) => c.url.split('/').pop()), ['pats-sea-x1', 'jobe-int', 'hall-sack']);
+});
+
+test('highlights: a title dated another day of the series is not this game\'s', () => {
+  assert.equal(titleDate('Rangers vs. Mariners Full Game Highlights (9/10/26)'), '2026-09-10');
+  assert.equal(titleDate('HIGHLIGHTS: LA Galaxy vs. Seattle Sounders FC | September 12, 2026'), '2026-09-12');
+  assert.equal(titleDate('MLS NEXT PRO: Chattanooga FC vs Atlanta United FC | Sept 13, 2026'), '2026-09-13');
+  assert.equal(titleDate('Jordan Morris goal vs. LA Galaxy'), null);
+  const xml = ['Rangers vs. Mariners Full Game Highlights (9/10/26)~b1~2026-09-11T05:00:00+00:00', 'Rangers vs. Mariners Full Game Highlights (9/9/26)~b2~2026-09-10T05:00:00+00:00']
+    .map((l) => { const [t, id, at] = l.split('~'); return `<entry><title>${t}</title><yt:videoId>${id}</yt:videoId><published>${at}</published></entry>`; }).join('');
+  assert.deepEqual(matchYoutube(parseYoutube(xml), { date: '2026-09-09', opp: { name: 'Texas Rangers', short: 'Rangers' } }, 'mariners').map((c) => c.url.slice(-2)), ['b2']);
 });

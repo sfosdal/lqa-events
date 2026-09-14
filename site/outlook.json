@@ -1,0 +1,11 @@
+{
+  "_": "Off-season blurbs for the Teams view's form block (app.js renderTeamForm): shown before a season starts and once one is well over. Plain text, one per team slug. Edit freely — nothing generates this file.",
+  "seahawks": "Mike Macdonald's third season in charge opens at Lumen Field. Flex-week kickoffs fill in above as the league confirms them.",
+  "mariners": "Spring training opens in Peoria in February and the regular season in late March; the schedule above fills in once MLB publishes it. Cal Raleigh and Julio Rodríguez remain the core of the lineup.",
+  "kraken": "A new season at Climate Pledge Arena. The Kraken open on the road and are home within the first week.",
+  "storm": "Rebuilding around a young core after a hard year; free agency and the draft over the winter will shape the roster before the season opens in May.",
+  "reign": "The Reign's NWSL season runs March to November at Lumen Field, with the playoffs beyond that for the top eight.",
+  "torrent": "The Torrent's second PWHL season opens in late November at Climate Pledge Arena, after an expansion year that ended in April.",
+  "sounders": "The Sounders' MLS season runs February to October, with the playoffs beyond that for the top nine in the West.",
+  "seawolves": "The Seawolves' Major League Rugby season runs March to June at Starfire Stadium in Tukwila, with the playoffs beyond that; the 2027 fixture list arrives over the winter."
+}

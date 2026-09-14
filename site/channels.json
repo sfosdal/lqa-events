@@ -1,0 +1,512 @@
+{
+  "_": "How to watch a network from Seattle, for the live game block (app.js renderTeamLive). Keys are regexes matched against ESPN's broadcast names, case-insensitive; first match wins. DirecTV and Dish numbers are the national ones; xfinity = the Xfinity 'King County South' lineup number (scripts/xfinity-lineup.mjs applies it from scripts/data/xfinity-98109.json — don't hand-edit those); ota = the Seattle over-the-air station and channel; stream = the services that carry it. A streaming-only service lists just its name.",
+  "channels": [
+    {
+      "match": "^ESPN2$",
+      "directv": "209",
+      "dish": "143",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Sling",
+        "Hulu + Live TV"
+      ],
+      "xfinity": "32"
+    },
+    {
+      "match": "^ESPNU$",
+      "directv": "208",
+      "dish": "141",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Sling"
+      ],
+      "xfinity": "400"
+    },
+    {
+      "match": "^ESPN\\+$|ESPN Plus",
+      "stream": [
+        "ESPN+"
+      ]
+    },
+    {
+      "match": "^ESPN(/ESPN App)?$|^ESPN Deportes$",
+      "directv": "206",
+      "dish": "140",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Sling",
+        "Hulu + Live TV"
+      ],
+      "xfinity": "31"
+    },
+    {
+      "match": "^ABC$|KOMO",
+      "directv": "4",
+      "dish": "4",
+      "ota": "KOMO 4",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Hulu + Live TV"
+      ],
+      "xfinity": "4"
+    },
+    {
+      "match": "^NBC(/Peacock)?$|^KING( 5)?$",
+      "directv": "5",
+      "dish": "5",
+      "ota": "KING 5",
+      "stream": [
+        "Peacock",
+        "YouTube TV",
+        "Fubo",
+        "Hulu + Live TV"
+      ],
+      "xfinity": "5"
+    },
+    {
+      "match": "^CBS$|KIRO",
+      "directv": "7",
+      "dish": "7",
+      "ota": "KIRO 7",
+      "stream": [
+        "Paramount+",
+        "YouTube TV",
+        "Fubo",
+        "Hulu + Live TV"
+      ],
+      "xfinity": "7"
+    },
+    {
+      "match": "^FOX( / FOX ONE)?$|KCPQ",
+      "directv": "13",
+      "dish": "13",
+      "ota": "KCPQ 13",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Hulu + Live TV"
+      ],
+      "xfinity": "13"
+    },
+    {
+      "match": "^KONG",
+      "directv": "16",
+      "dish": "16",
+      "ota": "KONG 16",
+      "stream": [],
+      "xfinity": "6"
+    },
+    {
+      "match": "Kraken Hockey Network|KHN",
+      "directv": "16",
+      "dish": "16",
+      "ota": "KONG 16",
+      "stream": [
+        "Prime Video (Kraken)"
+      ],
+      "xfinity": "6"
+    },
+    {
+      "match": "^FS1$|Fox Sports 1",
+      "directv": "219",
+      "dish": "150",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Sling",
+        "Hulu + Live TV"
+      ],
+      "xfinity": "33"
+    },
+    {
+      "match": "^FS2$|Fox Sports 2",
+      "directv": "618",
+      "dish": "397",
+      "stream": [
+        "Fubo",
+        "Sling"
+      ],
+      "xfinity": "413"
+    },
+    {
+      "match": "^TNT$|^HBO MAX$|^Max$",
+      "directv": "245",
+      "dish": "138",
+      "stream": [
+        "Max",
+        "YouTube TV",
+        "Sling",
+        "Hulu + Live TV"
+      ],
+      "xfinity": "54"
+    },
+    {
+      "match": "^TBS$",
+      "directv": "247",
+      "dish": "139",
+      "stream": [
+        "Max",
+        "YouTube TV",
+        "Sling",
+        "Hulu + Live TV"
+      ],
+      "xfinity": "55"
+    },
+    {
+      "match": "^truTV$",
+      "directv": "246",
+      "dish": "242",
+      "stream": [
+        "Max",
+        "YouTube TV",
+        "Sling"
+      ],
+      "xfinity": "49"
+    },
+    {
+      "match": "NFL Network",
+      "directv": "212",
+      "dish": "154",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Sling"
+      ],
+      "xfinity": "180"
+    },
+    {
+      "match": "MLB Network|^MLBN$",
+      "directv": "213",
+      "dish": "152",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Sling"
+      ],
+      "xfinity": "407"
+    },
+    {
+      "match": "NHL Network",
+      "directv": "215",
+      "dish": "157",
+      "stream": [
+        "Fubo",
+        "Sling"
+      ],
+      "xfinity": "419"
+    },
+    {
+      "match": "NBA TV",
+      "directv": "216",
+      "dish": "156",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Sling"
+      ],
+      "xfinity": "416"
+    },
+    {
+      "match": "CBS Sports Network|CBSSN",
+      "directv": "221",
+      "dish": "158",
+      "stream": [
+        "Paramount+",
+        "YouTube TV",
+        "Fubo"
+      ],
+      "xfinity": "412"
+    },
+    {
+      "match": "^ION$",
+      "directv": "305",
+      "dish": "250",
+      "ota": "KWPX 33",
+      "stream": [
+        "YouTube TV",
+        "Fubo"
+      ],
+      "xfinity": "3"
+    },
+    {
+      "match": "^Prime Video$|Amazon",
+      "stream": [
+        "Prime Video"
+      ]
+    },
+    {
+      "match": "Apple TV|MLS Season Pass",
+      "stream": [
+        "Apple TV"
+      ]
+    },
+    {
+      "match": "^Peacock$|Peacock/NBCSN|^NBCSN$|NBC Sports Network",
+      "stream": [
+        "Peacock"
+      ]
+    },
+    {
+      "match": "Paramount\\+",
+      "stream": [
+        "Paramount+"
+      ]
+    },
+    {
+      "match": "Netflix",
+      "stream": [
+        "Netflix"
+      ]
+    },
+    {
+      "match": "Mariners\\.TV",
+      "stream": [
+        "Fubo",
+        "Mariners.TV app (in-market)"
+      ],
+      "directv": "687",
+      "xfinity": "1261"
+    },
+    {
+      "match": "MLB\\.TV",
+      "stream": []
+    },
+    {
+      "match": "Root Sports",
+      "directv": "687",
+      "dish": "426",
+      "stream": [
+        "Fubo"
+      ]
+    },
+    {
+      "match": "^Hulu$|^HULU$",
+      "stream": [
+        "Hulu"
+      ]
+    },
+    {
+      "match": "Disney\\+",
+      "stream": [
+        "Disney+"
+      ]
+    },
+    {
+      "match": "^USA Net(work)?$",
+      "directv": "242",
+      "dish": "105",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Sling",
+        "Hulu + Live TV",
+        "Peacock"
+      ],
+      "xfinity": "58"
+    },
+    {
+      "match": "^CNBC$",
+      "directv": "355",
+      "dish": "208",
+      "stream": [
+        "YouTube TV",
+        "Fubo",
+        "Sling",
+        "Hulu + Live TV",
+        "Peacock"
+      ],
+      "xfinity": "46"
+    },
+    {
+      "match": "CW Seattle|KUNS",
+      "ota": "KUNS 51",
+      "stream": [
+        "YouTube TV",
+        "Hulu + Live TV"
+      ],
+      "xfinity": "29"
+    },
+    {
+      "match": "FOX 13\\+|KZJO",
+      "ota": "KZJO 22",
+      "stream": [
+        "Victory+",
+        "FOX 13+ app"
+      ],
+      "xfinity": "10"
+    },
+    {
+      "match": "Prime Video-Seattle",
+      "stream": [
+        "Prime Video (Washington)"
+      ]
+    },
+    {
+      "match": "^Victory\\+$",
+      "stream": [
+        "Victory+"
+      ]
+    },
+    {
+      "match": "^Roku$",
+      "stream": [
+        "The Roku Channel"
+      ]
+    },
+    {
+      "match": "^NWSL\\+$",
+      "stream": [
+        "NWSL+"
+      ]
+    },
+    {
+      "match": "FOX Deportes",
+      "directv": "461",
+      "stream": [
+        "Fubo",
+        "Sling"
+      ]
+    },
+    {
+      "match": "^SN$|^SN\\+$|^SNW$|^TVAS$|^TVA Sports$|KFAA|^Vegas 34$|^Vegas",
+      "hide": true
+    }
+  ],
+  "links": {
+    "_": "Where each name in the strip goes (app.js buildWatchList links an entry to the longest name it contains).",
+    "MLB.TV": "https://www.mlb.com/tv",
+    "Mariners.TV": "https://www.mlb.com/mariners/tv",
+    "Root Sports": "https://www.rootsports.com/",
+    "DirecTV": "https://www.directv.com/channel-lineup/",
+    "Xfinity": "https://www.xfinity.com/stream/",
+    "Dish": "https://www.dish.com/",
+    "Fubo": "https://www.fubo.tv/",
+    "YouTube TV": "https://tv.youtube.com/",
+    "Sling": "https://www.sling.com/",
+    "Hulu + Live TV": "https://www.hulu.com/live-tv",
+    "Hulu": "https://www.hulu.com/",
+    "Peacock": "https://www.peacocktv.com/",
+    "Paramount+": "https://www.paramountplus.com/",
+    "Max": "https://www.max.com/",
+    "ESPN+": "https://plus.espn.com/",
+    "Prime Video": "https://www.amazon.com/gp/video/storefront",
+    "Apple TV": "https://tv.apple.com/",
+    "Netflix": "https://www.netflix.com/",
+    "Disney+": "https://www.disneyplus.com/",
+    "ESPN": "https://www.espn.com/watch/",
+    "ESPN2": "https://www.espn.com/watch/",
+    "ESPNU": "https://www.espn.com/watch/",
+    "ESPN Deportes": "https://www.espn.com/watch/",
+    "ABC": "https://abc.com/watch-live",
+    "NBC": "https://www.nbc.com/live",
+    "CBS": "https://www.cbs.com/live-tv/",
+    "FOX": "https://www.fox.com/live/",
+    "FS1": "https://www.foxsports.com/live",
+    "FS2": "https://www.foxsports.com/live",
+    "TNT": "https://www.tntdrama.com/watchtnt",
+    "TBS": "https://www.tbs.com/watchtbs",
+    "truTV": "https://www.trutv.com/watchtrutv",
+    "NFL Network": "https://www.nfl.com/network/",
+    "MLB Network": "https://www.mlb.com/network",
+    "NHL Network": "https://www.nhl.com/info/nhl-network",
+    "NBA TV": "https://www.nba.com/watch/nba-tv",
+    "CBS Sports Network": "https://www.cbssports.com/cbs-sports-network/",
+    "ION": "https://iontelevision.com/",
+    "KOMO 4": "https://komonews.com/",
+    "KING 5": "https://www.king5.com/",
+    "KIRO 7": "https://www.kiro7.com/",
+    "KCPQ 13": "https://www.fox13seattle.com/",
+    "KONG 16": "https://www.king5.com/",
+    "Kraken Hockey Network": "https://www.nhl.com/kraken/",
+    "Seattle Sports": "https://www.seattlesports.com/",
+    "KTTH": "https://www.ktth.com/",
+    "93.3 KJR FM": "https://933kjr.iheart.com/",
+    "950 KJR AM": "https://950kjr.iheart.com/",
+    "KIRO Newsradio 97.3 FM": "https://mynorthwest.com/category/kiro-newsradio/",
+    "El Rey 1360 AM": "https://tunein.com/radio/El-Rey-1360-s33534/",
+    "KING 5+": "https://www.king5.com/watch",
+    "KUNS 51": "https://cwseattle.com/",
+    "CW Seattle": "https://cwseattle.com/",
+    "KZJO 22": "https://www.fox13seattle.com/fox13plus",
+    "FOX 13+": "https://www.fox13seattle.com/fox13plus",
+    "FOX 13+ app": "https://www.fox13seattle.com/fox13plus",
+    "Victory+": "https://www.victoryplus.com/",
+    "The Roku Channel": "https://therokuchannel.roku.com/",
+    "NWSL+": "https://www.nwslsoccer.com/watch",
+    "YouTube (PWHL)": "https://www.youtube.com/@thepwhlofficial",
+    "USA Network": "https://www.usanetwork.com/live",
+    "CNBC": "https://www.cnbc.com/live-tv/",
+    "FOX Deportes": "https://www.foxdeportes.com/",
+    "Prime Video (Washington)": "https://www.amazon.com/gp/video/storefront"
+  },
+  "_hide": "An entry with hide: true is a feed a Seattle viewer can't use (Canadian regional and national feeds, the other side's stations): the strip leaves it out.",
+  "clubs": {
+    "_": "What every game of a club carries beyond the league's listing — the radio network and the local streams (app.js buildWatchStrip adds them when the game's own list lacks them).",
+    "mariners": {
+      "radio": [
+        "Seattle Sports (710 AM)"
+      ],
+      "tv": [],
+      "note": "Seattle Sports app streams every game; Sundays also on KIRO Newsradio 97.3 FM; Seattle Red 770 AM when a Seahawks game overlaps"
+    },
+    "kraken": {
+      "radio": [
+        "93.3 KJR FM"
+      ],
+      "tv": [
+        "Kraken Hockey Network"
+      ],
+      "note": "Kraken Hockey Network: 77 games free over the air on KONG, up to 20 on KING 5, all of them free on Prime Video for Prime members in WA/OR/AK; 7 national games on TNT, ESPN, ESPN+/Hulu"
+    },
+    "seahawks": {
+      "radio": [
+        "Seattle Sports (710 AM)",
+        "KIRO Newsradio 97.3 FM"
+      ],
+      "tv": [],
+      "note": "Seahawks Radio Network flagships; streams only within 100 miles of Lumen Field"
+    },
+    "storm": {
+      "radio": [],
+      "tv": [],
+      "note": "35 local games on KOMO 4 and CW Seattle (KUNS), all streamed on Prime Video across Washington; nationals on USA Network, ION, NBA TV"
+    },
+    "sounders": {
+      "radio": [
+        "93.3 KJR FM",
+        "El Rey 1360 AM (Spanish)"
+      ],
+      "tv": [
+        "Apple TV"
+      ],
+      "note": "every match on Apple TV (included with an Apple TV subscription from 2026, no separate Season Pass); radio also 950 KJR AM and the Sounders app"
+    },
+    "reign": {
+      "radio": [],
+      "tv": [],
+      "note": "7 matches on FOX 13+ (KZJO 22.1) with Victory+, 7 on ION, 5 on NWSL+, 1 on CBS Sports Network, the rest Prime Video; no radio"
+    },
+    "torrent": {
+      "radio": [],
+      "tv": [
+        "YouTube (PWHL)",
+        "KONG",
+        "KING 5+"
+      ],
+      "note": "every PWHL game free on the league's YouTube channel; six on KONG and the KING 5+ app; no radio"
+    },
+    "seawolves": {
+      "radio": [],
+      "tv": [
+        "ESPN+",
+        "KONG",
+        "KING 5+"
+      ],
+      "note": "every match on ESPN+, select matches on ESPN2; the rest on KONG and the KING 5+ app in Western Washington; no radio"
+    }
+  }
+}

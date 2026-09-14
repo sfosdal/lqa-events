@@ -91,18 +91,25 @@ html { scroll-behavior: smooth; overflow-x: clip; } /* clip: the footer bleeds t
 @media (min-width: 1360px) { :root { --pagew: 80rem; } }
 body {
   /* no bottom padding: the sticky footer is the page's last thing, and any
-     padding here would show as a blank band under it once the list is short */
+     padding here would show as a blank band under it once the list is short.
+     A column flex at least a viewport tall, so a short page (the Teams view
+     with one team) still puts the footer at the bottom edge */
+  display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh;
   margin: 0 auto; padding: 0 1.25rem; max-width: var(--pagew);
   background: var(--sky); color: var(--ink);
   font: 16px/1.55 var(--body);
 }
+/* flex items refuse to shrink below their content's minimum width, so one
+   unwrappable line (a TV listing, the compact bar's title) would push a whole
+   section past a phone's edge; let them shrink like blocks */
+body > * { min-width: 0; }
 a { color: inherit; text-underline-offset: 2px; }
 :focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 2px; }
 
 /* ---- masthead ---- */
 .masthead {
   display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-end;
-  justify-content: space-between; padding: 2.5rem 0 1.5rem;
+  justify-content: space-between; padding: 2.5rem 0 1rem;
 }
 .eyebrow {
   font-family: var(--mono); font-size: .8rem; letter-spacing: .12em;
@@ -166,7 +173,7 @@ h1 {
 .tile span { font-family: var(--mono); font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; line-height: 1; }
 .tile:hover { border-color: var(--ink-soft); color: var(--ink); }
 /* ---- filter bar: one row of matching chips ---- */
-/* Funnel (filters), Reset, Copy link, Add To Calendar, then the theme pill
+/* Funnel (filters), Reset, Copy link, Add To Calendar, then the theme toggle
    at the right end. position: relative makes the bar the box the subscribe
    pop hangs from. */
 .filterbar {
@@ -186,13 +193,15 @@ h1 {
 /* The bar can't wrap. When its content wouldn't fit — app.js measures and
    sets .is-tight — the labeled chips keep just their icons; the labels stay
    for screen readers. */
-.filterbar.is-tight #subscribeBtn span, .filterbar.is-tight #filterToggle span, .filterbar.is-tight #teamsBtn span {
+.filterbar.is-tight #subscribeBtn span, .filterbar.is-tight #filterToggle span, .filterbar.is-tight #teamViewBtn span {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
-.filterbar.is-tight #subscribeBtn, .filterbar.is-tight #filterToggle, .filterbar.is-tight #teamsBtn { padding: .5em .7em; }
-.filterbar.is-tight #subscribeBtn svg, .filterbar.is-tight #filterToggle svg, .filterbar.is-tight #teamsBtn svg { width: 1.1rem; height: 1.1rem; }
+.filterbar.is-tight #subscribeBtn, .filterbar.is-tight #filterToggle, .filterbar.is-tight #teamViewBtn { padding: .5em .7em; }
+.filterbar.is-tight #subscribeBtn svg, .filterbar.is-tight #filterToggle svg, .filterbar.is-tight #teamViewBtn svg { width: 1.1rem; height: 1.1rem; }
 /* the Teams chip is a switch: solid while its view is on show */
-#teamsBtn[aria-pressed="true"] { background: var(--ink); color: var(--sky); border-color: var(--ink); }
+/* the view switch: agenda | home teams, a two-stop pill like the theme's (same rules, .view-toggle) */
+.view-toggle[data-active="teams"] .theme-knob { left: calc(3px + var(--tt)); }
+.view-toggle button[aria-checked="true"] { color: var(--sky); }
 /* while the Teams view is up the agenda's own controls step aside — the
    filters, search, the Today floater, Add To Calendar and the phone's calendar chip */
 html.teams-open #filterToggle, html.teams-open .search-wrap,
@@ -200,7 +209,7 @@ html.teams-open #subscribeBtn, html.teams-open .cal-toggle { display: none; }
 html.teams-open #calToday { display: none; }
 /* the search box: a chip that takes typing, a magnifier at its right end and
    no placeholder; it gives up width first when the row gets tight */
-.filterbar .search-wrap { position: relative; display: flex; flex: 1 1 8rem; min-width: 6rem; } /* takes whatever room the row has left */
+.filterbar .search-wrap { position: relative; display: flex; flex: 1 1 10rem; min-width: 10rem; } /* takes whatever room the row has left, never less than a word's worth: the chips drop their labels first (is-tight) */
 #searchBox {
   width: 100%; font: 500 .85rem/1 var(--body); color: var(--ink); background: var(--mist);
   border: 1px solid var(--line); border-radius: 999px; padding: .5em 2.4em .5em .95em; min-height: 2.25rem;
@@ -214,15 +223,17 @@ html.teams-open #calToday { display: none; }
   position: absolute; right: .85rem; top: 50%; width: 1rem; height: 1rem;
   transform: translateY(-50%); color: var(--ink-soft); pointer-events: none;
 }
-/* Add To Calendar sits toward the right end, just left of the theme pill
-   (DOM order keeps it with the other actions; flex order moves it); the
-   search box grows to fill the gap before it */
+/* Right end of the bar, left to right: Add To Calendar, the calendar chip
+   (narrow layouts only), Home Teams, then the theme pill always last (DOM
+   order keeps the chips together; flex order places them); the search box
+   grows to fill the gap before them */
 #subscribeBtn { order: 1; }
-#calToggle { order: 3; } /* the calendar chip: far right, past the theme pill */
-/* light / system / dark: a three-stop pill at the bar's right end, the ink
-   knob sliding under the active icon */
+#calToggle { order: 2; }
+#viewToggle { order: 4; } /* #teamViewBtn (3) sits just left of it while Teams is open */
+/* light / dark: a two-stop pill at the bar's right end, the ink knob
+   sliding under the stop in effect (the system's side until a click) */
 .theme-toggle {
-  position: relative; display: inline-flex; order: 2;
+  position: relative; display: inline-flex; order: 5;
   padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--mist);
 }
 .theme-toggle { --tt: 2rem; } /* stop width — wider on phones for the tap target */
@@ -232,14 +243,13 @@ html.teams-open #calToday { display: none; }
   display: grid; place-items: center;
 }
 .theme-toggle button svg { width: 1rem; height: 1rem; }
-.theme-toggle button[aria-checked="true"] { color: var(--sky); cursor: default; }
+.theme-toggle button[aria-checked="true"] { color: var(--sky); } /* still a click target: any stop flips */
 .theme-toggle button:not([aria-checked="true"]):hover { color: var(--ink); }
 .theme-knob {
   position: absolute; top: 3px; left: 3px; width: var(--tt); height: calc(100% - 6px);
   border-radius: 999px; background: var(--ink); transition: left .18s; /* ink knob, page-colored icon — like a checked box */
 }
-.theme-toggle[data-active="system"] .theme-knob { left: calc(3px + var(--tt)); }
-.theme-toggle[data-active="dark"] .theme-knob { left: calc(3px + var(--tt) * 2); }
+.theme-toggle[data-active="dark"] .theme-knob { left: calc(3px + var(--tt)); }
 @media (prefers-reduced-motion: reduce) { .theme-knob { transition: none; } }
 /* the bar stays pinned at the top while the list scrolls (--barh is its
    height — the month dividers and the calendar strip stick just below it);
@@ -252,11 +262,17 @@ html.teams-open #calToday { display: none; }
 /* the pinned bar's title: one slim line above the chips in the masthead's
    face, shown once the masthead itself has scrolled off; --titleh is what
    it adds to the bar, and html.is-scrolled adds that to --barh */
-.bar-title {
-  font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1.2rem;
-  text-transform: uppercase; letter-spacing: .02em; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis; margin: 0 0 .5rem;
+.bar-title { /* one size for all three parts */
+  display: flex; align-items: baseline; gap: .9rem; white-space: nowrap;
+  font-family: var(--display); font-weight: 700; font-size: 1.1rem; line-height: 1.2rem;
+  text-transform: uppercase; letter-spacing: .02em; margin: 0 0 .5rem;
 }
+.bar-title[hidden] { display: none; } /* an author display beats the UA [hidden] rule */
+.bar-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; } /* the title gives way first */
+.bar-eyebrow { /* "Seattle" and "Updated …" in the masthead's eyebrow face */
+  flex: none; font-family: var(--mono); font-weight: 400; letter-spacing: .08em; color: var(--gold);
+}
+#barUpdated { margin-left: auto; font-size: .6em; } /* the stamp: flush right, 40% smaller */
 html.is-scrolled { --barh: calc(var(--barh-base) + var(--titleh)); }
 .filter-panel {
   position: absolute; left: 0; right: 0; top: calc(100% + .5rem); z-index: 20;
@@ -333,6 +349,7 @@ html.is-scrolled { --barh: calc(var(--barh-base) + var(--titleh)); }
 
 /* ---- agenda layout: list + docked mini calendar ---- */
 .agenda { margin-top: 1.6rem; }
+.agenda, .teams { margin-bottom: 1.5rem; } /* the gap above the footer (its own top margin is auto) */
 .agenda-layout {
   display: grid; grid-template-columns: minmax(0, 1fr) 18rem;
   gap: 0 2.5rem; align-items: start;
@@ -454,11 +471,14 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
      they never run into the oval that hangs below it */
   background: linear-gradient(var(--sky) 50%, transparent);
 }
-/* the rule itself: a 1px layer at the row's center, above the shadow */
+/* the rule itself: a 1px layer at the row's center, above the shadow. A
+   month's warms to the brand orange at the middle like the footer's edge;
+   a holiday's stays the plain list rule */
 .month-row::before, .holiday-row::before {
   content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; z-index: 1;
   background: linear-gradient(90deg, transparent, var(--rule) 15%, var(--rule) 85%, transparent);
 }
+.month-row::before { background: linear-gradient(90deg, transparent, var(--line) 15%, var(--gold) 50%, var(--line) 85%, transparent); }
 .month-row > span, .holiday-row > span { position: relative; z-index: 1; background: var(--sky); padding: 0 .9rem; }
 /* the label sits in an oval the rule runs into: the same 1px line as the
    rule, bent around the name (months and holidays alike) */
@@ -466,7 +486,12 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
   border: 1px solid var(--rule); border-radius: 999px; padding: .4em 1.1em .3em;
   background: color-mix(in srgb, var(--rule) 15%, var(--sky)); /* a whisper above the page, well clear of the outline */
 }
+.month-row > span:not(.hol-pill) { border-color: var(--gold); } /* the month oval takes the orange its rule arrives in */
 .holiday-row > span, .month-row > .hol-pill { display: inline-flex; align-items: center; gap: .5rem; }
+/* a holiday is a flag, not another divider: a solid orange pill, ink type,
+   on the same orange-centred rule as a month's */
+.holiday-row::before { background: linear-gradient(90deg, transparent, var(--line) 15%, var(--gold) 50%, var(--line) 85%, transparent); }
+.holiday-row > span, .month-row > .hol-pill { background: var(--gold); border-color: var(--gold); color: #1b2733; }
 /* a holiday sharing the month's row: its own pill beside the month's, a
    size down like a holiday row, gone while the month is stuck up top */
 .month-row > .hol-pill { font-size: 1.05rem; }
@@ -496,7 +521,6 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
    mirrored pair carries the curves on into the card */
 .sg-line { fill: none; stroke-width: 1.5; stroke-opacity: .85; stroke-linecap: round; pointer-events: stroke; }
 .sg-trunk { stroke: var(--ink-soft); pointer-events: none; } /* a merged lane's shared line */
-.sg-tail { pointer-events: none; } /* its fade is a gradient stroke, set by filter.js */
 .series-n { font-size: .68rem; color: var(--ink-soft); letter-spacing: .04em; }
 @media (max-width: 640px) { .series-graph { display: none; } }
 .date-rail { text-align: center; }
@@ -620,15 +644,12 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
    site" right. Row two: the sources, a sentence per line, centered. */
 footer {
   position: sticky; bottom: 0; z-index: 12; background: var(--sky);
-  margin: 1.5rem calc(50% - 50vw) 0; padding: .6rem 1.25rem calc(.6rem + env(safe-area-inset-bottom));
+  margin: auto calc(50% - 50vw) 0; /* auto: pushed to the bottom of a short page (the sections keep the 1.5rem gap) */
+  padding: .6rem 1.25rem calc(.6rem + env(safe-area-inset-bottom));
 }
-/* above the footer the list dissolves into the page's paper (no drop
-   shadow); the edge itself is a hairline that warms to the brand orange at
-   the center and cools to --line at the sides */
-footer::before {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 56px; pointer-events: none;
-  background: linear-gradient(to top, var(--sky), color-mix(in srgb, var(--sky) 75%, transparent) 40%, transparent);
-}
+/* no fade above the footer (Steve, 2026-09-10: the list and the season
+   calendar show whole right down to the edge); the edge itself is a hairline
+   that warms to the brand orange at the center and cools to --line at the sides */
 footer::after {
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; pointer-events: none;
   background: linear-gradient(90deg, var(--line), var(--gold) 50%, var(--line));
@@ -685,19 +706,434 @@ footer .share summary { font-size: .9rem; white-space: nowrap; }
 .gw-credit strong { font-weight: 500; color: var(--gold); }
 
 /* ---- the Teams view: the home teams' seasons, home and away ---- */
-.teams { max-width: 54rem; margin: 1.6rem auto 0; }
+.teams { width: 100%; margin: 1.6rem auto 0; } /* width: as a body flex item, auto margins would shrink it to its content and it would shift per team */
+/* list or calendar, one at a time, each the full width (the bar's
+   Calendar chip switches; app.js sets .is-cal on the section) */
+.teams.is-cal .team-main { display: none; }
+.team-cal[hidden] { display: none; }
+/* the season's months as cards filling the page, poster-style */
+.team-cal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; align-items: start; } /* two across, always (app.js pads week rows per pair) */
+@media (max-width: 640px) { .team-cal { gap: .7rem; } }
+/* the form block across the top of the calendar: crest, record and standing
+   in the club's colours, then a line or two on where the season stands */
+/* between seasons, in place of the empty list: the season past in numbers and the next one's outlook */
+.season-next { margin: .6rem 0 0; padding: 1rem 1.2rem 1.1rem; border: 1px solid var(--line); border-radius: 10px; background: var(--mist); }
+.season-next .sn-title { margin: 0 0 .5rem; font-family: var(--display); font-size: 1.2rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--team-2); }
+.season-next .sn-blurb { margin: 0 0 .7rem; font-size: .95rem; line-height: 1.5; color: var(--ink); max-width: 70ch; }
+.season-next .sn-facts p { margin: .3rem 0 0; font-family: var(--mono); font-size: .78rem; color: var(--ink-soft); }
+.season-next .sn-facts b { font-weight: 700; color: var(--ink); }
+.season-next .sn-soft { color: color-mix(in srgb, var(--ink-soft) 70%, transparent); }
+#teamHead { margin-bottom: 1.1rem; }
+/* Teams mode: the block close under the chips (the masthead's own spacing is the same in both views, so the bar never moves between them) */
+html.teams-open #teamsView { margin-top: .5rem; }
+#teamHead:empty { display: none; }
+.team-form {
+  display: flex; align-items: center; gap: 1.1rem;
+  padding: .85rem 1.1rem; border: 2px solid var(--ink-soft); border-radius: 10px; background: var(--mist);
+}
+.team-form { --crest: 9.5rem; } /* the crest sets the block's height: nothing beside it may run taller */
+/* pinned under the bar while the season scrolls by — and compact while it
+   is (app.js markStuck sets .is-compact once the page has scrolled past the
+   block's spot, and --head-h so the opponent bar and the month rows pin
+   below it): the crests small, the record or the score on one line, the
+   lines, the watch list and the news folded away */
+#teamHead { position: relative; padding-top: .5rem; background: var(--sky); z-index: 6; will-change: transform; }
+#teamHead.is-compact { position: sticky; top: var(--barh); } /* the whole block scrolls off with the page; the compact bar is what pins (app.js markStuck) */ /* the gap under the bar is the block's own padding, painted, so nothing scrolling under it shows through (seen 2026-09-13: the month pill peeking above the compact bar) */ /* its own layer: the crests' shadows are not repainted as the list scrolls under it */
+#teamHead.is-compact .team-form.is-live { flex-wrap: nowrap; } /* one row, whatever the run between the crests holds */
+/* the block changes height in place — the news unfolds, the pinned block
+   goes compact and back — and the browser's scroll anchoring would answer
+   each change by moving the page to keep whatever it had picked as the
+   anchor still: with the block pinned that lands the list hundreds of
+   pixels down and pins it compact (seen 2026-09-11). Nothing on the page
+   loads late above the fold, so the anchoring is not missed. */
+html { overflow-anchor: none; }
+#teamHead.is-compact .team-form { box-shadow: 0 8px 28px rgba(15, 25, 35, .18); }
+#teamHead.is-compact .team-form { --crest: 2.6rem; align-items: center; justify-content: center; gap: .7rem; padding: .4rem .9rem; }
+#teamHead.is-compact .tf-wiki, #teamHead.is-compact .tf-refresh-wrap, #teamHead.is-compact .tf-lines > * { display: none; }
+#teamHead.is-compact .is-live .tf-lines > .tf-state, #teamHead.is-compact .team-form.is-pre:not(.is-live) .tf-lines > p:first-child { display: block; margin: 0; } /* one line stays: the first pitch, or the opener */
+#teamHead.is-compact .tf-body, #teamHead.is-compact .tf-inner { display: flex; align-items: center; gap: .8rem; width: auto; min-width: 0; }
+#teamHead.is-compact .tf-head { flex-wrap: nowrap; gap: .3rem .6rem; white-space: nowrap; }
+#teamHead.is-compact .tf-record, #teamHead.is-compact .tf-score { font-size: 1.3rem; }
+#teamHead.is-compact .tf-standing, #teamHead.is-compact .tf-title { font-size: .85rem; }
+#teamHead.is-compact .tf-live { font-size: .65rem; padding: .2em .5em; }
+#teamHead.is-compact .tf-live::before { width: .4rem; height: .4rem; }
+#teamHead.is-compact .team-form.is-live { align-items: center; }
+/* the compact game bar uses the whole width: the crests at the block's ends, the score, the venue and the scorebug spread between them, the refresh control at the right end */
+#teamHead.is-compact .team-form.is-live .tf-body { flex: 1 1 auto; min-width: 0; }
+#teamHead.is-compact .team-form.is-live .tf-inner { width: 100%; justify-content: space-between; gap: 1rem; }
+#teamHead.is-compact .team-form.is-live .tf-refresh-wrap { display: flex; position: static; }
+
+#teamHead.is-compact .team-form.is-live .tf-cluster { display: contents; }
+/* the pinned bar's run: hidden in the full block, a row of short lines in the compact one */
+.tf-brief { display: none; }
+#teamHead.is-compact .team-form.is-live .tf-brief { display: flex; align-items: center; justify-content: center; gap: 1.3rem; flex: 1 1 auto; min-width: 0; font-family: var(--mono); font-size: .74rem; color: var(--ink-soft); } /* centred in the run it has, not on the page */
+#teamHead.is-compact .team-form.is-live .tf-brief p { margin: 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
+#teamHead.is-compact .team-form.is-live .tf-brief b { font-weight: 700; color: var(--ink); }
+#teamHead.is-compact .team-form.is-live .tf-info { flex-direction: row; align-items: center; gap: 1.4rem; flex: 1 1 auto; min-width: 0; }
+#teamHead.is-compact .team-form.is-live .tf-info > * { display: none; }
+#teamHead.is-compact .team-form.is-live .tf-info > .tf-series, #teamHead.is-compact .team-form.is-live .tf-info > .tf-next { display: block; margin: 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* the run between the crests: the series, the next game */
+#teamHead.is-compact .team-form:not(.is-live) .tf-body { flex: 0 1 auto; }
+#teamHead.is-compact .tf-head { justify-content: center; }
+.team-focus { top: calc(var(--barh) + .5rem + var(--head-h, 0px)); }
+.team-form img { width: var(--crest); height: var(--crest); object-fit: contain; flex: none; }
+.tf-body { min-width: 0; flex: 1 1 22rem; }
+/* the season's Wikipedia lead, at the right; under the rest when the row is narrow */
+.tf-wiki { position: relative; flex: 1 1 24rem; min-width: 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; max-height: var(--crest); overflow: hidden; padding-left: 1.1rem; border-left: 1px solid var(--line); font-size: .85rem; line-height: 1.45; color: var(--ink); } /* the rule runs the block's height; the text sits centred */
+/* the fold: the pieces that fit beside the crests show (app.js foldNews measures which); the arrow at the lower right opens the rest (the column grows past the crest) */
+.tf-wiki.has-more { padding-bottom: 1.1rem; } /* ARROW_ROOM in app.js */
+.tf-wiki.is-open, .tf-wiki.is-measuring { max-height: none; justify-content: flex-start; }
+.tf-news li.is-more { display: none; }
+.tf-wiki.is-open .tf-news li.is-more, .tf-wiki.is-measuring .tf-news li.is-more { display: grid; }
+.tf-wiki:not(.has-more) .tf-more { display: none; }
+/* the pregame's starters and the leaders out, at the top of the column */
+.tf-wiki .tf-lead { margin-bottom: .55rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
+.tf-wiki .tf-lead p:first-child { margin-top: 0; }
+.tf-more { position: absolute; right: 0; bottom: 0; width: 1.5rem; height: 1.5rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink-soft); cursor: pointer; display: grid; place-items: center; }
+.tf-more svg { width: 1.1rem; height: 1.1rem; transition: transform .2s; }
+.tf-more:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.tf-wiki.is-open .tf-more svg { transform: rotate(180deg); }
+.tf-wiki > p { margin: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; } /* the Wikipedia fallback: four lines */
+.tf-lines .tf-wikilink { display: inline-block; margin-top: .35rem; font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); text-decoration: none; }
+.tf-lines .tf-wikilink:hover { color: var(--ink); text-decoration: underline; }
+/* the news: headline (a link), date, one line of summary */
+.tf-news { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.tf-news li { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: .5rem; align-items: baseline; }
+.tf-news a { font-weight: 600; color: var(--ink); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* one line each, so three fit beside the crest */
+.tf-news a:hover { text-decoration: underline; color: var(--team-2); }
+.tf-news .tf-date { font-family: var(--mono); font-size: .7rem; color: var(--ink-soft); white-space: nowrap; } /* the outlet and the day */
+.tf-news p { grid-column: 1 / -1; margin: .05rem 0 0; font-size: .8rem; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 760px) { .team-form { flex-wrap: wrap; } .tf-wiki { flex-basis: 100%; max-height: none; padding-left: 0; border-left: 0; padding-top: .6rem; border-top: 1px solid var(--line); } }
+.tf-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: .3rem .8rem; font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; }
+.tf-record { font-size: 2rem; font-weight: 700; line-height: 1; color: var(--team-2); }
+.tf-standing { font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+.tf-title { font-size: 1.1rem; font-weight: 700; color: var(--team-2); }
+.tf-lines p { margin: .3rem 0 0; font-family: var(--mono); font-size: .78rem; color: var(--ink-soft); }
+.tf-lines b { font-weight: 700; color: var(--ink); }
+.tf-lines .tf-blurb { font-family: var(--body); font-size: .9rem; color: var(--ink); max-width: 60ch; }
+.tf-run { display: inline-flex; gap: .2rem; vertical-align: middle; }
+.tf-run i { font: 700 .66rem/1.5rem var(--mono); font-style: normal; width: 1.5rem; text-align: center; border-radius: 4px; background: var(--line); color: var(--ink-soft); }
+.tf-run i.r-W { background: var(--team-2); color: var(--team-2-on); }
+.tf-run i.r-L { background: color-mix(in srgb, var(--ink-soft) 25%, var(--mist)); }
+@media (max-width: 640px) { .team-form { gap: .8rem; padding: .7rem .8rem; } .team-form { --crest: 4rem; } .tf-record { font-size: 1.6rem; } }
+}
+/* a game in progress: LIVE tag, the score in the club's accent, the state of play */
+.tf-live { display: inline-flex; align-items: center; gap: .4rem; padding: .25em .6em; border-radius: 999px; background: var(--alert); color: #fff; font-size: .8rem; letter-spacing: .12em; }
+.tf-live::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: #fff; animation: tf-pulse 1.2s ease-in-out infinite; }
+.is-final .tf-live { background: var(--ink-soft); }
+.is-final .tf-live::before { animation: none; }
+@keyframes tf-pulse { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .tf-live::before { animation: none; } }
+/* refresh: the arrow spins while a fetch is out; beside it, when the score was last fetched */
+.tf-refresh-wrap { position: absolute; bottom: .5rem; right: .9rem; z-index: 2; display: flex; align-items: center; gap: .4rem; margin: 0; font-family: var(--mono); } /* the block's lower right corner, on the strip's centre line */
+.team-form.is-live { position: relative; align-items: flex-start; } /* the crests sit at the top; the refresh control needs the corner */
+.is-live .tf-wiki { padding-top: .2rem; } /* the refresh control sits at the block's foot now, not above the news */
+/* the top of the cluster — the tag and score, the state, the venue, the series and the predictor — is centred; the starters, the hurt and the watch list are left-aligned under it */
+.is-live .tf-head { justify-content: center; }
+.is-live .tf-lines .tf-state, .is-live .tf-lines .tf-series { text-align: center; }
+/* the left section: the crests' row, then the venue line and the watch strip, centred across it; the news column beside */
+.is-live .tf-main { flex: 2 1 34rem; min-width: 0; display: flex; flex-direction: column; gap: .45rem; } /* the game takes two parts of the row, the news one */
+.is-live .tf-row { display: flex; align-items: flex-start; gap: 1.1rem; height: calc(var(--crest) + 1rem); } /* the crests' height and a little air */
+.is-live .tf-row > img, .is-live .tf-row > img.tf-opp, .is-live .tf-row > .tf-opp-abbr { flex: 0 3 auto; min-width: 5rem; width: var(--crest); height: auto; aspect-ratio: 1; margin-top: var(--crest-top, 0px); } /* level with the bug (app.js alignCrests); when the row is tight both crests give way, alike, before the bug does */
+.tf-row > .is-link { cursor: pointer; } /* a crest opens the club's site */
+.tf-row > .is-link:hover { opacity: .85; }
+.tf-row > .is-link:focus-visible { outline: 2px solid var(--team-2); outline-offset: 3px; border-radius: 50%; }
+.tf-opp-abbr { display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--ink-soft); background: color-mix(in srgb, var(--ink-soft) 18%, transparent); font-family: var(--display); font-size: 1.9rem; font-weight: 700; letter-spacing: .06em; color: var(--ink); } /* a club with no mark on file */
+#teamHead.is-compact .tf-row > .tf-opp-abbr { flex: none; min-width: 0; width: var(--crest); height: var(--crest); margin-top: 0; font-size: .7rem; border-width: 1px; }
+.is-live .tf-row > .tf-body { align-self: center; }
+#teamHead.is-compact .tf-row > img, #teamHead.is-compact .tf-row > img.tf-opp { flex: none; min-width: 0; height: var(--crest); margin-top: 0; }
+#teamHead.is-compact .tf-row { height: auto; }
+/* one height for every block, a game on or not: the crests' (the narrow layout, which stacks, is free of it) */
+@media (min-width: 761px) {
+  .team-form { min-height: var(--crest); }
+  #teamHead.is-compact .team-form { min-height: 0; }
+  .team-form > .tf-body, .team-form > .tf-main, .team-form > .tf-wiki { max-height: calc(var(--crest) + 1rem); }
+  .team-form > .tf-body { overflow: hidden; }
+}
+
+.is-live .tf-row .tf-body { flex: 1 1 auto; }
+#teamHead.is-compact .tf-main, #teamHead.is-compact .tf-row { display: contents; } /* compact: the crests and the line back in the block's own row */
+.tf-pred { justify-content: center; }
+.is-live .tf-wiki { flex: 1 1 20rem; }
+.is-live .tf-inner { width: 100%; display: flex; align-items: center; gap: 1.3rem; } /* the score cluster, then the column of the rest — the block stays the crests' height */
+.tf-cluster { flex: 0 1 auto; min-width: 0; max-width: 100%; margin: 0 auto; padding: .35rem 1.2rem .45rem; display: flex; flex-direction: column; align-items: center; } /* centred between the crests, with air around it */
+.tf-info { flex: 1 0 11rem; min-width: 0; display: flex; flex-direction: column; gap: .2rem; font-family: var(--mono); font-size: .76rem; color: var(--ink-soft); }
+.tf-info p { margin: 0; }
+.tf-info b { font-weight: 700; color: var(--ink); }
+.tf-cluster > .tf-where { margin: 0 0 .3rem; text-align: center; font-family: var(--display); font-size: 1.05rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); white-space: nowrap; } /* the venue along the top of the bug */
+.tf-cluster > .tf-where a { color: inherit; text-decoration: none; }
+.tf-cluster > .tf-where a:hover { color: var(--team-2); text-decoration: underline; }
+#teamHead.is-compact .team-form.is-live .tf-cluster > .tf-where { margin: 0; font-size: .9rem; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; flex: 0 0 auto; max-width: 14rem; } /* the venue keeps its line; the run beside it gives way first */
+#teamHead.is-compact .team-form.is-live .tf-at { display: none; } /* the bar keeps the refresh button, not the stamp */
+.tf-info .tf-blurb { margin: .15rem 0 0; font-family: var(--body); font-size: .85rem; line-height: 1.4; color: var(--ink); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+/* the season's bug and the pregame's, in the same frame */
+.is-season .tf-head { display: none; } /* the record is in the bug; the head serves the compact bar */
+#teamHead.is-compact .is-season .tf-head { display: flex; }
+.bug-team-soft { background: #4a4f56; font-size: .8rem; letter-spacing: .1em; }
+.bug-team i { font-style: normal; }
+.bug-team .bug-nick { display: none; }
+#teamHead.is-compact .bug-team .bug-abbr { display: none; }
+#teamHead.is-compact .bug-team .bug-nick { display: inline; padding: 0 .45rem; white-space: nowrap; } /* the compact bar has the room for the name: Seahawks, not SEA */
+.bug-ev .tf-run { vertical-align: middle; }
+.bug-score.bug-odds { font-size: 1.05rem; letter-spacing: .02em; }
+.bug-grid.bug-grid-2.has-ring { grid-template-columns: 6.6rem minmax(3.6rem, max-content) auto; }
+.bug-ring { grid-area: 1 / 3 / 3 / 4; display: grid; place-items: center; padding: .15rem .8rem; border-left: 2px solid #c9cdd2; }
+.bug-ring svg { width: 3.1rem; height: 3.1rem; }
+#teamHead.is-compact .bug-ring, #teamHead.is-compact .is-season-bug .bug-ev { display: none; }
+#teamHead.is-compact .bug-grid.bug-grid-2.has-ring { grid-template-columns: minmax(2.7rem, max-content) 2rem; }
+.is-live .tf-wiki { max-height: calc(var(--crest) + 1rem); } /* the news column no taller than the row */
+.is-live img.tf-opp { margin-left: .2rem; }
+.tf-refresh { display: inline-grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0; border: 1px solid var(--ink-soft); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; } /* the block's own colour inside */
+.tf-refresh:hover { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.tf-refresh svg { width: 1rem; height: 1rem; }
+.tf-at { font-size: .7rem; color: var(--ink-soft); white-space: nowrap; }
+/* the countdown to the next fetch: a ring around the refresh button, filling
+   clockwise from the top over the poll's half-minute (app.js POLL_MS sets
+   --tick-delay so a redraw picks it up mid-way) */
+.tf-watch { position: relative; }
+@property --tick { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.tf-refresh { position: relative; isolation: isolate; }
+.tf-refresh::before { content: ""; position: absolute; inset: -1.5px; border-radius: 50%; z-index: 1; pointer-events: none; background: conic-gradient(color-mix(in srgb, var(--team-2) 45%, white) var(--tick), transparent 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); } /* a bright 2.5px ring over the button's border, covering it as it goes round */
+.tf-refresh-wrap.is-ticking .tf-refresh::before { animation: tf-tick 30s linear forwards; animation-delay: var(--tick-delay, 0ms); }
+@keyframes tf-tick { from { --tick: 0deg; } to { --tick: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .tf-refresh-wrap.is-ticking .tf-refresh::before { animation: none; --tick: 360deg; opacity: .35; } }
+.tf-watch::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; }
+.tf-watch::before { background: var(--line); }
+/* a fresh score: the block's face lifts toward the club's accent and settles */
+.team-form.is-flash { animation: tf-flash 1.2s ease-out; }
+@keyframes tf-flash { 0% { background: color-mix(in srgb, var(--team-2) 28%, var(--mist)); } 100% { background: var(--mist); } }
+@media (prefers-reduced-motion: reduce) { .team-form.is-flash { animation: none; } }
+.tf-refresh svg { width: .9rem; height: .9rem; }
+.tf-refresh.is-busy svg { animation: tf-spin .8s linear infinite; }
+@keyframes tf-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .tf-refresh.is-busy svg { animation: none; opacity: .5; } }
+.is-live .tf-head { align-items: center; } /* the LIVE tag and refresh sit on the score's centre line, not its baseline */
+.tf-score { font-size: 2rem; font-weight: 700; line-height: 1; color: var(--ink); letter-spacing: .04em; }
+.tf-score b { color: var(--team-2); }
+.tf-score .tf-dash { margin: 0 .3em; color: var(--ink-soft); font-weight: 400; }
+.is-pre .tf-score .tf-dash { font-size: .55em; text-transform: uppercase; letter-spacing: .1em; }
+.is-pre .tf-live { background: var(--team-2); color: var(--team-2-on); }
+.is-pre .tf-live::before { animation: none; background: currentColor; }
+/* the opponent's crest: as big as ours, after the lines, drawn the same way — no disc */
+.team-form img.tf-opp { width: var(--crest); height: var(--crest); object-fit: contain; flex: none; }
+.tf-lines .tf-state { color: var(--ink); font-weight: 700; }
+.tf-out { margin: .3rem 0 0; font-family: var(--body); font-size: .85rem; color: var(--ink); } /* the last out, in prose */
+.tf-lines .tf-out { max-width: 56ch; }
+.tf-out b { font-family: var(--mono); font-size: .74rem; color: var(--ink); }
+.tf-bugwrap { width: max-content; max-width: 100%; margin: 0; }
+.tf-wiki .tf-lead .tf-out { margin: 0; font-family: var(--body); font-size: .82rem; } /* the last out, at the top of the news column, in prose */
+.tf-wiki .tf-lead p, .is-live .tf-wiki .tf-lead p { text-align: left; margin: .25rem 0 0; } /* whatever the cluster centres, the column reads from the left (the second selector outranks the cluster's centring rules) */
+.tf-hl { list-style: none; margin: .1rem 0 0; padding: 0; display: grid; gap: .1rem; min-width: 0; }
+.tf-hl li { min-width: 0; overflow: hidden; } /* so a long title ellipsizes instead of running past the column */
+.tf-hl a { font-size: .8rem; color: var(--ink); text-decoration: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tf-hl a::before { content: "▶ "; font-size: .6rem; color: var(--team-2); }
+.tf-hl a:hover { text-decoration: underline; color: var(--team-2); }
+.tf-hl-head { margin-bottom: 0 !important; }
+.tf-wiki .tf-lead p:first-child { margin-top: 0; }
+.tf-wiki .tf-lead .tf-blurb { font-family: var(--body); font-size: .85rem; line-height: 1.4; color: var(--ink); max-width: none; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+/* the other sports' bug: team, score, that side's goals (or the ball) */
+.bug-grid.bug-grid-2 { grid-template-columns: 6.6rem minmax(3.6rem, max-content) minmax(5rem, 1fr); } /* the goals column takes what the row allows and trims with an ellipsis */
+/* (doubled class: these outrank the baseball grid's pins further down) */
+.bug-grid.bug-grid-2 > :nth-child(3) { grid-area: 1 / 3; } .bug-grid.bug-grid-2 > :nth-child(6) { grid-area: 2 / 3; }
+.bug-grid.bug-grid-2 > :nth-child(4) { grid-area: 2 / 1; } .bug-grid.bug-grid-2 > :nth-child(5) { grid-area: 2 / 2; }
+.bug-grid.bug-grid-2 > :nth-child(4), .bug-grid.bug-grid-2 > :nth-child(5), .bug-grid.bug-grid-2 > :nth-child(6) { border-bottom: 0; }
+.bug-ev { display: block; min-width: 0; padding: 0 .7rem; line-height: 1.95rem; border-left: 2px solid #c9cdd2; border-bottom: 2px solid #5c6167; font-size: .72rem; color: #d5d8dc; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bug-ball { display: inline-block; vertical-align: middle; margin-right: .4rem; }
+.bug-grid.bug-grid-2.no-ev { grid-template-columns: 8rem minmax(4.4rem, max-content); } .bug-grid-2.no-ev .bug-ev { display: none; } /* a final with nothing beside the scores */
+.bug-ball { width: .55rem; height: .55rem; border-radius: 50%; background: var(--bug-on); flex: none; }
+#teamHead.is-compact .bug-ev { display: none; }
+#teamHead.is-compact .bug-grid.bug-grid-2 { grid-template-columns: minmax(2.7rem, max-content) 1.6rem; }
+/* compact: the scorebug stays, slimmed — no pitcher rows, no last out — in place of the score and the state line */
+#teamHead.is-compact .tf-bugwrap { margin: 0; }
+#teamHead.is-compact .tf-bugwrap .tf-out, #teamHead.is-compact .bug-top, #teamHead.is-compact .has-bug .tf-head .tf-score, #teamHead.is-compact .has-bug .tf-lines .tf-state { display: none; }
+.tf-bug:not(.is-generic) { zoom: 1.02; } /* baseball's live bug has three rows on top: no room to grow */
+#teamHead.is-compact .tf-bug, #teamHead.is-compact .tf-bug:not(.is-generic) { zoom: 1; border-width: 1px; border-radius: 5px; box-shadow: none; }
+#teamHead.is-compact .bug-grid { grid-template-columns: minmax(2.7rem, max-content) 1.6rem 1.4rem auto; grid-template-rows: 1.2rem 1.2rem; }
+#teamHead.is-compact .bug-team { font-size: .72rem; border-bottom-width: 1px; letter-spacing: .04em; }
+#teamHead.is-compact .bug-score { font-size: 1rem; border-width: 1px; }
+#teamHead.is-compact .bug-inn { border-width: 1px; }
+#teamHead.is-compact .bug-inn b { font-size: .85rem; }
+#teamHead.is-compact .bug-inn i { border-left-width: .25rem; border-right-width: .25rem; }
+#teamHead.is-compact .bug-inn .bug-up { border-bottom-width: .36rem; }
+#teamHead.is-compact .bug-inn .bug-dn { border-top-width: .36rem; }
+#teamHead.is-compact .bug-field { padding: .1rem .45rem; gap: .5rem; }
+#teamHead.is-compact .bug-bases { width: 1.9rem; height: 1.2rem; }
+#teamHead.is-compact .bug-outs i { width: .5rem; height: .5rem; border-width: 1.5px; }
+#teamHead.is-compact .bug-count > b { font-size: .8rem; }
+/* where to watch: a low strip along the foot of the block, under both
+   columns — the cast mark, then each network with the ways to get it
+   inline, dotted apart, each a link where channels.json names one */
+.team-form.is-live { flex-wrap: wrap; }
+.tf-watch { flex: 1 1 100%; display: flex; align-items: center; gap: .5rem 1rem; margin-top: .3rem; padding: 0 3.2rem 0 0; height: 2.9rem; overflow: hidden; box-sizing: border-box; } /* two lines' room, its contents centred in it (the refresh control in its right end), so every block is the same height; the block's own bottom padding is folded into it so the centring is true */
+.team-form.is-live { padding-bottom: 0; } /* the strip's height carries the bottom padding (above) */
+.tf-watch-label { font-family: var(--mono); font-size: .74rem; color: var(--ink); }
+.tf-watch-none { font-family: var(--mono); font-size: .74rem; color: var(--ink-soft); }
+.tf-channels a { color: inherit; text-decoration: none; border-bottom: 1px dotted color-mix(in srgb, var(--ink-soft) 60%, transparent); }
+.tf-channels a:hover { color: var(--team-2); border-bottom-color: currentColor; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tf-tv { flex: none; position: relative; color: var(--ink-soft); display: inline-flex; }
+.tf-tv svg { width: 1.5rem; height: 1.5rem; }
+.tf-channels { list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-start; gap: .25rem 2rem; font-family: var(--mono); font-size: .74rem; line-height: 1.5; color: var(--ink-soft); max-height: 1.2rem; overflow: hidden; } /* one line; the rest unfolds behind the chevron (app.js foldWatch sets has-more when there is more) */
+.tf-watch.is-open { height: auto; padding-top: .7rem; padding-bottom: .7rem; }
+.tf-watch.is-open .tf-channels { max-height: none; }
+.tf-wmore { display: none; position: absolute; right: .2rem; top: 50%; transform: translateY(-50%); width: 1.5rem; height: 1.5rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink-soft); cursor: pointer; place-items: center; }
+.tf-wmore svg { width: 1.1rem; height: 1.1rem; transition: transform .2s; }
+.tf-wmore:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.tf-watch.has-more .tf-wmore { display: grid; }
+.tf-watch.is-open .tf-wmore svg { transform: rotate(180deg); }
+.team-form.is-live:not(.is-season) .tf-wmore { right: 3.4rem; } /* left of the refresh button on a game block */ /* the entries flow from the left, evenly spaced, rather than spread to the ends */
+.tf-channels li { display: flex; flex-wrap: wrap; column-gap: .45rem; } /* the network, then each way, on one line */
+.tf-channels li span + span::before { content: "· "; }
+.tf-channels b { color: var(--ink); font-weight: 700; }
+#teamHead.is-compact .tf-watch { display: none; }
+/* the scorebug: a baseball game in progress, drawn like the broadcast's —
+   a charcoal panel; the pitcher and the pitch count along the top; a row
+   per side (visitors first): the abbreviation on the club's colour, the
+   score on white; the inning between the half-inning arrows; the bases
+   as diamonds, the outs as lamps, the count. While the block is compact
+   the panel gives way to the head and the state line. */
+.has-bug .tf-head .tf-score, .has-bug .tf-head .tf-live, .has-bug .tf-lines .tf-state { display: none; }
+#teamHead.is-compact .has-bug .tf-head .tf-live { display: inline-flex; }
+/* the compact game bar: both crests at the left end (the opponent's beside ours), then "Mariners at Athletics" in place of the venue, the slim bug and the lead lines; the LIVE tag, the venue, the watch lines and the countdown ring stay off it */
+#teamHead.is-compact .team-form.is-live .tf-row > img:first-child { order: -3; }
+#teamHead.is-compact .team-form.is-live .tf-row > .tf-opp { order: -1; }
+#teamHead.is-compact .team-form.is-live .tf-head .tf-live, #teamHead.is-compact .team-form.is-live .tf-cluster > .tf-where, #teamHead.is-compact .team-form.is-live .tf-brief .tf-brief-watch { display: none; }
+#teamHead.is-compact .team-form.is-live .tf-refresh::before { display: none; }
+#teamHead.is-compact .team-form.is-live .tf-brief .tf-hl-head { display: none; } /* the "Highlights" heading has no list to head on the bar */
+.tf-vs { display: none; }
+#teamHead.is-compact .team-form.is-live .tf-row > .tf-vs { display: block; order: -2; margin: 0 -.15rem; font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); white-space: nowrap; flex: 0 0 auto; } /* between the crests */
+#teamHead.is-compact .team-form.is-live .tf-inner { justify-content: flex-start; }
+/* the compact season bar: the record, the standing, the bug and the next game centred in the run between the crests and last season's line, which sits at the right end */
+#teamHead.is-compact .team-form.is-live.is-season .tf-brief { display: contents; }
+#teamHead.is-compact .team-form.is-season .tf-bugwrap { display: none; } /* the season bug's two records read as a score on the bar; the record and the standing beside it say the same */
+#teamHead.is-compact .team-form.is-live.is-season .tf-head { margin-left: auto; }
+#teamHead.is-compact .team-form.is-live.is-season .tf-brief .tf-series { margin-left: auto; order: 99; }
+#teamHead.is-compact .tf-bug { isolation: isolate; } /* the rounded frame clips its cells even inside the pinned block's own compositing layer */
+.tf-bug { --bug-ink: #f4f4f4; --bug-on: #e5342b; zoom: 1.25; margin: 0 auto; width: max-content; max-width: 100%; font-family: var(--mono); color: var(--bug-ink); border: 2px solid #c9cdd2; border-radius: 8px; overflow: hidden; background: #2b2d30; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
+.bug-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1.5rem; padding: .2rem .8rem .15rem; border-bottom: 2px solid #c9cdd2; font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.bug-top > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; } /* one line, trimmed, never wrapped */
+.bug-pc { font-size: .85rem; }
+.bug-top.bug-bat { font-weight: 400; font-size: .8rem; padding-top: .15rem; color: #d5d8dc; } /* the batter's row under the pitcher's */
+.bug-top.bug-bat .bug-pc { font-size: .75rem; }
+.bug-top.bug-pitch { font-weight: 400; font-size: .72rem; padding: .1rem .7rem .2rem; color: #b9bec4; letter-spacing: .04em; } /* the last pitch: speed and type, then what came of it */
+.bug-top.bug-pitch .bug-pc { font-size: .72rem; }
+.bug-grid { display: grid; grid-template-columns: 6.6rem minmax(3.6rem, max-content) 2.4rem auto; grid-template-rows: 1.95rem 1.95rem; } /* wide and low; the score cell grows for a long record */
+.bug-team { display: grid; place-items: center; font-family: var(--display); font-size: 1.15rem; font-weight: 700; letter-spacing: .06em; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .5); border-bottom: 2px solid #5c6167; } /* the line between the two rows, darker than the frame */
+.bug-score { display: grid; place-items: center; padding: 0 .35rem; white-space: nowrap; background: #fafafa; color: #111; font-family: var(--display); font-size: 1.5rem; font-weight: 700; line-height: 1; border-bottom: 2px solid #5c6167; border-left: 2px solid #c9cdd2; }
+.bug-grid > :nth-child(1) { grid-area: 1 / 1; } .bug-grid > :nth-child(2) { grid-area: 1 / 2; } /* every cell pinned: the grid would otherwise place the row-spanning cells first */
+.bug-grid > :nth-child(5) { grid-area: 2 / 1; } .bug-grid > :nth-child(6) { grid-area: 2 / 2; }
+.bug-grid > :nth-child(5), .bug-grid > :nth-child(6) { border-bottom: 0; } /* the bottom row */
+.bug-inn { grid-area: 1 / 3 / 3 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1rem; border-left: 2px solid #c9cdd2; border-right: 2px solid #c9cdd2; }
+.bug-inn b { font-family: var(--display); font-size: 1.4rem; line-height: 1; }
+.bug-inn i { width: 0; height: 0; border-left: .38rem solid transparent; border-right: .38rem solid transparent; }
+.bug-inn .bug-up { border-bottom: .55rem solid #6a6d72; }
+.bug-inn .bug-dn { border-top: .55rem solid #6a6d72; }
+.bug-inn .bug-up.is-on { border-bottom-color: var(--bug-on); }
+.bug-inn .bug-dn.is-on { border-top-color: var(--bug-on); }
+.bug-field { grid-area: 1 / 4 / 3 / 5; display: flex; align-items: center; gap: 1.1rem; padding: .2rem 1rem .2rem .9rem; border-left: 2px solid #c9cdd2; }
+.bug-bases { width: 3.1rem; height: 1.9rem; }
+.bug-bases polygon { fill: transparent; stroke: #d5d8dc; stroke-width: 2; stroke-linejoin: round; }
+.bug-bases polygon.is-on { fill: var(--bug-on); stroke: #fff; }
+.bug-count { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; }
+.bug-count > b { font-family: var(--display); font-size: 1.35rem; line-height: 1; letter-spacing: .04em; }
+.bug-outs { display: flex; align-items: center; gap: .35rem; }
+.bug-outs i { width: .8rem; height: .8rem; border-radius: 50%; border: 2px solid #d5d8dc; }
+.bug-outs i.is-on { background: var(--bug-on); border-color: #fff; }
+
+/* the pregame: the predictor ring and its percentages, one line of starters, the leaders out */
+.tf-lines .tf-series, .tf-lines .tf-next, .tf-lines .tf-starters, .tf-lines .tf-hurt { color: var(--ink-soft); }
+.is-live .tf-lines .tf-next { text-align: center; }
+.tf-pred { display: flex; align-items: center; gap: .6rem; margin-top: .5rem; font-family: var(--mono); font-size: .74rem; color: var(--ink-soft); }
+.tf-pred svg { width: 3.4rem; height: 3.4rem; flex: none; }
+.tf-pred .tp-side { display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+.tf-pred .tp-side b { font-family: var(--display); font-size: 1.35rem; font-weight: 700; letter-spacing: .02em; }
+.is-live .tf-wiki { justify-content: flex-start; } /* beside a game the news sits at the top */
+/* the column wrapped under the row (app.js foldNews sets is-wrapped on the
+   block when it measures the column below the row): as tall as it needs,
+   the lead — the highlights, the last out — in a column of its own beside the news */
+.team-form.is-live.is-wrapped > .tf-wiki { max-height: none; }
+@media (min-width: 641px) {
+  .team-form.is-live.is-wrapped .tf-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 1.2rem; align-items: start; }
+  .team-form.is-live.is-wrapped .tf-cols .tf-lead { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; padding-right: 1.2rem; border-right: 1px solid var(--line); align-self: stretch; }
+  .team-form.is-live.is-wrapped .tf-cols .tf-lead:only-child { grid-column: 1 / -1; padding-right: 0; border-right: 0; }
+}
+/* the club's colours (app.js sets --team / --team-2 from filter.js TEAMS):
+   the frame and the month's name in the accent, home games in the primary */
+.team-cal .cal-month { border-radius: 10px; aspect-ratio: 1; display: flex; flex-direction: column; } /* the site's own frame (soft ink), not the club's accent */ /* a square card: the week rows share what's under the header */
+.team-cal .cal-mname {
+  display: flex; align-items: center; justify-content: center; gap: .6rem; margin: 0; /* an h3: no default margins, or the band gets a spare 1em above and below */
+  padding: .5rem .6rem; font-size: 1.4rem; line-height: 1; letter-spacing: .1em; /* the name sets the header's height; even padding above and below */
+  border-bottom-color: var(--ink-soft); color: #fff;
+  background: color-mix(in srgb, var(--team) 55%, #6f7a85); /* a desaturated wash of the club's primary */
+}
+.team-cal .cal-mname img { width: 1.9rem; height: 1.9rem; object-fit: contain; }
+.team-cal .cal-mname .sport { width: 1.3rem; height: 1.3rem; flex: none; color: rgba(255, 255, 255, .75); }
+.team-cal .cal-mname { font-family: var(--display); font-weight: 700; text-transform: uppercase; text-align: center; }
+/* poster cells: the day number tucked in the corner, the opponent and the
+   time centred; a home game is a solid ink cell, an away game a pale one */
+.team-cal .cal-days { flex: 1 1 auto; grid-auto-rows: minmax(0, 1fr); }
+.team-cal .cal-day {
+  aspect-ratio: auto; height: auto; min-height: 0; padding: .2rem .25rem; position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem;
+}
+.team-cal .cal-day.is-blank { display: block; margin: 0; width: auto; background: color-mix(in srgb, var(--line) 35%, var(--mist)); } /* a padding slot is a cell like the rest, a shade darker, hairlines all round */
+.team-cal .cal-day .num { position: absolute; top: .22rem; left: .3rem; font-size: .7rem; line-height: 1; }
+.team-cal .cal-day .abbr { font-weight: 700; font-size: 1rem; line-height: 1; margin-top: .4rem; }
+.team-cal .cal-day .gtime { font-size: .75rem; line-height: 1; opacity: .85; }
+.team-cal .cal-day .gtime i { font-style: normal; }
+@media (max-width: 640px) {
+  .team-cal .cal-day .num { font-size: .55rem; top: .12rem; left: .18rem; }
+  .team-cal .cal-day .abbr { font-size: .66rem; }
+  .team-cal .cal-day .gtime { font-size: .54rem; }
+}
+/* two-tone: home games solid in the primary, away games solid in the accent
+   (text by the accent's brightness, app.js --team-2-on). The home cell wears
+   a hairline of the accent so a navy primary still stands off a dark card. */
+.team-cal .cal-day.is-home { background: var(--team); color: #fff; box-shadow: inset 0 0 0 1.5px var(--team-2); }
+.team-cal .cal-day.is-away { background: #eef1f4; color: var(--team); box-shadow: inset 0 0 0 1.5px var(--team); } /* white, as the pocket schedules print it; the club's colour for the type and a hairline */
+.team-cal button.cal-day.is-home:hover { background: color-mix(in srgb, var(--team) 80%, #fff); }
+.team-cal button.cal-day.is-away:hover { background: #fff; }
+.team-cal .cal-day.is-today { box-shadow: inset 0 0 0 2px var(--gold); }
+.team-cal .cal-day.is-past:not(.is-blank) { opacity: .5; }
+.team-cal .cal-day.is-past .num { color: inherit; }
+/* the PDF and list ⇄ calendar chips: only while the Teams view is open, just left of Home Teams */
+html:not(.teams-open) #teamViewBtn, html:not(.teams-open) #teamPdfBtn { display: none; }
+#teamPdfBtn { order: 2; }
+#teamViewBtn { order: 3; }
+#teamViewBtn, #teamPdfBtn { padding: .5em .7em; } /* icon only (the label stays for screen readers): the strip needs the room for its names */
+#teamViewBtn span, #teamPdfBtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#teamViewBtn svg, #teamPdfBtn svg { width: 1.1rem; height: 1.1rem; }
+#teamViewBtn[aria-pressed="true"] { background: var(--ink); color: var(--sky); border-color: var(--ink); }
 /* the strip: one tab per team, crest over name, the chosen one solid */
-.team-strip { display: flex; gap: .6rem; overflow-x: auto; scrollbar-width: none; padding: .1rem .1rem .6rem; }
+/* the strip lives in the bar, right of the theme toggle, only while the
+   Teams view is open: one pill per club, crest and name, scrolling sideways
+   if it must; when the names won't fit the row app.js flags is-crests and
+   the pills shrink to their crests */
+html:not(.teams-open) .team-strip { display: none; }
+.filterbar .team-strip { order: 1; flex: 1 1 0; min-width: 0; display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; padding: .1rem 0; } /* order: where the search box was, so Home Teams (3) keeps its place beside the theme pill (5) */
 .team-strip::-webkit-scrollbar { display: none; }
 .team-tab {
-  flex: none; display: grid; justify-items: center; gap: .35rem; min-width: 5.2rem;
-  padding: .6rem .7rem .5rem; border: 1px solid var(--line); border-radius: 10px;
+  flex: none; display: inline-flex; align-items: center; gap: .4rem; min-height: 2.25rem;
+  padding: .3rem .75rem .3rem .45rem; border: 1px solid var(--line); border-radius: 999px;
   background: var(--mist); color: var(--ink-soft); cursor: pointer;
   font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; line-height: 1;
 }
-.team-tab img { width: 2.5rem; height: 2.5rem; object-fit: contain; }
+.team-tab img { width: 1.5rem; height: 1.5rem; object-fit: contain; }
 .team-tab:hover { border-color: var(--ink-soft); color: var(--ink); }
+.team-tab:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: -3px; } /* inside the pill: the strip clips anything past its edges */
 .team-tab[aria-pressed="true"] { background: var(--ink); color: var(--sky); border-color: var(--ink); }
+.team-tab .sport { width: .95rem; height: .95rem; flex: none; opacity: .75; } /* the sport, after the name */
+/* a game in progress: the whole pill breathes — its edge and face lift a
+   little and settle, over and over (no dot) */
+.team-tab.is-live { animation: tab-pulse 1.8s ease-in-out infinite; }
+@keyframes tab-pulse {
+  50% { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 14%, var(--mist)); transform: scale(1.03); }
+}
+.team-tab.is-live[aria-pressed="true"] { animation-name: tab-pulse-on; } /* the chosen club's pill is solid ink: it breathes in brightness instead */
+@keyframes tab-pulse-on { 50% { opacity: .78; transform: scale(1.03); } }
+@media (prefers-reduced-motion: reduce) { .team-tab.is-live { animation: none; border-color: var(--ink); } }
+.team-strip.is-nosport .team-tab .sport { display: none; } /* the first thing to go when the row is tight */
+.team-strip.is-crests .team-tab { padding: .3rem .45rem; }
+.team-strip.is-crests .team-tab span, .team-strip.is-crests .team-tab .sport { display: none; }
 /* the picked opponent: crest, name, how many games, their site, and the way back */
 .team-focus[hidden] { display: none; } /* an author display beats the UA [hidden] rule */
 /* it rides under the pinned bar while the games scroll, so the way back
@@ -714,12 +1150,29 @@ footer .share summary { font-size: .9rem; white-space: nowrap; }
 .team-focus .chip { display: inline-flex; align-items: center; text-decoration: none; padding: .4em .8em; }
 .team-focus .chip:last-child { margin-left: auto; }
 .team-focus .chip:hover { border-color: var(--ink-soft); }
+/* the postseason's rounds at the foot of the list: dashed cards, the "if they qualify" badge */
+.team-sched .ev.is-post { border: 1px dashed var(--ink-soft); background: transparent; padding-right: .75rem; }
+.team-sched .ev.is-post .ev-title { color: var(--ink); }
+.badge.b-pre { background: transparent; color: var(--ink-soft); border: 1px dashed var(--ink-soft); } /* a preseason game */
+.team-cal .cal-day.is-pre { opacity: .6; } /* preseason: there, but faded, like a played game */
+.badge.b-post { background: color-mix(in srgb, var(--team-2) 22%, transparent); color: var(--ink); border: 1px dashed var(--team-2); }
+.team-sched .month-group.is-post .month-row > span { color: var(--team-2); }
+/* and on the calendar: hatched days, the final's in the accent */
+.team-cal .cal-day.is-post { background: repeating-linear-gradient(-45deg, transparent 0 3px, color-mix(in srgb, var(--ink-soft) 22%, transparent) 3px 5px); }
+.team-cal .cal-day.is-post.is-final { background: repeating-linear-gradient(-45deg, transparent 0 3px, color-mix(in srgb, var(--team-2) 45%, transparent) 3px 5px); }
 /* the season list wears the agenda's day rows and cards */
 .team-sched { list-style: none; margin: 0; padding: 0; }
 /* month rows stick under the opponent bar while one is up (app.js sets --focus-h) */
-.team-sched .month-row { top: calc(var(--barh) + var(--focus-h, 0px)); }
+.team-sched .month-row { top: calc(var(--barh) + var(--focus-h, 0px) + var(--head-h, 0px)); }
 .team-sched .day-row { grid-template-columns: 5.2rem 1fr; }
 .team-sched .ev { padding-right: calc(2.9rem + .75rem + .6rem); } /* clear of the crest */
+/* on the dark palette a navy mark would sink into the card: a thin white
+   outline traced round the crest's own shape (four hard 1px shadows, no
+   blur, no disc) keeps it legible — in the list, and in the form block */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .team-sched .opp-btn img, :root:not([data-theme="light"]) .team-form img { filter: drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff); }
+}
+:root[data-theme="dark"] .team-sched .opp-btn img, :root[data-theme="dark"] .team-form img { filter: drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff); }
 .team-sched .ev.is-away { background: color-mix(in srgb, var(--ink-soft) 7%, transparent); }
 .team-sched .venue.is-away { color: var(--ink-soft); }
 .team-sched .ev.is-dim { opacity: .28; }
@@ -727,14 +1180,10 @@ footer .share summary { font-size: .9rem; white-space: nowrap; }
 .ev-watch { font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); letter-spacing: .02em; }
 .ev-watch b { font-weight: 700; }
 .b-playoff { color: var(--gold); }
-/* the opponent's crest is a button: full colour, a ring on hover. On the
-   dark palette it sits on a pale disc — the clubs draw their marks for
-   white paper, and a navy or forest-green one would sink into the card */
+/* the opponent's crest is a button: full colour on the card itself (no
+   disc behind it, Steve's call 2026-09-10 — a navy mark may sink into the
+   dark card, and that is accepted), a ring on hover */
 .opp-btn { position: absolute; right: .75rem; top: 50%; transform: translateY(-50%); width: 2.9rem; height: 2.9rem; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .opp-btn { background: #eef2f5; padding: .3rem; }
-}
-:root[data-theme="dark"] .opp-btn { background: #eef2f5; padding: .3rem; }
 .opp-btn .team-mark { position: static; transform: none; width: 100%; height: 100%; opacity: .9; }
 :root .opp-btn .team-mark { filter: none; }
 .opp-btn:hover .team-mark, .opp-btn:focus-visible .team-mark { opacity: 1; }
@@ -759,7 +1208,7 @@ footer .share summary { font-size: .9rem; white-space: nowrap; }
 
 /* phones follow the system light/dark setting, so no toggle; the query
    mirrors PHONE in index.html's head script — keep them in step */
-@media (max-width: 640px), (pointer: coarse) and (max-height: 500px) { .theme-toggle { display: none; } }
+@media (max-width: 640px), (pointer: coarse) and (max-height: 500px) { .theme-toggle:not(.view-toggle) { display: none; } } /* the view switch stays: it is how a phone reaches the home teams */
 
 /* ---- phones: the event sheet ---- */
 .sheet { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; }
@@ -844,3 +1293,76 @@ body.sheet-open { overflow: hidden; }
   .ev .time { min-width: 4.4rem; }
   .day-events { gap: .5rem; }
 }
+
+/* ---- print: the season calendar as a poster (the PDF chip) ---- */
+.print-head, .print-foot, .cal-wd { display: none; } /* the poster's own parts, print only */
+@media print {
+  /* a light sheet whatever the screen theme: the palette's light values,
+     after the dark-theme rules so they win */
+  :root.print-team, :root.print-team[data-theme="dark"] {
+    color-scheme: light;
+    --sky: #fff; --mist: #fff; --ink: #1b2733; --ink-soft: #55636f; --line: #c9d2da; --gold: #e8791d;
+  }
+  html.print-team body > *:not(#teamsView), html.print-team .team-main, html.print-team .floaters, html.print-team #teamHead { display: none !important; }
+  html.print-team body { background: #fff; padding: 0; }
+  html.print-team #teamsView { display: block; width: 100%; max-width: none; margin: 0; }
+  @page { size: letter portrait; margin: 8mm; }
+  /* the banner: crest, "SEATTLE MARINERS", the season, in the club's primary */
+  html.print-team .print-head { display: flex; align-items: center; gap: 5mm; padding: 3mm 6mm; margin-bottom: 4mm; background: var(--team); color: #fff; border-radius: 3mm; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  html.print-team .print-head img { width: 16mm; height: 16mm; object-fit: contain; }
+  html.print-team .ph-text { display: flex; flex-direction: column; font-family: var(--display); text-transform: uppercase; line-height: 1; }
+  html.print-team .ph-team { font-size: 26pt; font-weight: 700; letter-spacing: .04em; }
+  html.print-team .ph-season { font-size: 12pt; font-weight: 700; letter-spacing: .12em; color: var(--team-2); margin-top: 1.5mm; }
+  /* the months: square cards like the screen's (the week rows share what's
+     under the header), as many across (two, three, four) and as big as
+     lets the whole season fit one sheet — app.js prepPrint sizes them
+     (--pcard, --pgap); a short last row sits centred. Type scales with
+     the card. */
+  html.print-team .team-cal { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--pgap, 5mm); }
+  html.print-team .cal-month { flex: none; width: var(--pcard, 97mm); aspect-ratio: 1; display: flex; flex-direction: column; border: .4mm solid var(--team); border-radius: 2mm; break-inside: avoid; overflow: hidden; }
+  html.print-team .cal-mname { padding: calc(var(--pcard, 97mm) * .02) 2mm; font-size: calc(var(--pcard, 97mm) * .047); letter-spacing: .12em; color: #fff; background: var(--team); border-bottom: 0; }
+  html.print-team .cal-mname img { width: calc(var(--pcard, 97mm) * .067); height: calc(var(--pcard, 97mm) * .067); }
+  html.print-team .cal-mname .sport { display: none; }
+  html.print-team .cal-wd { display: grid; grid-template-columns: repeat(7, 1fr); background: color-mix(in srgb, var(--team) 12%, #fff); font: 700 calc(var(--pcard, 97mm) * .0235)/1 var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--team); }
+  html.print-team .cal-wd span { padding: calc(var(--pcard, 97mm) * .013) 0; text-align: center; }
+  html.print-team .cal-days { flex: 1 1 auto; grid-auto-rows: minmax(0, 1fr); gap: 0; background: none; } /* the week rows split the card's height */
+  /* the cells as the pocket schedules print them: the day number top left,
+     the start top right, the opponent large across the foot; a day with no
+     game solid grey with its number in white; home solid in the club's
+     primary, away white in the club's colour with a hairline of it */
+  html.print-team .cal-day { aspect-ratio: auto; height: auto; padding: calc(var(--pcard, 97mm) * .008) calc(var(--pcard, 97mm) * .01) calc(var(--pcard, 97mm) * .006); gap: 0; justify-content: flex-end; border: .2mm solid var(--line); margin: -.1mm; background: #fff; color: var(--ink); opacity: 1; box-shadow: none; }
+  html.print-team .cal-day:not(.is-blank):not(.is-home):not(.is-away):not(.is-post), html.print-team .cal-day.is-blank { background: #b4b9be; color: #fff; border-color: #fff; }
+  html.print-team .team-cal .cal-day.is-past:not(.is-blank) { opacity: 1; } /* played games print as strongly as the rest */
+  html.print-team .cal-day .num { top: calc(var(--pcard, 97mm) * .01); left: calc(var(--pcard, 97mm) * .012); font-size: calc(var(--pcard, 97mm) * .021); }
+  html.print-team .cal-day .abbr { font-family: var(--display); font-size: calc(var(--pcard, 97mm) * .052); line-height: 1; margin-top: auto; letter-spacing: .01em; }
+  html.print-team .cal-day .gtime i { display: none; }
+  html.print-team .cal-day .gtime { position: absolute; top: calc(var(--pcard, 97mm) * .01); right: calc(var(--pcard, 97mm) * .012); font-size: calc(var(--pcard, 97mm) * .019); line-height: 1; opacity: 1; }
+  html.print-team .cal-day.is-home { background: var(--team); color: #fff; border-color: var(--team); box-shadow: none; }
+  html.print-team .cal-day.is-away { background: #fff; color: var(--team); border-color: var(--team); box-shadow: none; } /* a hairline in the club colour, no heavier than the grid's */
+  html.print-team .cal-day.is-today { box-shadow: none; }
+  html.print-team .cal-day.is-pre { opacity: .55; } /* preseason, faded */
+  html.print-team .cal-day, html.print-team .cal-mname, html.print-team .cal-wd, html.print-team .print-head, html.print-team .print-foot { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  /* the legend */
+  html.print-team .print-foot { display: flex; align-items: center; gap: 6mm; margin-top: 3mm; font: 500 7pt/1 var(--mono); color: var(--ink-soft); text-transform: uppercase; letter-spacing: .08em; }
+  html.print-team .print-foot span:last-child { margin-left: auto; text-transform: none; letter-spacing: 0; }
+  html.print-team .pf-home::before, html.print-team .pf-away::before { content: ""; display: inline-block; width: 3.5mm; height: 3.5mm; margin-right: 1.5mm; vertical-align: -0.8mm; border: .3mm solid var(--team); }
+  html.print-team .pf-home::before { background: var(--team); }
+}
+
+/* ---- phones: the game block stacked (kept at the end of the file so it outranks the desktop rules above) ---- */
+@media (max-width: 640px) {
+  /* a phone (these come last, after every desktop rule they override): the crests on one line, small, at either end; the scorebug under them at its natural size; the news and the strip below */
+  .is-live .tf-main { flex-basis: 100%; }
+  .is-live .tf-wiki, .team-form > .tf-wiki { max-height: none; }
+  .is-live .tf-row { height: auto; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem .8rem; }
+  .is-live .tf-row > img, .is-live .tf-row > img.tf-opp, .is-live .tf-row > .tf-opp-abbr { order: 0; margin-top: 0; min-width: 0; width: var(--crest); height: var(--crest); flex: none; }
+  .is-live .tf-row > .tf-opp { order: 1; }
+  .is-live .tf-row > .tf-body { order: 2; flex: 1 1 100%; }
+  .tf-cluster { padding: 0; }
+  .tf-inner, .tf-cluster, .tf-bugwrap, .is-live .tf-row > .tf-body { min-width: 0; max-width: 100%; width: 100%; } /* nothing wider than the block: the bug's long cells trim instead */
+  .tf-bug, .tf-bug:not(.is-generic) { zoom: 1; width: 100%; max-width: 100%; }
+  .filterbar .search-wrap { flex: 1 1 4rem; min-width: 3rem; } /* the box gives way first: on a 375px phone the icon row needs the room */
+  /* a phone's bar is always the icon-only row: measured, the labelled one runs past the edge and the view switch with it */
+  .filterbar #subscribeBtn span, .filterbar #filterToggle span, .filterbar #teamViewBtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .filterbar #subscribeBtn, .filterbar #filterToggle, .filterbar #teamViewBtn { padding: .5em .7em; }
+  .filterbar #subscribeBtn svg, .filterbar #filterToggle svg, .filterbar #teamViewBtn svg { width: 1.1rem; height: 1.1rem; }

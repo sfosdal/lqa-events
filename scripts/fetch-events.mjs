@@ -364,10 +364,21 @@ const merged = mergeWithArchive(fresh, archived, today, cutoff).slice(-MAX_EVENT
 
 // League schedules flag floating dates Ticketmaster doesn't know yet, and
 // the full seasons (home and away) feed the site's Teams view
-let seasons = {};
-try { seasons = await applySchedules(merged); } catch (err) { console.error('Schedules step failed:', err.message); }
+let seasons = {}, form = {};
+try { ({ teams: seasons, form } = await applySchedules(merged)); } catch (err) { console.error('Schedules step failed:', err.message); }
+// The Seawolves' home matches have no ticket feed here: they enter the
+// listing from the club's own schedule (Starfire Stadium, typed sports,
+// the club's ticket page as the link) unless the feed already has that day
+// at that ground
+for (const g of (seasons.seawolves || []).filter((x) => x.home && x.date >= cutoff)) {
+  if (merged.some((e) => e.date === g.date && e.venue === g.venue)) continue;
+  merged.push({ venue: g.venue, title: `Seattle Seawolves vs ${g.opp.name}`, date: g.date, time: g.time, url: 'https://tickets.seawolves.rugby/events', type: 'sports' });
+}
+merged.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
 if (Object.keys(seasons).length) {
-  writeFileSync(new URL('../site/teams.json', import.meta.url), JSON.stringify({ generated: new Date().toISOString(), teams: seasons }, null, 1) + '\n');
+  const postseason = JSON.parse(readFileSync(new URL('./data/postseason.json', import.meta.url), 'utf8')); // each league's playoff rounds (hand-kept), shown until the real games land
+  delete postseason._;
+  writeFileSync(new URL('../site/teams.json', import.meta.url), JSON.stringify({ generated: new Date().toISOString(), teams: seasons, form, postseason }, null, 1) + '\n');
 } else {
   console.error('teams.json: no season fetched this run, the last one stands');
 }
