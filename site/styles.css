@@ -207,7 +207,8 @@ h1 {
 .view-toggle button[aria-checked="true"] { color: var(--sky); }
 /* while the Teams view is up the agenda's own controls step aside — the
    filters, search, the Today floater, Add To Calendar and the phone's calendar chip */
-html.teams-open #filterToggle, html.teams-open .search-wrap { display: none; } /* Add To Calendar stays: in Teams mode it offers the club's season feed */
+html.teams-open #filterToggle, html.teams-open .search-wrap,
+html.teams-open .cal-toggle { display: none; } /* Add To Calendar stays: in Teams mode it offers the club's season feed */
 html.teams-open #calToday { display: none; }
 /* the search box: a chip that takes typing, a magnifier at its right end and
    no placeholder; it gives up width first when the row gets tight */
@@ -225,11 +226,12 @@ html.teams-open #calToday { display: none; }
   position: absolute; right: .85rem; top: 50%; width: 1rem; height: 1rem;
   transform: translateY(-50%); color: var(--ink-soft); pointer-events: none;
 }
-/* Right end of the bar, left to right: the poster chip (Teams), Add To
-   Calendar, then the theme pill always last (DOM order keeps the chips
-   together; flex order places them); the search box grows to fill the gap
-   before them */
-#subscribeBtn { order: 3; } /* always in the same place in either mode: the poster chip sits before it in Teams */
+/* Right end of the bar, left to right: Add To Calendar, the calendar chip
+   (narrow layouts only), Home Teams, then the theme pill always last (DOM
+   order keeps the chips together; flex order places them); the search box
+   grows to fill the gap before them */
+#subscribeBtn { order: 3; } /* always just left of the view switch, in either mode: the small icon chip (the mini calendar, or the poster) sits before it */
+#calToggle { order: 2; }
 #viewToggle { order: -1; } /* the view switch leads the bar in either mode (Steve, 2026-09-14) */
 /* light / dark: a two-stop pill at the bar's right end, the ink knob
    sliding under the stop in effect (the system's side until a click) */
@@ -363,20 +365,67 @@ html.is-scrolled { --barh: calc(var(--barh-base) + var(--titleh)); }
 }
 .agenda-layout > ol { grid-column: 1; }
 .cal-side { position: sticky; top: calc(var(--barh) + .5rem); grid-column: 2; grid-row: 1; } /* same offset under the bar as the pops */
-/* the calendar belongs to the Month view (the switch's middle stop, app.js
-   setMonthView sets html.month-open); in the List view the list has the width */
-html:not(.month-open) .cal-side { display: none; }
-html:not(.month-open) .agenda-layout { grid-template-columns: minmax(0, 1fr); }
 /* the Add To Calendar pop hangs over the docked calendar (same width, same right edge)
    and is shorter, so the calendar steps out while the pop is open */
-.cal-side .cal { transition: opacity .15s; }
-html.pop-open .cal-side .cal { opacity: 0; pointer-events: none; }
+.cal-side:not(.is-float) .cal { transition: opacity .15s; }
+html.pop-open .cal-side:not(.is-float) .cal { opacity: 0; pointer-events: none; }
 /* Below the page's full width (62rem + padding) the calendar never docks —
    beside the list it would squeeze the cards to a sliver — so from here
-   down it sits above the list instead, in the flow, the list under it. */
+   down it floats over the list instead. */
 @media (max-width: 1023px) {
   .agenda-layout { display: flex; flex-direction: column; }
-  .cal-side { position: static; order: -1; align-self: center; width: min(22rem, 100%); margin-bottom: 1.1rem; }
+  /* the grid's align-items: start carries over; the strip must span the
+     column or it shrinks to its content (it has none, so its right edge —
+     where the handle hangs — would be the left edge of the page) */
+  .cal-side { align-self: stretch; width: 100%; }
+  /* a zero-height sticky strip, first in the column, carrying the handle
+     (hanging off its right end) and the floating calendar; both ride along
+     as the list scrolls */
+  .cal-side { order: -1; height: 0; top: calc(var(--barh) + .5rem); z-index: 15; }
+  .cal-side.is-float .cal {
+    position: absolute; z-index: 14; right: 0; top: 0; /* right under the pinned bar */
+    width: min(22rem, 100%);
+    max-height: calc(100vh - 5rem); max-height: calc(100dvh - 5rem); overflow-y: auto;
+  }
+  .cal-side.is-float .cal-month { box-shadow: 0 12px 36px rgba(0, 0, 0, .3); }
+}
+
+/* ---- the Month view: the month's events, as the filters leave them, on one calendar ---- */
+html.month-open .agenda-layout, html.month-open .cal-toggle { display: none; } /* the list and its mini calendar step aside; the board is the month */
+.month-board[hidden] { display: none; }
+.month-board { margin-top: .75rem; }
+.mb-wdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--mist); border: 2px solid var(--ink-soft); border-top: 0; border-bottom: 0; font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.mb-wdays span { padding: .1rem .35rem .3rem; }
+.mb-days { border: 2px solid var(--ink-soft); border-radius: 0 0 10px 10px; overflow: hidden; grid-auto-rows: minmax(5.5rem, auto); }
+.mb-days > .cal-day { aspect-ratio: auto; height: auto; display: flex; flex-direction: column; align-items: stretch; gap: .2rem; padding: .3rem .3rem .35rem; }
+.mb-days > .cal-day.is-blank { display: block; margin: 0; width: auto; background: color-mix(in srgb, var(--line) 35%, var(--mist)); } /* a padding slot is a cell like the rest, a shade darker */
+.mb-days .num { font-size: .72rem; line-height: 1; margin-bottom: .1rem; }
+.mb-days .hol { font-size: .58rem; line-height: 1.2; color: var(--gold); letter-spacing: .06em; text-transform: uppercase; }
+.mb-days .ticks { display: none; } /* phones only (below) */
+/* an event on the board: the time, the title, in the venue's wash with its hue down the left edge (a tap opens the event sheet, as a card does) */
+.mb-ev { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .35rem; align-items: baseline; width: 100%; text-align: left; font-family: var(--body); font-size: .7rem; line-height: 1.25; color: var(--ink); background: color-mix(in srgb, var(--dot) var(--tint), transparent); border: 0; border-left: 3px solid var(--dot); border-radius: 4px; padding: .18rem .3rem; cursor: pointer; }
+.mb-ev:hover { background: color-mix(in srgb, var(--dot) calc(var(--tint) + 14%), transparent); }
+.mb-ev[hidden] { display: none; }
+.mb-ev .t { font-family: var(--mono); font-size: .62rem; color: var(--ink-soft); white-space: nowrap; }
+.mb-ev .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.mb-ev.is-off .n { text-decoration: line-through; opacity: .7; }
+.mb-more { align-self: flex-start; font: inherit; font-family: var(--mono); font-size: .62rem; color: var(--ink-soft); background: none; border: 0; padding: .1rem .2rem; cursor: pointer; }
+.mb-more:hover { color: var(--ink); }
+.mb-days .cal-day.is-past .mb-ev { opacity: .55; }
+.mb-day[hidden], .mb-day { display: none; } /* the picked day's events: phones only */
+.mb-day h3 { font-family: var(--display); font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .5rem; }
+.mb-day .mb-ev { font-size: .85rem; padding: .5rem .6rem; margin-bottom: .4rem; }
+.mb-day .mb-ev .t { font-size: .72rem; }
+.mb-day .mb-ev .n { white-space: normal; }
+.mb-day .mb-none { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); }
+@media (max-width: 640px) { /* phones: the days carry the venue ticks; a tapped day lists its events under the grid */
+  .mb-days { grid-auto-rows: auto; }
+  .mb-days > .cal-day { aspect-ratio: 1; padding: .2rem .25rem; gap: .1rem; cursor: pointer; }
+  .mb-days .num { font-size: .68rem; }
+  .mb-days .hol, .mb-days .mb-ev, .mb-days .mb-more { display: none; }
+  .mb-days .ticks { display: flex; }
+  .mb-days .cal-day.is-picked { box-shadow: inset 0 0 0 2px var(--ink); }
+  .mb-day:not([hidden]) { display: block; margin-top: 1rem; }
 }
 
 /* ---- mini month calendar: a nav bar, then one framed card per month ---- */
@@ -410,6 +459,9 @@ html.pop-open .cal-side .cal { opacity: 0; pointer-events: none; }
 .cal-head button:not(:disabled):active { transform: translateY(1px); }
 .cal-month { border-radius: 0 0 10px 10px; }
 .cal-mname { display: none; } /* the header carries the name */
+/* floating over the list on a small screen the pair's outline is a touch
+   brighter than the docked hairline, being over content */
+.cal-side.is-float .cal-head, .cal-side.is-float .cal-month { border-color: color-mix(in srgb, var(--ink) 40%, var(--ink-soft)); }
 /* each card: its name across the top in the display face, over a hairline
    where the weekday row used to be, then only its own days (the grid is
    padded to whole weeks with blank cells, never with the neighbor months'
@@ -1245,6 +1297,17 @@ html:not(.teams-open) .team-strip { display: none; }
 
 /* ---- the calendar chip (narrow layouts only) ---- */
 
+/* Icon + chevron at the far right of the filter bar, a chip like the funnel.
+   The chevron points left while closed ("opens out over the list") and flips
+   right once open. On the wide layout the calendar is docked and app.js
+   hides this. */
+.cal-toggle[hidden] { display: none; }
+.cal-toggle span { /* label for screen readers only */
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.cal-toggle .chev { width: .85rem; height: .85rem; transition: transform .15s; }
+.cal-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+
 /* phones follow the system light/dark setting, so no toggle; the query
    mirrors PHONE in index.html's head script — keep them in step */
 @media (max-width: 640px), (pointer: coarse) and (max-height: 500px) { .theme-toggle:not(.view-toggle) { display: none; } } /* the view switch stays: it is how a phone reaches the home teams */
@@ -1423,5 +1486,7 @@ body.sheet-open { overflow: hidden; }
   .filterbar #subscribeBtn span, .filterbar #filterToggle span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .filterbar #subscribeBtn, .filterbar #filterToggle { padding: .5em .7em; }
   .filterbar #subscribeBtn svg, .filterbar #filterToggle svg { width: 1.1rem; height: 1.1rem; }
-  /* a 320px phone: measured, the row ran past its box; the gaps close up a little and the row fits with no control hidden */
+  /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
   .filterbar { gap: .4rem; }
+  .filterbar #calToggle .chev { display: none; }
+  .filterbar #calToggle { padding: .5em .7em; }

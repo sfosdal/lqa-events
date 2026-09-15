@@ -97,7 +97,7 @@
     <button id="eventsBtn" type="button" role="radio" aria-checked="true" data-view="events" title="Events">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
     </button>
-    <button id="monthBtn" type="button" role="radio" aria-checked="false" data-view="month" aria-controls="calBox" title="Month — the list with a month calendar beside it">
+    <button id="monthBtn" type="button" role="radio" aria-checked="false" data-view="month" aria-controls="calBox" title="Month — the month's events on a calendar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
     </button>
     <button id="teamsBtn" type="button" role="radio" aria-checked="false" data-view="teams" aria-controls="teamsView" title="Home Teams — season schedules, every game, home and away">
@@ -168,6 +168,13 @@
   <!-- the home teams, one pill per club, in the bar itself while the Teams
        view is open (crests only when the names won't fit; app.js sets is-crests) -->
   <div class="team-strip" id="teamStrip" aria-label="Teams"></div>
+  <!-- narrow layouts only (app.js hides it when the calendar is docked):
+       floats the calendar over the list. Chevron left = opens, right = folds. -->
+  <button id="calToggle" class="chip cal-toggle" type="button" aria-expanded="false" aria-controls="calBox" title="Show calendar" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+    <span>Hide calendar</span>
+    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+  </button>
 </nav>
 <!-- the funnel in the bar drops this open below it -->
 <div id="filterPanel" class="filter-panel" hidden>
@@ -207,8 +214,9 @@
   <div class="agenda-layout">
     <ol id="agenda"><li class="empty">Loading events…</li></ol>
     <aside class="cal-side" aria-label="Month calendar">
-      <!-- the Month view's calendar: docked beside the list on the wide
-           layout, above it on narrower ones; hidden in the List view -->
+      <!-- on narrow layouts this floats over the list (opened from the
+           calendar chip at the right end of the filter bar); on the wide
+           layout it's docked here -->
       <div class="cal" id="calBox">
         <!-- the card's header: ‹ month name › (Today is a floater at the lower right, shown when the list has left today) -->
         <div class="cal-head" id="calHead" aria-label="Change months">
@@ -224,6 +232,24 @@
       </div>
     </aside>
   </div>
+  <!-- the Month view (the switch's middle stop): the month's events, as
+       the filters leave them, on one full-width calendar; ‹ › page the
+       months (app.js renderBoard). On phones the days carry ticks and a
+       tapped day's events list under the grid. -->
+  <section id="monthBoard" class="month-board" aria-label="Month calendar" hidden>
+    <div class="cal-head mb-head" aria-label="Change months">
+      <button id="mbPrev" type="button" aria-label="Previous month">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <span class="cal-cur" id="mbCur" aria-live="polite"></span>
+      <button id="mbNext" type="button" aria-label="Next month">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="mb-wdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+    <div id="mbGrid" class="cal-days mb-days"></div>
+    <div id="mbDay" class="mb-day" hidden></div>
+  </section>
 </section>
 
 <!-- the Teams view: in place of the agenda while the Teams chip is on. A

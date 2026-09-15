@@ -230,7 +230,7 @@
         Object.keys(state.venueMode).forEach(function (v) {
           if (state.venues.indexOf(v) === -1) delete state.venueMode[v];
         });
-        renderFilters(); renderCal(); renderAgenda(); updateSubscribe();
+        renderFilters(); renderCal(); renderAgenda(); renderBoard(); updateSubscribe();
       })
       .catch(function (err) {
         $('agenda').innerHTML = '';
@@ -549,7 +549,7 @@
     return true;
   }
   // a filter change also rewinds the agenda to its first page
-  function applyFilters() { syncFilters(); renderCal(); renderAgenda(); updateSubscribe(); saveFilters(); }
+  function applyFilters() { syncFilters(); renderCal(); renderAgenda(); renderBoard(); updateSubscribe(); saveFilters(); }
 
   // Each group's map and full key list, for "only" and Select/Clear all.
   function groupInfo(g) {
@@ -714,20 +714,53 @@
     if (!document.documentElement.dataset.theme) applyTheme();
   });
 
-  // ---- the month calendar: the Month view ----
-  // The switch's middle stop (List · Month · Teams, Steve 2026-09-14): the
-  // list with the month calendar — docked beside it on the wide layout,
-  // above it on narrower ones (styles.css html.month-open). List is the
-  // agenda alone. The choice is kept per browser (lqa-view); ?view=month
-  // opens it for one visit.
+  // ---- the mini calendar: docked or floating ----
+  // Wide layout (the page at its full width): docked beside the list, always
+  // shown, no toggle. Narrower: never docked — beside the list it would
+  // squeeze the cards to a sliver — so a handle at the list's top-right
+  // opens it as a floating panel over the list, and it closes again on a
+  // day pick or a tap elsewhere (transient, so nothing is stored).
   var STACKED = '(max-width: 1023px)';
+  var calFloatOpen = false;
   var calWasStacked = null;
-  function monthOpen() { return document.documentElement.classList.contains('month-open'); }
   function syncCal() {
     var stacked = matchMedia(STACKED).matches;
-    if (stacked !== calWasStacked) { calWasStacked = stacked; renderCal(); }
-    $('calBox').hidden = !monthOpen();
+    if (stacked !== calWasStacked) { calWasStacked = stacked; renderCal(); } // one month floating, two docked
+    var open = !stacked || calFloatOpen;
+    $('calBox').hidden = !open;
+    document.querySelector('.cal-side').classList.toggle('is-float', stacked && open);
+    if (stacked && open) fitPops(true);
+    var t = $('calToggle');
+    t.hidden = !stacked;
+    t.setAttribute('aria-expanded', String(open));
+    t.title = open ? 'Hide calendar' : 'Show calendar';
+    t.querySelector('span').textContent = t.title;
   }
+  $('calToggle').addEventListener('click', function () {
+    calFloatOpen = $('calBox').hidden;
+    syncCal();
+  });
+  function closeFloatCal() { if (calFloatOpen) { calFloatOpen = false; syncCal(); } }
+  $('calGrid').addEventListener('click', function (e) {
+    if (e.target.closest('button.cal-day')) closeFloatCal();
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.cal-side, #calToggle')) closeFloatCal();
+  });
+  syncCal();
+  window.addEventListener('resize', syncCal);
+
+  // ---- the Month view: the month's events on one calendar ----
+  // The switch's middle stop (List · Month · Teams, Steve 2026-09-14): the
+  // current month, as the filters leave it, on a full-width calendar with
+  // ‹ › paging (renderBoard); the list and its mini calendar step aside
+  // (styles.css html.month-open). Opens on the current month every time.
+  // The choice is kept per browser (lqa-view); ?view=month opens it for
+  // one visit. On phones the days carry ticks and a tapped day's events
+  // list under the grid.
+  var BOARD_MAX = 5; // entries a day shows before "+N more"
+  var boardPick = null; // the phone's picked day
+  function monthOpen() { return document.documentElement.classList.contains('month-open'); }
   function syncViewSwitch() { // the knob and the stops follow the view on show
     var v = !$('teamsView').hidden ? 'teams' : monthOpen() ? 'month' : 'events';
     $('viewToggle').dataset.active = v;
@@ -735,16 +768,85 @@
   }
   function setMonthView(on, remember) {
     document.documentElement.classList.toggle('month-open', on);
+    $('monthBoard').hidden = !on;
     if (remember) { try { localStorage.setItem('lqa-view', on ? 'month' : 'list'); } catch (e) { /* no storage */ } }
-    syncCal(); syncViewSwitch();
-    if (on) { renderCal(); if (remember) syncTodayFloat(); } // a switch by hand: the Today floater re-judged against the calendar's month (at load the list isn't in yet)
+    if (on) {
+      var now = new Date();
+      state.month = new Date(now.getFullYear(), now.getMonth(), 1);
+      boardPick = null;
+      closeFloatCal();
+      renderCal(); renderBoard();
+    }
+    syncViewSwitch();
+    if (remember) syncTodayFloat(); // by hand: the floater re-judged (at load the list isn't in yet)
   }
+  function boardEntry(e) {
+    var b = document.createElement('button'); b.type = 'button';
+    b.className = 'mb-ev' + (e.status ? ' is-off' : '');
+    b.style.setProperty('--dot', venueColor(e.venue));
+    var t = document.createElement('span'); t.className = 't'; t.textContent = fmtTime(e.time);
+    var n = document.createElement('span'); n.className = 'n'; n.textContent = e.title;
+    b.appendChild(t); b.appendChild(n);
+    b.title = e.venue + ' · ' + e.title + (e.status ? ' (' + e.status + ')' : '');
+    b.addEventListener('click', cardTap(e), true);
+    return b;
+  }
+  function renderBoard() {
+    if (!monthOpen() || !state.month) return;
+    var m = state.month, bounds = monthBounds(), today = todayStr();
+    $('mbCur').textContent = m.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    $('mbPrev').disabled = !bounds || sameMonth(m, new Date(bounds.min.getFullYear(), bounds.min.getMonth(), 1));
+    $('mbNext').disabled = !bounds || m.getFullYear() * 12 + m.getMonth() >= bounds.max.getFullYear() * 12 + bounds.max.getMonth();
+    var grid = $('mbGrid'); grid.innerHTML = '';
+    var last = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(), cells = Math.ceil((m.getDay() + last) / 7) * 7;
+    var hols = state.holidays ? holidayMap() : {};
+    var pick = boardPick && boardPick.slice(0, 7) === ymd(m).slice(0, 7) ? boardPick : null, firstWith = null;
+    for (var i = 0; i < cells; i++) {
+      var dayN = i - m.getDay() + 1;
+      if (dayN < 1 || dayN > last) { var blank = document.createElement('div'); blank.className = 'cal-day is-blank'; grid.appendChild(blank); continue; }
+      var d = new Date(m.getFullYear(), m.getMonth(), dayN), key = ymd(d), evs = dayItems(key);
+      if (evs.length && !firstWith && key >= today) firstWith = key;
+      var cell = document.createElement('div');
+      cell.className = 'cal-day' + (key === today ? ' is-today' : '') + (key < today ? ' is-past' : '') + (evs.length ? '' : ' is-empty');
+      cell.dataset.date = key;
+      var num = document.createElement('span'); num.className = 'num'; num.textContent = dayN; cell.appendChild(num);
+      (hols[key] || []).forEach(function (h) { var s = document.createElement('span'); s.className = 'hol'; s.textContent = h.title; cell.appendChild(s); });
+      if (evs.length) { // the phone's ticks, one per event in the venue's hue
+        var ticks = document.createElement('span'); ticks.className = 'ticks';
+        evs.slice(0, 6).forEach(function (e) { var t = document.createElement('i'); t.style.setProperty('--dot', venueColor(e.venue)); ticks.appendChild(t); });
+        cell.appendChild(ticks);
+      }
+      evs.forEach(function (e, n) { var b = boardEntry(e); if (n >= BOARD_MAX) b.hidden = true; cell.appendChild(b); });
+      if (evs.length > BOARD_MAX) {
+        var more = document.createElement('button'); more.type = 'button'; more.className = 'mb-more'; more.textContent = '+' + (evs.length - BOARD_MAX) + ' more';
+        more.addEventListener('click', function (ev) { var c = ev.currentTarget.parentNode; c.querySelectorAll('.mb-ev[hidden]').forEach(function (b) { b.hidden = false; }); ev.currentTarget.remove(); });
+        cell.appendChild(more);
+      }
+      grid.appendChild(cell);
+    }
+    // the phone's day list: the picked day, else today when the month is this one, else the first day with something on
+    pick = pick || (sameMonth(m, new Date()) ? today : firstWith) || firstWith;
+    var day = $('mbDay'); day.innerHTML = '';
+    if (pick) {
+      var c = grid.querySelector('.cal-day[data-date="' + pick + '"]'); if (c) c.classList.add('is-picked');
+      var h = document.createElement('h3'); h.textContent = parseDate(pick).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }); day.appendChild(h);
+      var list = dayItems(pick);
+      if (!list.length) { var none = document.createElement('p'); none.className = 'mb-none'; none.textContent = 'Nothing listed'; day.appendChild(none); }
+      list.forEach(function (e) { day.appendChild(boardEntry(e)); });
+    }
+    day.hidden = !pick;
+  }
+  $('mbGrid').addEventListener('click', function (e) { // a day tapped (not an entry on it): the phone's list turns to it
+    var cell = e.target.closest('.cal-day'); if (!cell || !cell.dataset.date || e.target.closest('.mb-ev, .mb-more')) return;
+    boardPick = cell.dataset.date; renderBoard();
+  });
+  $('mbPrev').addEventListener('click', function () { shiftMonth(-1); });
+  $('mbNext').addEventListener('click', function () { shiftMonth(1); });
   (function () {
     var want = new URLSearchParams(location.search).get('view'), saved = null;
     try { saved = localStorage.getItem('lqa-view'); } catch (e) { /* unreadable storage */ }
     setMonthView(want ? want === 'month' : saved === 'month', false);
   })();
-  window.addEventListener('resize', syncCal);
 
   // ---- the filter bar folds Reset / Copy to icons only when it must ----
   // Measured with the labels shown: if the row would overflow its box, the
@@ -2681,13 +2783,13 @@
     state.showPast = false; state.pastFrom = null;
     renderCal();
     renderAgenda();
-    scrollToDate(todayStr());
+    if (monthOpen()) { boardPick = null; renderBoard(); } else scrollToDate(todayStr());
     syncTodayFloat(); // no scroll event if the list was already there
   });
   function shiftMonth(dir) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + dir, 1);
     swapCal(dir);
-    jumpToMonth();
+    if (monthOpen()) { renderBoard(); syncTodayFloat(); } else jumpToMonth();
   }
   // The bar's team pills carry names while the row has room for them and
   // fall back to crests alone when it doesn't (re-checked on resize).
@@ -2970,8 +3072,9 @@
   // with the masthead still on screen — first scrolls the page until the bar
   // is pinned, which is where the panel would end up anyway.
   function fitPops(opening) {
-    [$('filterPanel'), $('subscribePop')].forEach(function (el) {
+    [$('filterPanel'), $('subscribePop'), $('calBox')].forEach(function (el) {
       if (el.hidden) return;
+      if (el === $('calBox') && !document.querySelector('.cal-side.is-float')) { el.style.maxHeight = ''; return; }
       var room = window.innerHeight - el.getBoundingClientRect().top - 12;
       if (opening && room < 240) {
         var bar = document.querySelector('.filter-area').getBoundingClientRect();
@@ -2990,6 +3093,7 @@
   function syncTodayFloat() {
     var btn = $('calToday');
     var today = todayStr();
+    if (monthOpen()) { btn.hidden = !state.month || sameMonth(state.month, new Date()); return; } // the board: Today means this month
     var edge = document.querySelector('.filter-area').getBoundingClientRect().bottom + 1;
     var rows = Array.from(document.querySelectorAll('#agenda .day-row'));
     var home = rows.filter(function (r) { return r.dataset.date >= today; })[0] || rows[rows.length - 1];
