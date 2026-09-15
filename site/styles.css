@@ -201,13 +201,13 @@ h1 {
 .filterbar.is-tight #subscribeBtn, .filterbar.is-tight #filterToggle { padding: .5em .7em; }
 .filterbar.is-tight #subscribeBtn svg, .filterbar.is-tight #filterToggle svg { width: 1.1rem; height: 1.1rem; }
 /* the Teams chip is a switch: solid while its view is on show */
-/* the view switch: agenda | home teams, a two-stop pill like the theme's (same rules, .view-toggle) */
-.view-toggle[data-active="teams"] .theme-knob { left: calc(3px + var(--tt)); }
+/* the view switch: list | month | home teams, a three-stop pill like the theme's (same rules, .view-toggle) */
+.view-toggle[data-active="month"] .theme-knob { left: calc(3px + var(--tt)); }
+.view-toggle[data-active="teams"] .theme-knob { left: calc(3px + 2 * var(--tt)); }
 .view-toggle button[aria-checked="true"] { color: var(--sky); }
 /* while the Teams view is up the agenda's own controls step aside — the
    filters, search, the Today floater, Add To Calendar and the phone's calendar chip */
-html.teams-open #filterToggle, html.teams-open .search-wrap,
-html.teams-open .cal-toggle { display: none; } /* Add To Calendar stays: in Teams mode it offers the club's season feed */
+html.teams-open #filterToggle, html.teams-open .search-wrap { display: none; } /* Add To Calendar stays: in Teams mode it offers the club's season feed */
 html.teams-open #calToday { display: none; }
 /* the search box: a chip that takes typing, a magnifier at its right end and
    no placeholder; it gives up width first when the row gets tight */
@@ -225,12 +225,11 @@ html.teams-open #calToday { display: none; }
   position: absolute; right: .85rem; top: 50%; width: 1rem; height: 1rem;
   transform: translateY(-50%); color: var(--ink-soft); pointer-events: none;
 }
-/* Right end of the bar, left to right: Add To Calendar, the calendar chip
-   (narrow layouts only), Home Teams, then the theme pill always last (DOM
-   order keeps the chips together; flex order places them); the search box
-   grows to fill the gap before them */
-#subscribeBtn { order: 3; } /* always just left of the view switch, in either mode: the small icon chip (the mini calendar, or the poster) sits before it */
-#calToggle { order: 2; }
+/* Right end of the bar, left to right: the poster chip (Teams), Add To
+   Calendar, then the theme pill always last (DOM order keeps the chips
+   together; flex order places them); the search box grows to fill the gap
+   before them */
+#subscribeBtn { order: 3; } /* always in the same place in either mode: the poster chip sits before it in Teams */
 #viewToggle { order: -1; } /* the view switch leads the bar in either mode (Steve, 2026-09-14) */
 /* light / dark: a two-stop pill at the bar's right end, the ink knob
    sliding under the stop in effect (the system's side until a click) */
@@ -364,29 +363,20 @@ html.is-scrolled { --barh: calc(var(--barh-base) + var(--titleh)); }
 }
 .agenda-layout > ol { grid-column: 1; }
 .cal-side { position: sticky; top: calc(var(--barh) + .5rem); grid-column: 2; grid-row: 1; } /* same offset under the bar as the pops */
+/* the calendar belongs to the Month view (the switch's middle stop, app.js
+   setMonthView sets html.month-open); in the List view the list has the width */
+html:not(.month-open) .cal-side { display: none; }
+html:not(.month-open) .agenda-layout { grid-template-columns: minmax(0, 1fr); }
 /* the Add To Calendar pop hangs over the docked calendar (same width, same right edge)
    and is shorter, so the calendar steps out while the pop is open */
-.cal-side:not(.is-float) .cal { transition: opacity .15s; }
-html.pop-open .cal-side:not(.is-float) .cal { opacity: 0; pointer-events: none; }
+.cal-side .cal { transition: opacity .15s; }
+html.pop-open .cal-side .cal { opacity: 0; pointer-events: none; }
 /* Below the page's full width (62rem + padding) the calendar never docks —
    beside the list it would squeeze the cards to a sliver — so from here
-   down it floats over the list instead. */
+   down it sits above the list instead, in the flow, the list under it. */
 @media (max-width: 1023px) {
   .agenda-layout { display: flex; flex-direction: column; }
-  /* the grid's align-items: start carries over; the strip must span the
-     column or it shrinks to its content (it has none, so its right edge —
-     where the handle hangs — would be the left edge of the page) */
-  .cal-side { align-self: stretch; width: 100%; }
-  /* a zero-height sticky strip, first in the column, carrying the handle
-     (hanging off its right end) and the floating calendar; both ride along
-     as the list scrolls */
-  .cal-side { order: -1; height: 0; top: calc(var(--barh) + .5rem); z-index: 15; }
-  .cal-side.is-float .cal {
-    position: absolute; z-index: 14; right: 0; top: 0; /* right under the pinned bar */
-    width: min(22rem, 100%);
-    max-height: calc(100vh - 5rem); max-height: calc(100dvh - 5rem); overflow-y: auto;
-  }
-  .cal-side.is-float .cal-month { box-shadow: 0 12px 36px rgba(0, 0, 0, .3); }
+  .cal-side { position: static; order: -1; align-self: center; width: min(22rem, 100%); margin-bottom: 1.1rem; }
 }
 
 /* ---- mini month calendar: a nav bar, then one framed card per month ---- */
@@ -420,15 +410,12 @@ html.pop-open .cal-side:not(.is-float) .cal { opacity: 0; pointer-events: none; 
 .cal-head button:not(:disabled):active { transform: translateY(1px); }
 .cal-month { border-radius: 0 0 10px 10px; }
 .cal-mname { display: none; } /* the header carries the name */
-/* floating over the list on a small screen the pair's outline is a touch
-   brighter than the docked hairline, being over content */
-.cal-side.is-float .cal-head, .cal-side.is-float .cal-month { border-color: color-mix(in srgb, var(--ink) 40%, var(--ink-soft)); }
 /* each card: its name across the top in the display face, over a hairline
    where the weekday row used to be, then only its own days (the grid is
    padded to whole weeks with blank cells, never with the neighbor months'
    dates; the columns run Sunday to Saturday)  */
 .cal-mname { padding: .45rem .6rem .3rem; border-bottom: 1px solid var(--line); font-size: .95rem; letter-spacing: .12em; }
-.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--line); }
+.cal-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; background: var(--line); } /* minmax(0, …): a day's row of ticks can't widen its column, so the seven fit a 320px phone (the ticks wrap under) */
 .cal-days > * {
   aspect-ratio: 1; padding: .2rem .25rem; /* square cells */
   font-family: var(--mono); font-size: .68rem; text-align: left; vertical-align: top;
@@ -441,7 +428,7 @@ html.pop-open .cal-side:not(.is-float) .cal { opacity: 0; pointer-events: none; 
    beside them (leading ones to the left, trailing ones to the right and
    down) so no lines are drawn between padding slots — only where they meet
    a day, plus the rule under the month's name, which runs the full width. */
-.cal-day { background: var(--mist); border: 0; color: var(--ink); display: block; width: 100%; }
+.cal-day { background: var(--mist); border: 0; color: var(--ink); display: block; width: 100%; min-width: 0; overflow: hidden; }
 .cal-day.is-blank { width: auto; aspect-ratio: auto; margin: 0 0 0 -1px; } /* stretches with its margins; the row's height comes from its days */
 .cal-day:not(.is-blank) ~ .cal-day.is-blank { margin: 0 -1px -1px 0; }
 button.cal-day { cursor: pointer; }
@@ -1004,21 +991,24 @@ html { overflow-anchor: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* the strip's three sections (app.js buildWatchStrip): streaming at the left, TV centred, radio at the right — a grid of three equal tracks so the middle stays centred whatever the ends hold; an empty section keeps its track */
 .tf-sect { display: flex; align-items: center; gap: .5rem; min-width: 0; }
-.tf-sect-stream { justify-self: start; }
-.tf-sect-tv { justify-self: center; }
-.tf-sect-radio { justify-self: end; }
-.tf-sect.is-empty { visibility: hidden; }
+.tf-sect.at-l { justify-self: start; }
+.tf-sect.at-c { justify-self: center; }
+.tf-sect.at-r { justify-self: end; }
+.tf-sect.is-empty { display: none; }
 .tf-ico { flex: none; position: relative; color: var(--ink-soft); display: inline-flex; }
 .tf-ico svg { width: 1.5rem; height: 1.5rem; }
-.tf-sect-tv .tf-channels { justify-content: flex-start; } /* the list starts at its mark; the section as a whole is what sits centred */
-.tf-sect-radio .tf-channels { justify-content: flex-end; }
+.tf-sect .tf-channels { justify-content: flex-start; } /* the list starts at its mark; the section as a whole is what sits left, centred or right */
+.tf-sect.at-r .tf-channels { justify-content: flex-start; } /* right-justified as a whole, but its entries still flow from its mark: pushed to the end they would leave a hole after the mark when the line wraps (Steve, 2026-09-14) */
 .tf-watch.has-more { padding-right: 2.2rem; } /* the chevron's room at the right end, clear of the radio section */
 @media (min-width: 641px) {
-  .tf-watch { display: grid; grid-template-columns: minmax(7rem, 1fr) minmax(0, auto) minmax(7rem, 1fr); align-items: center; column-gap: 1rem; } /* the ends keep a floor, so a long TV list wraps behind the chevron rather than crushing them; a section never spills into its neighbour */
+  /* the sections' places (app.js buildWatchStrip counts them): three sit left, centre and right; two at the ends; one centred — the ends keep a floor, so a long list wraps behind the chevron rather than crushing its neighbour, and a section never spills into the next */
+  .tf-watch { display: grid; grid-template-columns: minmax(7rem, 1fr) minmax(0, auto) minmax(7rem, 1fr); align-items: center; column-gap: 1rem; }
+  .tf-watch.has-2 { grid-template-columns: minmax(7rem, auto) minmax(7rem, auto); justify-content: space-between; }
+  .tf-watch.has-1, .tf-watch.has-0 { grid-template-columns: minmax(0, auto); justify-content: center; }
   .tf-sect { min-width: 0; overflow: hidden; }
   .tf-watch > .tf-watch-label, .tf-watch > .tf-watch-none { grid-column: 1 / -1; }
 }
-.tf-channels { list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-start; gap: .25rem 2rem; font-family: var(--mono); font-size: .74rem; line-height: 1.5; color: var(--ink-soft); max-height: 1.2rem; overflow: hidden; } /* one line; the rest unfolds behind the chevron (app.js foldWatch sets has-more when there is more) */
+.tf-channels { list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-start; gap: .25rem 1.1rem; font-family: var(--mono); font-size: .74rem; line-height: 1.5; color: var(--ink-soft); max-height: 1.2rem; overflow: hidden; } /* one line, the groups a little apart (each starts with its bold name, so no more is needed); the rest unfolds behind the chevron (app.js foldWatch sets has-more when there is more) */
 .tf-watch.is-open { height: auto; padding-top: .7rem; padding-bottom: .7rem; }
 .tf-watch.is-open .tf-channels { max-height: none; }
 .tf-wmore { display: none; position: absolute; right: .2rem; top: 50%; transform: translateY(-50%); width: 1.5rem; height: 1.5rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink-soft); cursor: pointer; place-items: center; }
@@ -1254,16 +1244,6 @@ html:not(.teams-open) .team-strip { display: none; }
 .team-fold .chip:hover { border-color: var(--ink-soft); color: var(--ink); }
 
 /* ---- the calendar chip (narrow layouts only) ---- */
-/* Icon + chevron at the far right of the filter bar, a chip like the funnel.
-   The chevron points left while closed ("opens out over the list") and flips
-   right once open. On the wide layout the calendar is docked and app.js
-   hides this. */
-.cal-toggle[hidden] { display: none; }
-.cal-toggle span { /* label for screen readers only */
-  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
-}
-.cal-toggle .chev { width: .85rem; height: .85rem; transition: transform .15s; }
-.cal-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
 
 /* phones follow the system light/dark setting, so no toggle; the query
    mirrors PHONE in index.html's head script — keep them in step */
@@ -1436,14 +1416,12 @@ body.sheet-open { overflow: hidden; }
   .tf-watch { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: .3rem; height: auto; padding: .4rem 0 .55rem; }
   .tf-sect { width: 100%; }
   .tf-sect.is-empty { display: none; }
-  .tf-sect-tv .tf-channels, .tf-sect-radio .tf-channels { justify-content: flex-start; }
+  .tf-sect .tf-channels, .tf-sect.at-r .tf-channels { justify-content: flex-start; }
   .tf-channels { max-height: none; gap: .25rem 1rem; }
   .filterbar .search-wrap { flex: 1 1 4rem; min-width: 3rem; } /* the box gives way first: on a 375px phone the icon row needs the room */
   /* a phone's bar is always the icon-only row: measured, the labelled one runs past the edge and the view switch with it */
   .filterbar #subscribeBtn span, .filterbar #filterToggle span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .filterbar #subscribeBtn, .filterbar #filterToggle { padding: .5em .7em; }
   .filterbar #subscribeBtn svg, .filterbar #filterToggle svg { width: 1.1rem; height: 1.1rem; }
-  /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
+  /* a 320px phone: measured, the row ran past its box; the gaps close up a little and the row fits with no control hidden */
   .filterbar { gap: .4rem; }
-  .filterbar #calToggle .chev { display: none; }
-  .filterbar #calToggle { padding: .5em .7em; }

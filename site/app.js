@@ -714,40 +714,36 @@
     if (!document.documentElement.dataset.theme) applyTheme();
   });
 
-  // ---- the mini calendar: docked or floating ----
-  // Wide layout (the page at its full width): docked beside the list, always
-  // shown, no toggle. Narrower: never docked — beside the list it would
-  // squeeze the cards to a sliver — so a handle at the list's top-right
-  // opens it as a floating panel over the list, and it closes again on a
-  // day pick or a tap elsewhere (transient, so nothing is stored).
+  // ---- the month calendar: the Month view ----
+  // The switch's middle stop (List · Month · Teams, Steve 2026-09-14): the
+  // list with the month calendar — docked beside it on the wide layout,
+  // above it on narrower ones (styles.css html.month-open). List is the
+  // agenda alone. The choice is kept per browser (lqa-view); ?view=month
+  // opens it for one visit.
   var STACKED = '(max-width: 1023px)';
-  var calFloatOpen = false;
   var calWasStacked = null;
+  function monthOpen() { return document.documentElement.classList.contains('month-open'); }
   function syncCal() {
     var stacked = matchMedia(STACKED).matches;
-    if (stacked !== calWasStacked) { calWasStacked = stacked; renderCal(); } // one month floating, two docked
-    var open = !stacked || calFloatOpen;
-    $('calBox').hidden = !open;
-    document.querySelector('.cal-side').classList.toggle('is-float', stacked && open);
-    if (stacked && open) fitPops(true);
-    var t = $('calToggle');
-    t.hidden = !stacked;
-    t.setAttribute('aria-expanded', String(open));
-    t.title = open ? 'Hide calendar' : 'Show calendar';
-    t.querySelector('span').textContent = t.title;
+    if (stacked !== calWasStacked) { calWasStacked = stacked; renderCal(); }
+    $('calBox').hidden = !monthOpen();
   }
-  $('calToggle').addEventListener('click', function () {
-    calFloatOpen = $('calBox').hidden;
-    syncCal();
-  });
-  function closeFloatCal() { if (calFloatOpen) { calFloatOpen = false; syncCal(); } }
-  $('calGrid').addEventListener('click', function (e) {
-    if (e.target.closest('button.cal-day')) closeFloatCal();
-  });
-  document.addEventListener('click', function (e) {
-    if (!e.target.closest('.cal-side, #calToggle')) closeFloatCal();
-  });
-  syncCal();
+  function syncViewSwitch() { // the knob and the stops follow the view on show
+    var v = !$('teamsView').hidden ? 'teams' : monthOpen() ? 'month' : 'events';
+    $('viewToggle').dataset.active = v;
+    $('viewToggle').querySelectorAll('button[data-view]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.view === v)); });
+  }
+  function setMonthView(on, remember) {
+    document.documentElement.classList.toggle('month-open', on);
+    if (remember) { try { localStorage.setItem('lqa-view', on ? 'month' : 'list'); } catch (e) { /* no storage */ } }
+    syncCal(); syncViewSwitch();
+    if (on) { renderCal(); if (remember) syncTodayFloat(); } // a switch by hand: the Today floater re-judged against the calendar's month (at load the list isn't in yet)
+  }
+  (function () {
+    var want = new URLSearchParams(location.search).get('view'), saved = null;
+    try { saved = localStorage.getItem('lqa-view'); } catch (e) { /* unreadable storage */ }
+    setMonthView(want ? want === 'month' : saved === 'month', false);
+  })();
   window.addEventListener('resize', syncCal);
 
   // ---- the filter bar folds Reset / Copy to icons only when it must ----
@@ -802,8 +798,7 @@
     if (open) fitTeamStrip();
     $('teamsView').hidden = !open;
     document.querySelector('.agenda').hidden = open;
-    $('viewToggle').dataset.active = open ? 'teams' : 'events'; // the switch's knob slides to the view on show
-    $('teamsBtn').setAttribute('aria-checked', String(open)); $('eventsBtn').setAttribute('aria-checked', String(!open));
+    syncViewSwitch(); // the switch's knob slides to the view on show
     if (push) history.pushState(null, '', teamsUrl(slug === 'auto' ? 'all' : slug));
     if (open) {
       applyTeamView();
@@ -1416,10 +1411,13 @@
     }
     return brief;
   }
-  // The strip along the block's foot, in every state: the cast mark, then
-  // each network with the ways to get it; the schedule's networks for a game
-  // not yet on ESPN's board; a note when none are known yet. `label` names
-  // whose game it is when it isn't the one shown ("Next game").
+  // The strip along the block's foot, in every state: streaming, TV and
+  // radio, each behind its own mark. Three sections sit left, centre and
+  // right; two sit at the ends; one sits centred (Steve, 2026-09-14) —
+  // app.js hands styles.css the count (has-1/2/3) and each section its
+  // place (at-l/at-c/at-r). The schedule's networks for a game not yet on
+  // ESPN's board; a note when none are known yet. `label` names whose game
+  // it is when it isn't the one shown ("Next game").
   function buildWatchStrip(names, radio, label, team) {
     // the club's standing outlets (channels.json clubs): its radio network and local streams, beside whatever the league listed; the feeds a Seattle viewer can't use left out
     var club = (channelsData && channelsData.clubs && team && channelsData.clubs[team.slug]) || {};
@@ -1429,12 +1427,16 @@
     (club.radio || []).forEach(function (r) { if (radio.indexOf(r) < 0) radio.push(r); });
     var wl = document.createElement('div'); wl.className = 'tf-watch';
     if (label) { var lb = document.createElement('b'); lb.className = 'tf-watch-label'; lb.textContent = label; wl.appendChild(lb); }
-    // three sections (Steve, 2026-09-14): streaming at the left, TV centred, radio at the right, each behind its own mark
-    var parts = splitWatch(names), any = parts.tv.length || parts.stream.length || (radio && radio.length);
-    if (!any) { var none = document.createElement('span'); none.className = 'tf-watch-none'; none.textContent = 'Broadcast to be announced'; wl.appendChild(none); }
-    wl.appendChild(watchSection('stream', CAST_SVG, 'Streaming', parts.stream.length ? buildWatchList(parts.stream, null, 'stream', parts.own) : null));
-    wl.appendChild(watchSection('tv', TV_SVG, 'TV', parts.tv.length ? buildWatchList(parts.tv, null, 'tv') : null));
-    wl.appendChild(watchSection('radio', RADIO_SVG, 'Radio', radio && radio.length ? buildWatchList([], radio, 'radio') : null));
+    var parts = splitWatch(names);
+    var sections = [
+      watchSection('stream', CAST_SVG, 'Streaming', parts.stream.length ? buildStreamList(parts.stream) : null),
+      watchSection('tv', TV_SVG, 'TV', parts.tv.length ? buildWatchList(parts.tv, null, 'tv') : null),
+      watchSection('radio', RADIO_SVG, 'Radio', radio && radio.length ? buildWatchList([], radio, 'radio') : null)
+    ].filter(function (sec) { return !sec.classList.contains('is-empty'); });
+    if (!sections.length) { var none = document.createElement('span'); none.className = 'tf-watch-none'; none.textContent = 'Broadcast to be announced'; wl.appendChild(none); }
+    wl.classList.add('has-' + sections.length);
+    var places = sections.length === 3 ? ['at-l', 'at-c', 'at-r'] : sections.length === 2 ? ['at-l', 'at-r'] : ['at-c'];
+    sections.forEach(function (sec, i) { sec.classList.add(places[i]); wl.appendChild(sec); });
     var more = document.createElement('button'); more.type = 'button'; more.className = 'tf-wmore'; // the rest of the ways, when one line can't hold them (foldWatch shows the chevron)
     more.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
     function setWatchOpen(open) { wl.classList.toggle('is-open', open); more.title = open ? 'Fewer' : 'More ways to watch'; more.setAttribute('aria-label', more.title); more.setAttribute('aria-expanded', open ? 'true' : 'false'); }
@@ -1442,34 +1444,39 @@
     more.addEventListener('click', function () { setWatchOpen(!wl.classList.contains('is-open')); settleBlock(); });
     wl.appendChild(more);
     if (!channelsData) loadChannels().then(function () { // once the table has loaded: the numbers, the links, the club's own outlets (the countdown carries over)
-      var fresh = buildWatchStrip(names, radio, label, team); fresh.className = wl.className; fresh.style.cssText = wl.style.cssText;
+      var fresh = buildWatchStrip(names, radio, label, team); fresh.className = fresh.className.replace(/\bis-open\b/, '') + (wl.classList.contains('is-open') ? ' is-open' : ''); fresh.style.cssText = wl.style.cssText;
       if (wl.parentNode) wl.parentNode.replaceChild(fresh, wl); foldNews(); foldWatch();
       var box = fresh.closest('.team-form'), old = box && box.querySelector('.tf-brief');
       if (old) old.replaceWith(buildBrief(box.querySelector('.tf-lead'), fresh));
     });
     return wl;
   }
-  // The league's names sorted into the strip's sections: a network that
-  // reaches a set (an antenna, DirecTV, Dish, Xfinity) is TV, and the
-  // services that carry it join the streaming section; a name with no set
-  // behind it (Peacock, NWSL+, Mariners.TV) is streaming itself. Each
-  // service once.
+  // The league's names sorted into the strip's sections. A network that
+  // reaches a set (an antenna, DirecTV, Dish, Xfinity) is TV; a name with
+  // no set behind it (Peacock, NWSL+, MLB.TV) is streaming itself. The
+  // streaming section is a list of groups, each a name and the ways to it:
+  // a service the league named, with its own ways (free at…, the app on…);
+  // then each TV network with the services that carry it ("BTN via Fox One
+  // · YouTube TV"), so a carrier is never mistaken for a channel of its own.
   function splitWatch(names) {
-    var tv = [], stream = [], seen = {}, own = {};
-    var add = function (x) { var k = String(x).toLowerCase(); if (!seen[k]) { seen[k] = true; stream.push(x); } };
+    var tv = [], stream = [], seen = {};
+    // two names for one thing (KHN/Prime, Kraken Hockey Network, KONG — the same set and the same services) show once, under the first
     names.forEach(function (n) {
       var info = channelInfo(n), set = info && (info.ota || info.directv || info.dish || info.xfinity);
-      if (set || !info) tv.push(n); else { add(n); own[String(n).toLowerCase()] = true; } // own: named by the league, so its entry's ways show (free at…)
+      var k = set ? JSON.stringify([info.ota, info.directv, info.dish, info.xfinity]) : String(n).toLowerCase();
+      if (seen[k]) return; seen[k] = true;
+      if (set || !info) tv.push(n);
+      else stream.push({ name: n, ways: (info.stream || []).filter(function (x) { return x.toLowerCase() !== String(n).toLowerCase(); }), apps: info.apps || null, via: false });
     });
-    names.forEach(function (n) { // the networks' services, after the services named outright
-      var info = channelInfo(n), set = info && (info.ota || info.directv || info.dish || info.xfinity);
-      if (set) (info.stream || []).forEach(add);
+    tv.forEach(function (n) { // the networks' carriers, after the services named outright — one group per distinct set of carriers
+      var info = channelInfo(n), k = info && JSON.stringify(info.stream || []);
+      if (info && (info.stream || []).length && !seen[k]) { seen[k] = true; stream.push({ name: n, ways: info.stream.slice(), apps: null, via: true }); }
     });
-    return { tv: tv, stream: stream, own: own };
+    return { tv: tv, stream: stream };
   }
   var TV_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 21h8M12 18v3M8 3l4 3 4-3"/></svg>';
   var RADIO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="12" rx="2"/><circle cx="8.5" cy="15" r="2.5"/><path d="M14 13h4M14 17h4M6 9l12-6"/></svg>';
-  function watchSection(kind, svg, title, list) { // a section: its mark, then its list — empty when the game has none of that kind (it keeps its place, so TV stays centred)
+  function watchSection(kind, svg, title, list) { // a section: its mark, then its list — marked empty (and left out of the strip) when the game has none of that kind
     var sec = document.createElement('div'); sec.className = 'tf-sect tf-sect-' + kind; sec.dataset.kind = kind;
     if (!list) { sec.classList.add('is-empty'); return sec; }
     var ico = document.createElement('span'); ico.className = 'tf-ico'; ico.title = title; ico.innerHTML = svg + '<span class="sr-only">' + title + '</span>'; sec.appendChild(ico);
@@ -1477,10 +1484,9 @@
     return sec;
   }
   // a list for a section — TV: each network with the ways to a set (the
-  // antenna, DirecTV, Xfinity); streaming: each service, with how to reach
-  // it where the table says (NWSL+); radio: the stations. Every entry a
-  // link where the table has one.
-  function buildWatchList(names, radio, kind, own) {
+  // antenna, DirecTV, Xfinity); radio: the stations. Every entry a link
+  // where the table has one.
+  function buildWatchList(names, radio, kind) {
     var ul = document.createElement('ul'); ul.className = 'tf-channels'; ul.dataset.kind = kind || 'tv';
     names.forEach(function (n) {
       var li = document.createElement('li'), info = channelInfo(n);
@@ -1490,8 +1496,6 @@
         if (info.ota) how.push('over the air ' + info.ota);
         if (info.directv) how.push('DirecTV ' + info.directv);
         if (info.xfinity) how.push('Xfinity ' + info.xfinity);
-      } else if (info && kind === 'stream' && own && own[String(n).toLowerCase()]) { // a service the league named: its own ways, as its entry lists them (free at…, the app on…)
-        (info.stream || []).filter(function (x) { return x.toLowerCase() !== String(n).toLowerCase(); }).slice(0, 2).forEach(function (x) { how.push(x); });
       }
       how.forEach(function (h) { li.appendChild(watchEntry('span', h)); });
       ul.appendChild(li);
@@ -1500,6 +1504,30 @@
       var rl = document.createElement('li');
       radio.forEach(function (r) { rl.appendChild(watchEntry('span', r)); }); ul.appendChild(rl);
     }
+    return ul;
+  }
+  // the streaming section's list: a group per name — its ways, dot-
+  // separated, the carriers of a network behind "via"; then the group's
+  // apps (channels.json apps: device → its install page), "app on Apple TV
+  // · Fire TV · Roku", each device a link to install it
+  function buildStreamList(groups) {
+    var ul = document.createElement('ul'); ul.className = 'tf-channels'; ul.dataset.kind = 'stream';
+    groups.forEach(function (g) {
+      var li = document.createElement('li');
+      li.appendChild(watchEntry('b', g.name));
+      g.ways.forEach(function (w, i) {
+        var sp = watchEntry('span', w);
+        if (g.via && i === 0) sp.insertBefore(document.createTextNode('via '), sp.firstChild);
+        li.appendChild(sp);
+      });
+      if (g.apps) Object.keys(g.apps).forEach(function (dev, i) {
+        var sp = document.createElement('span'), a = document.createElement('a');
+        a.href = g.apps[dev]; a.target = '_blank'; a.rel = 'noopener'; a.textContent = dev; a.title = 'Install the ' + g.name + ' app on ' + dev;
+        if (i === 0) sp.appendChild(document.createTextNode('app on '));
+        sp.appendChild(a); li.appendChild(sp);
+      });
+      ul.appendChild(li);
+    });
     return ul;
   }
   // ---- a live game: the block becomes the game ----
@@ -2418,9 +2446,12 @@
     bar.appendChild(x);
     $('teamsView').style.setProperty('--focus-h', (bar.offsetHeight + 8) + 'px'); // the month rows stick below it
   }
-  $('viewToggle').addEventListener('click', function () { // a tap anywhere on the pill flips the view, as the theme pill does
+  $('viewToggle').addEventListener('click', function (e) { // the stop tapped is the view: List, Month (the list with the calendar), Teams
+    var b = e.target.closest('button[data-view]');
+    if (!b) return;
+    if (b.dataset.view === 'teams') { if ($('teamsView').hidden) setTeamsView(teamView.slug || new URLSearchParams(location.search).get('team') || 'auto', true); return; }
     if (!$('teamsView').hidden) setTeamsView(null, true);
-    else setTeamsView(teamView.slug || new URLSearchParams(location.search).get('team') || 'auto', true);
+    setMonthView(b.dataset.view === 'month', true);
   });
   window.addEventListener('popstate', function () {
     var slug = new URLSearchParams(location.search).get('team');
@@ -2939,9 +2970,8 @@
   // with the masthead still on screen — first scrolls the page until the bar
   // is pinned, which is where the panel would end up anyway.
   function fitPops(opening) {
-    [$('filterPanel'), $('subscribePop'), $('calBox')].forEach(function (el) {
+    [$('filterPanel'), $('subscribePop')].forEach(function (el) {
       if (el.hidden) return;
-      if (el === $('calBox') && !document.querySelector('.cal-side.is-float')) { el.style.maxHeight = ''; return; }
       var room = window.innerHeight - el.getBoundingClientRect().top - 12;
       if (opening && room < 240) {
         var bar = document.querySelector('.filter-area').getBoundingClientRect();

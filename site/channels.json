@@ -1,5 +1,5 @@
 {
- "_": "How to watch a network from Seattle, for the live game block (app.js renderTeamLive). Keys are regexes matched against ESPN's broadcast names, case-insensitive; first match wins. DirecTV and Dish numbers are the national ones; xfinity = the Xfinity 'King County South' lineup number (scripts/xfinity-lineup.mjs applies it from scripts/data/xfinity-98109.json — don't hand-edit those); ota = the Seattle over-the-air station and channel; stream = the services that carry it. A streaming-only service lists just its name.",
+ "_": "How to watch a network from Seattle, for the live game block (app.js renderTeamLive). Keys are regexes matched against ESPN's broadcast names, case-insensitive; first match wins. DirecTV and Dish numbers are the national ones; xfinity = the Xfinity 'King County South' lineup number (scripts/xfinity-lineup.mjs applies it from scripts/data/xfinity-98109.json — don't hand-edit those); ota = the Seattle over-the-air station and channel; stream = the services that carry it. A streaming-only service lists just its name, and its own ways in stream (free at…); apps = device → the page to install its app from (app.js buildStreamList links each).",
  "channels": [
   {
    "match": "^ESPN2$",
@@ -372,10 +372,14 @@
   {
    "match": "^NWSL\\+$",
    "stream": [
-    "free at plus.nwslsoccer.com",
-    "NWSL+ app on Apple TV, Fire TV, Roku"
+    "free at plus.nwslsoccer.com"
    ],
-   "note": "the league's own service: \"a free service available online, and via the NWSL+ app on Apple TV, Fire TV, and Roku TV\" (nwslsoccer.com/plus, read 2026-09-14)"
+   "apps": {
+    "Apple TV": "https://apps.apple.com/us/app/national-womens-soccer-league/id1221577457",
+    "Fire TV": "https://www.amazon.com/dp/B0CV82W6HL",
+    "Roku": "https://www.nwslsoccer.com/nwsl-plus-apps"
+   },
+   "note": "the league's own service: \"a free service available online, and via the NWSL+ app on Apple TV, Fire TV, and Roku TV\" (nwslsoccer.com/plus, read 2026-09-14). apps: the App Store listing of the league's app (Apple TV, tvOS 15.1+ — the one nwslsoccer.com/nwsl-plus-apps says to search for), the Amazon Appstore listing 'National Women's Soccer League' (Fire TV), and for Roku the league's how-to-find page, since Roku's channel store has no linkable page for it"
   },
   {
    "match": "FOX Deportes",
@@ -451,6 +455,8 @@
   "Victory+": "https://www.victoryplus.com/",
   "The Roku Channel": "https://therokuchannel.roku.com/",
   "NWSL+": "https://www.nwslsoccer.com/watch",
+  "plus.nwslsoccer.com": "https://plus.nwslsoccer.com/",
+  "Fox One": "https://www.fox.com/",
   "YouTube (PWHL)": "https://www.youtube.com/@thepwhlofficial",
   "USA Network": "https://www.usanetwork.com/live",
   "CNBC": "https://www.cnbc.com/live-tv/",

@@ -93,9 +93,12 @@
     <span>PDF</span>
   </button>
   <!-- the view switch: the events list | the home teams' seasons, a two-stop pill like the theme's -->
-  <div id="viewToggle" class="theme-toggle view-toggle" role="radiogroup" aria-label="View" data-active="events">
+  <div id="viewToggle" class="theme-toggle view-toggle" role="radiogroup" aria-label="View" data-active="events"><!-- List · Month · Teams (Steve, 2026-09-14): Month is the list with the month calendar; app.js remembers the choice -->
     <button id="eventsBtn" type="button" role="radio" aria-checked="true" data-view="events" title="Events">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+    </button>
+    <button id="monthBtn" type="button" role="radio" aria-checked="false" data-view="month" aria-controls="calBox" title="Month — the list with a month calendar beside it">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
     </button>
     <button id="teamsBtn" type="button" role="radio" aria-checked="false" data-view="teams" aria-controls="teamsView" title="Home Teams — season schedules, every game, home and away">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 3M17 6h3a3 3 0 0 1-3 3"/></svg>
@@ -165,13 +168,6 @@
   <!-- the home teams, one pill per club, in the bar itself while the Teams
        view is open (crests only when the names won't fit; app.js sets is-crests) -->
   <div class="team-strip" id="teamStrip" aria-label="Teams"></div>
-  <!-- narrow layouts only (app.js hides it when the calendar is docked):
-       floats the calendar over the list. Chevron left = opens, right = folds. -->
-  <button id="calToggle" class="chip cal-toggle" type="button" aria-expanded="false" aria-controls="calBox" title="Show calendar" hidden>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
-    <span>Hide calendar</span>
-    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-  </button>
 </nav>
 <!-- the funnel in the bar drops this open below it -->
 <div id="filterPanel" class="filter-panel" hidden>
@@ -211,9 +207,8 @@
   <div class="agenda-layout">
     <ol id="agenda"><li class="empty">Loading events…</li></ol>
     <aside class="cal-side" aria-label="Month calendar">
-      <!-- on narrow layouts this floats over the list (opened from the
-           calendar chip at the right end of the filter bar); on the wide
-           layout it's docked here -->
+      <!-- the Month view's calendar: docked beside the list on the wide
+           layout, above it on narrower ones; hidden in the List view -->
       <div class="cal" id="calBox">
         <!-- the card's header: ‹ month name › (Today is a floater at the lower right, shown when the list has left today) -->
         <div class="cal-head" id="calHead" aria-label="Change months">
