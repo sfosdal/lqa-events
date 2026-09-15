@@ -121,6 +121,15 @@ h1 {
   line-height: .92; text-transform: uppercase; letter-spacing: .01em; margin: 0;
 }
 .masthead-text { min-width: 0; max-width: 100%; } /* a flex item would grow to its widest line and push past a phone's edge */
+/* the masthead's tools (Steve, 2026-09-14): the poster chip (Teams view
+   only, see #teamPdfBtn), Add To Calendar and the theme pill at the
+   masthead's right end, bottom-aligned with the stamp line — the bar below
+   keeps its room for the switch, filters, search and the clubs */
+.masthead { position: relative; }
+.masthead-tools { display: flex; align-items: center; gap: .6rem; flex: none; margin-left: auto; }
+.masthead-tools .chip { display: inline-flex; align-items: center; gap: .45rem; min-height: 2.25rem; position: relative; }
+.masthead-tools .chip svg { width: 1rem; height: 1rem; flex: none; }
+.masthead-tools .chip:not(:disabled):hover { border-color: var(--ink-soft); }
 .sub { color: var(--ink-soft); max-width: 34rem; margin: .8rem 0 0; }
 
 .updated { /* the "Updated …" stamp: an eyebrow line under the title, spaced like the one above it */
@@ -1483,9 +1492,12 @@ body.sheet-open { overflow: hidden; }
   .tf-channels { max-height: none; gap: .25rem 1rem; }
   .filterbar .search-wrap { flex: 1 1 4rem; min-width: 3rem; } /* the box gives way first: on a 375px phone the icon row needs the room */
   /* a phone's bar is always the icon-only row: measured, the labelled one runs past the edge and the view switch with it */
-  .filterbar #subscribeBtn span, .filterbar #filterToggle span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .filterbar #subscribeBtn, .filterbar #filterToggle { padding: .5em .7em; }
-  .filterbar #subscribeBtn svg, .filterbar #filterToggle svg { width: 1.1rem; height: 1.1rem; }
+  .filterbar #filterToggle span, .masthead-tools #subscribeBtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .filterbar #filterToggle, .masthead-tools #subscribeBtn { padding: .5em .7em; }
+  .filterbar #filterToggle svg, .masthead-tools #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
+  /* the tools sit at the top right, on the eyebrow's line (short, so the room is there), clear of the title below; a flex row would cost the phone a line */
+  .masthead-tools { position: absolute; right: 0; top: 1.2rem; gap: .4rem; }
+  .masthead-tools .chip, .masthead-tools #subscribeBtn { min-height: 1.9rem; padding: .3em .55em; }
   /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
   .filterbar { gap: .4rem; }
   .filterbar #calToggle .chev { display: none; }
