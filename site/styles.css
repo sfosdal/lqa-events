@@ -285,7 +285,13 @@ html.teams-open #calToday { display: none; }
   flex: none; font-family: var(--mono); font-weight: 400; letter-spacing: .08em; color: var(--gold);
 }
 #barUpdated { margin-left: auto; font-size: .6em; } /* the stamp: flush right, 40% smaller */
-html.is-scrolled { --barh: calc(var(--barh-base) + var(--titleh)); }
+html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--titleh)); } /* the title line carries the masthead's tools while scrolled (app.js markStuck moves them): 1.7rem chips + the .5rem gap */
+/* the tools in the title line: icon-only chips a size down, the theme pill scaled to match, at the line's right end (the pop still hangs from the bar below) */
+.bar-title .masthead-tools { align-self: center; margin-left: auto; gap: .4rem; }
+.bar-title .masthead-tools .chip { min-height: 1.7rem; padding: .2em .5em; }
+.bar-title .masthead-tools .chip span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.bar-title .masthead-tools .chip svg { width: 1rem; height: 1rem; }
+.bar-title .theme-toggle { zoom: .8; }
 .filter-panel {
   position: absolute; left: 0; right: 0; top: calc(100% + .5rem); z-index: 20;
   background: var(--mist); border: 1px solid var(--line);
@@ -1496,7 +1502,7 @@ body.sheet-open { overflow: hidden; }
   .filterbar #filterToggle, .masthead-tools #subscribeBtn { padding: .5em .7em; }
   .filterbar #filterToggle svg, .masthead-tools #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
   /* the tools sit at the top right, on the eyebrow's line (short, so the room is there), clear of the title below; a flex row would cost the phone a line */
-  .masthead-tools { position: absolute; right: 0; top: 1.2rem; gap: .4rem; }
+  .masthead > .masthead-tools { position: absolute; right: 0; top: 1.2rem; gap: .4rem; }
   .masthead-tools .chip, .masthead-tools #subscribeBtn { min-height: 1.9rem; padding: .3em .55em; }
   /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
   .filterbar { gap: .4rem; }

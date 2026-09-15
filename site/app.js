@@ -3117,6 +3117,9 @@
     if (bt.hidden === mastOff) {
       bt.hidden = !mastOff;
       document.documentElement.classList.toggle('is-scrolled', mastOff); // raises --barh by the title line
+      // the masthead's tools (Add To Calendar, the poster chip, the theme pill) ride along: into the title line's right end while the masthead is off, back home when it returns (Steve, 2026-09-14)
+      var tools = document.querySelector('.masthead-tools');
+      if (tools) (mastOff ? bt : document.querySelector('.masthead')).appendChild(tools);
     }
     fitPops();
     // the Teams block: pinned under the bar once the page has scrolled past
