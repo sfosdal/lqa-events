@@ -366,6 +366,41 @@ export function mapOtbEvents(data, venueLabel = 'On the Boards') {
 }
 
 /**
+ * Map Seattle Rep's performance feed (seattlerep.org/plays/json — the
+ * Tessitura rows its calendar page renders; window.AppConfig.eventFeedURL)
+ * to feed events, one per performance. Only what happens in the three
+ * houses (Bagley Wright, Leo K., Poncho Forum) is a show: the feed also
+ * carries classes, sessions, auditions and donor trips (no facility, or a
+ * classroom / board room, tagged "For Adults" / "For Youth" / "Seattle Rep
+ * Studios"), which stay out. perf_date is the local curtain, as ISO with
+ * the Pacific offset or "YYYY-MM-DD HH:MM:SS"; either way the wall clock
+ * is the venue's. A performance's special and accessibility keywords
+ * (Preview Performance, Opening Night, Open Captioning, ASL Interpreted …)
+ * ride on the title after a colon, the way Seattle Center's calendar names
+ * the same nights. Returns [{ venue, title, date, time, url, type, soldOut? }].
+ */
+const REP_HOUSES = /^(Bagley Wright|Leo K\.?|Poncho Forum)/i;
+const REP_NOT_A_SHOW = /studios|for adults|for youth/i;
+export function mapRepEvents(data, venueLabel = 'Seattle Rep') {
+  const out = [];
+  for (const it of Array.isArray(data) ? data : []) {
+    if (it.show_in_listings === false || !it.title || !it.perf_date) continue;
+    if (!REP_HOUSES.test(String(it.facility || ''))) continue;
+    if (REP_NOT_A_SHOW.test(String(it.tag || ''))) continue;
+    const m = String(it.perf_date).match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}:\d{2})/);
+    if (!m) continue;
+    const extras = (it.keywords || [])
+      .filter((k) => /^(Special Performances|Accessibility)$/.test(String(k.category || '').trim()))
+      .map((k) => String(k.keyword || '').trim()).map((k) => (k === 'Preview Performance' ? k : k.replace(/ Performance$/, ''))).filter(Boolean);
+    const title = decodeEntities(it.title) + (extras.length ? `: ${extras.join(' & ')}` : '');
+    const ev = { venue: venueLabel, title, date: m[1], time: m[2], url: it.event_url || 'https://www.seattlerep.org/plays/calendar', type: 'arts' };
+    if (it.is_sold_out) ev.soldOut = true;
+    out.push(ev);
+  }
+  return out;
+}
+
+/**
  * Map a DICE events-api response ({data: [...]}) to feed events, converting
  * each UTC instant to its venue-local date and time.
  */

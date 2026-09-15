@@ -57,7 +57,13 @@ and `h=1` switches the US & WA holidays rows on.
   `site/events.ics`. Dedicated sources first: Ticketmaster Discovery API
   (Climate Pledge Arena — needs `TICKETMASTER_API_KEY`, skipped without it),
   The Vera Project via the DICE API, SIFF Cinema Uptown's calendar, On the
-  Boards' Squarespace JSON, and the Convention Center's Momentus
+  Boards' Squarespace JSON, Seattle Rep's Tessitura performance feed
+  (seattlerep.org/plays/json — the Bagley Wright, Leo K. and Poncho Forum
+  houses, sold-out flag carried, a night's special/accessibility keywords
+  after a colon in the title; classes, auditions and donor trips skipped —
+  the campus sweep below used to carry these shows untagged, as the
+  grounds, and now skips a card whose title starts with a Rep show playing
+  that day), and the Convention Center's Momentus
   calendar (downtown, like the SoDo stadiums; conventions and consumer shows
   as one all-day event per day, private one-day meetings skipped), and the
   campus neighbours Seattle Center's calendar doesn't carry: Seattle

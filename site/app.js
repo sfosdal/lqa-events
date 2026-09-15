@@ -22,6 +22,7 @@
     'Pacific Science Center': '--v-pacsci',
     'KEXP': '--v-kexp',
     'The Traveling Goat': '--v-goat',
+    'Seattle Rep': '--v-rep',
   };
   // Unexpected venues draw from the same cool, web-safe family as the
   // curated ones, hashed from the name so the pick is stable day to day.
@@ -41,6 +42,7 @@
     'McCaw Hall': 'https://www.mccawhall.com/events',
     'Seattle Center': 'https://www.seattlecenter.com/events/event-calendar',
     'On the Boards': 'https://ontheboards.org/events',
+    'Seattle Rep': 'https://www.seattlerep.org/plays/calendar',
     'The Vera Project': 'https://theveraproject.org/events/',
     // Seattle Center's calendar filtered to the Playhouse (the same venue
     // category the feed's sweep reads); Cornish's own calendar mixes in the
@@ -274,7 +276,10 @@
   // Movies off; every other venue starts unchecked (the Convention Center
   // included, for all its size). Bars aren't venues here, so they're
   // untouched. The Teams view is never filtered — every game shows there.
-  var DEFAULT_VENUES_ON = ['Climate Pledge Arena', 'Seattle Center', 'McCaw Hall', 'Lumen Field', 'T-Mobile Park'];
+  // Seattle Rep is on too: its shows were part of the grounds' calendar
+  // until the Rep's own feed took them over (2026-09-15), so the default
+  // view keeps showing them.
+  var DEFAULT_VENUES_ON = ['Climate Pledge Arena', 'Seattle Center', 'McCaw Hall', 'Lumen Field', 'T-Mobile Park', 'Seattle Rep'];
   var DEFAULT_VENUES_OFF = ['MoPOP', "Children's Theatre", 'Cornish Playhouse', 'SIFF Cinema Uptown', 'Pacific Science Center',
     'The Vera Project', 'On the Boards', 'KEXP', 'Convention Center', 'Starfire Stadium', 'Husky Stadium'];
   var BIG_NIGHT_SEATS = 2000; // the Capacity preset's floor; McCaw Hall (2,900) is the smallest venue in

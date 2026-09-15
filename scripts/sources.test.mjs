@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, mapDiceEvents, parseSiffScreenings, mapOtbEvents, parseGoatEvents } from './sources.mjs';
+import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, parseGoatEvents } from './sources.mjs';
 
 // --- Seattle Center calendar HTML (event cards; dates live on detail pages) ---
 
@@ -354,6 +354,29 @@ test('OtB runaway date ranges cap at six nights', () => {
   const yearLater = 1789698600424 + 365 * 86400e3;
   const evs = mapOtbEvents({ upcoming: [{ title: 'Broken', fullUrl: '/e', startDate: 1789698600424, endDate: yearLater }] });
   assert.equal(evs.length, 6);
+});
+
+// --- Seattle Rep (Tessitura performance rows from /plays/json) ---
+
+const repRow = (o) => ({ show_in_listings: true, perf_date: '2026-09-24T19:30:00-07:00', facility: 'Leo K. Theater',
+  event_url: 'https://www.seattlerep.org/plays/202627-season/eureka-day', is_sold_out: false, tag: null, title: 'Eureka Day', ...o });
+
+test('maps Rep performances in the houses, local wall clock, sold-out flagged; classes skipped', () => {
+  const evs = mapRepEvents([
+    repRow({}),
+    repRow({ perf_date: '2026-09-26 14:00:00', facility: 'Bagley Wright Theater', title: 'Amadeus ', is_sold_out: true }),
+    repRow({ facility: 'Poncho Forum', title: 'Eulogy', tag: "Pony World Theatre's",
+      keywords: [{ category: ' Performance Detail', keyword: 'REGULAR RUN' }, { category: 'Special Performances', keyword: 'Preview Performance' }, { category: 'Accessibility', keyword: 'Open Captioning' }] }),
+    repRow({ facility: 'Poncho Forum', title: 'Community Choir', tag: 'Seattle Rep Studios' }),
+    repRow({ facility: 'Rep Studios Classroom', title: 'Fall Class: Design', tag: 'For Youth' }),
+    repRow({ facility: null, title: 'Tour London with Seattle Rep' }),
+    repRow({ show_in_listings: false }),
+  ]);
+  assert.deepEqual(evs, [
+    { venue: 'Seattle Rep', title: 'Eureka Day', date: '2026-09-24', time: '19:30:00', url: 'https://www.seattlerep.org/plays/202627-season/eureka-day', type: 'arts' },
+    { venue: 'Seattle Rep', title: 'Amadeus', date: '2026-09-26', time: '14:00:00', url: 'https://www.seattlerep.org/plays/202627-season/eureka-day', type: 'arts', soldOut: true },
+    { venue: 'Seattle Rep', title: 'Eulogy: Preview Performance & Open Captioning', date: '2026-09-24', time: '19:30:00', url: 'https://www.seattlerep.org/plays/202627-season/eureka-day', type: 'arts' },
+  ]);
 });
 
 // --- The Traveling Goat (Wix repeater: date line, title with the time, blurb) ---

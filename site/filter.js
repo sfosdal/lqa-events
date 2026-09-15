@@ -50,7 +50,7 @@
   var TYPE_VENUE_DEFAULT = {
     'Climate Pledge Arena': 'concert', 'The Vera Project': 'concert',
     'T-Mobile Park': 'concert', 'Lumen Field': 'concert', 'Husky Stadium': 'concert', // non-game stadium bookings are shows
-    'McCaw Hall': 'arts', 'Cornish Playhouse': 'arts', 'On the Boards': 'arts',
+    'McCaw Hall': 'arts', 'Cornish Playhouse': 'arts', 'On the Boards': 'arts', 'Seattle Rep': 'arts',
     'Seattle Center': 'community', 'SIFF Cinema Uptown': 'community', // SIFF specials = festival programming
     'Convention Center': 'expo',
     "Children's Theatre": 'arts', 'MoPOP': 'community', 'Pacific Science Center': 'community', 'KEXP': 'concert',
@@ -91,6 +91,7 @@
     'The Vera Project': favicon('theveraproject.org'),
     'SIFF Cinema Uptown': 'https://www.siff.net/images/SIFF_favicon_03.png',
     'On the Boards': favicon('ontheboards.org'),
+    'Seattle Rep': favicon('www.seattlerep.org'),
     'T-Mobile Park': favicon('www.mlb.com'),
     'Lumen Field': favicon('www.lumenfield.com'),
     'Husky Stadium': favicon('gohuskies.com'),
@@ -106,6 +107,7 @@
     'The Vera Project': '#a26be6', 'On the Boards': '#e07ae0', 'McCaw Hall': '#d158a7',
     'Convention Center': '#7fa7cc', 'Husky Stadium': '#c4a0f0',
     "Children's Theatre": '#6cc9db', 'MoPOP': '#e88ad8', 'Pacific Science Center': '#62b8f7', 'KEXP': '#b48cf5',
+    'Seattle Rep': '#f0827a',
     'The Traveling Goat': '#5fb3a1', // bars: a muted sea-green, off the fallback hash's neon
   };
 
@@ -117,7 +119,7 @@
   // biggest grounds festival.
   var VENUE_CAPACITY = {
     'Husky Stadium': 70000, 'Lumen Field': 68700, 'T-Mobile Park': 47900, 'Convention Center': 20000,
-    'Climate Pledge Arena': 18100, 'Seattle Center': 10000, 'McCaw Hall': 2900,
+    'Climate Pledge Arena': 18100, 'Seattle Center': 10000, 'McCaw Hall': 2900, 'Seattle Rep': 850,
     'MoPOP': 800, "Children's Theatre": 480, 'Cornish Playhouse': 460, 'SIFF Cinema Uptown': 450,
     'Pacific Science Center': 400, 'The Vera Project': 300, 'On the Boards': 300, 'KEXP': 200,
   };
@@ -170,6 +172,7 @@
     ['venue', "Children's Theatre"], ['venue', 'MoPOP'], ['venue', 'Pacific Science Center'], ['venue', 'KEXP'],
     ['badge', 'bar'],
     ['venue', 'Husky Stadium'], ['team', 'huskies'],
+    ['venue', 'Seattle Rep'],
   ];
   var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode' };
   function encodeFilterCode(mode) {

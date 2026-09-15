@@ -10,7 +10,7 @@
  */
 import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
-import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents } from './sources.mjs';
+import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents } from './sources.mjs';
 import { mergeWithArchive } from './merge.mjs';
 import { applySchedules } from './schedules.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
@@ -113,11 +113,25 @@ const SC_EXCLUDE = /sculpture walk/i;
 
 // facility labels that are venues of their own on the site
 const SC_VENUE_LABEL = { 'Marion Oliver McCaw Hall': 'McCaw Hall' };
-async function seattleCenterSweep(existingVenues, mccawUrl) {
+// The calendar also lists Seattle Rep's performances, untagged (no
+// facility, so they'd read as the grounds) and named the Rep's way with the
+// night's flavour after a colon ("Eureka Day: Preview Performance"); the
+// Rep's own feed supplies them, so a card whose title starts with a Rep
+// show playing that day is that show, and skipped.
+async function seattleCenterSweep(dedicated, mccawUrl) {
+  const existingVenues = [...new Set(dedicated.map((e) => e.venue))];
   const covered = (label) => existingVenues.some((v) => {
     const a = v.toLowerCase(), b = label.toLowerCase();
     return a.includes(b) || b.includes(a);
   });
+  const repByDate = new Map();
+  for (const e of dedicated) {
+    if (e.venue !== 'Seattle Rep') continue;
+    const base = e.title.toLowerCase().split(':')[0].trim();
+    if (!repByDate.has(e.date)) repByDate.set(e.date, new Set());
+    repByDate.get(e.date).add(base);
+  }
+  const atRep = (c) => [...(repByDate.get(c.date) || [])].some((t) => c.title.toLowerCase().startsWith(t));
   const today = new Date().toISOString().slice(0, 10);
   const horizon = new Date(Date.now() + WINDOW_DAYS * 86400e3).toISOString().slice(0, 10);
 
@@ -149,7 +163,7 @@ async function seattleCenterSweep(existingVenues, mccawUrl) {
     if (!c.date) { console.error(`No date bar for ${c.url}`); continue; }
     if (SC_EXCLUDE.test(c.title)) { standing++; continue; }
     const venueTag = c.tags.find((t) => venueLabels.includes(t));
-    if (venueTag && covered(venueTag)) { atOwnSource++; continue; }
+    if ((venueTag && covered(venueTag)) || atRep(c)) { atOwnSource++; continue; }
     const venue = SC_VENUE_LABEL[venueTag] || venueTag || 'Seattle Center';
     let url = c.url;
     if (venue === 'McCaw Hall' && mccawUrl) url = mccawUrl.get(c.title.toLowerCase()) || url;
@@ -209,6 +223,17 @@ async function onTheBoards() {
   const res = await fetch('https://ontheboards.org/events?format=json', { headers: { 'user-agent': BROWSER_UA } });
   if (!res.ok) { console.error('On the Boards HTTP', res.status); return []; }
   return mapOtbEvents(await res.json(), 'On the Boards');
+}
+
+// --- Seattle Rep (Bagley Wright + Leo K. theatres, on the campus): the
+//     Tessitura performance feed its calendar page renders — one row per
+//     performance, sold-out flag included; classes and auditions skipped. ---
+async function seattleRep() {
+  const res = await fetch('https://www.seattlerep.org/plays/json', { headers: { 'user-agent': BROWSER_UA } });
+  if (!res.ok) { console.error('Seattle Rep HTTP', res.status); return []; }
+  const evs = mapRepEvents(await res.json(), 'Seattle Rep');
+  console.log(`Seattle Rep: ${evs.length} performances`);
+  return evs;
 }
 
 // --- Convention Center (Arch + Summit, downtown): the Momentus
@@ -304,6 +329,7 @@ const sources = [
   veraProjectDice,
   siffUptown,
   onTheBoards,
+  seattleRep,
   seattleConventionCenter, // downtown, like the stadiums: big enough to matter
   seattleChildrensTheatre,
   mopop,
@@ -319,7 +345,7 @@ for (const src of sources) {
 }
 
 // ...then the campus-wide sweep fills in every other venue (McCaw Hall included).
-try { all = all.concat(await seattleCenterSweep([...new Set(all.map((e) => e.venue))], await mccawUrls())); }
+try { all = all.concat(await seattleCenterSweep(all, await mccawUrls())); }
 catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 
 // Collapse the campus's micro-locations (courtyards, lawns, festival stages —
@@ -331,7 +357,7 @@ const CANONICAL_VENUES = new Set([
   'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
   'SIFF Cinema Uptown', 'On the Boards', 'Convention Center',
   "Children's Theatre", 'MoPOP', 'Pacific Science Center', 'KEXP',
-  'The Traveling Goat',
+  'The Traveling Goat', 'Seattle Rep',
 ]);
 const normalizeVenue = (e) => (CANONICAL_VENUES.has(e.venue) ? e : { ...e, venue: 'Seattle Center' });
 all = all.map(normalizeVenue);

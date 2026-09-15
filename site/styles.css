@@ -30,6 +30,7 @@
   --v-scc: #4f7ca3;       /* Convention Center: steel blue, a step off the arena's */
   --v-sct: #2c8c9e; --v-mopop: #b34a9a; --v-pacsci: #2a7fb8; --v-kexp: #6d4fc4; /* the campus neighbours */
   --v-goat: #2f8f7c;     /* local bars: a muted sea-green (The Traveling Goat) */
+  --v-rep: #c0392b;      /* Seattle Rep: a stage-curtain red, the one warm hue */
   --venue-text: 72%;     /* how much of the venue hue the card's venue label keeps (light mode) */
   --tint: 26%;           /* the venue wash behind each card (light mode; 13% in the dark palette) */
   /* event-type hues (calendar ticks, agenda right edge): concerts salmon and
@@ -62,7 +63,7 @@
     --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
     --v-cornish: #3ecf97; --v-cpa: #4da3f0; --v-tmobile: #8ad8e0; --v-seactr: #6a72e6;
     --v-lumen: #8b8fe8; --v-husky: #c4a0f0; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
-    --v-scc: #7fa7cc; --v-sct: #6cc9db; --v-mopop: #e88ad8; --v-pacsci: #62b8f7; --v-kexp: #b48cf5; --v-goat: #5fb3a1;
+    --v-scc: #7fa7cc; --v-sct: #6cc9db; --v-mopop: #e88ad8; --v-pacsci: #62b8f7; --v-kexp: #b48cf5; --v-goat: #5fb3a1; --v-rep: #f0827a;
     --venue-text: 100%; --tint: 13%;
     --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
     --t-movie: #8b9db0; --t-community: #e660a8; --t-expo: #4fd1c5; --t-bar: #e3ad3c; --alert: #ff4b3e;
@@ -74,7 +75,7 @@
   --line: #333f4a; --gold: #f08a33; --gold-soft: #3a2a1a;
   --v-cornish: #3ecf97; --v-cpa: #4da3f0; --v-tmobile: #8ad8e0; --v-seactr: #6a72e6;
   --v-lumen: #8b8fe8; --v-husky: #c4a0f0; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
-  --v-scc: #7fa7cc; --v-sct: #6cc9db; --v-mopop: #e88ad8; --v-pacsci: #62b8f7; --v-kexp: #b48cf5; --v-goat: #5fb3a1;
+  --v-scc: #7fa7cc; --v-sct: #6cc9db; --v-mopop: #e88ad8; --v-pacsci: #62b8f7; --v-kexp: #b48cf5; --v-goat: #5fb3a1; --v-rep: #f0827a;
   --venue-text: 100%; --tint: 13%;
   --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
   --t-movie: #8b9db0; --t-community: #e660a8; --t-expo: #4fd1c5; --t-bar: #e3ad3c; --alert: #ff4b3e;
