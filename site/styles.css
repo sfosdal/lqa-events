@@ -249,7 +249,7 @@ html.teams-open #calToday { display: none; }
   position: relative; display: inline-flex; order: 5;
   padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--mist);
 }
-.theme-toggle { --tt: 2rem; } /* stop width — wider on phones for the tap target */
+.theme-toggle { --tt: 2rem; cursor: pointer; } /* stop width — wider on phones for the tap target; the rim and the knob are click targets too (a press anywhere steps the pill) */
 .theme-toggle button {
   position: relative; z-index: 1; width: var(--tt); height: 1.7rem; cursor: pointer;
   background: none; border: 0; padding: 0; color: var(--ink-soft); border-radius: 999px;
@@ -263,6 +263,8 @@ html.teams-open #calToday { display: none; }
   border-radius: 999px; background: var(--ink); transition: left .18s; /* ink knob, page-colored icon — like a checked box */
 }
 .theme-toggle[data-active="dark"] .theme-knob { left: calc(3px + var(--tt)); }
+.theme-toggle[data-active="system"] .theme-knob { left: calc(3px + 2 * var(--tt)); }
+.theme-toggle[data-active="cvd"] .theme-knob { left: calc(3px + 3 * var(--tt)); }
 @media (prefers-reduced-motion: reduce) { .theme-knob { transition: none; } }
 /* the bar stays pinned at the top while the list scrolls (--barh is its
    height — the month dividers and the calendar strip stick just below it);
@@ -461,10 +463,24 @@ html.month-open .agenda-layout, html.month-open .cal-toggle { display: none; } /
   border: 2px solid var(--ink-soft); border-bottom: 0; border-radius: 10px 10px 0 0; /* the month card's frame */
 }
 .cal-head #calNext { justify-self: end; }
-.cal-head .cal-cur {
+.cal-head button.cal-cur { /* the month's name: a button that opens the month / year picker (outranks the bar's control rule below) */
   font-family: var(--display); font-weight: 700; font-size: 1rem;
   text-transform: uppercase; letter-spacing: .12em; text-align: center;
+  display: inline-block; background: none; border: 0; color: var(--ink); cursor: pointer; padding: .1rem .5rem; border-radius: 6px; width: auto; min-width: 0; height: auto; min-height: 0;
 }
+.cal-head button.cal-cur:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist)); }
+/* the month / year picker under a calendar's header (app.js openMonthPick) */
+.cal-pick { position: fixed; z-index: 30; width: 15rem; padding: .6rem; background: var(--mist); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 36px rgba(0, 0, 0, .3); }
+.cp-head { display: grid; grid-template-columns: 2rem 1fr 2rem; align-items: center; margin-bottom: .45rem; }
+.cp-head button { background: none; border: 0; color: var(--ink); font-size: 1.3rem; line-height: 1; cursor: pointer; border-radius: 6px; height: 1.75rem; }
+.cp-head button:disabled { opacity: .3; cursor: default; }
+.cp-head button:not(:disabled):hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist)); }
+.cp-year { font-family: var(--display); font-weight: 700; font-size: 1.05rem; letter-spacing: .1em; text-align: center; }
+.cp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; }
+.cp-grid button { font-family: var(--mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; padding: .45rem 0; background: none; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); cursor: pointer; }
+.cp-grid button:disabled { opacity: .3; cursor: default; }
+.cp-grid button:not(:disabled):hover { border-color: var(--ink-soft); }
+.cp-grid button.is-on { background: var(--ink); color: var(--sky); border-color: var(--ink); }
 .cal-head button { /* flat controls inside the bar */
   display: inline-grid; place-items: center; width: 2rem; height: 1.75rem; cursor: pointer;
   background: none; color: var(--ink); border: 0; border-radius: 6px;
@@ -776,15 +792,32 @@ footer::after {
    down to its mark) when the line wouldn't fit. */
 .foot-inner {
   position: relative; max-width: calc(var(--pagew) - 2.5rem); margin: 0 auto;
-  display: flex; align-items: center; gap: 1.2rem; white-space: nowrap;
+  display: flex; align-items: center; justify-content: space-around; gap: 1.2rem; white-space: nowrap;
 }
 footer p { color: var(--ink-soft); font-size: .72rem; margin: 0; }
 .gw { display: flex; align-items: center; gap: .7rem; }
 .gw-logo { width: 32px; height: 32px; color: var(--ink-bright); flex: none; } /* pure white on dark */
 footer .gw-credit { font-size: .9rem; letter-spacing: .1em; line-height: 1; } /* same size as Sources / Embed */
+/* three things across the row — the credit, the Updated stamp, the links —
+   spaced 1 : 2 : 2 : 1 (space-around; Steve, 2026-09-15) */
 footer .gw { order: 1; }
-footer #embed { order: 2; margin-left: auto; }
+footer .foot-updated { order: 2; font-family: var(--mono); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin: 0; white-space: nowrap; }
+footer .foot-links { order: 3; display: flex; align-items: center; gap: 1.2rem; }
+footer .foot-link { order: 1; } /* Advertise, Embed, Sources */
+footer #embed { order: 2; }
 footer .share.info { order: 3; position: relative; }
+/* the Advertise link: dressed as the Sources / Embed labels, after them */
+footer .foot-link { position: relative; top: -.5px; display: inline-flex; align-items: center; gap: .4rem; /* measured half a pixel under its neighbours' labels (Steve, 2026-09-15) */ font-family: var(--mono); font-size: .9rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ink); text-decoration: none; padding: .2rem 0; white-space: nowrap; }
+footer .foot-link:hover { color: var(--ink-soft); }
+footer .foot-link svg { width: 1.1rem; height: 1.1rem; }
+.foot-inner.is-tight .foot-link span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* the advertising page (advertise.html): a short column of prose under the masthead */
+.ad-page { max-width: 40rem; margin: 0 auto 4rem; padding: 0 1.25rem; }
+.ad-page h2 { font: 700 1.3rem/1.2 var(--body); margin: 1.6rem 0 .5rem; }
+.ad-page p, .ad-page li { color: var(--ink-soft); line-height: 1.55; }
+.ad-page ul { padding-left: 1.2rem; }
+.ad-page .ad-lead { font-size: 1.1rem; color: var(--ink); }
+.ad-page .ad-back { display: inline-block; margin-top: 2rem; font-family: var(--mono); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ink); }
 footer .info summary svg { width: 1.1rem; height: 1.1rem; }
 .info-body { width: min(18rem, 90vw); text-align: left; } /* the Embed panel's width; its own details box is only as wide as its label */
 .info-body h3 { font-size: 1.05rem; margin: 0 0 .4rem; }
@@ -818,6 +851,13 @@ footer .share summary { font-size: .9rem; white-space: nowrap; }
 .season-next .sn-facts b { font-weight: 700; color: var(--ink); }
 .season-next .sn-soft { color: color-mix(in srgb, var(--ink-soft) 70%, transparent); }
 #teamHead { margin-bottom: 1.1rem; }
+#teamHead.is-multi { display: grid; gap: .7rem; } /* several clubs picked: a block each, stacked */
+#teamHead.is-compact.is-multi .team-form:not(:first-child) { display: none; } /* pinned under the bar there is room for one */
+/* the poster chooser under the PDF chip, with several clubs picked */
+.pdf-pick { position: fixed; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; max-width: min(24rem, calc(100vw - 1rem)); padding: .6rem .7rem; background: var(--mist); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 36px rgba(0, 0, 0, .3); }
+.pdf-pick-label { flex-basis: 100%; font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); }
+.pdf-pick .chip { display: inline-flex; align-items: center; gap: .35rem; }
+.pdf-pick .chip img { width: 18px; height: 18px; object-fit: contain; }
 /* Teams mode: the block close under the chips (the masthead's own spacing is the same in both views, so the bar never moves between them) */
 html.teams-open #teamsView { margin-top: .5rem; }
 #teamHead:empty { display: none; }
@@ -871,6 +911,12 @@ html { overflow-anchor: none; }
 .team-focus { top: calc(var(--barh) + .5rem + var(--head-h, 0px)); }
 .team-form img { width: var(--crest); height: var(--crest); object-fit: contain; flex: none; }
 .tf-body { min-width: 0; flex: 1 1 22rem; }
+/* only a game in progress carries the news; the season block, the pregame
+   and the final keep the stats lines (Next, Series, the record, last season)
+   and drop the stories, the "more" button and the season blurb (Steve, 2026-09-15) */
+.team-form.is-season .tf-news, .team-form.is-season .tf-more, .team-form.is-season .tf-wiki > p,
+.team-form.is-pre .tf-news, .team-form.is-pre .tf-more, .team-form.is-pre .tf-wiki > p,
+.team-form.is-final .tf-news, .team-form.is-final .tf-more, .team-form.is-final .tf-wiki > p { display: none; }
 /* the season's Wikipedia lead, at the right; under the rest when the row is narrow */
 .tf-wiki { position: relative; flex: 1 1 24rem; min-width: 0; align-self: stretch; display: flex; flex-direction: column; max-height: var(--crest); overflow: hidden auto; scrollbar-width: thin; padding-left: 1.1rem; border-left: 1px solid var(--line); font-size: .85rem; line-height: 1.45; color: var(--ink); } /* the rule runs the block's height; beside the crests the column scrolls inside it */
 .tf-wiki > .tf-cols, .tf-wiki > p { margin-block: auto; } /* short: centred on the row; tall: scrolls from the top (justify-content: center would clip the top) */
@@ -1094,6 +1140,8 @@ html { overflow-anchor: none; }
 @media (min-width: 641px) {
   /* the sections' places (app.js buildWatchStrip counts them): three sit left, centre and right; two at the ends; one centred — the ends keep a floor, so a long list wraps behind the chevron rather than crushing its neighbour, and a section never spills into the next */
   .tf-watch { display: grid; grid-template-columns: minmax(7rem, 1fr) minmax(0, auto) minmax(7rem, 1fr); align-items: center; column-gap: 1rem; }
+  .tf-watch.has-3 { grid-template-columns: auto auto auto; justify-content: space-around; column-gap: 0; } /* the room shared 1 : 2 : 2 : 1 — a half at each end, a whole between (Steve, 2026-09-15) */
+  .tf-watch.has-3 .tf-sect { justify-self: center; }
   .tf-watch.has-2 { grid-template-columns: minmax(7rem, auto) minmax(7rem, auto); justify-content: space-between; }
   .tf-watch.has-1, .tf-watch.has-0 { grid-template-columns: minmax(0, auto); justify-content: center; }
   .tf-sect { min-width: 0; overflow: hidden; }
@@ -1325,7 +1373,7 @@ html:not(.teams-open) .team-strip { display: none; }
 .ev .time.t-clock { align-items: stretch; align-self: center; gap: .1rem; padding-top: 0; min-width: 6.4rem; }
 /* the date rail's colours and faces: the digits in the display face and the ink, the PM as the weekday (Steve, 2026-09-15) */
 .t-big { display: block; font: 700 2.05rem/1 var(--display); letter-spacing: -.01em; color: var(--ink); text-align: center; }
-.t-foot { display: block; text-align: center; font: 600 .8rem/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); } /* a touch bigger and bolder than the rail's weekday (Steve, 2026-09-15) */
+.t-foot { display: block; text-align: center; font: 700 1rem/1 var(--mono); text-transform: uppercase; letter-spacing: .1em; color: var(--ink-soft); } /* clearly bigger and bolder than the rail's weekday — .8rem read as no change (Steve, 2026-09-15) */
 .ev-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; align-self: stretch; flex-wrap: wrap; }
 .ev-foot .ev-watch { margin-left: auto; text-align: right; }
 .ev-watch-ico { display: inline-block; width: .95rem; height: .95rem; vertical-align: -.22em; margin-right: .3em; color: var(--ink-soft); }
@@ -1362,7 +1410,7 @@ html:not(.teams-open) .team-strip { display: none; }
 
 /* phones follow the system light/dark setting, so no toggle; the query
    mirrors PHONE in index.html's head script — keep them in step */
-@media (max-width: 640px), (pointer: coarse) and (max-height: 500px) { .theme-toggle:not(.view-toggle) { display: none; } } /* the view switch stays: it is how a phone reaches the home teams */
+/* phones keep the four-way toggle too (Steve, 2026-09-15): its system stop follows the OS, and the palette must be reachable */
 
 /* ---- phones: the event sheet ---- */
 .sheet { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; }
@@ -1418,6 +1466,7 @@ body.sheet-open { overflow: hidden; }
   #searchBox { font-size: 1rem; } /* under 16px iOS Safari zooms the page when the box gets focus */
   :root { --barh-base: 3.9rem; } /* = 2.75rem chips + the .filter-area padding */
   .theme-toggle { --tt: 2.6rem; }
+  .theme-toggle:not(.view-toggle) { --tt: 2.1rem; } /* four stops fit the phone's row */
   .theme-toggle button { height: 2.35rem; }
   .cal-days > * { min-height: 2.75rem; }
   .cal-head button { min-width: 2.75rem; min-height: 2.75rem; }
@@ -1547,3 +1596,29 @@ body.sheet-open { overflow: hidden; }
   .filterbar { gap: .4rem; }
   .filterbar #calToggle .chev { display: none; }
   .filterbar #calToggle { padding: .5em .7em; }
+
+} /* end of the phone block (it ran to the end of the file unclosed, harmlessly, until rules followed it) */
+
+/* ---- the colour-blind palette (html.colorblind; the Colorblind chip in the
+   masthead) ---- Okabe–Ito's eight, told apart by the common colour-vision
+   deficiencies, over the venue hues in either theme (html:root.colorblind outranks
+   the theme blocks' :root rules). The venue name sits beside every colour
+   anyway; the last-five marks go blue (won) and vermillion (lost), with
+   the letter still on each.
+   Reviewed 2026-09-15 (Machado-simulated deutan / protan / tritan): the six
+   venues on by default get six different colours whose closest pairs sit
+   at ΔE 16–18 in the worst deficiency (orange / vermillion for deutans,
+   sky / green for tritans) — tellable, not vivid; hue alone can't carry
+   more than that for everyone, which is why the name is always printed.
+   Okabe–Ito's yellow (#f0e442) is left out: 1.2 : 1 against the light page,
+   invisible as a tick or wash. Vermillion is 3.4 : 1 on light, blue 3.4 : 1
+   on dark — the faintest, still legible for a 1rem label. */
+html:root.colorblind {
+  --v-cpa: #0072b2; --v-tmobile: #56b4e9; --v-lumen: #009e73; --v-seactr: #e69f00;
+  --v-mccaw: #cc79a7; --v-cornish: #d55e00; --v-siff: #d55e00; --v-vera: #56b4e9;
+  --v-otb: #cc79a7; --v-scc: #0072b2; --v-sct: #009e73; --v-mopop: #e69f00;
+  --v-pacsci: #56b4e9; --v-kexp: #d55e00; --v-goat: #009e73; --v-rep: #d55e00; --v-husky: #cc79a7;
+}
+html.colorblind .tf-run i.r-W { background: #0072b2; color: #fff; }
+html.colorblind .tf-run i.r-L { background: #d55e00; color: #fff; }
+html.colorblind .tf-run i.r-D { background: var(--line); color: var(--ink); }
