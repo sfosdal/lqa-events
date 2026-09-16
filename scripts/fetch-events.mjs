@@ -406,6 +406,26 @@ for (const g of (seasons.huskies || []).filter((x) => x.home && x.date >= cutoff
   if (merged.some((e) => e.date === g.date && e.venue === g.venue)) continue;
   merged.push({ venue: g.venue, title: `Washington Huskies vs ${g.opp.name}`, date: g.date, time: g.time, url: 'https://gohuskies.com/sports/football/tickets', type: 'sports', ...(g.tbd ? { dateTbd: true } : {}), ...(g.watch ? { watch: g.watch } : {}) });
 }
+// Ticket availability for the Ticketmaster venues, from the local checker
+// (scripts/soldout-check.mjs → scripts/data/soldout.json, committed every six
+// hours by its launchd job): each on-sale event's box-office and resale
+// counts and lowest price, and soldOut when the box office has nothing left.
+try {
+  const so = JSON.parse(readFileSync(new URL('./data/soldout.json', import.meta.url), 'utf8'));
+  let n = 0, s = 0;
+  for (const e of merged) {
+    const m = (e.url || '').match(/\/event\/([0-9A-F]{16})/i);
+    const r = m && (so.events || {})[m[1].toUpperCase()];
+    if (!r || !/^(available|soldout)$/.test(r.status)) continue; // 'none' (nothing seen either way) and 'unknown' say nothing
+    const out = r.status === 'soldout';
+    e.tickets = { box: out ? 0 : (r.primary == null ? null : r.primary), resale: r.resale || 0, checked: r.checked }; // box null: on sale, count unknown (an older page layout)
+    const from = out ? r.fromResale : r.fromPrimary;
+    if (from != null) e.tickets.from = from;
+    if (out) { e.soldOut = true; s++; }
+    n++;
+  }
+  console.log(`soldout: ${n} events with ticket counts (checked ${so.generated}), ${s} sold out`);
+} catch (err) { console.error('soldout.json:', err.message); }
 merged.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
 if (Object.keys(seasons).length) {
   const postseason = JSON.parse(readFileSync(new URL('./data/postseason.json', import.meta.url), 'utf8')); // each league's playoff rounds (hand-kept), shown until the real games land

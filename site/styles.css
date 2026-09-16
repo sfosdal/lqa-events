@@ -317,7 +317,8 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
    Holidays switch pushed to the right */
 .fp-top { display: flex; align-items: center; gap: 1rem; padding: 0 1.25rem; margin: 0 0 1.1rem; }
 .fp-presets { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; flex: 1; min-width: 0; }
-.fp-holidays { margin-left: auto; white-space: nowrap; flex: none; }
+.fp-soldout { margin-left: auto; white-space: nowrap; flex: none; }
+.fp-holidays { white-space: nowrap; flex: none; }
 .fp-preset { font-size: .8rem; padding: .4em .85em; min-height: 2rem; }
 .fp-preset:hover { border-color: var(--ink-soft); }
 .fp-preset.is-on { background: var(--ink); color: var(--sky); border-color: var(--ink); }
@@ -591,15 +592,18 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
    mirrored pair carries the curves on into the card */
 .sg-line { fill: none; stroke-width: 1.5; stroke-opacity: .85; stroke-linecap: round; pointer-events: stroke; }
 .sg-trunk { stroke: var(--ink-soft); pointer-events: none; } /* a merged lane's shared line */
-.series-n { font-size: .68rem; color: var(--ink-soft); letter-spacing: .04em; }
+.series-n { font: .68rem/1 var(--mono); color: var(--ink-soft); letter-spacing: .04em; white-space: nowrap; align-self: center; } /* "1 of 2" after the title */
 @media (max-width: 640px) { .series-graph { display: none; } }
-.date-rail { text-align: center; }
+/* the day's number and weekday sit centred on the day's FIRST event (Steve,
+   2026-09-15): app.js alignRails gives the rail that row's height, and the
+   rail centres its two lines in it */
+.date-rail { text-align: center; align-self: start; display: flex; flex-direction: column; justify-content: center; gap: .1rem; } /* the same line metrics as the clock (.t-clock), so the two centre on one midpoint */
 .date-rail .dnum {
   font-family: var(--display); font-weight: 700; font-size: 2.6rem; line-height: 1; display: block;
 }
 .date-rail .dmeta {
   font-family: var(--mono); font-size: .7rem; text-transform: uppercase;
-  letter-spacing: .06em; color: var(--ink-soft); /* "WEDNESDAY" fits the rail */
+  letter-spacing: .06em; color: var(--ink-soft); line-height: 1; /* "WEDNESDAY" fits the rail; line-height 1 like the clock's PM */
 }
 .day-events { display: grid; gap: .6rem; align-content: start; }
 /* each row carries a whisper of its venue's color (set inline by app.js) */
@@ -658,6 +662,25 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 .ev.is-off .ev-title a, .ev.is-off .venue { text-decoration: line-through; color: var(--ink-soft); }
 .ev.is-off .time, .ev.is-off .team-mark { opacity: .55; }
 .ev-note { font-family: var(--mono); font-size: .76rem; letter-spacing: .04em; color: var(--alert); font-weight: 700; }
+/* Ticketmaster inventory: a third line, "272 of 18,100 tickets left · 614
+   resale · from $25". A sold-out or nearly-sold-out card is framed in the
+   alert red (an inset shadow, so nothing shifts) and wears a small tab out
+   of its foot saying which — the ODDS tab's cut (Steve, 2026-09-15); room
+   for it below, and the card lets it show */
+.ev-tix { font-family: var(--mono); font-size: .72rem; letter-spacing: .02em; color: var(--ink-soft); }
+/* the frame is a pseudo-element with a z-index so it paints OVER the series
+   connectors (the .series-graph svg comes after the rows); the ink colour —
+   white on the dark theme, like the odds bug's frame — not the alert red
+   (Steve, 2026-09-15) */
+.ev.is-soldout { overflow: visible; margin-bottom: .95rem; }
+.ev.is-soldout::before { content: ""; position: absolute; inset: 0; border: 1.5px solid var(--ink); border-radius: 6px; pointer-events: none; z-index: 1; }
+.ev.is-soldout::after {
+  content: attr(data-tab); position: absolute; top: 100%; left: 1rem; z-index: 1;
+  font: 700 .6rem/1 var(--mono); letter-spacing: .14em; color: #f4f4f4; background: #2b2d30;
+  border: 1.5px solid #c9cdd2; border-top: 0; border-radius: 0 0 6px 6px; padding: .24rem .6rem .2rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .25); pointer-events: none;
+}
+.sheet-tix { font-family: var(--mono); font-size: .76rem; color: var(--ink-soft); margin: -.4rem 0 .6rem; }
 /* notes in the masthead's stamp type (see .updated), small */
 .pop-note {
   font-family: var(--display); font-weight: 700; font-size: .76rem; line-height: 1.35;
@@ -1294,6 +1317,19 @@ html:not(.teams-open) .team-strip { display: none; }
 .team-sched .venue.is-away { color: var(--ink-soft); }
 .team-sched .ev.is-dim { opacity: .28; }
 .team-sched .ev { transition: opacity .2s; }
+/* a game row's foot: the ticket line at the left, TV / radio pushed to the right */
+.team-sched .ev .ev-body { flex: 1 1 auto; } /* so the foot can reach the row's right edge */
+/* the time cell as a scoreboard clock, in the events list and the Teams
+   view alike: the digits as big as the column allows ("12:10" fills it),
+   "PM" centred beneath, the cell centred on the row (Steve, 2026-09-15) */
+.ev .time.t-clock { align-items: stretch; align-self: center; gap: .1rem; padding-top: 0; min-width: 6.4rem; }
+/* the date rail's colours and faces: the digits in the display face and the ink, the PM as the weekday (Steve, 2026-09-15) */
+.t-big { display: block; font: 700 2.05rem/1 var(--display); letter-spacing: -.01em; color: var(--ink); text-align: center; }
+.t-foot { display: block; text-align: center; font: .7rem/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+.ev-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; align-self: stretch; flex-wrap: wrap; }
+.ev-foot .ev-watch { margin-left: auto; text-align: right; }
+.ev-watch-ico { display: inline-block; width: .95rem; height: .95rem; vertical-align: -.22em; margin-right: .3em; color: var(--ink-soft); }
+.ev-watch-ico svg { width: 100%; height: 100%; display: block; }
 .ev-watch { font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); letter-spacing: .02em; }
 .ev-watch b { font-weight: 700; }
 .b-playoff { color: var(--gold); }
@@ -1346,10 +1382,11 @@ html:not(.teams-open) .team-strip { display: none; }
 .sheet-when:has(+ .sheet-watch:not([hidden])) { margin-bottom: .3rem; }
 .sheet-watch { color: var(--ink-soft); margin: 0 0 1rem; font-size: .92rem; }
 .sheet-watch b { font: 500 .66rem/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; margin-right: .3rem; }
-.sheet-actions { display: flex; flex-direction: column; gap: .6rem; }
+.sheet-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; } /* smaller chips, as many to a line as fit, centred (Steve, 2026-09-15) */
+.sheet-actions .chip[hidden], .sheet-actions .btn-cal[hidden] { display: none; } /* the chip rule below sets a display, which would otherwise beat the hidden attribute — an empty pill where a club's "season" chip isn't (Steve, 2026-09-15) */
 .sheet-actions .btn-cal, .sheet-actions .chip {
-  display: inline-flex; justify-content: center; align-items: center; min-height: 2.75rem;
-  text-decoration: none; margin: 0;
+  display: inline-flex; justify-content: center; align-items: center; min-height: 2.2rem;
+  font-size: .82rem; padding: .4em .85em; text-decoration: none; margin: 0;
 }
 body.sheet-open { overflow: hidden; }
 /* wider screens: the same sheet is a pop hanging off the clicked card — the
@@ -1366,8 +1403,7 @@ body.sheet-open { overflow: hidden; }
   .sheet-venue { font-size: .72rem; margin-bottom: .2rem; }
   .sheet-title { font-size: 1.05rem; margin-bottom: .3rem; }
   .sheet-when { font-size: .88rem; margin-bottom: .8rem; }
-  .sheet-actions { flex-direction: row; flex-wrap: wrap; gap: .5rem; }
-  .sheet-actions .btn-cal, .sheet-actions .chip { min-height: 2.25rem; font-size: .85rem; padding: .5em .95em; }
+  .sheet-actions { gap: .45rem; }
   .sheet-actions .btn-cal:hover { background: var(--ink-soft); }
   .sheet-actions .chip:hover { border-color: var(--ink-soft); }
   #sheetClose { display: none; }
@@ -1399,7 +1435,7 @@ body.sheet-open { overflow: hidden; }
   /* day groups: date reads across the top instead of down a rail */
   .day-row { display: block; padding: .85rem 0; }
   .date-rail {
-    display: flex; align-items: baseline; gap: .55rem;
+    display: flex; flex-direction: row; justify-content: flex-start; align-items: baseline; gap: .55rem; /* a line above the events; the desktop rule's column and centring undone */
     text-align: left; margin-bottom: .5rem;
   }
   .date-rail .dnum { display: inline; font-size: 1.7rem; }
@@ -1409,6 +1445,8 @@ body.sheet-open { overflow: hidden; }
      just with a narrower time column */
   .ev { padding: .5em .6em; }
   .ev .time { min-width: 4.4rem; }
+  .ev .time.t-clock { min-width: 5rem; }
+  .t-big { font-size: 1.6rem; }
   .day-events { gap: .5rem; }
 }
 

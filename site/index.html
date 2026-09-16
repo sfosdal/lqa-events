@@ -189,6 +189,13 @@
        default; US, WA and Seattle holidays computed from the rules in app.js) -->
   <div class="fp-top">
     <div class="fp-presets" id="fpPresets"></div>
+    <!-- Sold Out & Nearly: only the events the checker (or a source) marks
+         sold out, or within 5% of the house — LQAFilter.ticketState -->
+    <label class="fp-check fp-soldout">
+      <input type="checkbox" id="soldOnlyToggle" autocomplete="off">
+      <span class="cb"></span>
+      <span class="fp-name">Sold Out &amp; Nearly</span>
+    </label>
     <label class="fp-check fp-holidays">
       <input type="checkbox" id="holidaysToggle" autocomplete="off">
       <span class="cb"></span>
@@ -380,12 +387,14 @@
     <p class="sheet-venue" id="sheetVenue"></p>
     <h2 class="sheet-title" id="sheetTitle"></h2>
     <p class="sheet-when" id="sheetWhen"></p>
+    <p class="sheet-tix" id="sheetTix" hidden><!-- Ticketmaster inventory: "272 of 18,100 tickets left · 614 resale · from $25 · checked Sep 15" (app.js) --></p>
     <p class="sheet-watch" id="sheetWatch" hidden><!-- a home game's TV / radio, from the league (app.js) --></p>
     <div class="sheet-actions">
+      <!-- order: the short chips first so they share a line, the long venue link after (Steve, 2026-09-15) -->
       <a id="sheetTickets" class="btn-cal" href="#" target="_blank" rel="noopener">Tickets</a>
-      <a id="sheetVenueLink" class="chip" href="#" target="_blank" rel="noopener"></a>
       <button id="sheetOnlyVenue" class="chip" type="button" title="Show only this venue's events"></button>
       <button id="sheetTeam" class="chip" type="button" title="This club's whole season in the Teams view" hidden></button>
+      <a id="sheetVenueLink" class="chip" href="#" target="_blank" rel="noopener"></a>
       <button id="sheetClose" class="chip" type="button">Close</button>
     </div>
   </div>

@@ -88,7 +88,7 @@
   // Kayak-style checkboxes: each filter map holds name → 'ex' for unchecked
   // (hidden); absent = checked (shown). Everything starts checked except SIFF
   // movies — see applyDefaultFilters.
-  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, q: '', holidays: false, month: null, showPast: false, pastFrom: null, series: [] };
+  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, q: '', holidays: false, soldOnly: false, month: null, showPast: false, pastFrom: null, series: [] };
 
   function modeKeys(map, mode) {
     return Object.keys(map).filter(function (k) { return map[k] === mode; });
@@ -132,6 +132,17 @@
   // The gutter column right of the cards is sized per page for the lanes
   // the graph needs; lines take their series' venue colour and merge into
   // each card's right edge, running along it briefly at the join.
+  // The date rail centres on the day's first event: the rail gets that row's
+  // height (a row is two or three lines) and centres its number and weekday
+  // in it. Desktop only — on phones the rail is a line above the events.
+  function alignRails() {
+    var phone = matchMedia('(max-width: 640px)').matches;
+    document.querySelectorAll('.day-row').forEach(function (li) {
+      var rail = li.querySelector('.date-rail'), first = li.querySelector('.day-events > .ev');
+      if (!rail) return;
+      rail.style.height = phone || !first ? '' : first.offsetHeight + 'px';
+    });
+  }
   function drawSeriesGraph() {
     var ol = $('agenda');
     var layout = document.querySelector('.agenda-layout');
@@ -233,6 +244,7 @@
           if (state.venues.indexOf(v) === -1) delete state.venueMode[v];
         });
         renderFilters(); renderCal(); renderAgenda(); renderBoard(); updateSubscribe();
+        if (!$('teamsView').hidden && teamView.slug !== undefined) renderTeams(teamView.slug); // a ?team= open drew the season before the feed arrived: again, with ticket links and counts
       })
       .catch(function (err) {
         $('agenda').innerHTML = '';
@@ -300,6 +312,7 @@
     p.typesOff.forEach(function (t) { state.badgeMode[t] = 'ex'; });
     if (p.teamsOff) groupInfo('team').keys.forEach(function (t) { state.teamMode[t] = 'ex'; });
     if (p.holidays !== undefined) state.holidays = p.holidays;
+    state.soldOnly = false; // a preset is a whole state: the Sold Out & Nearly switch goes off with it (Steve, 2026-09-15)
   }
   // Does the panel's current state equal this preset? Compares what's off in
   // each group against the preset's lists (only keys the panel shows count,
@@ -312,6 +325,7 @@
     var sorted = function (a) { return a.slice().sort().join('|'); };
     if (off('team') !== (p.teamsOff ? sorted(groupInfo('team').keys) : '')) return false;
     if (p.holidays !== undefined && state.holidays !== p.holidays) return false;
+    if (state.soldOnly) return false; // no preset keeps the switch on
     var shown = groupInfo('venue').keys;
     return off('venue') === sorted(p.venuesOff().filter(function (v) { return shown.indexOf(v) >= 0; })) && off('badge') === sorted(p.typesOff);
   }
@@ -339,7 +353,7 @@
   }
   function isDefaultState() {
     if (Object.keys(state.teamMode).length) return false;
-    if (state.q || state.holidays) return false;
+    if (state.q || state.holidays || state.soldOnly) return false;
     var v = Object.keys(state.venueMode);
     if (v.length !== DEFAULT_VENUES_OFF.length || !DEFAULT_VENUES_OFF.every(function (x) { return state.venueMode[x] === 'ex'; })) return false;
     var k = Object.keys(state.badgeMode);
@@ -349,7 +363,7 @@
   // (e.g. river's Neighborhood section) can't drift from these rules.
   function filtered(list) {
     return list.filter(function (e) {
-      return LQAFilter.matchesFilter(e, { venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode })
+      return LQAFilter.matchesFilter(e, { venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode, soldOnly: state.soldOnly })
         && LQAFilter.matchesSearch(e, state.q);
     });
   }
@@ -507,6 +521,7 @@
       c.checked = state.teamMode[c.dataset.team] !== 'ex';
     });
     $('holidaysToggle').checked = state.holidays;
+    $('soldOnlyToggle').checked = state.soldOnly;
     if ($('searchBox').value.trim() !== state.q) $('searchBox').value = state.q;
     var any = !isDefaultState();
     $('filterToggle').classList.toggle('is-on', any);
@@ -514,7 +529,7 @@
   // Filter choices persist per-browser (no login — just localStorage).
   function saveFilters() {
     try {
-      localStorage.setItem('lqa-filters', JSON.stringify({ v: 3, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode, hol: state.holidays }));
+      localStorage.setItem('lqa-filters', JSON.stringify({ v: 3, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode, hol: state.holidays, so: state.soldOnly }));
     } catch (e) { /* private mode etc. — filters just won't persist */ }
   }
   function loadFilters() {
@@ -529,7 +544,9 @@
         Object.keys(s.venues || {}).forEach(function (v) { if (s.venues[v] === 'ex') state.venueMode[v] = 'ex'; });
         Object.keys(s.badges || {}).forEach(function (k) { if (TYPE_KEYS[k] && s.badges[k] === 'ex') state.badgeMode[k] = 'ex'; });
         Object.keys(s.teams || {}).forEach(function (k) { if (TEAM_BY_SLUG[k] && s.teams[k] === 'ex') state.teamMode[k] = 'ex'; });
-        state.holidays = !!s.hol;
+        // a ?h=1 / ?so=1 link sets these before the saved prefs load — keep them
+        state.holidays = state.holidays || !!s.hol;
+        state.soldOnly = state.soldOnly || !!s.so;
       } else {
         // v1 arrays: only its team exclusions survive the checkbox model
         (s.teams || []).forEach(function (k) { if (TEAM_BY_SLUG[k]) state.teamMode[k] = 'ex'; });
@@ -545,6 +562,7 @@
     var params = new URLSearchParams(location.search);
     if (params.get('s')) state.q = LQAFilter.decodeSearch(params.get('s')).trim();
     if (params.get('h') === '1') state.holidays = true;
+    if (params.get('so') === '1') state.soldOnly = true;
     var code = params.get('f');
     var parsed = code == null ? null : LQAFilter.parseFilterCode(code);
     if (!parsed) return false;
@@ -667,6 +685,10 @@
   });
   $('holidaysToggle').addEventListener('change', function () {
     state.holidays = this.checked;
+    applyFilters();
+  });
+  $('soldOnlyToggle').addEventListener('change', function () {
+    state.soldOnly = this.checked;
     applyFilters();
   });
   // the search applies as you type, a beat after the last keystroke
@@ -1088,7 +1110,8 @@
       // the home building's wash for a home game; away games stay on the page
       if (g.home) row.style.background = 'color-mix(in srgb, ' + venueColor(tm.venue) + ' var(--tint), transparent)';
       var time = document.createElement('span'); time.className = 'time';
-      time.textContent = g.tbd || !g.time ? 'TBD' : fmtTime(g.time);
+      if (g.tbd || !g.time) time.textContent = 'TBD';
+      else clockCell(time, fmtTime(g.time));
       row.appendChild(time);
       var body = document.createElement('div'); body.className = 'ev-body';
       var where = document.createElement('span'); where.className = 'venue' + (g.home ? '' : ' is-away');
@@ -1106,16 +1129,31 @@
       if (g.playoff) { var pb = document.createElement('span'); pb.className = 'badge b-playoff'; pb.textContent = 'playoff'; title.appendChild(pb); }
       if (g.pre) { var pr = document.createElement('span'); pr.className = 'badge b-pre'; pr.textContent = 'preseason'; title.appendChild(pr); }
       if (g.tbd) { var tb = document.createElement('span'); tb.className = 'badge b-tbd'; tb.textContent = 'time tbd'; title.appendChild(tb); }
+      // a home game's ticket state (the feed's Ticketmaster counts): frame + badge like the list
+      var ts = feed ? LQAFilter.ticketState(feed) : '';
+      if (ts) ticketTab(row, ts, feed);
       body.appendChild(title);
-      if (g.watch && ((g.watch.tv || []).length || (g.watch.radio || []).length)) {
-        var w = document.createElement('span'); w.className = 'ev-watch';
-        [['tv', 'TV'], ['radio', 'Radio']].forEach(function (k) {
-          if (!g.watch[k[0]] || !g.watch[k[0]].length) return;
-          if (w.childNodes.length) w.appendChild(document.createTextNode(' · '));
-          var b = document.createElement('b'); b.textContent = k[1] + ' ';
-          w.appendChild(b); w.appendChild(document.createTextNode(g.watch[k[0]].join(', ')));
-        });
-        body.appendChild(w);
+      // the foot line: tickets at the left, TV / radio at the right
+      var tix = feed ? ticketsLine(feed) : '';
+      var hasWatch = g.watch && ((g.watch.tv || []).length || (g.watch.radio || []).length);
+      if (tix || hasWatch) {
+        var foot = document.createElement('span'); foot.className = 'ev-foot';
+        if (tix) { var tl = document.createElement('span'); tl.className = 'ev-tix'; tl.textContent = tix; tl.title = 'Ticketmaster inventory' + (feed.tickets && feed.tickets.checked ? ', checked ' + fmtSince(feed.tickets.checked) : ''); foot.appendChild(tl); }
+        if (hasWatch) {
+          // the strip's marks, small: streaming (cast), TV, radio — the names after each (Steve, 2026-09-15)
+          var w = document.createElement('span'); w.className = 'ev-watch';
+          var parts = splitWatch(g.watch.tv || []);
+          var tvLower = parts.tv.map(function (n) { return String(n).toLowerCase(); });
+          var streamOnly = parts.stream.map(function (s) { return s.name; }).filter(function (n) { return tvLower.indexOf(String(n).toLowerCase()) < 0; }); // a channel that also streams (Mariners.TV) is named once, under the TV mark
+          [['Streaming', CAST_SVG, streamOnly], ['TV', TV_SVG, parts.tv], ['Radio', RADIO_SVG, g.watch.radio || []]].forEach(function (k) {
+            if (!k[2].length) return;
+            if (w.childNodes.length) w.appendChild(document.createTextNode(' \u00b7 '));
+            var ic = document.createElement('i'); ic.className = 'ev-watch-ico'; ic.innerHTML = k[1]; ic.title = k[0]; ic.setAttribute('aria-label', k[0]);
+            w.appendChild(ic); w.appendChild(document.createTextNode(k[2].join(', ')));
+          });
+          foot.appendChild(w);
+        }
+        body.appendChild(foot);
       }
       row.appendChild(body);
       // the opponent's crest: a button that lights up just their games
@@ -1158,6 +1196,7 @@
     } else renderTeamCal(team, all, today);
     // land on the next game, under the bar (with the played games folded
     // that is the top of the list)
+    alignRails(); // the date rails, now that the season's rows are laid out
     var next = list.querySelector('.day-row:not(.is-past)');
     if (next && teamView.showPast) next.scrollIntoView({ block: 'start', behavior: 'instant' });
     else if (!teamView.showPast) window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1692,6 +1731,12 @@
   // can be worked on when nothing is being played. Local use only.
   var DEMO = (new URLSearchParams(location.search).get('demo') || '').toLowerCase();
   if (DEMO && !/^(live|pre|final)$/.test(DEMO)) DEMO = 'live';
+  // &inning=4: a baseball demo starts at the top of that inning and moves a
+  // half-inning on every poll (30 s), runs trickling in, to the final after
+  // the 9th — a game that plays out, for watching the block change state
+  // (Steve, 2026-09-15). Without it: bottom of the 7th, standing still.
+  var DEMO_INNING = Number(new URLSearchParams(location.search).get('inning')) || 0;
+  var demoTicks = 0; // polls so far
   function demoEvent(team) {
     var today = todayStr(), gs = teamGames(team.slug) || [];
     var g = gs.filter(function (x) { return x.date === today; })[0] || gs.filter(function (x) { return x.date > today; })[0] || gs[gs.length - 1];
@@ -1705,13 +1750,25 @@
     us.score = '4'; them.score = '3';
     if (state === 'post') { st.type = { state: 'post', detail: 'Final', shortDetail: 'Final', completed: true }; us.winner = true; return ev; }
     if (sport === 'baseball') {
-      st.type = { state: 'in', detail: 'Bottom 7th', shortDetail: 'Bot 7th' }; st.period = 7;
-      c.situation = { balls: 2, strikes: 1, outs: 1, onFirst: true, onSecond: false, onThird: true,
-        pitcher: { athlete: { id: 'demo-p', displayName: 'Bryan Woo', shortName: 'B. Woo' } },
-        batter: { athlete: { id: 'demo-b', displayName: 'Julio Rodríguez', shortName: 'J. Rodríguez' }, summary: '1-3, HR, 2 RBI' } };
-      live.pitches[team.slug] = { 'demo-p': 78 };
-      live.lastPitch[team.slug] = { mph: 96, type: 'Four-seam FB', result: 'Strike Looking' };
-      live.lastOut[team.slug] = { id: 'demo-out', text: 'Raleigh grounded out to second.', batter: 'C. Raleigh', pitcher: 'J. Ryan', when: 'Bot 7th' };
+      var halves = DEMO_INNING ? demoTicks : 13; // half-innings played: &inning=N starts at the top of the Nth; the still demo sits in the bottom of the 7th
+      var inning = (DEMO_INNING || 1) + Math.floor(halves / 2), bottom = halves % 2 === 1;
+      if (inning > 9) { // the game has played out
+        us.score = '5'; them.score = '3';
+        st.type = { state: 'post', detail: 'Final', shortDetail: 'Final', completed: true }; us.winner = true; return ev;
+      }
+      var ord = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'][inning];
+      var half = (bottom ? 'Bottom ' : 'Top ') + ord, short = (bottom ? 'Bot ' : 'Top ') + ord;
+      // runs trickle in as the innings go: 0-0 at the start of the 4th, 4-3 by the 7th, 5-3 at the end
+      var played = DEMO_INNING ? halves : 13;
+      us.score = String(Math.min(5, Math.floor(played * 4 / 13))); them.score = String(Math.min(3, Math.floor(played * 3 / 13)));
+      st.type = { state: 'in', detail: half, shortDetail: short }; st.period = inning;
+      var outs = played % 3, onBase = played % 4;
+      c.situation = { balls: played % 4, strikes: played % 3, outs: outs, onFirst: onBase >= 1, onSecond: onBase === 2, onThird: onBase >= 3,
+        pitcher: { athlete: { id: 'demo-p', displayName: bottom ? 'José Ryan' : 'Bryan Woo', shortName: bottom ? 'J. Ryan' : 'B. Woo' } },
+        batter: { athlete: { id: 'demo-b', displayName: bottom ? 'Julio Rodríguez' : 'Mike Trout', shortName: bottom ? 'J. Rodríguez' : 'M. Trout' }, summary: bottom ? '1-3, HR, 2 RBI' : '0-2, BB' } };
+      live.pitches[team.slug] = { 'demo-p': 40 + played * 6 };
+      live.lastPitch[team.slug] = { mph: 94 + (played % 4), type: ['Four-seam FB', 'Slider', 'Changeup', 'Sweeper'][played % 4], result: ['Strike Looking', 'Ball', 'Foul', 'Swinging Strike'][played % 4] };
+      live.lastOut[team.slug] = { id: 'demo-out-' + played, text: bottom ? 'Raleigh grounded out to second.' : 'Trout flied out to center.', batter: bottom ? 'C. Raleigh' : 'M. Trout', pitcher: bottom ? 'J. Ryan' : 'B. Woo', when: short };
     } else if (sport === 'football') {
       st.type = { state: 'in', detail: '8:42 - 3rd', shortDetail: '8:42 - 3rd' }; st.period = 3; st.displayClock = '8:42';
       c.situation = { downDistanceText: '2nd & 7 at SEA 42', possession: ourId, lastPlay: { text: 'K. Walker III rushed for 5 yards to the SEA 42.' } };
@@ -1742,6 +1799,7 @@
     if (!t) return;
     live.at = new Date();
     var ev = demoEvent(t);
+    demoTicks++; // the next poll is the next half-inning
     live.events[t.slug] = ev; live.event = ev; live.slug = t.slug;
     var state = ev && ev.competitions[0].status.type.state;
     var pill = $('teamStrip').querySelector('.team-tab[data-slug="' + t.slug + '"]');
@@ -2597,6 +2655,43 @@
     sheet.style.top = Math.round(top) + 'px';
   }
   window.addEventListener('resize', placeSheet);
+  // "272 of 18,100 tickets left · 614 resale · from $25" — the box-office
+  // count against the venue's seats, then resale, then the lowest price
+  // (resale's when the box office is out); '' when the feed has no counts
+  // The time cell as a scoreboard clock (Steve, 2026-09-15): the digits as
+  // big as the column allows, in green, "PM" centred beneath, the whole thing
+  // centred on the row — the events list and the Teams view alike. Fills the
+  // given span; an all-day or TBD cell is left to the caller.
+  function clockCell(time, clock) {
+    var parts = clock.split(' '); // "7:00 PM"
+    time.classList.add('t-clock');
+    var big = document.createElement('b'); big.className = 't-big'; big.textContent = parts[0];
+    var tf = document.createElement('span'); tf.className = 't-foot'; tf.textContent = parts[1] || '';
+    time.appendChild(big); time.appendChild(tf);
+  }
+  // a sold-out or nearly-sold-out card: the red frame, and a small tab out of
+  // its foot saying which (styles.css .ev.is-soldout::after reads data-tab),
+  // like the ODDS tab under the odds bug
+  function ticketTab(row, ts, e) {
+    row.classList.add('is-soldout');
+    row.dataset.tab = ts === 'soldout' ? 'SOLD OUT' : 'NEARLY SOLD OUT';
+    row.title = ts === 'soldout' ? 'The box office has no tickets left' + (e.tickets && e.tickets.resale ? ' — resale only' : '')
+      : 'Five percent of the house or less is left at the box office';
+  }
+  function ticketsLine(e) {
+    var t = e.tickets;
+    var n = function (x) { return Number(x).toLocaleString('en-US'); };
+    var cap = VENUE_CAPACITY[e.venue];
+    // a source that only says sold out (the Rep's feed, DICE): the fact and the house
+    if (!t) return e.soldOut ? 'Sold out' + (cap ? ' \u00b7 ' + n(cap) + ' seats' : '') : '';
+    var parts = [];
+    if (e.soldOut) parts.push('Sold out at the box office');
+    else if (t.box != null) parts.push(n(t.box) + (cap ? ' of ' + n(cap) : '') + ' tickets left');
+    else parts.push('On sale'); // the checker saw tickets listed but no count
+    if (t.resale) parts.push(n(t.resale) + ' resale');
+    if (t.from != null) parts.push('from $' + Math.round(t.from));
+    return parts.join(' \u00b7 ');
+  }
   function openSheet(e, anchor, point) {
     $('sheetVenue').textContent = e.venue;
     $('sheetTitle').textContent = e.title;
@@ -2605,6 +2700,9 @@
     if (e.status) when += ' · ' + e.status.toUpperCase() + (e.statusSince ? ' (noticed ' + fmtSince(e.statusSince) + ')' : '');
     if (e.dateTbd) when += ' · date TBD';
     $('sheetWhen').textContent = when;
+    var tix = ticketsLine(e);
+    var st = $('sheetTix'); st.hidden = !tix;
+    st.textContent = tix ? tix + (e.tickets && e.tickets.checked ? ' \u00b7 checked ' + fmtSince(e.tickets.checked) : '') : '';
     // a home game's TV / radio, when its league listed them
     var w = $('sheetWatch'); w.innerHTML = '';
     var watch = e.watch || {};
@@ -2679,6 +2777,7 @@
     var url = location.origin + location.pathname + '?f=' + code;
     if (state.q) url += '&s=' + LQAFilter.encodeSearch(state.q);
     if (state.holidays) url += '&h=1';
+    if (state.soldOnly) url += '&so=1';
     var label = $('copyFilterLabel');
     var original = label.textContent;
     copyText(url).then(function () {
@@ -2980,14 +3079,14 @@
         row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' var(--tint), transparent)';
         var time = document.createElement('span');
         time.className = 'time';
-        time.textContent = fmtTime(e.time);
+        if (e.time) clockCell(time, fmtTime(e.time)); else time.textContent = fmtTime(e.time); // "all day" stays a word
+        var sn = null;
         if (e.series) {
-          // "2 of 4" under the time; the gutter graph picks the row up by id
-          var sn = document.createElement('span');
+          // "2 of 4" after the title (Steve, 2026-09-15 — it sat under the time); the gutter graph picks the row up by id
+          sn = document.createElement('span');
           sn.className = 'series-n';
           sn.textContent = e.series.n + ' of ' + e.series.total;
           sn.title = seriesLabel(e.series.s);
-          time.appendChild(sn);
           row.dataset.series = e.series.s.id;
         }
         // time keeps its own column; everything else stacks left-aligned:
@@ -3017,6 +3116,7 @@
           row.appendChild(logo);
         }
         titleLine.appendChild(a);
+        if (sn) titleLine.appendChild(sn);
         body.appendChild(venue); body.appendChild(titleLine);
         // a show that's off: struck through, with a third line saying so
         // (and when we noticed, if the feed knows)
@@ -3029,6 +3129,19 @@
           off.textContent = e.status.charAt(0).toUpperCase() + e.status.slice(1) + (e.statusSince ? ' ' + fmtSince(e.statusSince) : '');
           off.title = 'This event has been ' + e.status + ' — check the ticket page for refunds or a new date';
           body.appendChild(off);
+        }
+        // Ticketmaster inventory (feed `tickets`, from the local checker):
+        // a third line — "272 of 18,100 tickets left · 614 resale · from $25";
+        // a sold-out show gets a red frame and a badge
+        var ts = LQAFilter.ticketState(e);
+        if (ts) ticketTab(row, ts, e); // the red frame and the tab out of the card's foot, sold out and nearly alike (Steve, 2026-09-15)
+        var tix = ticketsLine(e);
+        if (tix) {
+          var tl = document.createElement('span');
+          tl.className = 'ev-tix';
+          tl.textContent = tix;
+          tl.title = e.tickets ? 'Ticketmaster inventory' + (e.tickets.checked ? ', checked ' + fmtSince(e.tickets.checked) : '') : 'Sold out, per the venue\u2019s own listing';
+          body.appendChild(tl);
         }
         // a game the league may still move
         if (e.dateTbd) {
@@ -3056,13 +3169,14 @@
       ol.appendChild(li);
     }
     drawSeriesGraph();
+    alignRails();
     syncTodayFloat();
   }
   // the series graph is measured from the rows, so it follows the window
   var resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () { drawSeriesGraph(); fitTeamStrip(); }, 150);
+    resizeTimer = setTimeout(function () { drawSeriesGraph(); alignRails(); fitTeamStrip(); }, 150);
   });
 
   // The month divider that's currently stuck (just under the pinned filter

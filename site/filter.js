@@ -124,6 +124,18 @@
     'Pacific Science Center': 400, 'The Vera Project': 300, 'On the Boards': 300, 'KEXP': 200,
   };
 
+  // Ticket state from the feed's `tickets` and `soldOut`: 'soldout' (the box
+  // office has nothing left), 'nearly' (what's left is 5% of the house or
+  // less — a night's worth of returns, at an arena and a ballpark alike; 100
+  // tickets where the venue has no capacity on file), '' otherwise.
+  function ticketState(e) {
+    if (e.soldOut) return 'soldout';
+    var t = e.tickets;
+    if (!t || t.box == null || t.box <= 0) return '';
+    var cap = VENUE_CAPACITY[e.venue];
+    return t.box <= (cap ? Math.ceil(cap * 0.05) : 100) ? 'nearly' : '';
+  }
+
   // The campus venues walk a crowd past Lower Queen Anne; these three are a
   // bus ride away and listed for their size (a venue missing here is campus).
   var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town', 'Starfire Stadium': 'town', 'Husky Stadium': 'town' };
@@ -142,6 +154,7 @@
     var teamMode = mode.teamMode || {};
     if (venueMode[e.venue] === 'ex') return false;
     if (badgeMode[eventType(e)] === 'ex') return false;
+    if (mode.soldOnly && !ticketState(e)) return false; // the "Sold Out & Nearly" switch: only those
     var title = e.title || '';
     for (var slug in teamMode) {
       if (teamMode[slug] === 'ex' && TEAM_BY_SLUG[slug] && TEAM_BY_SLUG[slug].re.test(title)) return false;
@@ -521,6 +534,7 @@
     slugify: slugify,
     eventType: eventType,
     matchesFilter: matchesFilter,
+    ticketState: ticketState,
     matchesSearch: matchesSearch,
     encodeSearch: encodeSearch,
     decodeSearch: decodeSearch,
