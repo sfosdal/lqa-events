@@ -2627,14 +2627,14 @@
     var old = document.querySelector('.pdf-pick'); if (old) { old.remove(); return; }
     var pick = document.createElement('div'); pick.className = 'pdf-pick'; pick.setAttribute('role', 'menu');
     var lbl = document.createElement('span'); lbl.className = 'pdf-pick-label'; lbl.textContent = 'Season poster for'; pick.appendChild(lbl);
-    sel.concat([null]).forEach(function (t) {
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = t ? t.label : 'All ' + sel.length;
-      if (t && t.logo) { var im = document.createElement('img'); im.src = t.logo; im.alt = ''; im.width = 18; im.height = 18; b.insertBefore(im, b.firstChild); }
-      b.addEventListener('click', function () { pick.remove(); printTeams(t ? [t] : sel); });
+    sel.forEach(function (t) { // one club per row, no All (Steve, 2026-09-15)
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = t.label;
+      if (t.logo) { var im = document.createElement('img'); im.src = t.logo; im.alt = ''; im.width = 18; im.height = 18; b.insertBefore(im, b.firstChild); }
+      b.addEventListener('click', function () { pick.remove(); printTeams([t]); });
       pick.appendChild(b);
     });
-    var r = $('teamPdfBtn').getBoundingClientRect();
-    pick.style.top = (r.bottom + 6) + 'px'; pick.style.right = Math.max(8, window.innerWidth - r.right) + 'px';
+    var r = $('teamPdfBtn').getBoundingClientRect(); // its left edge on the chip's
+    pick.style.top = (r.bottom + 6) + 'px'; pick.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 8 - 12 * 16)) + 'px';
     document.body.appendChild(pick);
     setTimeout(function () { // outside tap or Esc closes it
       var off = function (e) { if (e.type === 'keydown' && e.key !== 'Escape') return; if (e.type === 'click' && e.target.closest('.pdf-pick')) return; pick.remove(); document.removeEventListener('click', off, true); document.removeEventListener('keydown', off); };
@@ -3032,9 +3032,10 @@
   function fitTeamStrip() {
     var strip = $('teamStrip');
     if (!strip.children.length || !document.documentElement.classList.contains('teams-open')) return;
-    // three sizes: names with their sport icons; names alone; crests alone
-    strip.classList.remove('is-crests', 'is-nosport');
-    if (strip.scrollWidth > strip.clientWidth + 1) strip.classList.add('is-nosport');
+    // three sizes (Steve, 2026-09-15): every club named; the off-season clubs
+    // down to their crests first; then every club a crest
+    strip.classList.remove('is-crests', 'is-offcrests');
+    if (strip.scrollWidth > strip.clientWidth + 1) strip.classList.add('is-offcrests');
     if (strip.scrollWidth > strip.clientWidth + 1) strip.classList.add('is-crests');
   }
   // Re-render the month cards with a reel move: forward (dir > 0) the top
@@ -3504,12 +3505,27 @@
   // the pop floats over the docked mini calendar and is shorter than it,
   // so while it's open the calendar fades out (styles.css: html.pop-open)
   // rather than showing a strip of days under the pop's bottom edge
+  // The pop hangs from the Add To My Calendar button itself (fixed, under
+  // its right edge), wherever the button is — the masthead, or the pinned
+  // title line once the page has scrolled — instead of from the bar, which
+  // in the Teams view put it under the club strip, over the score block
+  // (Steve, 2026-09-15). Re-placed as the page scrolls or resizes.
+  function placeSubscribePop() {
+    var p = $('subscribePop');
+    if (p.hidden) return;
+    var r = $('subscribeBtn').getBoundingClientRect();
+    p.style.position = 'fixed'; p.style.left = 'auto';
+    p.style.top = (r.bottom + 8) + 'px';
+    p.style.right = Math.max(8, window.innerWidth - r.right) + 'px';
+  }
   function setSubscribeOpen(open) {
     $('subscribePop').hidden = !open;
     $('subscribeBtn').setAttribute('aria-expanded', String(open));
     document.documentElement.classList.toggle('pop-open', open);
-    if (open) { $('qrPanel').hidden = true; $('qrBtn').setAttribute('aria-expanded', 'false'); fitPops(true); }
+    if (open) { $('qrPanel').hidden = true; $('qrBtn').setAttribute('aria-expanded', 'false'); placeSubscribePop(); fitPops(true); }
   }
+  window.addEventListener('scroll', placeSubscribePop, { passive: true });
+  window.addEventListener('resize', placeSubscribePop);
   $('subscribeBtn').addEventListener('click', function () { setSubscribeOpen($('subscribePop').hidden); });
   document.addEventListener('click', function (e) {
     if (!e.target.closest('#subscribeBtn, #subscribePop') && !$('subscribePop').hidden) setSubscribeOpen(false);
