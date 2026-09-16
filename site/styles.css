@@ -1325,7 +1325,7 @@ html:not(.teams-open) .team-strip { display: none; }
 .ev .time.t-clock { align-items: stretch; align-self: center; gap: .1rem; padding-top: 0; min-width: 6.4rem; }
 /* the date rail's colours and faces: the digits in the display face and the ink, the PM as the weekday (Steve, 2026-09-15) */
 .t-big { display: block; font: 700 2.05rem/1 var(--display); letter-spacing: -.01em; color: var(--ink); text-align: center; }
-.t-foot { display: block; text-align: center; font: .7rem/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+.t-foot { display: block; text-align: center; font: 600 .8rem/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); } /* a touch bigger and bolder than the rail's weekday (Steve, 2026-09-15) */
 .ev-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; align-self: stretch; flex-wrap: wrap; }
 .ev-foot .ev-watch { margin-left: auto; text-align: right; }
 .ev-watch-ico { display: inline-block; width: .95rem; height: .95rem; vertical-align: -.22em; margin-right: .3em; color: var(--ink-soft); }
