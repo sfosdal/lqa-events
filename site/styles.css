@@ -1376,11 +1376,12 @@ html:not(.teams-open) .team-strip { display: none; }
 /* a game in progress: the whole pill breathes — its edge and face lift a
    little and settle, over and over (no dot) */
 .team-tab.is-live { animation: tab-pulse 1.8s ease-in-out infinite; }
+/* no scale in the pulse (Steve, 2026-09-16): a bordered pill scaled by a few percent rasterises its arcs and its straight edges on different sub-pixels, and a seam showed at the brightest point — the pill breathes in colour and a soft ring instead, drawn on whole pixels */
 @keyframes tab-pulse {
-  50% { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 14%, var(--mist)); transform: scale(1.03); }
+  50% { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 14%, var(--mist)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ink) 35%, transparent); }
 }
 .team-tab.is-live[aria-pressed="true"] { animation-name: tab-pulse-on; } /* the chosen club's pill is solid ink: it breathes in brightness instead */
-@keyframes tab-pulse-on { 50% { opacity: .78; transform: scale(1.03); } }
+@keyframes tab-pulse-on { 50% { opacity: .78; box-shadow: 0 0 0 2px color-mix(in srgb, var(--ink) 35%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .team-tab.is-live { animation: none; border-color: var(--ink); } }
 /* out of season (app.js teamActive): the crest alone, after the clubs in season */
 .team-tab.is-off { order: 1; } /* out of season: after the clubs in season */

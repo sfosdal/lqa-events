@@ -2016,18 +2016,22 @@
     live.highlights[team.slug] = { id: ev.id, at: Date.now(), final: false, n: 5, clips: titles.map(function (t) { return { title: t, url: '#' }; }) };
     return ev;
   }
+  // the demo's club: the one the address named when the page opened (?team=mariners&demo=live) — only that one plays;
+  // switching pills shows the other clubs as they are (Steve, 2026-09-16: "in demo mode multiple teams seem live")
+  var DEMO_SLUG = ((new URLSearchParams(location.search).get('team') || '').split(',')[0] || '').trim();
   function demoPoll() { // the demo's poll: no feed — the same made-up game again, so the ring and the redraw behave as they do live
-    var t = selectedTeams()[0];
+    var t = LQAFilter.TEAMS.filter(function (x) { return x.slug === DEMO_SLUG; })[0] || selectedTeams()[0];
     if (!t) return;
+    if (!DEMO_SLUG) DEMO_SLUG = t.slug; // no club in the address: the first one picked is the demo's from here on
     live.at = new Date();
     var ev = demoEvent(t);
     demoTicks++; // the next poll is the next half-inning
+    Object.keys(live.events).forEach(function (k) { if (k !== t.slug) delete live.events[k]; }); // no other club is playing
     live.events[t.slug] = ev; live.event = ev; live.slug = t.slug;
     var state = ev && ev.competitions[0].status.type.state;
-    var pill = $('teamStrip').querySelector('.team-tab[data-slug="' + t.slug + '"]');
-    if (pill) pill.classList.toggle('is-live', state === 'in');
+    $('teamStrip').querySelectorAll('.team-tab').forEach(function (pill) { pill.classList.toggle('is-live', pill.dataset.slug === t.slug && state === 'in'); });
     live.shown = state || null; live.shownBy[t.slug] = state || null;
-    if (teamView.slugs.length > 1) syncHead(t); else swapFormBlock(t); // several picked: the first is the club playing, and takes the head alone (Steve, 2026-09-15)
+    if (teamSelected(t.slug)) { if (teamView.slugs.length > 1) syncHead(t); else swapFormBlock(t); } // its block only while it is the club on show
     live.timer = setTimeout(pollLive, state === 'in' ? POLL_MS : 10 * POLL_MS);
   }
   // Every club with a game on today is checked (one scoreboard call per
