@@ -12,16 +12,17 @@
 <meta name="apple-mobile-web-app-title" content="LQA Events">
 <meta name="mobile-web-app-capable" content="yes">
 <script>
-  // Apply the saved stop of the four-way toggle before the first paint:
-  // light, dark, system (nothing set — prefers-color-scheme decides) or cvd
-  // (the colour-vision-deficiency palette on the system scheme; styles.css
+  // Before the first paint: the theme (light, dark, or system — nothing set,
+  // prefers-color-scheme decides) and, separately, the palette (standard,
+  // or cvd — the colour-vision-deficiency hues; styles.css
   // html:root.colorblind — not 'cb', the filter panel's checkbox class).
-  // app.js applyTheme keeps this in sync. Phones have the toggle too now
-  // (Steve, 2026-09-15: the palette must be reachable there).
+  // Two pills, two settings (Steve, 2026-09-15); app.js applyTheme and
+  // applyPalette keep them in sync. A saved 'cvd' theme from the four-way
+  // pill's day reads as system + cvd.
   try {
-    var t = localStorage.getItem('lqa-theme');
+    var t = localStorage.getItem('lqa-theme'), pal = localStorage.getItem('lqa-palette');
     if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
-    if (t === 'cvd') document.documentElement.classList.add('colorblind');
+    if (pal === 'cvd' || (t === 'cvd' && pal == null)) document.documentElement.classList.add('colorblind');
   } catch (e) { /* no storage — system it is */ }
 </script>
 <!-- Google tag (gtag.js) -->
@@ -82,7 +83,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/></svg>
     <span>Add To My Calendar</span>
   </button>
-  <!-- the four-way toggle: light, dark, match the system, and the colour-vision-deficiency palette (Steve, 2026-09-15; app.js applyTheme) -->
+  <!-- the theme pill: light, dark, system — and beside it the palette pill: standard, or the colour-vision-deficiency hues (Steve, 2026-09-15; app.js applyTheme / applyPalette) -->
   <div id="themeToggle" class="theme-toggle" role="radiogroup" aria-label="Color theme" data-active="system">
     <button type="button" role="radio" aria-checked="true" data-theme="light" title="Light">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -90,10 +91,16 @@
     <button type="button" role="radio" aria-checked="false" data-theme="dark" title="Dark">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     </button>
-    <button type="button" role="radio" aria-checked="false" data-theme="system" title="Match the system">
+    <button type="button" role="radio" aria-checked="false" data-theme="system" title="System">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
     </button>
-    <button type="button" role="radio" aria-checked="false" data-theme="cvd" title="Color vision deficiency palette">
+    <span class="theme-knob" aria-hidden="true"></span>
+  </div>
+  <div id="paletteToggle" class="theme-toggle" role="radiogroup" aria-label="Color palette" data-active="std">
+    <button type="button" role="radio" aria-checked="true" data-palette="std" title="Standard colors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>
+    </button>
+    <button type="button" role="radio" aria-checked="false" data-palette="cvd" title="Color vision deficiency palette">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
     </button>
     <span class="theme-knob" aria-hidden="true"></span>
@@ -250,26 +257,35 @@
           </button>
         </div>
         <div id="calGrid" class="cal-months"><!-- one .cal-month card per month, from app.js --></div>
+        <!-- TODAY: a tab out of the card's foot, the odds tab's cut (Steve, 2026-09-15); app.js placeTodayTab moves it under the month board in the month view -->
+        <button id="calToday" type="button" class="cal-today-tab" title="Back to today: the current month, past days put away" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><circle cx="12" cy="15.5" r="1.6" fill="currentColor" stroke="none"/></svg>
+      <span>Today</span>
+    </button>
       </div>
     </aside>
   </div>
-  <!-- the Month view (the switch's middle stop): the month's events, as
-       the filters leave them, on one full-width calendar; ‹ › page the
-       months (app.js renderBoard). On phones the days carry ticks and a
-       tapped day's events list under the grid. -->
+  <!-- the month view (the calendar stop of the view pill): one continuous
+       grid of weeks from this month on, square days carrying their events'
+       names, a sticky ‹ MONTH › header naming the month at the top of the
+       window (its name opens the month / year picker), and more months
+       appended as you scroll — no end (app.js renderBoard). A tapped day
+       opens a card listing everything on it (openDayPop). -->
   <section id="monthBoard" class="month-board" aria-label="Month calendar" hidden>
-    <div class="cal-head mb-head" aria-label="Change months">
-      <button id="mbPrev" type="button" aria-label="Previous month">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-      </button>
-      <button class="cal-cur" id="mbCur" type="button" aria-live="polite" title="Pick a month and year"></button>
-      <button id="mbNext" type="button" aria-label="Next month">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-      </button>
+    <div id="mbSticky" class="mb-sticky">
+      <div class="cal-head mb-head" aria-label="Change months">
+        <button id="mbPrev" type="button" aria-label="Previous month">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <button class="cal-cur" id="mbCur" type="button" aria-live="polite" title="Pick a month and year"></button>
+        <button id="mbNext" type="button" aria-label="Next month">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="mb-wdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
     </div>
-    <div class="mb-wdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
     <div id="mbGrid" class="cal-days mb-days"></div>
-    <div id="mbDay" class="mb-day" hidden></div>
+    <div id="mbSentinel" class="mb-sentinel" aria-hidden="true"></div>
   </section>
 </section>
 
@@ -305,10 +321,6 @@
        left today. Top: shown once the masthead has scrolled off. app.js
        toggles hidden on both; on narrow screens they drop their labels. -->
   <div class="floaters">
-    <button id="calToday" type="button" class="chip" title="Back to today: the current month, past days put away" hidden>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><circle cx="12" cy="15.5" r="1.6" fill="currentColor" stroke="none"/></svg>
-      <span>Today</span>
-    </button>
     <button id="toTop" type="button" class="chip" title="Back to top" aria-label="Back to top" hidden>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
       <span>Top</span>

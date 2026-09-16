@@ -122,6 +122,7 @@ h1 {
   line-height: .92; text-transform: uppercase; letter-spacing: .01em; margin: 0;
 }
 .masthead-text { min-width: 0; max-width: 100%; } /* a flex item would grow to its widest line and push past a phone's edge */
+.masthead .eyebrow { font-size: calc(clamp(2.6rem, 7vw, 4.2rem) * .25); font-weight: 500; letter-spacing: .14em; margin-bottom: .2rem; } /* "Seattle": a quarter of the title's size, a shade bolder (Steve, 2026-09-15) */
 /* the masthead's tools (Steve, 2026-09-14): the poster chip (Teams view
    only, see #teamPdfBtn), Add To Calendar and the theme pill at the
    masthead's right end, bottom-aligned with the stamp line — the bar below
@@ -220,9 +221,10 @@ h1 {
 html.teams-open #filterToggle, html.teams-open .search-wrap,
 html.teams-open .cal-toggle { display: none; } /* Add To Calendar stays: in Teams mode it offers the club's season feed */
 html.teams-open #calToday { display: none; }
+.cal-side:not(.is-float) .cal { margin-bottom: 1.6rem; } /* room for the TODAY tab below the docked card */
 /* the search box: a chip that takes typing, a magnifier at its right end and
    no placeholder; it gives up width first when the row gets tight */
-.filterbar .search-wrap { position: relative; display: flex; flex: 1 1 10rem; min-width: 10rem; } /* takes whatever room the row has left, never less than a word's worth: the chips drop their labels first (is-tight) */
+.filterbar .search-wrap { position: relative; display: flex; flex: 1 1 10rem; min-width: 10rem; max-width: 28rem; } /* max-width: never the whole of a wide page (Steve, 2026-09-15) */ /* takes whatever room the row has left, never less than a word's worth: the chips drop their labels first (is-tight) */
 #searchBox {
   width: 100%; font: 500 .85rem/1 var(--body); color: var(--ink); background: var(--mist);
   border: 1px solid var(--line); border-radius: 999px; padding: .5em 2.4em .5em .95em; min-height: 2.25rem;
@@ -264,7 +266,7 @@ html.teams-open #calToday { display: none; }
 }
 .theme-toggle[data-active="dark"] .theme-knob { left: calc(3px + var(--tt)); }
 .theme-toggle[data-active="system"] .theme-knob { left: calc(3px + 2 * var(--tt)); }
-.theme-toggle[data-active="cvd"] .theme-knob { left: calc(3px + 3 * var(--tt)); }
+#paletteToggle[data-active="cvd"] .theme-knob { left: calc(3px + var(--tt)); } /* the palette pill's second stop */
 @media (prefers-reduced-motion: reduce) { .theme-knob { transition: none; } }
 /* the bar stays pinned at the top while the list scrolls (--barh is its
    height — the month dividers and the calendar strip stick just below it);
@@ -411,44 +413,78 @@ html.pop-open .cal-side:not(.is-float) .cal { opacity: 0; pointer-events: none; 
 
 /* ---- the Month view: the month's events, as the filters leave them, on one calendar ---- */
 html.month-open .agenda-layout, html.month-open .cal-toggle { display: none; } /* the list and its mini calendar step aside; the board is the month */
+/* ---- the month view: one continuous grid of weeks, square days (Steve, 2026-09-15) ----
+   The grid runs from this month on with no end (app.js appends months as
+   the sentinel nears the window), sized to the window: seven squares across,
+   the page scrolling down them under the pinned filter bar; the ‹ MONTH ›
+   header and the weekday row stick under the bar and name the month at the
+   top (the sticky footer stays pinned at the bottom as everywhere). A day
+   carries its events' names only, as many as fit, the rest folded into
+   "+N more" (fitBoardCells); a tap on the day opens the card listing them all. */
 .month-board[hidden] { display: none; }
-.month-board { margin-top: .75rem; }
-.mb-wdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--mist); border: 2px solid var(--ink-soft); border-top: 0; border-bottom: 0; font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.month-board { margin: 0 auto; max-width: 100%; position: relative; } /* app.js sizeBoard sets its width: seven squares that show the whole month in the window at the top of the page, centred when that is narrower than the page */
+.mb-sticky { position: sticky; top: var(--barh); z-index: 6; background: var(--sky); padding-top: 1.9rem; } /* the room is the TODAY tab's, which rises from the header (Steve: an up tab) */
+.mb-head { position: relative; } /* the tab and, on a centred board, the vertical month name hang off it */
+/* TODAY over the month view's header: the same tab, upside down — rising from the header's top edge */
+.cal-head button.cal-today-tab { width: auto; height: auto; min-width: 0; min-height: 0; display: inline-flex; border-radius: 6px 6px 0 0; } /* not the header's arrow-button size, nor the phones' 2.75rem touch minimum */
+.cal-head button.cal-today-tab svg { width: .85rem; height: .85rem; }
+.mb-head .cal-today-tab { top: auto; bottom: 100%; border-top: 2px solid #c9cdd2; border-bottom: 0; border-radius: 6px 6px 0 0; padding: .24rem .7rem .3rem; box-shadow: 0 -3px 8px rgba(0, 0, 0, .25); }
+/* the board centred narrower than the page (sizeBoard's is-narrow): the month's name stands as vertical text in the left gutter, reading upward, still the picker's button */
+.month-board.is-narrow .cal-head button.cal-cur { position: absolute; right: calc(100% + .6rem); top: 0; writing-mode: vertical-rl; transform: rotate(180deg); transform-origin: center; font-size: 1.5rem; letter-spacing: .16em; padding: .5rem .1rem; line-height: 1; white-space: nowrap; }
+.month-board.is-narrow .mb-head { grid-template-columns: 1fr 1fr; } /* painted: the days scroll under it, not through the gap to the bar; the TODAY tab hangs from its foot */
+.mb-wdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--mist); border: 2px solid var(--ink-soft); border-top: 0; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
 .mb-wdays span { padding: .1rem .35rem .3rem; }
-.mb-days { border: 2px solid var(--ink-soft); border-radius: 0 0 10px 10px; overflow: hidden; grid-auto-rows: minmax(5.5rem, auto); }
-.mb-days > .cal-day { aspect-ratio: auto; height: auto; display: flex; flex-direction: column; align-items: stretch; gap: .2rem; padding: .3rem .3rem .35rem; }
-.mb-days > .cal-day.is-blank { display: block; margin: 0; width: auto; background: color-mix(in srgb, var(--line) 35%, var(--mist)); } /* a padding slot is a cell like the rest, a shade darker */
-.mb-days .num { font-size: .72rem; line-height: 1; margin-bottom: .1rem; }
+.mb-days { border: 2px solid var(--ink-soft); border-top: 0; border-radius: 0 0 10px 10px; overflow: hidden; grid-auto-rows: auto; }
+.mb-days > .cal-day { aspect-ratio: 1; height: auto; display: flex; flex-direction: column; align-items: stretch; gap: .15rem; padding: .3rem .3rem .35rem; cursor: pointer; }
+.mb-days > .cal-day:hover { background: color-mix(in srgb, var(--ink) 6%, var(--mist)); }
+.mb-days > .cal-day.is-today:hover { background: color-mix(in srgb, var(--ink) 26%, var(--mist)); }
+.mb-days > .cal-day.is-alt { background: color-mix(in srgb, var(--line) 22%, var(--mist)); } /* every other month a shade off, so the months read in the shared weeks */
+.mb-days > .cal-day.is-alt:hover { background: color-mix(in srgb, var(--ink) 8%, var(--mist)); }
+.mb-days > .cal-day.is-lead { opacity: .45; } /* the tail of last month that fills the first week */
+.mb-days > .cal-day.is-mstart { box-shadow: inset 0 2px 0 var(--ink-soft); } /* the month's first week: a rule along the top of its days — a stair-step where the months share a week */
+.mb-days > .cal-day.is-first { box-shadow: inset 2px 2px 0 var(--ink-soft); }
+.mb-days > .cal-day.is-first.is-today, .mb-days > .cal-day.is-mstart.is-today { box-shadow: inset 0 0 0 1px var(--ink), inset 0 2px 0 var(--ink-soft); }
+.mb-days .num { font-size: clamp(.72rem, 1.3vw, 1rem); line-height: 1; margin-bottom: .1rem; }
+.mb-days .cal-day.is-first .num { font-weight: 700; }
 .mb-days .hol { font-size: .58rem; line-height: 1.2; color: var(--gold); letter-spacing: .06em; text-transform: uppercase; }
 .mb-days .ticks { display: none; } /* phones only (below) */
-/* an event on the board: the time, the title, in the venue's wash with its hue down the left edge (a tap opens the event sheet, as a card does) */
-.mb-ev { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .35rem; align-items: baseline; width: 100%; text-align: left; font-family: var(--body); font-size: .7rem; line-height: 1.25; color: var(--ink); background: color-mix(in srgb, var(--dot) var(--tint), transparent); border: 0; border-left: 3px solid var(--dot); border-radius: 4px; padding: .18rem .3rem; cursor: pointer; }
+/* an event on a day: its name only (Steve, 2026-09-15 — no times), one line in its venue's colour */
+.mb-ev { display: block; flex: none; width: 100%; text-align: left; font-family: var(--body); font-size: .7rem; line-height: 1.25; color: var(--ink); background: color-mix(in srgb, var(--dot) var(--tint), transparent); border: 0; border-left: 3px solid var(--dot); border-radius: 4px; padding: .18rem .3rem; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 .mb-ev:hover { background: color-mix(in srgb, var(--dot) calc(var(--tint) + 14%), transparent); }
 .mb-ev[hidden] { display: none; }
-.mb-ev .t { font-family: var(--mono); font-size: .62rem; color: var(--ink-soft); white-space: nowrap; }
-.mb-ev .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.mb-ev.is-off .n { text-decoration: line-through; opacity: .7; }
-.mb-more { align-self: flex-start; font: inherit; font-family: var(--mono); font-size: .62rem; color: var(--ink-soft); background: none; border: 0; padding: .1rem .2rem; cursor: pointer; }
+.mb-ev.is-off { text-decoration: line-through; opacity: .7; }
+.mb-more { flex: none; align-self: flex-start; font: inherit; font-family: var(--mono); font-size: .62rem; color: var(--ink-soft); background: none; border: 0; padding: .1rem .2rem; cursor: pointer; }
+.mb-more[hidden] { display: none; }
 .mb-more:hover { color: var(--ink); }
 .mb-days .cal-day.is-past .mb-ev { opacity: .55; }
-.mb-day[hidden], .mb-day { display: none; } /* the picked day's events: phones only */
-.mb-day h3 { font-family: var(--display); font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .5rem; }
-.mb-day .mb-ev { font-size: .85rem; padding: .5rem .6rem; margin-bottom: .4rem; }
-.mb-day .mb-ev .t { font-size: .72rem; }
-.mb-day .mb-ev .n { white-space: normal; }
-.mb-day .mb-none { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); }
-@media (max-width: 640px) { /* phones: the days carry the venue ticks; a tapped day lists its events under the grid */
-  .mb-days { grid-auto-rows: auto; }
-  .mb-days > .cal-day { aspect-ratio: 1; padding: .2rem .25rem; gap: .1rem; cursor: pointer; }
-  .mb-days .num { font-size: .68rem; }
+.mb-sentinel { height: 1px; }
+/* the day's card: opens over the tapped day (the day, grown) and lists everything on it */
+.mb-pop { position: fixed; z-index: 31; background: var(--mist); border: 2px solid var(--ink-soft); border-radius: 10px; box-shadow: 0 14px 40px rgba(0, 0, 0, .35); padding: .6rem .7rem .7rem; max-height: min(70vh, 32rem); overflow-y: auto; transform-origin: top left; animation: mb-pop-in .16s ease-out; }
+@keyframes mb-pop-in { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .mb-pop { animation: none; } }
+.mb-pop h3 { font-family: var(--display); font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .5rem; display: flex; align-items: baseline; gap: .6rem; }
+.mb-pop h3 .mb-pop-n { font-family: var(--mono); font-weight: 400; font-size: .68rem; letter-spacing: .1em; color: var(--ink-soft); }
+.mb-pop .mb-ev { font-size: .85rem; padding: .4rem .6rem; margin-bottom: .35rem; white-space: normal; }
+.mb-pop .mb-ev .mb-sub { display: block; font-family: var(--mono); font-weight: 400; font-size: .68rem; letter-spacing: .04em; color: var(--ink-soft); margin-top: .1rem; }
+.mb-pop .mb-none { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); margin: 0; }
+@media (max-width: 640px) { /* phones: the days are too small for names — they carry the venue ticks; the tap opens the same card */
+  .mb-days > .cal-day { padding: .2rem .25rem; gap: .1rem; }
   .mb-days .hol, .mb-days .mb-ev, .mb-days .mb-more { display: none; }
   .mb-days .ticks { display: flex; }
-  .mb-days .cal-day.is-picked { box-shadow: inset 0 0 0 2px var(--ink); }
-  .mb-day:not([hidden]) { display: block; margin-top: 1rem; }
 }
 
 /* ---- mini month calendar: a nav bar, then one framed card per month ---- */
-.cal { display: grid; gap: 0; } /* the header bar and the card are one piece */
+.cal { display: grid; gap: 0; position: relative; } /* the header bar and the card are one piece; the TODAY tab hangs from its foot */
+/* TODAY: a tab out of the calendar's foot, the odds tab's cut (Steve, 2026-09-15) — shown only while the list has left today (app.js syncTodayFloat) */
+.cal-today-tab {
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%); z-index: 4; display: inline-flex; align-items: center; gap: .35rem;
+  font: 700 .62rem/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #f4f4f4; background: #2b2d30;
+  border: 2px solid #c9cdd2; border-top: 0; border-radius: 0 0 6px 6px; padding: .28rem .7rem .24rem; cursor: pointer; zoom: 1.15;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .25);
+}
+.cal-today-tab svg { width: .85rem; height: .85rem; }
+.cal-today-tab:hover { background: #3a3d41; }
+.cal-today-tab[hidden] { display: none; }
 .cal[hidden] { display: none; } /* an author display beats the UA [hidden] rule */
 .cal-months { display: grid; gap: 1.1rem; grid-auto-rows: max-content; } /* rows stay card-sized even while the reel pins the box's height */
 /* when the month changes the cards move like a reel (app.js swapCal):
@@ -462,7 +498,7 @@ html.month-open .agenda-layout, html.month-open .cal-toggle { display: none; } /
   padding: .3rem .3rem .1rem; background: var(--mist);
   border: 2px solid var(--ink-soft); border-bottom: 0; border-radius: 10px 10px 0 0; /* the month card's frame */
 }
-.cal-head #calNext { justify-self: end; }
+.cal-head #calNext, .cal-head #mbNext { justify-self: end; } /* ‹ flush left, › flush right on both calendars */
 .cal-head button.cal-cur { /* the month's name: a button that opens the month / year picker (outranks the bar's control rule below) */
   font-family: var(--display); font-weight: 700; font-size: 1rem;
   text-transform: uppercase; letter-spacing: .12em; text-align: center;
@@ -513,7 +549,10 @@ html.month-open .agenda-layout, html.month-open .cal-toggle { display: none; } /
    beside them (leading ones to the left, trailing ones to the right and
    down) so no lines are drawn between padding slots — only where they meet
    a day, plus the rule under the month's name, which runs the full width. */
-.cal-day { background: var(--mist); border: 0; color: var(--ink); display: block; width: 100%; min-width: 0; overflow: hidden; }
+/* a day: the number top-left (a button centres its content otherwise, so a
+   day with two rows of ticks lifted its number), the ticks under it as a
+   centred block of at most four a row (Steve, 2026-09-15) */
+.cal-day { background: var(--mist); border: 0; color: var(--ink); display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; width: 100%; min-width: 0; overflow: hidden; }
 .cal-day.is-blank { width: auto; aspect-ratio: auto; margin: 0 0 0 -1px; } /* stretches with its margins; the row's height comes from its days */
 .cal-day:not(.is-blank) ~ .cal-day.is-blank { margin: 0 -1px -1px 0; }
 button.cal-day { cursor: pointer; }
@@ -521,12 +560,13 @@ button.cal-day { cursor: pointer; }
    touch of ink over the card (lighter in dark mode, darker in light), so
    it reads in both themes */
 button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist)); box-shadow: inset 0 0 0 1px var(--ink-soft); }
-.cal-day .num { display: block; }
+.cal-day .num { display: block; font-size: .88rem; line-height: 1; text-align: left; }
 /* today: the hover treatment, a touch brighter, held */
 .cal-day.is-today { background: color-mix(in srgb, var(--ink) 20%, var(--mist)); box-shadow: inset 0 0 0 1px var(--ink); }
 .cal-day.is-today .num { font-weight: 700; }
-.ticks { display: flex; flex-wrap: wrap; gap: 2px; margin-top: .2rem; }
-.ticks i { width: .28rem; height: .28rem; border-radius: 1px; background: var(--dot, var(--ink-soft)); }
+.ticks { display: flex; justify-content: center; align-items: center; gap: 2px; margin: .3rem auto 0; } /* three dots at most, centred, then a "+" for the rest (Steve, 2026-09-15) */
+.ticks i { width: .32rem; height: .32rem; border-radius: 1px; background: var(--dot, var(--ink-soft)); flex: none; }
+.ticks .tick-more { font: 700 .6rem/1 var(--mono); color: var(--ink-soft); margin-left: 1px; }
 /* past days go grey: the number in the soft ink, the venue ticks washed
    out — still tinted enough to tell venues apart, just clearly behind us */
 .cal-day.is-past { color: var(--ink-soft); }
@@ -800,6 +840,9 @@ footer::after {
 @media (min-width: 641px) {
   .foot-inner { display: grid; grid-template-columns: 1fr auto 1fr; }
   .foot-inner > * { justify-self: center; }
+  /* the stamp gone (is-stampless): two things left, one at each end (Steve, 2026-09-15) */
+  .foot-inner.is-stampless { grid-template-columns: auto auto; justify-content: space-between; }
+  .foot-inner.is-stampless > * { justify-self: auto; }
 }
 footer p { color: var(--ink-soft); font-size: .72rem; margin: 0; }
 .gw { display: flex; align-items: center; gap: .7rem; }
@@ -817,6 +860,7 @@ footer .share.info { order: 3; position: relative; }
 footer .foot-link { position: relative; top: -.5px; display: inline-flex; align-items: center; gap: .4rem; /* measured half a pixel under its neighbours' labels (Steve, 2026-09-15) */ font-family: var(--mono); font-size: .9rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ink); text-decoration: none; padding: .2rem 0; white-space: nowrap; }
 footer .foot-link:hover { color: var(--ink-soft); }
 footer .foot-link svg { width: 1.1rem; height: 1.1rem; }
+.foot-inner.is-stampless .foot-updated { display: none; } /* the first thing to go when the row is short of room */
 .foot-inner.is-tight .foot-link span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* the advertising page (advertise.html): a short column of prose under the masthead */
 .ad-page { max-width: 40rem; margin: 0 auto 4rem; padding: 0 1.25rem; }
@@ -1106,7 +1150,6 @@ html { overflow-anchor: none; }
 .tf-bugwrap:has(> .is-pregame.is-tight)::after { zoom: 1; }
 #teamHead.is-compact .tf-bugwrap { margin: 0; }
 #teamHead.is-compact .tf-bugwrap::after { display: none; }
-.tf-bugwrap:has(> .is-pregame.is-est)::after { content: "ESTIMATE"; font-size: .5rem; letter-spacing: .08em; padding-top: .28rem; } /* no line for this game: the chances come from the clubs' records — a longer word, set tighter to keep the column's width */
 #teamHead.is-compact .tf-bugwrap .tf-out, #teamHead.is-compact .bug-top, #teamHead.is-compact .has-bug .tf-head .tf-score, #teamHead.is-compact .has-bug .tf-lines .tf-state { display: none; }
 .tf-bug:not(.is-generic) { zoom: 1.02; } /* baseball's live bug has three rows on top: no room to grow */
 #teamHead.is-compact .tf-bug, #teamHead.is-compact .tf-bug:not(.is-generic) { zoom: 1; border-width: 1px; border-radius: 5px; box-shadow: none; }
@@ -1475,7 +1518,7 @@ body.sheet-open { overflow: hidden; }
   #searchBox { font-size: 1rem; } /* under 16px iOS Safari zooms the page when the box gets focus */
   :root { --barh-base: 3.9rem; } /* = 2.75rem chips + the .filter-area padding */
   .theme-toggle { --tt: 2.6rem; }
-  .theme-toggle:not(.view-toggle) { --tt: 2.1rem; } /* four stops fit the phone's row */
+  .theme-toggle:not(.view-toggle) { --tt: 2.1rem; } /* the theme and palette pills fit the phone's row */
   .theme-toggle button { height: 2.35rem; }
   .cal-days > * { min-height: 2.75rem; }
   .cal-head button { min-width: 2.75rem; min-height: 2.75rem; }

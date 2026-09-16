@@ -37,7 +37,8 @@ append-only registry in `filter.js`, zero-padded to six digits, so links
 keep working as venues and teams are added and every code is the same
 length.
 Opening one loads with those exclusions instead of your saved local prefs.
-The masthead's theme toggle has four stops — light, dark, system, and CVD, the colour-vision-deficiency palette on the system scheme (Okabe–Ito venue hues, blue/orange last-five marks); the choice is remembered per browser (`lqa-theme`), phones included.
+The masthead has a theme pill (light, dark, system — `lqa-theme`) and beside it a palette pill (standard, or CVD — the colour-vision-deficiency palette: Okabe–Ito venue hues, blue/vermillion last-five marks — `lqa-palette`); both remembered per browser, phones included, any combination. `?team=a,b&demo=live` plays the first club picked as the game in progress.
+The view pill's middle stop (`?view=month`, remembered as `lqa-view`) is one continuous grid of weeks from this month on: square days carrying the names of what's on (as many as fit, the rest as "+N more"; phones show venue ticks), the ‹ MONTH › header pinned under the filter bar and naming the month at the top of the window (its name opens the month / year picker), more months appended as you scroll — there is no last one. Tapping a day opens a card listing everything on it.
 The panel's preset chips (Default, Everything, Nothing, Neighborhood,
 Capacity > 2,500) are just such filter states applied in one tap — Everything switches
 Holidays on as well, Nothing unchecks every group, and Capacity keeps the
