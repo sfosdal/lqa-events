@@ -269,10 +269,15 @@
   // wallpaper, not something a reader traces, and only clutters the
   // gutter; its "n of N" label under the time still says it's a run. ----
   function parseYmd(s) { var p = String(s).split('-'); return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])); }
-  function seriesKey(e) { return e.venue + '|' + String(e.title || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+  // a Rep performance's title carries its keywords after a colon ("Eureka
+  // Day: Preview Performance", "…: Opening Night", "…: Open Captioning");
+  // the run is one series, so the key is the show alone (Steve, 2026-09-16:
+  // the previews, opening night and run were three lines in one lane)
+  function seriesBase(e) { var t = String(e.title || ''); return e.venue === 'Seattle Rep' ? t.split(':')[0] : t; }
+  function seriesKey(e) { return e.venue + '|' + seriesBase(e).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
   function seriesLabel(s) {
     var f = function (d) { return parseYmd(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
-    return s.events[0].title + ' — ' + s.events.length + ' ' + (eventType(s.events[0]) === 'sports' ? 'games' : 'nights') + ' · ' + f(s.start) + ' – ' + f(s.end);
+    return seriesBase(s.events[0]).trim() + ' — ' + s.events.length + ' ' + (eventType(s.events[0]) === 'sports' ? 'games' : 'nights') + ' · ' + f(s.start) + ' – ' + f(s.end);
   }
   function findSeries(list) {
     var groups = {};

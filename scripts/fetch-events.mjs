@@ -424,7 +424,18 @@ try {
     if (out) { e.soldOut = true; s++; }
     n++;
   }
-  console.log(`soldout: ${n} events with ticket counts (checked ${so.generated}), ${s} sold out`);
+  // the home teams' away games (the checker finds the host's listing by club and date): the same counts onto the season schedule
+  let a = 0;
+  for (const r of Object.values(so.events || {})) {
+    if (!r.away || !r.club || !/^(available|soldout)$/.test(r.status) || /half price|\bpromo\b|\bpresale\b/i.test(r.name || '')) continue; // a promo's own listing ("HALF PRICE: …") never speaks for the game
+    const g = (seasons[r.club] || []).find((x) => !x.home && x.date === r.date);
+    if (!g) continue;
+    const out = r.status === 'soldout';
+    g.tickets = { box: out ? 0 : (r.primary == null ? null : r.primary), resale: r.resale || 0, checked: r.checked };
+    const from = out ? r.fromResale : r.fromPrimary; if (from != null) g.tickets.from = from; if (out) g.soldOut = true;
+    a++;
+  }
+  console.log(`soldout: ${n} events with ticket counts (checked ${so.generated}), ${s} sold out, ${a} away games`);
 } catch (err) { console.error('soldout.json:', err.message); }
 merged.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
 if (Object.keys(seasons).length) {

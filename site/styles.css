@@ -122,16 +122,13 @@ h1 {
   line-height: .92; text-transform: uppercase; letter-spacing: .01em; margin: 0;
 }
 .masthead-text { min-width: 0; max-width: 100%; } /* a flex item would grow to its widest line and push past a phone's edge */
-.masthead .eyebrow { font-size: calc(clamp(2.6rem, 7vw, 4.2rem) * .25); font-weight: 500; letter-spacing: .14em; margin-bottom: .2rem; } /* "Seattle": a quarter of the title's size, a shade bolder (Steve, 2026-09-15) */
+.masthead .eyebrow { font-size: calc(clamp(2.6rem, 7vw, 4.2rem) * .5); font-weight: 500; letter-spacing: .14em; margin-bottom: .1rem; line-height: 1; } /* "Seattle": half the title's size (Steve, 2026-09-16: twice the quarter it was), a shade bolder */
 /* the masthead's tools (Steve, 2026-09-14): the poster chip (Teams view
    only, see #teamPdfBtn), Add To Calendar and the theme pill at the
    masthead's right end, bottom-aligned with the stamp line — the bar below
    keeps its room for the switch, filters, search and the clubs */
 .masthead { position: relative; }
 .masthead-tools { display: flex; align-items: center; gap: .6rem; flex: none; margin-left: auto; }
-.masthead-tools .chip { display: inline-flex; align-items: center; gap: .45rem; min-height: 2.25rem; position: relative; }
-.masthead-tools .chip svg { width: 1rem; height: 1rem; flex: none; }
-.masthead-tools .chip:not(:disabled):hover { border-color: var(--ink-soft); }
 .sub { color: var(--ink-soft); max-width: 34rem; margin: .8rem 0 0; }
 
 .updated { /* the "Updated …" stamp: an eyebrow line under the title, spaced like the one above it */
@@ -242,7 +239,7 @@ html.teams-open #calToday { display: none; }
    (narrow layouts only), Home Teams, then the theme pill always last (DOM
    order keeps the chips together; flex order places them); the search box
    grows to fill the gap before them */
-#subscribeBtn { order: 3; } /* always just left of the view switch, in either mode: the small icon chip (the mini calendar, or the poster) sits before it */
+#subscribeBtn { order: 3; } /* the bar's last chip in either mode; the small icon chips (the phone's mini calendar, the season calendar) sit before it (back in the bar 2026-09-16) */
 #calToggle { order: 2; }
 #viewToggle { order: -1; } /* the view switch leads the bar in either mode (Steve, 2026-09-14) */
 /* light / dark: a two-stop pill at the bar's right end, the ink knob
@@ -288,7 +285,7 @@ html.teams-open #calToday { display: none; }
 .bar-eyebrow { /* "Seattle" and "Updated …" in the masthead's eyebrow face */
   flex: none; font-family: var(--mono); font-weight: 400; letter-spacing: .08em; color: var(--gold);
 }
-#barUpdated { margin-left: auto; font-size: .6em; } /* the stamp: flush right, 40% smaller */
+#barUpdated { display: none; } /* the stamp is the footer's alone (Steve, 2026-09-16) */
 html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--titleh)); } /* the title line carries the masthead's tools while scrolled (app.js markStuck moves them): 1.7rem chips + the .5rem gap */
 /* the tools in the title line: icon-only chips a size down, the theme pill scaled to match, at the line's right end (the pop still hangs from the bar below) */
 .bar-title .masthead-tools { align-self: center; margin-left: auto; gap: .4rem; }
@@ -430,20 +427,23 @@ html.month-open .agenda-layout, html.month-open .cal-toggle { display: none; } /
 .cal-head button.cal-today-tab[hidden] { display: none; } /* the override above would otherwise beat [hidden] */
 .mb-head .cal-today-tab { top: auto; bottom: 100%; border-top: 2px solid var(--ink-soft); border-bottom: 0; border-radius: 6px 6px 0 0; padding: .24rem .7rem .3rem; box-shadow: 0 -3px 8px rgba(0, 0, 0, .25); }
 /* the board centred narrower than the page (sizeBoard's is-narrow): the months' names stand beside their blocks, so the header keeps only ‹ › */
-.month-board.is-narrow .cal-head button.cal-cur { display: none; }
-.month-board.is-narrow .mb-head { grid-template-columns: 1fr 1fr; } /* painted: the days scroll under it, not through the gap to the bar; the TODAY tab hangs from its foot */
+/* …and on a centred board the header goes altogether (Steve, 2026-09-16: "useless" — the names beside the blocks say the month and open the picker; scrolling moves the months); what stays is the sticky anchor, a hair tall, and TODAY as a chip under the filter bar while another month is at the top */
+.month-board.is-narrow .mb-head { display: none; }
+.month-board.is-narrow .mb-sticky { padding-top: 0; height: .4rem; }
+.month-board.is-narrow .mb-sticky > .cal-today-tab { top: .4rem; bottom: auto; border: 2px solid var(--ink-soft); border-radius: 6px; box-shadow: 0 3px 8px rgba(0, 0, 0, .25); } /* painted: the days scroll under it, not through the gap to the bar; the TODAY tab hangs from its foot */
 .mb-sticky .mb-head { border-bottom: 2px solid var(--ink-soft); border-radius: 10px; padding-bottom: .3rem; } /* the header on its own: the weekday row went with each month */
 .mb-wdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--mist); border: 2px solid var(--ink-soft); border-bottom: 0; border-radius: 10px 10px 0 0; font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
-.mb-wdays span { padding: .1rem .35rem .3rem; }
+.mb-wdays span { padding: .1rem .35rem .3rem; text-align: center; } /* centred over the column (Steve, 2026-09-16) */
 /* every month its own block (Steve, 2026-09-15): a framed grid padded to whole weeks with blank slots, a gap between months, its name standing beside it on a centred board */
 .mb-month { position: relative; margin-top: .8rem; }
 .mb-days { border: 2px solid var(--ink-soft); border-radius: 0 0 10px 10px; overflow: hidden; grid-auto-rows: auto; }
-/* the month's name: a heading over its block on a full-width board (the sticky header names the one at the top; this names each as it passes), standing beside it on a centred one */
-.mb-mname { display: block; font: 700 .95rem/1 var(--display); text-transform: uppercase; letter-spacing: .12em; color: var(--ink); background: none; border: 0; padding: .15rem .1rem .35rem; margin: 0; cursor: pointer; text-align: left; border-radius: 6px; }
+/* the month's name: standing beside its block on a centred board; on a full-width board the pinned ‹ MONTH › bar names the month, so no heading over the block as well (it read twice — Steve's review, 2026-09-16) */
+.mb-mname { display: none; font: 700 .95rem/1 var(--display); text-transform: uppercase; letter-spacing: .12em; color: var(--ink); background: none; border: 0; padding: .15rem .1rem .35rem; margin: 0; cursor: pointer; text-align: left; border-radius: 6px; }
 .mb-mname:hover { color: var(--ink-soft); }
-.month-board.is-narrow .mb-mname { position: absolute; right: calc(100% + .9rem); top: 50%; translate: 0 -50%; /* centred on its block (Steve, 2026-09-15) */ writing-mode: vertical-rl; transform: rotate(180deg); transform-origin: center; font: 700 var(--mname, 3rem)/1 var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--ink); background: none; border: 0; padding: 0; margin: 0; cursor: pointer; white-space: nowrap; border-radius: 6px; }
+.month-board.is-narrow .mb-mname { display: block; position: absolute; right: calc(100% + .9rem); top: 50%; translate: 0 -50%; /* centred on its block (Steve, 2026-09-15) */ writing-mode: vertical-rl; transform: rotate(180deg); transform-origin: center; font: 700 var(--mname, 3rem)/1 var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--ink); background: none; border: 0; padding: 0; margin: 0; cursor: pointer; white-space: nowrap; border-radius: 6px; }
 .month-board.is-narrow .mb-mname:hover { color: var(--ink-soft); }
 .month-board.is-narrow .mb-mname:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.month-board.is-short .mb-days > .cal-day { aspect-ratio: auto; height: var(--cellh); } /* a full-width board that would run past the window: the days give up a little height (never under 60% of their width) so the month fits (app.js sizeBoard) */
 .mb-days > .cal-day { aspect-ratio: 1; height: auto; display: flex; flex-direction: column; align-items: stretch; gap: .15rem; padding: .3rem .3rem .35rem; cursor: pointer; }
 .mb-days > .cal-day:hover { background: color-mix(in srgb, var(--ink) 6%, var(--mist)); }
 .mb-days > .cal-day.is-today:hover { background: color-mix(in srgb, var(--ink) 26%, var(--mist)); }
@@ -467,6 +467,7 @@ html.month-open .agenda-layout, html.month-open .cal-toggle { display: none; } /
 .mb-pop { position: fixed; z-index: 31; background: var(--mist); border: 2px solid var(--ink-soft); border-radius: 10px; box-shadow: 0 14px 40px rgba(0, 0, 0, .35); padding: .6rem .7rem .7rem; max-height: min(70vh, 32rem); overflow-y: auto; transform-origin: top left; animation: mb-pop-in .16s ease-out; }
 @keyframes mb-pop-in { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .mb-pop { animation: none; } }
+@media (max-width: 640px) { .mb-pop { left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 70vh; border-radius: 12px 12px 0 0; border-bottom: 0; padding-bottom: calc(.7rem + env(safe-area-inset-bottom, 0px)); transform-origin: bottom center; } } /* a sheet from the foot, like the event's (app.js openDayPop leaves the position to this) */
 .mb-pop h3 { font-family: var(--display); font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .5rem; display: flex; align-items: baseline; gap: .6rem; }
 .mb-pop h3 .mb-pop-n { font-family: var(--mono); font-weight: 400; font-size: .68rem; letter-spacing: .1em; color: var(--ink-soft); }
 .mb-pop .mb-ev { font-size: .85rem; padding: .4rem .6rem; margin-bottom: .35rem; white-space: normal; background: color-mix(in srgb, var(--ink) 6%, transparent); }
@@ -570,9 +571,10 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
 /* today: the hover treatment, a touch brighter, held */
 .cal-day.is-today { background: color-mix(in srgb, var(--ink) 20%, var(--mist)); box-shadow: inset 0 0 0 1px var(--ink); }
 .cal-day.is-today .num { font-weight: 700; }
-.ticks { display: flex; justify-content: center; align-items: center; gap: 2px; margin: .3rem auto 0; } /* three dots at most, centred, then a "+" for the rest (Steve, 2026-09-15) */
-.ticks i { width: .32rem; height: .32rem; border-radius: 1px; background: var(--dot, var(--ink-soft)); flex: none; }
-.ticks .tick-more { font: 700 .6rem/1 var(--mono); color: var(--ink-soft); margin-left: 1px; }
+/* three round dots at most, centred, then a "+" for the rest — the row sits at the cell's foot, the + the dots' own height and on their line (Steve, 2026-09-15 / 16) */
+.ticks { display: flex; justify-content: center; align-items: center; gap: 2px; margin: auto auto 0; padding-top: .3rem; height: .32rem; box-sizing: content-box; }
+.ticks i { width: .32rem; height: .32rem; border-radius: 50%; background: var(--dot, var(--ink-soft)); flex: none; }
+.ticks .tick-more { display: block; width: .32rem; height: .32rem; margin-left: 1px; flex: none; color: var(--ink-soft); background: linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat, linear-gradient(currentColor, currentColor) center / 1.5px 100% no-repeat; font-size: 0; }
 /* past days go grey: the number in the soft ink, the venue ticks washed
    out — still tinted enough to tell venues apart, just clearly behind us */
 .cal-day.is-past { color: var(--ink-soft); }
@@ -857,7 +859,7 @@ footer .gw-credit { font-size: .9rem; letter-spacing: .1em; line-height: 1; } /*
 /* three things across the row — the credit, the Updated stamp, the links —
    spaced 1 : 2 : 2 : 1 (space-around; Steve, 2026-09-15) */
 footer .gw { order: 1; }
-footer .foot-updated { order: 2; font-family: var(--mono); font-size: .9rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin: 0; white-space: nowrap; } /* the Ghostwood credit's type (Steve, 2026-09-15: the two should match) */
+footer .foot-updated { order: 2; font-family: var(--mono); font-size: .9rem; font-weight: 500; letter-spacing: .1em; color: var(--gold); margin: 0; white-space: nowrap; } /* the Ghostwood credit's type (Steve, 2026-09-15: the two should match) */
 footer .foot-links { order: 3; display: flex; align-items: center; gap: 1.2rem; }
 footer .foot-link { order: 1; } /* Advertise, Embed, Sources */
 footer #embed { order: 2; }
@@ -977,6 +979,8 @@ html { overflow-anchor: none; }
 .team-form.is-season .tf-news, .team-form.is-season .tf-more, .team-form.is-season .tf-wiki > p,
 .team-form.is-pre .tf-news, .team-form.is-pre .tf-more, .team-form.is-pre .tf-wiki > p,
 .team-form.is-final .tf-news, .team-form.is-final .tf-more, .team-form.is-final .tf-wiki > p { display: none; }
+/* with the news gone the rule under the lines went with it (Steve, 2026-09-16: "scraps of left over design") */
+.team-form.is-season .tf-wiki .tf-lead, .team-form.is-pre .tf-wiki .tf-lead, .team-form.is-final .tf-wiki .tf-lead { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
 /* the season's Wikipedia lead, at the right; under the rest when the row is narrow */
 .tf-wiki { position: relative; flex: 1 1 24rem; min-width: 0; align-self: stretch; display: flex; flex-direction: column; max-height: var(--crest); overflow: hidden auto; scrollbar-width: thin; padding-left: 1.1rem; border-left: 1px solid var(--line); font-size: .85rem; line-height: 1.45; color: var(--ink); } /* the rule runs the block's height; beside the crests the column scrolls inside it */
 .tf-wiki > .tf-cols, .tf-wiki > p { margin-block: auto; } /* short: centred on the row; tall: scrolls from the top (justify-content: center would clip the top) */
@@ -990,6 +994,7 @@ html { overflow-anchor: none; }
 /* the pregame's starters and the leaders out, at the top of the column */
 .tf-wiki .tf-lead { margin-bottom: .55rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
 .tf-wiki .tf-lead p:first-child { margin-top: 0; }
+.tf-lines p[hidden] { display: none; } /* a line fitLead dropped */
 .tf-more { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; margin: .6rem auto 0; flex: none; font-size: .78rem; padding: .45em .9em .45em 1.05em; color: var(--ink-soft); }
 .tf-more svg { width: .9rem; height: .9rem; transition: transform .2s; }
 .tf-more:hover { color: var(--ink); border-color: var(--ink-soft); }
@@ -1137,7 +1142,7 @@ html { overflow-anchor: none; }
 .tf-hl a:hover { text-decoration: underline; color: var(--team-2); }
 .tf-hl-head { margin-bottom: 0 !important; }
 .tf-wiki .tf-lead p:first-child { margin-top: 0; }
-.tf-wiki .tf-lead .tf-blurb { font-family: var(--body); font-size: .85rem; line-height: 1.4; color: var(--ink); max-width: none; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.tf-wiki .tf-lead .tf-blurb { font-family: var(--body); font-size: .85rem; line-height: 1.4; color: var(--ink); max-width: none; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 /* the other sports' bug: team, score, that side's goals (or the ball) */
 .bug-grid.bug-grid-2 { grid-template-columns: 6.6rem minmax(3.6rem, max-content) minmax(5rem, 1fr); } /* the goals column takes what the row allows and trims with an ellipsis */
 /* (doubled class: these outrank the baseball grid's pins further down) */
@@ -1186,7 +1191,7 @@ html { overflow-anchor: none; }
 .tf-channels a:hover { color: var(--team-2); border-bottom-color: currentColor; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* the strip's three sections (app.js buildWatchStrip): streaming at the left, TV centred, radio at the right — a grid of three equal tracks so the middle stays centred whatever the ends hold; an empty section keeps its track */
-.tf-sect { display: flex; align-items: center; gap: .5rem; min-width: 0; }
+.tf-sect { display: flex; align-items: center; gap: .5rem; min-width: 0; max-width: 100%; overflow: hidden; } /* a section never spills into its neighbour: its list wraps (and folds behind the chevron) inside its own track */
 .tf-sect.at-l { justify-self: start; }
 .tf-sect.at-c { justify-self: center; }
 .tf-sect.at-r { justify-self: end; }
@@ -1199,7 +1204,7 @@ html { overflow-anchor: none; }
 @media (min-width: 641px) {
   /* the sections' places (app.js buildWatchStrip counts them): three sit left, centre and right; two at the ends; one centred — the ends keep a floor, so a long list wraps behind the chevron rather than crushing its neighbour, and a section never spills into the next */
   .tf-watch { display: grid; grid-template-columns: minmax(7rem, 1fr) minmax(0, auto) minmax(7rem, 1fr); align-items: center; column-gap: 1rem; }
-  .tf-watch.has-3 { grid-template-columns: 1fr auto 1fr; column-gap: 0; } /* the middle section dead centre, the outer two centred in their halves: the 1 : 2 : 2 : 1 spacing with the centre kept honest (Steve, 2026-09-15) */
+  .tf-watch.has-3 { grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr); column-gap: .6rem; } /* minmax(0, …): a long TV list wraps inside its track (and folds behind the chevron) instead of running into the radio (Steve, 2026-09-16) */ /* the middle section dead centre, the outer two centred in their halves: the 1 : 2 : 2 : 1 spacing with the centre kept honest (Steve, 2026-09-15) */
   .tf-watch.has-3 .tf-sect { justify-self: center; }
   .tf-watch.has-2 { grid-template-columns: minmax(7rem, auto) minmax(7rem, auto); justify-content: space-between; }
   .tf-watch.has-1, .tf-watch.has-0 { grid-template-columns: minmax(0, auto); justify-content: center; }
@@ -1299,7 +1304,8 @@ html { overflow-anchor: none; }
 @media (min-width: 641px) {
   .team-form.is-live.is-wrapped .tf-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 1.2rem; align-items: start; }
   .team-form.is-live.is-wrapped .tf-cols .tf-lead { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; padding-right: 1.2rem; border-right: 1px solid var(--line); align-self: stretch; }
-  .team-form.is-live.is-wrapped .tf-cols .tf-lead:only-child { grid-column: 1 / -1; padding-right: 0; border-right: 0; }
+  .team-form.is-live.is-wrapped .tf-cols .tf-lead:only-child, .team-form.is-live.is-wrapped.is-season .tf-cols .tf-lead, .team-form.is-live.is-wrapped.is-pre .tf-cols .tf-lead, .team-form.is-live.is-wrapped.is-final .tf-cols .tf-lead { grid-column: 1 / -1; padding-right: 0; border-right: 0; } /* no news beside it: the lines take the whole width (Steve, 2026-09-16: wasted space) */
+  .team-form.is-live.is-wrapped .tf-cols .tf-lead { max-height: 6.4rem; overflow: hidden; } /* four lines' room under the crests: the block keeps near its wide height, app.js fitLead drops the lower-priority lines to fit */
 }
 /* the club's colours (app.js sets --team / --team-2 from filter.js TEAMS):
    the frame and the month's name in the accent, home games in the primary */
@@ -1355,6 +1361,7 @@ html:not(.teams-open) #teamPdfBtn { display: none; }
 html:not(.teams-open) .team-strip { display: none; }
 .filterbar .team-strip { order: 1; flex: 1 1 0; min-width: 0; display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; padding: 0; } /* no vertical padding: the strip is exactly a pill tall, so the bar keeps one height in both modes */ /* order: where the search box was, so Home Teams (3) keeps its place beside the theme pill (5) */
 .team-strip::-webkit-scrollbar { display: none; }
+.team-strip.is-more-right { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.6rem), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 2.6rem), transparent); } /* more crests beyond the edge: a fade says so (app.js fitTeamStrip) */
 .team-tab {
   flex: none; display: inline-flex; align-items: center; gap: .4rem; min-height: 2.25rem;
   padding: .3rem .75rem .3rem .45rem; border: 1px solid var(--line); border-radius: 999px;
@@ -1406,6 +1413,8 @@ html:not(.teams-open) .team-strip { display: none; }
 .team-cal .cal-day.is-pre { opacity: .6; } /* preseason: there, but faded, like a played game */
 .badge.b-post { background: color-mix(in srgb, var(--team-2) 22%, transparent); color: var(--ink); border: 1px dashed var(--team-2); }
 .team-sched .month-group.is-post .month-row > span { color: var(--team-2); }
+.team-sched .month-row.is-phase > span { color: var(--team-2); } /* the phase headings — Preseason, the regular season, Postseason — in the postseason pill's dress (Steve, 2026-09-16) */
+.team-sched .month-row.is-phase { margin-top: .4rem; }
 /* and on the calendar: hatched days, the final's in the accent */
 .team-cal .cal-day.is-post { background: repeating-linear-gradient(-45deg, transparent 0 3px, color-mix(in srgb, var(--ink-soft) 22%, transparent) 3px 5px); }
 .team-cal .cal-day.is-post.is-final { background: repeating-linear-gradient(-45deg, transparent 0 3px, color-mix(in srgb, var(--team-2) 45%, transparent) 3px 5px); }
@@ -1440,6 +1449,7 @@ html:not(.teams-open) .team-strip { display: none; }
 .ev-watch-ico { display: inline-block; width: .95rem; height: .95rem; vertical-align: -.22em; margin-right: .3em; color: var(--ink-soft); }
 .ev-watch-ico svg { width: 100%; height: 100%; display: block; }
 .ev-watch { font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); letter-spacing: .02em; }
+.ev-watch-name { white-space: nowrap; } /* "Seattle Sports (710 AM)" breaks between outlets, never inside one */
 .ev-watch b { font-weight: 700; }
 .b-playoff { color: var(--gold); }
 /* the opponent's crest is a button: full colour on the card itself (no
@@ -1533,13 +1543,15 @@ body.sheet-open { overflow: hidden; }
   .cal-head button { min-width: 2.75rem; min-height: 2.75rem; }
   .fp-row { padding: .55rem .35rem; }
   /* presets: one swipeable row instead of three stacked ones; no label */
-  .fp-top { gap: .6rem; margin: 0 -1rem 1rem; padding: 0 1rem; }
+  .fp-top { gap: .6rem; margin: 0 -1rem 1rem; padding: 0 1rem; flex-wrap: wrap; }
+  .fp-top .fp-presets { flex-basis: 100%; } /* the presets take the row; Sold Out & Nearly and Holidays go to the next (they had sat over the chips) */
   .fp-presets { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 0 0 .2rem; }
   .fp-presets::-webkit-scrollbar { display: none; }
   .fp-preset { flex: none; }
   .fp-only { padding: .55em .6em; }
   .masthead { padding: 1.6rem 0 .8rem; gap: 1.1rem; }
-  h1 { font-size: clamp(2.4rem, 11vw, 3.2rem); }
+  h1 { font-size: clamp(2rem, 8.5vw, 3.2rem); } /* a size down (was 11vw): with the doubled eyebrow the theme pill had come down over the title's last letters (Steve's review, 2026-09-16) */
+  .masthead .eyebrow { line-height: 1.7; } /* the eyebrow's line is the pill's: tall enough that the title starts under the pill */
   .pop { left: 0; right: 0; width: auto; }
 
   /* day groups: date reads across the top instead of down a rail */
@@ -1647,12 +1659,12 @@ body.sheet-open { overflow: hidden; }
   .tf-channels { max-height: none; gap: .25rem 1rem; }
   .filterbar .search-wrap { flex: 1 1 4rem; min-width: 3rem; } /* the box gives way first: on a 375px phone the icon row needs the room */
   /* a phone's bar is always the icon-only row: measured, the labelled one runs past the edge and the view switch with it */
-  .filterbar #filterToggle span, .masthead-tools #subscribeBtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .filterbar #filterToggle, .masthead-tools #subscribeBtn { padding: .5em .7em; }
-  .filterbar #filterToggle svg, .masthead-tools #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
+  .filterbar #filterToggle span, .filterbar #subscribeBtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .filterbar #filterToggle, .filterbar #subscribeBtn { padding: .5em .7em; } /* phones: icons only (the chips moved into the bar 2026-09-16) */
+  .filterbar #filterToggle svg, .filterbar #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
   /* the tools sit at the top right, on the eyebrow's line (short, so the room is there), clear of the title below; a flex row would cost the phone a line */
-  .masthead > .masthead-tools { position: absolute; right: 0; top: 1.2rem; gap: .4rem; }
-  .masthead-tools .chip, .masthead-tools #subscribeBtn { min-height: 1.9rem; padding: .3em .55em; }
+  .masthead > .masthead-tools { position: absolute; right: 0; top: 0; gap: .4rem; }
+  .masthead-tools .chip { min-height: 1.9rem; padding: .3em .55em; }
   /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
   .filterbar { gap: .4rem; }
   .filterbar #calToggle .chev { display: none; }

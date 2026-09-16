@@ -63,20 +63,10 @@
     <p class="eyebrow">Seattle</p>
     <h1>Lower Queen Anne</h1> <!-- just the name: one line on any screen -->
   </div>
-  <!-- the masthead's tools (Steve, 2026-09-14): the poster chip (Teams
-       view only), Add To Calendar and the theme pill live up here so the
-       bar keeps its room for the switch, filters, search and the clubs.
-       The Add To Calendar pop still hangs from the bar below. -->
+  <!-- the masthead's tools: the theme pill alone (Steve, 2026-09-16 — the
+       season calendar and Add To My Calendar chips moved down into the bar) -->
   <div class="masthead-tools">
   <!-- the home teams' seasons, home and away (the Teams view below the bar) -->
-  <button id="teamPdfBtn" class="chip" type="button" title="Download the season calendar as a PDF">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M13 13h3M8 17h3M13 17h3"/></svg>
-    <span>PDF</span>
-  </button>
-  <button id="subscribeBtn" class="chip" type="button" aria-expanded="false" aria-controls="subscribePop" title="Subscribe in your calendar app">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/></svg>
-    <span>Add To My Calendar</span>
-  </button>
   <!-- the theme pill: light, dark, system (Steve, 2026-09-15; app.js applyTheme) -->
   <div id="themeToggle" class="theme-toggle" role="radiogroup" aria-label="Color theme" data-active="system">
     <button type="button" role="radio" aria-checked="true" data-theme="light" title="Light">
@@ -180,6 +170,15 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
     <span>Hide calendar</span>
     <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+  </button>
+  <!-- the right end of the bar (Steve, 2026-09-16): the season calendar chip (Teams view only), then Add To My Calendar; flex order places them after the clubs -->
+  <button id="teamPdfBtn" class="chip" type="button" title="Season calendar — download it as a PDF">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M13 13h3M8 17h3M13 17h3"/></svg>
+    <span>Season Calendar</span> <!-- Steve, 2026-09-16: named for what it is, not the file type -->
+  </button>
+  <button id="subscribeBtn" class="chip" type="button" aria-expanded="false" aria-controls="subscribePop" title="Subscribe in your calendar app">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/></svg>
+    <span>Add To My Calendar</span>
   </button>
 </nav>
 <!-- the funnel in the bar drops this open below it -->

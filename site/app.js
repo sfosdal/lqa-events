@@ -222,9 +222,9 @@
             var mins = Math.round((Date.now() - gen.getTime()) / 60000);
             // the stamp's style (Steve, 2026-09-15, late): "4hrs fresh", "1hr fresh", "fresh just now" under an hour, "2 days old" past two days
             var h = Math.round(mins / 60), d = Math.round(mins / 1440);
-            var text = mins < 60 ? 'fresh just now' : mins < 48 * 60 ? h + (h === 1 ? 'hr' : 'hrs') + ' fresh' : d + ' days old';
+            var text = mins < 60 ? 'Fresh just now' : mins < 48 * 60 ? h + (h === 1 ? 'hr' : 'hrs') + ' Fresh' : d + ' days old'; // "8hrs Fresh", as Steve wrote it (2026-09-16) — not all caps
             $('updated').textContent = text;
-            $('barUpdated').textContent = text; // the compact bar's copy, the same words
+            // (the compact bar no longer repeats it — Steve, 2026-09-16: once, in the footer)
           };
           stamp();
           setInterval(stamp, 60000);
@@ -801,7 +801,8 @@
     $('viewToggle').querySelectorAll('button[data-view]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.view === v)); });
   }
   // the TODAY tab hangs from the mini calendar's foot; in the month view, from the sticky header's
-  function placeTodayTab() { (monthOpen() ? $('mbSticky').querySelector('.mb-head') : $('calBox')).appendChild($('calToday')); }
+  // the TODAY tab hangs from the mini calendar's foot; in the month view it rises from the sticky header — or, on a centred board with no header, floats as a chip under the filter bar
+  function placeTodayTab() { (monthOpen() ? ($('monthBoard').classList.contains('is-narrow') ? $('mbSticky') : $('mbSticky').querySelector('.mb-head')) : $('calBox')).appendChild($('calToday')); }
   function setMonthView(on, remember) {
     document.documentElement.classList.toggle('month-open', on);
     $('monthBoard').hidden = !on;
@@ -830,6 +831,21 @@
   }
   // the home teams by their short names in this view (Steve, 2026-09-15: "just use Kraken instead of Seattle Kraken")
   function boardTitle(t) { return t.replace(/\bSeattle (Kraken|Mariners|Seahawks|Storm|Reign|Sounders|Torrent|Seawolves)\b/g, '$1'); }
+  // the club's statistical leaders and its injured, from ESPN's matchup page
+  // (digestMatchup): a line each for the block's column (Steve, 2026-09-16:
+  // "why limited stats here" — the Seahawks' block after one game)
+  function leaderLines(leaders, injured) {
+    var esc = function (x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+    var out = [];
+    // one figure per leader: of a compound value ("16/22, 187 YDS, 1 TD") the yards, else its first piece; the unit shortened ("pass yds" → "pass")
+    var fig = function (st) { var parts = String(st.v || '').split(', '), pick = parts.filter(function (x) { return /\bYDS\b/.test(x); })[0] || parts[0] || ''; return pick.replace(/\s*YDS\b/, '').trim() + ' ' + String(st.a || '').replace(/ yds$/, ''); };
+    if (leaders && leaders.length) out.push({ cls: 'tf-leaders', html: '<b>Leaders</b> ' + esc(leaders.slice(0, 3).map(function (l) { return String(l.name).replace(/^[A-Z]\. /, '') + (l.stats[0] ? ' ' + fig(l.stats[0]) : ''); }).join(' · ')) });
+    if (injured && injured.length) {
+      var top = injured.slice(0, 2).map(function (i) { return i.name + (i.pos ? ' ' + i.pos : ''); });
+      out.push({ cls: 'tf-injured', html: '<b>Injured</b> ' + esc(injured.length + ' · ' + top.join(', ') + (injured.length > 2 ? ', …' : '')) });
+    }
+    return out;
+  }
   function boardFirst() { var now = new Date(); return new Date(now.getFullYear(), now.getMonth(), 1); }
   function boardCell(d, hols, today) {
     var key = ymd(d), evs = dayItems(key);
@@ -881,16 +897,25 @@
   // then centred, and the months' names stand in the left gutter, as big
   // as the gutter and the block allow. Never under 3.4rem a square: a tiny
   // window scrolls the month instead.
+  // what the first block adds above its grid (its heading on a centred board, the weekday row, the gap and the frame) — measured once it exists
+  function boardExtras() {
+    var b = $('mbGrid').firstElementChild, g = b && b.querySelector('.mb-days');
+    return b && g ? b.offsetHeight - g.offsetHeight + parseFloat(getComputedStyle(b).marginTop) : 2.7 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+  }
   function sizeBoard() {
     if (!monthOpen()) return;
     var board = $('monthBoard'), first = boardFirst(), rows = Math.ceil((first.getDay() + new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate()) / 7);
-    board.style.width = '';
+    board.style.width = ''; board.classList.remove('is-short'); board.style.removeProperty('--cellh');
     var top = $('mbGrid').getBoundingClientRect().top + window.scrollY, foot = document.querySelector('footer').offsetHeight;
-    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize), room = window.innerHeight - top - foot - 2.7 * rem; // less the block's weekday row, its gap above and the frame
+    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize), room = window.innerHeight - top - foot - boardExtras() - 4;
     var page = board.clientWidth, cell = Math.max(3.4 * rem, Math.min(page / 7, room / rows));
     if (cell * 7 < page - 1) board.style.width = Math.floor(cell * 7 + 4) + 'px'; // + the frame's two 2px sides
+    else if (room / rows < page / 7 - 1 && window.matchMedia('(min-width: 641px)').matches) { // width alone would run the month past the window: the days give up height, to 60% of their width (Steve's review, 2026-09-16)
+      board.classList.add('is-short'); board.style.setProperty('--cellh', Math.max(0.6 * page / 7, room / rows) + 'px');
+    }
     var gutter = (page - board.offsetWidth) / 2, narrow = gutter >= 3 * rem;
     board.classList.toggle('is-narrow', narrow);
+    placeTodayTab();
     board.style.setProperty('--mname', narrow ? Math.min(4.2 * rem, gutter - 1.4 * rem, rows * cell / 8.5) + 'px' : '');
   }
   function renderBoard() {
@@ -902,6 +927,7 @@
     if (end < first) end = first;
     grid.innerHTML = '';
     for (var m = first; m <= end; m = new Date(m.getFullYear(), m.getMonth() + 1, 1)) appendMonth(m);
+    sizeBoard(); // again, now the first block's extras can be measured
     fitBoardCells();
     feedBoard();
     syncBoardHead();
@@ -982,6 +1008,7 @@
     if (!list.length) { var none = document.createElement('p'); none.className = 'mb-none'; none.textContent = 'Nothing listed'; pop.appendChild(none); }
     list.forEach(function (e) { pop.appendChild(boardEntry(e, true)); });
     document.body.appendChild(pop);
+    if (window.matchMedia('(max-width: 640px)').matches) { setTimeout(function () { document.addEventListener('click', dayPopOff, true); document.addEventListener('keydown', dayPopOff); window.addEventListener('scroll', closeDayPop, { passive: true }); }, 0); return; } // a phone: a sheet from the foot (styles.css), nothing to place
     var r = cell.getBoundingClientRect(), g = $('mbGrid').getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
     var w = Math.max(r.width, Math.min(20 * 16, g.width)), left = Math.min(r.left, vw - w - 8, g.right - w); left = Math.max(8, left);
     pop.style.width = w + 'px'; pop.style.left = left + 'px';
@@ -1006,6 +1033,7 @@
   // labels go (see .filterbar.is-tight). Re-checked on resize.
   function fitFilterBar() {
     var bar = document.querySelector('.filterbar');
+    if (document.documentElement.classList.contains('teams-open')) { fitTeamStrip(); return; } // the Teams view folds in its own order (the strip scrolls, so the bar never measures as tight)
     bar.classList.remove('is-tight');
     if (bar.scrollWidth > bar.clientWidth + 1) bar.classList.add('is-tight');
   }
@@ -1050,7 +1078,7 @@
     var bn = document.querySelector('.bar-name'), h1 = document.querySelector('.masthead h1'); // the masthead and the pinned bar's title name the view: the events, or the clubs
     if (bn) { if (!bn.dataset.events) bn.dataset.events = bn.textContent; bn.textContent = open ? 'Hometown Teams' : bn.dataset.events; }
     if (h1) { if (!h1.dataset.events) h1.dataset.events = h1.innerHTML; h1.innerHTML = open ? 'Hometown Teams' : h1.dataset.events; }
-    if (open) fitTeamStrip();
+    if (open) fitTeamStrip(); else fitFilterBar(); // back to the list: the bar measured its own way (a fold left from the Teams view would stick)
     $('teamsView').hidden = !open;
     document.querySelector('.agenda').hidden = open;
     syncViewSwitch(); // the switch's knob slides to the view on show
@@ -1167,11 +1195,9 @@
         b.type = 'button'; b.className = 'team-tab'; b.dataset.slug = t.slug;
         if (t.logo) { var img = document.createElement('img'); img.src = t.logo; img.alt = ''; img.width = 40; img.height = 40; b.appendChild(img); }
         var l = document.createElement('span'); l.textContent = t.label; b.appendChild(l); // no sport icon (Steve, 2026-09-15)
-        b.addEventListener('click', function () { // a tap adds the club to the pick or drops it; the last one picked stays
-          var now = teamView.slugs.slice(), i = now.indexOf(t.slug);
-          if (i >= 0) { if (now.length === 1) return; now.splice(i, 1); } else now.push(t.slug);
-          var to = teams.map(function (x) { return x.slug; }).filter(function (s) { return now.indexOf(s) >= 0; }).join(',');
-          teamView.opp = null; teamView.showPast = false; history.replaceState(null, '', teamsUrl(to)); renderTeams(to);
+        b.addEventListener('click', function () { // a tap picks that club alone (Steve, 2026-09-16: one at a time — several clubs at once only by ?team=a,b)
+          if (teamView.slugs.length === 1 && teamView.slugs[0] === t.slug) return;
+          teamView.opp = null; teamView.showPast = false; history.replaceState(null, '', teamsUrl(t.slug)); renderTeams(t.slug);
         });
         strip.appendChild(b);
       });
@@ -1196,7 +1222,7 @@
     (allMode ? teams : sel).forEach(function (t) { (teamGames(t.slug) || []).forEach(function (g) { items.push({ g: g, team: t }); }); });
     items.sort(function (a, b) { return (a.g.date + (a.g.time || '')) < (b.g.date + (b.g.time || '')) ? -1 : 1; });
     var all = items.map(function (it) { return it.g; });
-    var today = todayStr(), lastMonth = null, group = null, dayBox = null, lastDate = null;
+    var today = todayStr(), lastMonth = null, group = null, dayBox = null, lastDate = null, lastPhase = null;
     // the season so far folds away: a line at the top says how many games
     // have been played and opens them (this team, this visit)
     var played = all.filter(function (g) { return g.date < today; });
@@ -1226,6 +1252,18 @@
         var ms = document.createElement('span'); ms.textContent = parseDate(g.date).toLocaleDateString('en-US', { month: 'long' });
         mr.appendChild(ms); group.appendChild(mr); list.appendChild(group);
         lastDate = null;
+      }
+      // the season's phases, each announced like the postseason (Steve, 2026-09-16): PRESEASON, then "2026–27 REGULAR SEASON", then POSTSEASON once its games are real — one club's list only
+      var phase = g.playoff ? 'post' : g.pre ? 'pre' : 'regular';
+      if (single && phase !== lastPhase) {
+        var announce = phase !== 'regular' || lastPhase === 'pre'; // the regular season is announced only after a preseason on the same list (Steve, 2026-09-16: once the preseason is over — unless the past is shown — the heading says nothing)
+        lastPhase = phase;
+        if (!announce) { /* the regular season simply begins */ } else {
+        var ph = document.createElement('div'); ph.className = 'month-row is-phase'; var phs = document.createElement('span');
+        phs.textContent = phase === 'pre' ? 'Preseason' : phase === 'post' ? 'Postseason' : seasonLabel(team, all) + ' Regular Season';
+        ph.appendChild(phs); group.appendChild(ph);
+        lastDate = null; // the day's rail again under the new heading, even mid-month
+        }
       }
       if (g.date !== lastDate) {
         lastDate = g.date;
@@ -1262,19 +1300,20 @@
       a.textContent = (multi ? tm.label + ' ' : '') + (g.home ? 'vs ' : 'at ') + g.opp.name; // several clubs listed: each row names its club
       a.title = g.home ? (feed && feed.url ? 'Tickets' : tm.label + ' schedule') : (g.opp.site ? g.opp.name + ' — their site' : tm.label + ' schedule');
       title.appendChild(a);
-      if (g.playoff) { var pb = document.createElement('span'); pb.className = 'badge b-playoff'; pb.textContent = 'playoff'; title.appendChild(pb); }
-      if (g.pre) { var pr = document.createElement('span'); pr.className = 'badge b-pre'; pr.textContent = 'preseason'; title.appendChild(pr); }
+      if (g.playoff && !single) { var pb = document.createElement('span'); pb.className = 'badge b-playoff'; pb.textContent = 'playoff'; title.appendChild(pb); } // several clubs' lists carry no phase headings: the badges say it
+      if (g.pre && !single) { var pr = document.createElement('span'); pr.className = 'badge b-pre'; pr.textContent = 'preseason'; title.appendChild(pr); }
       if (g.tbd) { var tb = document.createElement('span'); tb.className = 'badge b-tbd'; tb.textContent = 'time tbd'; title.appendChild(tb); }
       // a home game's ticket state (the feed's Ticketmaster counts): frame + badge like the list
-      var ts = feed ? LQAFilter.ticketState(feed) : '';
-      if (ts) ticketTab(row, ts, feed);
+      var tk = feed || (g.tickets || g.soldOut ? g : null); // a home game's counts come with the feed's listing; an away game's ride on the schedule itself (the checker reads the host's page — Steve, 2026-09-16)
+      var ts = tk ? LQAFilter.ticketState(tk) : '';
+      if (ts) ticketTab(row, ts, tk);
       body.appendChild(title);
       // the foot line: tickets at the left, TV / radio at the right
-      var tix = feed ? ticketsLine(feed) : '';
+      var tix = tk ? ticketsLine(tk) : '';
       var hasWatch = g.watch && ((g.watch.tv || []).length || (g.watch.radio || []).length);
       if (tix || hasWatch) {
         var foot = document.createElement('span'); foot.className = 'ev-foot';
-        if (tix) { var tl = document.createElement('span'); tl.className = 'ev-tix'; tl.textContent = tix; tl.title = 'Ticketmaster inventory' + (feed.tickets && feed.tickets.checked ? ', checked ' + fmtSince(feed.tickets.checked) : ''); foot.appendChild(tl); }
+        if (tix) { var tl = document.createElement('span'); tl.className = 'ev-tix'; tl.textContent = tix; tl.title = 'Ticketmaster inventory' + (tk.tickets && tk.tickets.checked ? ', checked ' + fmtSince(tk.tickets.checked) : ''); foot.appendChild(tl); }
         if (hasWatch) {
           // the strip's marks, small: streaming (cast), TV, radio — the names after each (Steve, 2026-09-15)
           var w = document.createElement('span'); w.className = 'ev-watch';
@@ -1285,7 +1324,8 @@
             if (!k[2].length) return;
             if (w.childNodes.length) w.appendChild(document.createTextNode(' \u00b7 '));
             var ic = document.createElement('i'); ic.className = 'ev-watch-ico'; ic.innerHTML = k[1]; ic.title = k[0]; ic.setAttribute('aria-label', k[0]);
-            w.appendChild(ic); w.appendChild(document.createTextNode(k[2].join(', ')));
+            w.appendChild(ic);
+            k[2].forEach(function (name, i) { if (i) w.appendChild(document.createTextNode(', ')); var nm = document.createElement('span'); nm.className = 'ev-watch-name'; nm.textContent = name; w.appendChild(nm); }); // each outlet unbreakable ("Seattle Sports (710 AM)" had split at the bracket on phones)
           });
           foot.appendChild(w);
         }
@@ -1436,14 +1476,41 @@
     return outlookLoading;
   }
   function ordinal(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+  // "2026" or "2026–27": the years the regular season's games span (football's one year, hockey's two)
+  function seasonLabel(team, games) {
+    var reg = (games || []).filter(function (g) { return !g.pre && !g.playoff; }), y1 = reg.length ? reg[0].date.slice(0, 4) : String(new Date().getFullYear()), y2 = reg.length ? reg[reg.length - 1].date.slice(0, 4) : y1;
+    return y1 === y2 ? y1 : y1 + '\u2013' + y2.slice(2);
+  }
   function gameLine(g) { // "Thu Sep 11 at Athletics"
     return parseDate(g.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' ' + (g.home ? 'vs ' : 'at ') + (g.opp.short || g.opp.name);
   }
   function resLetter(g) { return g.res.won ? 'W' : g.res.us === g.res.them ? 'D' : 'L'; }
-  function recordFrom(games) { // W-L(-D) from the results, for a club with no standings line
-    var w = 0, l = 0, d = 0;
-    games.forEach(function (g) { var r = resLetter(g); if (r === 'W') w++; else if (r === 'D') d++; else l++; });
-    return w + '-' + l + (d ? '-' + d : '');
+  function recordFrom(games) { // W-L(-D) from the results, for a club with no standings line; hockey's overtime losses as the third figure (W-L-OTL), as the standings count them
+    var w = 0, l = 0, d = 0, o = 0;
+    games.forEach(function (g) { var r = resLetter(g); if (r === 'W') w++; else if (r === 'D') d++; else if (g.res.ot) o++; else l++; });
+    return w + '-' + l + (d ? '-' + d : o ? '-' + o : '');
+  }
+  // Two more lines for the column, from the results the schedule already
+  // holds (no fetch, nothing to go stale — Steve, 2026-09-16: the next best
+  // stats that fit the space): the streak, the last ten and the road record;
+  // then the scoring rate for and against, and the season's margin. From
+  // three results on.
+  function formLines(team, played) {
+    var esc = function (x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+    var out = [];
+    if (!played.length) return out;
+    if (played.length >= 3) { // a streak and a "last N" mean something from the third game (Steve, 2026-09-16: the Seahawks' block looked bare after one game — the scoring line comes from the first)
+      var last = resLetter(played[played.length - 1]), n = 0;
+      for (var i = played.length - 1; i >= 0 && resLetter(played[i]) === last; i--) n++;
+      var away = played.filter(function (g) { return !g.home; });
+      out.push({ cls: 'tf-form tf-streak', html: '<b>Form</b> ' + esc(last + n + ' streak · ' + recordFrom(played.slice(-10)) + ' last ' + Math.min(10, played.length) + (away.length ? ' · ' + recordFrom(away) + ' away' : '')) });
+    }
+    var us = 0, them = 0;
+    played.forEach(function (g) { us += g.res.us; them += g.res.them; });
+    var unit = { baseball: 'runs', hockey: 'goals', soccer: 'goals' }[team.sport] || 'points';
+    var diff = us - them, per = function (v) { return (v / played.length).toFixed(1); };
+    out.push({ cls: 'tf-form tf-scoring', html: '<b>' + esc(unit.charAt(0).toUpperCase() + unit.slice(1)) + '</b> ' + esc(per(us) + ' for · ' + per(them) + ' against · ' + (diff > 0 ? '+' : diff < 0 ? '\u2212' : '') + Math.abs(diff)) }); // per game, and the season's margin — kept short so it never wraps (Steve's review, 2026-09-16) // short enough for the column at three figures (the Storm's −206)
+    return out;
   }
   function renderTeamForm(team, games, today) {
     function esc(x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
@@ -1502,9 +1569,11 @@
       line('tf-season', '<b>' + esc(record) + '</b> ' + esc((standing ? standing + ' · ' : '') + (homeRec ? homeRec + ' at home' : '')) + runHtml);
     }
     else if (last && last.res) line('tf-next', '<b>Last game</b> ' + esc(gameLine(last)) + ', ' + (last.res.won ? 'won ' : last.res.us === last.res.them ? 'drew ' : 'lost ') + last.res.us + '–' + last.res.them);
+    if (stage === 'in' || stage === 'over') formLines(team, played).forEach(function (f) { line(f.cls, f.html); }); // the streak, the last ten, the road record; the scoring
+    if (od && next && od.date === next.date) leaderLines(od.leaders && od.leaders.us, od.injured && od.injured.us).forEach(function (f) { line(f.cls, f.html); }); // the leaders and the injured, once the matchup page is in
     if (form.prev && form.prev.record) { // last season, from ESPN's record for the season before (its "playoff seed" runs past the bracket for the clubs that missed it)
       var pv = form.prev, tail = pv.seed ? (pv.seed <= 8 ? ' · playoff seed ' + pv.seed : ' · missed the playoffs') : pv.rank ? ' · ' + ordinal(pv.rank) + ' in the table' : '';
-      line('tf-series', '<b>' + esc(pv.season) + '</b> ' + esc(pv.record) + esc(tail));
+      line('tf-series tf-prev', '<b>' + esc(pv.season) + '</b> ' + esc(pv.record) + esc(tail));
     }
     if (stage === 'pre') { // the hand-written outlook (once a season is over it sits in the panel below the block instead)
       var blurb = document.createElement('p'); blurb.className = 'tf-blurb'; lead.appendChild(blurb);
@@ -1652,7 +1721,21 @@
       }
     });
   }
-  function settleBlock() { fitBug(); foldNews(); alignCrests(); foldWatch(); }
+  // The column's lines, by priority: when they run past the room the column
+  // has (beside the crests, the row's height; under them, four lines) the
+  // least important go first — the injured, the leaders, last season, the
+  // streak, the scoring, the series — never the next game or the record
+  // (Steve, 2026-09-16: keep the block to its height).
+  var LEAD_DROP = ['.tf-injured', '.tf-leaders', '.tf-blurb', '.tf-prev', '.tf-streak', '.tf-scoring', '.tf-series:not(.tf-prev)'];
+  function fitLead() {
+    document.querySelectorAll('#teamHead .tf-wiki .tf-lead').forEach(function (lead) {
+      var wiki = lead.closest('.tf-wiki');
+      lead.querySelectorAll('p[hidden]').forEach(function (p) { p.hidden = false; });
+      var over = function () { return lead.scrollHeight > lead.clientHeight + 1 || wiki.scrollHeight > wiki.clientHeight + 1; };
+      for (var i = 0; i < LEAD_DROP.length && over(); i++) { var p = lead.querySelector(LEAD_DROP[i]); if (p) p.hidden = true; }
+    });
+  }
+  function settleBlock() { fitBug(); foldNews(); alignCrests(); foldWatch(); fitLead(); }
   var foldPending = false;
   window.addEventListener('resize', function () { if (!foldPending) { foldPending = true; requestAnimationFrame(function () { foldPending = false; settleBlock(); }); } });
   // ---- where to watch: the networks ESPN names, looked up in channels.json ----
@@ -2109,12 +2192,12 @@
         if (!ev) return null;
         var them = ev.competitions[0].competitors.filter(function (c) { return String(c.team.id) !== team.espn.id; })[0];
         return fetch(base + '/summary?event=' + ev.id, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (s) { var d = digestMatchup(s || {}, team, ev); return { chance: d.chance, series: d.series, them: them ? { abbr: them.team.abbreviation, color: them.team.color, alt: them.team.alternateColor } : null }; }) // no summary: the book's line still stands
+          .then(function (s) { var d = digestMatchup(s || {}, team, ev); return { chance: d.chance, series: d.series, leaders: d.leaders, injured: d.injured, them: them ? { abbr: them.team.abbreviation, color: them.team.color, alt: them.team.alternateColor } : null }; }) // no summary: the book's line still stands
           .then(function (o) { if (o.chance) return o; return estimateChance(team, ev).then(function (ch) { o.chance = ch; return o; }); }); // nothing priced it: the estimate
       })
       .then(function (o) {
         if (!o || !(o.chance || seriesText(o.series))) return;
-        live.odds[team.slug] = { date: g.date, at: Date.now(), chance: o.chance, series: o.series, them: o.them };
+        live.odds[team.slug] = { date: g.date, at: Date.now(), chance: o.chance, series: o.series, them: o.them, leaders: o.leaders, injured: o.injured }; // the leaders and the injured ride along for the block's column
         if (teamSelected(team.slug) && !teamStage(team.slug)) swapFormBlock(team, true); // the season block is up: redraw it with the ring
       })
       .catch(function () { /* no odds: the block stands without them */ });
@@ -2238,7 +2321,7 @@
         if (!x || !x.athlete) return;
         var id = x.athlete.id, abbr = STAT_ABBR[cat.name] || (cat.shortDisplayName || cat.displayName || cat.name || '').toLowerCase();
         if (!by[id]) { by[id] = { name: x.athlete.shortName || x.athlete.displayName, pos: x.athlete.position && x.athlete.position.abbreviation, stats: [], hurt: hurt[id] || null }; order.push(id); }
-        by[id].stats.push(x.displayValue + ' ' + abbr);
+        by[id].stats.push({ v: x.displayValue, a: abbr }); // the value as ESPN prints it ("16/22, 187 YDS, 1 TD") and the category's short name
       });
       out.leaders[key] = order.map(function (id) { return by[id]; });
     });
@@ -2510,9 +2593,11 @@
       if (upcoming) line('', 'tf-next').innerHTML = '<b>Next</b> ' + esc(gameLine(upcoming)) + (upcoming.time && !upcoming.tbd ? ', ' + esc(fmtTime(upcoming.time)) : '');
     }
     if (mu && seriesText(mu.series)) line('', 'tf-series').innerHTML = '<b>Series</b> ' + esc(seriesText(mu.series)); // the season series, and how the last meeting went
+    if (pre) formLines(team, (teamGames(team.slug) || []).filter(function (g) { return g.date < todayStr() && g.res && !g.pre; })).forEach(function (f) { line('', f.cls).innerHTML = f.html; }); // before the game: the streak and the scoring, with the next game and the series
     if (pre && mu) {
       lead = document.createElement('div'); lead.className = 'tf-lines tf-lead';
       function leadLine(cls, html) { var p = document.createElement('p'); p.className = cls; p.innerHTML = html; lead.appendChild(p); }
+      leaderLines(mu.leaders.us, mu.injured.us).forEach(function (f) { leadLine(f.cls, f.html); });
       if (mu.starters.us || mu.starters.them) leadLine('tf-starters', '<b>Starters</b> ' + esc(mu.starters.us || '?') + ' <span class="tf-dash">vs</span> ' + esc(mu.starters.them || '?'));
       var hurt = []; // the leaders on the IL, by side — the one injury note that matters
       [['us', us.team.abbreviation || team.label], ['them', them.team.abbreviation || them.team.shortDisplayName]].forEach(function (k) {
@@ -2544,7 +2629,7 @@
     cluster.insertBefore(where, bugwrap); // the venue along the top of the bug
     var vs = vsLine(team.label, us.homeAway === 'home', them.team.shortDisplayName || them.team.displayName); // the compact bar: "at" or "vs" between the two crests, the nicknames either side when the bar has room
     row.appendChild(vs); // in the row, so the compact bar (the row's children laid in the block's own row) can seat it between the crests
-    lines.querySelectorAll('.tf-next, .tf-series').forEach(function (p) { // the next game and the season series: the top of the news column, with the starters or the last out
+    lines.querySelectorAll('.tf-next, .tf-series, .tf-form').forEach(function (p) { // the next game and the season series: the top of the news column, with the starters or the last out
       if (!lead) { lead = document.createElement('div'); lead.className = 'tf-lines tf-lead'; }
       lead.appendChild(p);
     });
@@ -2741,7 +2826,7 @@
     if (sel.length === 1) { printTeams(sel); return; }
     var old = document.querySelector('.pdf-pick'); if (old) { old.remove(); return; }
     var pick = document.createElement('div'); pick.className = 'pdf-pick'; pick.setAttribute('role', 'menu');
-    var lbl = document.createElement('span'); lbl.className = 'pdf-pick-label'; lbl.textContent = 'Season poster for'; pick.appendChild(lbl);
+    var lbl = document.createElement('span'); lbl.className = 'pdf-pick-label'; lbl.textContent = 'Season calendar for'; pick.appendChild(lbl);
     sel.forEach(function (t) { // one club per row, no All (Steve, 2026-09-15)
       var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = t.label;
       if (t.logo) { var im = document.createElement('img'); im.src = t.logo; im.alt = ''; im.width = 18; im.height = 18; b.insertBefore(im, b.firstChild); }
@@ -3151,14 +3236,22 @@
   // The bar's team pills carry names while the row has room for them and
   // fall back to crests alone when it doesn't (re-checked on resize).
   function fitTeamStrip() {
-    var strip = $('teamStrip');
+    var strip = $('teamStrip'), bar = document.querySelector('.filterbar');
     if (!strip.children.length || !document.documentElement.classList.contains('teams-open')) return;
-    // three sizes (Steve, 2026-09-15): every club named; the off-season clubs
-    // down to their crests first; then every club a crest
-    strip.classList.remove('is-crests', 'is-offcrests');
-    if (strip.scrollWidth > strip.clientWidth + 1) strip.classList.add('is-offcrests');
-    if (strip.scrollWidth > strip.clientWidth + 1) strip.classList.add('is-crests');
+    // the row gives way in this order (Steve, 2026-09-15 / 16): the off-season
+    // clubs down to their crests first; then the bar's chip labels (Add To My
+    // Calendar) fold to icons; only then every club a crest. The strip scrolls
+    // inside the bar, so it — not the bar — is what's measured.
+    var over = function () { return strip.scrollWidth > strip.clientWidth + 1; };
+    strip.classList.remove('is-crests', 'is-offcrests'); bar.classList.remove('is-tight');
+    if (over()) strip.classList.add('is-offcrests');
+    if (over()) bar.classList.add('is-tight');
+    if (over()) strip.classList.add('is-crests');
+    stripEdge();
   }
+  // more crests beyond the strip's right edge: a fade says so, lifted once scrolled to the end
+  function stripEdge() { var strip = $('teamStrip'); strip.classList.toggle('is-more-right', strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 2); }
+  $('teamStrip').addEventListener('scroll', stripEdge, { passive: true });
   // Re-render the month cards with a reel move: forward (dir > 0) the top
   // card scrolls up and out and the new one rises in from below; backward is
   // the mirror. The outgoing card rides along for the run, then goes.

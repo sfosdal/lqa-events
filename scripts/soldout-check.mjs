@@ -37,6 +37,14 @@ const VENUES = [ // Discovery venue ids, as in fetch-events.mjs
   { id: 'KovZpZAEknnA', label: 'Lumen Field' },
 ];
 const SKIP = /parking|parkwhiz|arena tours?|all access pass|stadium tour|ballpark tour|notification list|flex membership/i;
+// the home teams' AWAY games too (Steve, 2026-09-16): the host club's Ticketmaster
+// listing, found by the club's name within the window; only a primary listing
+// (a 16-hex event id in its URL — the resale-only listings Ticketmaster carries
+// for MLB and some WNBA hosts have another id and are skipped, so those games
+// show nothing rather than a false sold-out). Matched to teams.json by club,
+// date and opponent; the build stamps the counts onto the schedule.
+const AWAY_DAYS = 45;
+const CLUBS = { seahawks: 'Seattle Seahawks', mariners: 'Seattle Mariners', kraken: 'Seattle Kraken', storm: 'Seattle Storm', reign: 'Seattle Reign', sounders: 'Seattle Sounders', torrent: 'Seattle Torrent', seawolves: 'Seattle Seawolves', huskies: 'Washington Huskies' };
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PROFILE = path.join(os.homedir(), 'Library', 'Application Support', 'lqa-events-soldout'); // its own profile: never the everyday one
 const PORT = 9333;
@@ -75,6 +83,42 @@ async function listEvents() {
   return out;
 }
 
+async function listAwayGames() {
+  const out = [];
+  let teams;
+  try { teams = JSON.parse(fs.readFileSync(path.join(ROOT, 'site', 'teams.json'), 'utf8')).teams || {}; } catch { return out; }
+  const today = new Date(), until = new Date(today.getTime() + AWAY_DAYS * 864e5);
+  const ymd = (d) => d.toISOString().slice(0, 10);
+  const norm = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const ours = new Set(VENUES.map((v) => v.id));
+  for (const [slug, name] of Object.entries(CLUBS)) {
+    const games = (teams[slug] || []).filter((g) => !g.home && g.date >= ymd(today) && g.date <= ymd(until));
+    if (!games.length) continue;
+    let evs = [];
+    try {
+      const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?apikey=${KEY}&keyword=${encodeURIComponent(name)}&startDateTime=${ymd(today)}T00:00:00Z&endDateTime=${ymd(until)}T23:59:59Z&sort=date,asc&size=100`); // no country: the Kraken's Canadian hosts list on Ticketmaster Canada
+      if (!res.ok) { console.warn(slug, 'discovery', res.status); continue; }
+      evs = ((await res.json())._embedded || {}).events || [];
+    } catch (e) { console.warn(slug, 'discovery', String(e).slice(0, 60)); continue; }
+    await sleep(250); // Discovery's rate limit: five a second
+    for (const g of games) {
+      const opp = [g.opp && g.opp.name, g.opp && g.opp.short].filter(Boolean).map(norm);
+      const e = evs.find((x) => {
+        const v = ((x._embedded || {}).venues || [])[0] || {};
+        if (ours.has(v.id) || SKIP.test(x.name) || /half price|\bpromo\b|\bpresale\b/i.test(x.name) || !x.dates || !x.dates.start || x.dates.start.localDate !== g.date) return false; // not a promo's own listing ("HALF PRICE: …" — its page reads as sold out once the offer ends)
+        const n = norm(x.name);
+        return n.includes(norm(name).replace(/^seattle |^washington /, '')) && opp.some((o) => n.includes(o));
+      });
+      const m = e && (e.url || '').match(/\/event\/([0-9A-F]{16})/i);
+      if (!m) continue; // not listed, or resale only
+      const status = e.dates.status && e.dates.status.code, start = e.sales && e.sales.public && e.sales.public.startDateTime;
+      const venue = (((e._embedded || {}).venues || [])[0] || {}).name || g.venue;
+      out.push({ id: m[1].toUpperCase(), url: e.url, name: e.name, date: g.date, venue, status, onsale: status === 'onsale' && start && Date.parse(start) <= Date.now(), club: slug, away: true });
+    }
+  }
+  return out;
+}
+
 // ---- Chrome over the DevTools protocol (no packages: Node's own WebSocket) ----
 function launchChrome() {
   fs.mkdirSync(PROFILE, { recursive: true });
@@ -101,7 +145,7 @@ async function connect() {
   const send = (method, params = {}) => new Promise((res) => { const n = ++id; pending.set(n, res); ws.send(JSON.stringify({ id: n, method, params })); });
   await send('Network.enable'); await send('Page.enable');
   // the page's own facets response is read as it arrives (Fetch domain, response stage) — surer than asking again from inside the page
-  await send('Fetch.enable', { patterns: [{ urlPattern: '*.ticketmaster.com/api/ismds/event/*/facets*', requestStage: 'Response' }] }); // the same call comes from offeradapter.ticketmaster.com on some pages and services.ticketmaster.com on others
+  await send('Fetch.enable', { patterns: [{ urlPattern: '*.ticketmaster.com/api/ismds/event/*/facets*', requestStage: 'Response' }, { urlPattern: '*.ticketmaster.ca/api/ismds/event/*/facets*', requestStage: 'Response' }] }); // the same call comes from offeradapter.ticketmaster.com on some pages and services.ticketmaster.com on others
   return { send, on: (fn) => listeners.push(fn), off: (fn) => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }, close: () => ws.close() };
 }
 
@@ -169,9 +213,14 @@ async function checkEvent(cdp, ev) {
   return { status: primary > 0 ? 'available' : resale > 0 ? 'soldout' : 'none', primary, resale, fromPrimary: price('primary'), fromResale: price('resale') };
 }
 
-const events = await listEvents();
-const todo = events.filter((e) => e.onsale).slice(0, limit || undefined);
-console.log(`${events.length} events at ${VENUES.length} venues, ${events.filter((e) => e.onsale).length} on sale, checking ${todo.length}`);
+const home = await listEvents(), away = await listAwayGames();
+const events = home.concat(away.filter((a) => !home.some((h) => h.id === a.id)));
+if (process.argv.includes('--list')) { // just the list, no browser: what a run would check
+  for (const e of events) console.log(`${e.date}  ${e.away ? 'AWAY ' + e.club.padEnd(9) : 'home '.padEnd(14)} ${e.onsale ? 'onsale ' : (e.status || '?').padEnd(7)} ${e.name.slice(0, 50).padEnd(50)} ${e.venue}`);
+  process.exit(0);
+}
+const todo = events.filter((e) => e.onsale && (!process.argv.includes('--away') || e.away)).slice(0, limit || undefined); // --away: just the away games (a partial run keeps the rest of the last one)
+console.log(`${home.length} events at ${VENUES.length} venues + ${away.length} away games, ${events.filter((e) => e.onsale).length} on sale, checking ${todo.length}`);
 const chrome = CDP_URL ? null : launchChrome();
 const prev = fs.existsSync(OUT) ? JSON.parse(fs.readFileSync(OUT, 'utf8')).events || {} : {};
 const results = {};
@@ -187,9 +236,9 @@ try {
     const last = prev[ev.id];
     if (/^(none|unknown)$/.test(res.status) && last && /^(available|soldout)$/.test(last.status)) {
       res = { ...last, note: `kept from ${last.checked.slice(0, 10)}: this run ${res.status}${res.note ? ' (' + res.note + ')' : ''}` };
-      results[ev.id] = { ...res, name: ev.name, date: ev.date, venue: ev.venue };
+      results[ev.id] = { ...res, name: ev.name, date: ev.date, venue: ev.venue, ...(ev.away ? { club: ev.club, away: true } : {}) };
     } else {
-      results[ev.id] = { ...res, name: ev.name, date: ev.date, venue: ev.venue, checked: new Date().toISOString() };
+      results[ev.id] = { ...res, name: ev.name, date: ev.date, venue: ev.venue, ...(ev.away ? { club: ev.club, away: true } : {}), checked: new Date().toISOString() };
     }
     console.log(`${ev.date}  ${ev.name.slice(0, 44).padEnd(44)}  ${res.status.padEnd(9)} primary ${String(res.primary ?? '-').padStart(5)}  resale ${String(res.resale ?? '-').padStart(5)}  ${res.note || ''}  (${Date.now() - t0}ms)`);
   }
@@ -197,8 +246,8 @@ try {
 } finally {
   if (chrome) chrome.kill();
 }
-for (const ev of events) if (!ev.onsale) results[ev.id] = { status: 'presale', name: ev.name, date: ev.date, venue: ev.venue, checked: new Date().toISOString() }; // not yet on public sale: nothing to be sold out of
-if (limit) for (const k of Object.keys(prev)) if (!results[k]) results[k] = prev[k]; // a partial run keeps the rest of the last one
+for (const ev of events) if (!ev.onsale) results[ev.id] = { status: 'presale', name: ev.name, date: ev.date, venue: ev.venue, ...(ev.away ? { club: ev.club, away: true } : {}), checked: new Date().toISOString() }; // not yet on public sale: nothing to be sold out of
+if (limit || process.argv.includes('--away')) for (const k of Object.keys(prev)) if (!results[k]) results[k] = prev[k]; // a partial run keeps the rest of the last one
 fs.writeFileSync(OUT, JSON.stringify({ generated: new Date().toISOString(), _: 'scripts/soldout-check.mjs (a local run — Ticketmaster inventory as a real Chrome sees it; committed by scripts/soldout-run.sh). status: available = box-office tickets on sale; soldout = only resale left; none = the inventory call and the page both showed nothing (not treated as sold out); presale = public sale not started; unknown = the page gave no answer; a none/unknown run keeps the last real answer, its own checked time, note says so.', events: results }, null, 1) + '\n');
 const tally = {}; for (const r of Object.values(results)) tally[r.status] = (tally[r.status] || 0) + 1;
 console.log('wrote', path.relative(ROOT, OUT), JSON.stringify(tally));
