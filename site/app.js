@@ -220,11 +220,11 @@
           // while the tab sits open.
           var stamp = function () {
             var mins = Math.round((Date.now() - gen.getTime()) / 60000);
-                        // the footer's stamp, terse (Steve, 2026-09-15): "Updated 2h ago", "Updated 6min ago", "Updated just now"
-            var terse = mins < 1 ? '' : mins < 60 ? mins + 'min ' : mins < 48 * 60 ? Math.round(mins / 60) + 'h ' : Math.round(mins / 1440) + 'd ';
-            $('updated').textContent = 'Updated ' + (terse ? terse + 'ago' : 'just now');
-            // the compact bar's copy: "6min current", "3h current", "2d current"
-            $('barUpdated').textContent = terse + 'current';
+            // the stamp's style (Steve, 2026-09-15, late): "4hrs fresh", "1hr fresh", "fresh just now" under an hour, "2 days old" past two days
+            var h = Math.round(mins / 60), d = Math.round(mins / 1440);
+            var text = mins < 60 ? 'fresh just now' : mins < 48 * 60 ? h + (h === 1 ? 'hr' : 'hrs') + ' fresh' : d + ' days old';
+            $('updated').textContent = text;
+            $('barUpdated').textContent = text; // the compact bar's copy, the same words
           };
           stamp();
           setInterval(stamp, 60000);
@@ -703,8 +703,7 @@
     var t = document.documentElement.dataset.theme;
     return t === 'light' || t === 'dark' ? t : (darkQuery.matches ? 'dark' : 'light');
   }
-  // The theme pill (Steve, 2026-09-15): light, dark, or system. The palette
-  // is its own pill (applyPalette below), so dark + cvd is a choice too.
+  // The theme pill (Steve, 2026-09-15): light, dark, or system.
   function applyTheme(t, persist) {
     var stop = t === 'light' || t === 'dark' ? t : 'system';
     if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
@@ -727,22 +726,6 @@
     });
   }
   applyTheme(document.documentElement.dataset.theme);
-  // The palette pill: standard, or cvd — the colour-vision-deficiency hues
-  // (html.colorblind: Okabe–Ito venue hues, blue / vermillion last-five
-  // marks) — remembered per browser (lqa-palette), applied before the first
-  // paint by index.html's head script.
-  function applyPalette(p, persist) {
-    var stop = p === 'cvd' ? 'cvd' : 'std';
-    document.documentElement.classList.toggle('colorblind', stop === 'cvd'); // not 'cb': that is the filter panel's checkbox class
-    $('paletteToggle').dataset.active = stop;
-    $('paletteToggle').querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.palette === stop)); });
-    if (persist) { try { localStorage.setItem('lqa-palette', stop); } catch (e) { /* no storage */ } }
-  }
-  applyPalette(document.documentElement.classList.contains('colorblind') ? 'cvd' : 'std');
-  $('paletteToggle').addEventListener('click', function (e) {
-    var b = e.target.closest('button[data-palette]'), cur = $('paletteToggle').dataset.active;
-    applyPalette(b && b.dataset.palette !== cur ? b.dataset.palette : nextStop($('paletteToggle'), 'data-palette', cur), true);
-  });
   // A press anywhere on a pill moves it (Steve, 2026-09-15): a stop that
   // isn't lit becomes the choice; the lit stop, the knob or the rim step to
   // the next stop round the ring.
@@ -754,7 +737,7 @@
     var b = e.target.closest('button[data-theme]'), cur = $('themeToggle').dataset.active;
     applyTheme(b && b.dataset.theme !== cur ? b.dataset.theme : nextStop($('themeToggle'), 'data-theme', cur), true);
   });
-  // following the system (or cvd on it): the browser chrome tracks the OS setting as it changes
+  // following the system: the browser chrome tracks the OS setting as it changes
   darkQuery.addEventListener('change', function () {
     if (!document.documentElement.dataset.theme) applyTheme();
   });
@@ -839,22 +822,21 @@
     var b = document.createElement('button'); b.type = 'button';
     b.className = 'mb-ev' + (e.status ? ' is-off' : '');
     b.style.setProperty('--dot', venueColor(e.venue));
-    b.textContent = e.title;
+    b.textContent = boardTitle(e.title);
     if (full) { var sub = document.createElement('span'); sub.className = 'mb-sub'; sub.textContent = fmtTime(e.time) + ' · ' + e.venue + (e.status ? ' · ' + e.status : ''); b.appendChild(sub); }
     else b.title = fmtTime(e.time) + ' · ' + e.venue + (e.status ? ' (' + e.status + ')' : '');
     b.addEventListener('click', cardTap(e), true);
     return b;
   }
+  // the home teams by their short names in this view (Steve, 2026-09-15: "just use Kraken instead of Seattle Kraken")
+  function boardTitle(t) { return t.replace(/\bSeattle (Kraken|Mariners|Seahawks|Storm|Reign|Sounders|Torrent|Seawolves)\b/g, '$1'); }
   function boardFirst() { var now = new Date(); return new Date(now.getFullYear(), now.getMonth(), 1); }
-  function boardCell(d, m, hols, today) {
-    var key = ymd(d), evs = dayItems(key), inMonth = sameMonth(d, m);
+  function boardCell(d, hols, today) {
+    var key = ymd(d), evs = dayItems(key);
     var cell = document.createElement('div');
-    cell.className = 'cal-day' + (key === today ? ' is-today' : '') + (key < today ? ' is-past' : '') + (evs.length ? '' : ' is-empty') +
-      (inMonth ? (m.getMonth() % 2 ? ' is-alt' : '') + (d.getDate() === 1 ? ' is-first' : '') + (d.getDate() <= 7 ? ' is-mstart' : '') : ' is-lead');
+    cell.className = 'cal-day' + (key === today ? ' is-today' : '') + (key < today ? ' is-past' : '') + (evs.length ? '' : ' is-empty');
     cell.dataset.date = key;
-    var num = document.createElement('span'); num.className = 'num';
-    num.textContent = d.getDate() === 1 ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : d.getDate();
-    cell.appendChild(num);
+    var num = document.createElement('span'); num.className = 'num'; num.textContent = d.getDate(); cell.appendChild(num);
     (hols[key] || []).forEach(function (h) { var s = document.createElement('span'); s.className = 'hol'; s.textContent = h.title; cell.appendChild(s); });
     if (evs.length) { // the phone's ticks: three at most, then a "+" for the rest, as on the mini calendar
       var ticks = document.createElement('span'); ticks.className = 'ticks';
@@ -866,33 +848,50 @@
     if (evs.length) { var fold = document.createElement('button'); fold.type = 'button'; fold.className = 'mb-more'; fold.hidden = true; cell.appendChild(fold); } // "+N more", set by fitBoardCells
     return cell;
   }
-  // appends one month's days to the grid — the first month also the tail of
-  // the month before, so the grid starts on a Sunday; after that each month
-  // simply carries on, a day a cell, so the columns stay Sunday to Saturday
+  // appends one month as its own block (Steve, 2026-09-15: every month its
+  // own month): a framed grid of its days padded to whole weeks with blank
+  // slots, and beside it, when the board stands in from the page's edges,
+  // its name as tall vertical text (the picker's button there)
   function appendMonth(m) {
-    var grid = $('mbGrid'), hols = state.holidays ? holidayMap() : {}, today = todayStr();
-    var frag = document.createDocumentFragment();
-    if (!grid.children.length) for (var i = m.getDay(); i > 0; i--) frag.appendChild(boardCell(new Date(m.getFullYear(), m.getMonth(), 1 - i), m, hols, today));
-    var last = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
-    for (var dn = 1; dn <= last; dn++) frag.appendChild(boardCell(new Date(m.getFullYear(), m.getMonth(), dn), m, hols, today));
-    grid.appendChild(frag);
+    var hols = state.holidays ? holidayMap() : {}, today = todayStr();
+    var block = document.createElement('section'); block.className = 'mb-month'; block.dataset.month = ymd(m).slice(0, 7);
+    var name = m.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    block.setAttribute('aria-label', name);
+    var label = document.createElement('button'); label.type = 'button'; label.className = 'mb-mname'; label.textContent = name; label.title = 'Pick a month and year';
+    label.addEventListener('click', function () { openMonthPick(label); });
+    block.appendChild(label);
+    var wd = document.createElement('div'); wd.className = 'mb-wdays'; wd.setAttribute('aria-hidden', 'true'); // the weekday row goes with each month (Steve, 2026-09-15)
+    ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(function (d) { var sp = document.createElement('span'); sp.textContent = d; wd.appendChild(sp); });
+    block.appendChild(wd);
+    var grid = document.createElement('div'); grid.className = 'cal-days mb-days';
+    var last = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(), cells = Math.ceil((m.getDay() + last) / 7) * 7;
+    for (var i = 0; i < cells; i++) {
+      var dn = i - m.getDay() + 1;
+      if (dn < 1 || dn > last) { var blank = document.createElement('div'); blank.className = 'cal-day is-blank'; grid.appendChild(blank); continue; }
+      grid.appendChild(boardCell(new Date(m.getFullYear(), m.getMonth(), dn), hols, today));
+    }
+    block.appendChild(grid);
+    $('mbGrid').appendChild(block);
     boardEnd = m;
   }
   // the squares' size: the page's width, or less when the whole of this
   // month would not show at the top of the page — the window's height less
   // the board's top there, the header and the footer, over the month's rows
   // (Steve, 2026-09-15: the full month in a single window); the board is
-  // then centred. Never under 3.4rem: a tiny window scrolls the month instead.
+  // then centred, and the months' names stand in the left gutter, as big
+  // as the gutter and the block allow. Never under 3.4rem a square: a tiny
+  // window scrolls the month instead.
   function sizeBoard() {
     if (!monthOpen()) return;
     var board = $('monthBoard'), first = boardFirst(), rows = Math.ceil((first.getDay() + new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate()) / 7);
     board.style.width = '';
     var top = $('mbGrid').getBoundingClientRect().top + window.scrollY, foot = document.querySelector('footer').offsetHeight;
-    var room = window.innerHeight - top - foot - 8, rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    var cell = Math.max(3.4 * rem, Math.min(board.clientWidth / 7, room / rows));
-    var page = board.clientWidth;
+    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize), room = window.innerHeight - top - foot - 2.7 * rem; // less the block's weekday row, its gap above and the frame
+    var page = board.clientWidth, cell = Math.max(3.4 * rem, Math.min(page / 7, room / rows));
     if (cell * 7 < page - 1) board.style.width = Math.floor(cell * 7 + 4) + 'px'; // + the frame's two 2px sides
-    board.classList.toggle('is-narrow', (page - board.offsetWidth) / 2 >= 2.6 * rem); // a gutter wide enough for the month's name standing in it (styles.css)
+    var gutter = (page - board.offsetWidth) / 2, narrow = gutter >= 3 * rem;
+    board.classList.toggle('is-narrow', narrow);
+    board.style.setProperty('--mname', narrow ? Math.min(4.2 * rem, gutter - 1.4 * rem, rows * cell / 8.5) + 'px' : '');
   }
   function renderBoard() {
     if (!monthOpen()) return;
@@ -920,14 +919,14 @@
     evs.forEach(function (b, n) { b.hidden = n >= show; });
     fold.textContent = '+' + (evs.length - show) + ' more'; fold.hidden = false;
   }
-  function fitBoardCells(from) { // from: only the cells appended since (the rest are settled)
+  function fitBoardCells(from) { // from: only the month blocks appended since (the rest are settled)
     if (!monthOpen() || window.matchMedia('(max-width: 640px)').matches) return;
-    var kids = $('mbGrid').children;
-    for (var i = from || 0; i < kids.length; i++) fitCell(kids[i]);
+    var blocks = $('mbGrid').children;
+    for (var i = from || 0; i < blocks.length; i++) blocks[i].querySelectorAll('.cal-day:not(.is-blank)').forEach(fitCell);
   }
   var boardFitPending = false;
   window.addEventListener('resize', function () { if (!boardFitPending) { boardFitPending = true; requestAnimationFrame(function () { boardFitPending = false; sizeBoard(); fitBoardCells(); feedBoard(); closeDayPop(); }); } });
-  // more months as the foot of the grid nears the window — no last month
+  // more months as the foot of the board nears the window — no last month
   function growBoard(m) { var before = $('mbGrid').children.length; appendMonth(m); fitBoardCells(before); }
   function feedBoard() {
     if (!monthOpen()) return;
@@ -935,15 +934,18 @@
     while (n++ < 12 && $('mbSentinel').getBoundingClientRect().top < window.innerHeight + 900) growBoard(new Date(boardEnd.getFullYear(), boardEnd.getMonth() + 1, 1));
   }
   if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { if (es.some(function (x) { return x.isIntersecting; })) feedBoard(); }, { rootMargin: '900px 0px' }).observe($('mbSentinel'));
-  // the header names the month whose days sit at the top of the window, just under it
-  function boardTop() { var st = $('mbSticky'); return st.getBoundingClientRect().bottom; }
+  // the header names the month whose block sits under it: the block that
+  // holds the point half a row down from the header, else the first block
+  // not yet scrolled past
+  function boardTop() { return $('mbSticky').getBoundingClientRect().bottom; }
+  function boardBlock(m) { return $('mbGrid').querySelector('.mb-month[data-month="' + ymd(m).slice(0, 7) + '"]'); }
   function syncBoardHead() {
     if (!monthOpen()) return;
-    var grid = $('mbGrid'); if (!grid.children.length) return;
-    var r = grid.getBoundingClientRect(), y = boardTop() + r.width / 14, cell = null; // half a (square) row under the header: the row that mostly shows there names the month
-    if (y > r.top) { var hit = document.elementFromPoint(Math.min(r.right - 4, r.left + r.width * .64), y); cell = hit && hit.closest('#mbGrid .cal-day'); } // the Thursday column: the row's majority month
-    if (!cell) cell = grid.children[Math.min(grid.children.length - 1, y <= r.top ? 4 : grid.children.length - 3)];
-    var d = parseDate(cell.dataset.date), m = new Date(d.getFullYear(), d.getMonth(), 1);
+    var blocks = Array.from($('mbGrid').children); if (!blocks.length) return;
+    var y = boardTop() + $('monthBoard').offsetWidth / 14, block = null;
+    for (var i = 0; i < blocks.length; i++) { var r = blocks[i].getBoundingClientRect(); if (r.bottom > y) { block = blocks[i]; break; } }
+    block = block || blocks[blocks.length - 1];
+    var m = new Date(Number(block.dataset.month.slice(0, 4)), Number(block.dataset.month.slice(5, 7)) - 1, 1);
     if (!state.month || !sameMonth(m, state.month)) { state.month = m; renderCal(); }
     $('mbCur').textContent = m.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     $('mbPrev').disabled = m <= boardFirst();
@@ -952,19 +954,18 @@
   }
   var boardHeadPending = false;
   window.addEventListener('scroll', function () { if (monthOpen() && !boardHeadPending) { boardHeadPending = true; requestAnimationFrame(function () { boardHeadPending = false; syncBoardHead(); }); } }, { passive: true });
-  // the page scrolls so a day's row sits right under the header
-  function boardScrollTo(cell) {
-    if (!cell) return;
+  // the page scrolls so a month's block sits right under the header
+  function boardScrollTo(block) {
+    if (!block) return;
     var st = $('mbSticky'), off = parseFloat(getComputedStyle(st).top) + st.offsetHeight;
-    window.scrollTo({ top: cell.getBoundingClientRect().top + window.scrollY - off + 1, behavior: 'instant' }); // instant, like the list's jumps (a smooth scroll needs frames, which a background tab never gets — seen while testing 2026-09-15)
+    window.scrollTo({ top: block.getBoundingClientRect().top + window.scrollY - off - 6, behavior: 'instant' }); // instant, like the list's jumps (a smooth scroll needs frames, which a background tab never gets — seen while testing 2026-09-15)
     syncBoardHead();
   }
-  function boardGo(m) { // a month: its first day's row; this month: today's row
+  function boardGo(m) {
     if (!monthOpen()) return;
     if (m < boardFirst()) m = boardFirst();
     while (boardEnd < m) growBoard(new Date(boardEnd.getFullYear(), boardEnd.getMonth() + 1, 1));
-    var key = sameMonth(m, new Date()) ? todayStr() : ymd(m);
-    boardScrollTo($('mbGrid').querySelector('.cal-day[data-date="' + key + '"]'));
+    boardScrollTo(boardBlock(m));
   }
   // the day's card: over the tapped day, the day grown to hold all of its events
   function closeDayPop() { var old = document.querySelector('.mb-pop'); if (old) old.remove(); document.removeEventListener('click', dayPopOff, true); document.removeEventListener('keydown', dayPopOff); window.removeEventListener('scroll', closeDayPop); }
@@ -3139,8 +3140,10 @@
     draw();
     var r = anchor.getBoundingClientRect();
     document.body.appendChild(pick);
-    var w = pick.offsetWidth, left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2));
-    pick.style.top = (r.bottom + 6) + 'px'; pick.style.left = left + 'px';
+    var w = pick.offsetWidth, left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2)), top = r.bottom + 6;
+    if (r.height > r.width * 2) { left = r.right + 8; top = r.top; } // a month's standing name (the month view): beside it, from its top
+    top = Math.max(8, Math.min(window.innerHeight - pick.offsetHeight - 8, top));
+    pick.style.top = top + 'px'; pick.style.left = left + 'px';
     setTimeout(function () { document.addEventListener('click', off, true); document.addEventListener('keydown', off); }, 0);
   }
   $('calCur').addEventListener('click', function () { openMonthPick(this); });

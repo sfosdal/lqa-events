@@ -266,7 +266,6 @@ html.teams-open #calToday { display: none; }
 }
 .theme-toggle[data-active="dark"] .theme-knob { left: calc(3px + var(--tt)); }
 .theme-toggle[data-active="system"] .theme-knob { left: calc(3px + 2 * var(--tt)); }
-#paletteToggle[data-active="cvd"] .theme-knob { left: calc(3px + var(--tt)); } /* the palette pill's second stop */
 @media (prefers-reduced-motion: reduce) { .theme-knob { transition: none; } }
 /* the bar stays pinned at the top while the list scrolls (--barh is its
    height — the month dividers and the calendar strip stick just below it);
@@ -428,29 +427,35 @@ html.month-open .agenda-layout, html.month-open .cal-toggle { display: none; } /
 /* TODAY over the month view's header: the same tab, upside down — rising from the header's top edge */
 .cal-head button.cal-today-tab { width: auto; height: auto; min-width: 0; min-height: 0; display: inline-flex; border-radius: 6px 6px 0 0; } /* not the header's arrow-button size, nor the phones' 2.75rem touch minimum */
 .cal-head button.cal-today-tab svg { width: .85rem; height: .85rem; }
-.mb-head .cal-today-tab { top: auto; bottom: 100%; border-top: 2px solid #c9cdd2; border-bottom: 0; border-radius: 6px 6px 0 0; padding: .24rem .7rem .3rem; box-shadow: 0 -3px 8px rgba(0, 0, 0, .25); }
-/* the board centred narrower than the page (sizeBoard's is-narrow): the month's name stands as vertical text in the left gutter, reading upward, still the picker's button */
-.month-board.is-narrow .cal-head button.cal-cur { position: absolute; right: calc(100% + .6rem); top: 0; writing-mode: vertical-rl; transform: rotate(180deg); transform-origin: center; font-size: 1.5rem; letter-spacing: .16em; padding: .5rem .1rem; line-height: 1; white-space: nowrap; }
+.cal-head button.cal-today-tab[hidden] { display: none; } /* the override above would otherwise beat [hidden] */
+.mb-head .cal-today-tab { top: auto; bottom: 100%; border-top: 2px solid var(--ink-soft); border-bottom: 0; border-radius: 6px 6px 0 0; padding: .24rem .7rem .3rem; box-shadow: 0 -3px 8px rgba(0, 0, 0, .25); }
+/* the board centred narrower than the page (sizeBoard's is-narrow): the months' names stand beside their blocks, so the header keeps only ‹ › */
+.month-board.is-narrow .cal-head button.cal-cur { display: none; }
 .month-board.is-narrow .mb-head { grid-template-columns: 1fr 1fr; } /* painted: the days scroll under it, not through the gap to the bar; the TODAY tab hangs from its foot */
-.mb-wdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--mist); border: 2px solid var(--ink-soft); border-top: 0; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.mb-sticky .mb-head { border-bottom: 2px solid var(--ink-soft); border-radius: 10px; padding-bottom: .3rem; } /* the header on its own: the weekday row went with each month */
+.mb-wdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--mist); border: 2px solid var(--ink-soft); border-bottom: 0; border-radius: 10px 10px 0 0; font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
 .mb-wdays span { padding: .1rem .35rem .3rem; }
-.mb-days { border: 2px solid var(--ink-soft); border-top: 0; border-radius: 0 0 10px 10px; overflow: hidden; grid-auto-rows: auto; }
+/* every month its own block (Steve, 2026-09-15): a framed grid padded to whole weeks with blank slots, a gap between months, its name standing beside it on a centred board */
+.mb-month { position: relative; margin-top: .8rem; }
+.mb-days { border: 2px solid var(--ink-soft); border-radius: 0 0 10px 10px; overflow: hidden; grid-auto-rows: auto; }
+/* the month's name: a heading over its block on a full-width board (the sticky header names the one at the top; this names each as it passes), standing beside it on a centred one */
+.mb-mname { display: block; font: 700 .95rem/1 var(--display); text-transform: uppercase; letter-spacing: .12em; color: var(--ink); background: none; border: 0; padding: .15rem .1rem .35rem; margin: 0; cursor: pointer; text-align: left; border-radius: 6px; }
+.mb-mname:hover { color: var(--ink-soft); }
+.month-board.is-narrow .mb-mname { position: absolute; right: calc(100% + .9rem); top: 50%; translate: 0 -50%; /* centred on its block (Steve, 2026-09-15) */ writing-mode: vertical-rl; transform: rotate(180deg); transform-origin: center; font: 700 var(--mname, 3rem)/1 var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--ink); background: none; border: 0; padding: 0; margin: 0; cursor: pointer; white-space: nowrap; border-radius: 6px; }
+.month-board.is-narrow .mb-mname:hover { color: var(--ink-soft); }
+.month-board.is-narrow .mb-mname:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
 .mb-days > .cal-day { aspect-ratio: 1; height: auto; display: flex; flex-direction: column; align-items: stretch; gap: .15rem; padding: .3rem .3rem .35rem; cursor: pointer; }
 .mb-days > .cal-day:hover { background: color-mix(in srgb, var(--ink) 6%, var(--mist)); }
 .mb-days > .cal-day.is-today:hover { background: color-mix(in srgb, var(--ink) 26%, var(--mist)); }
-.mb-days > .cal-day.is-alt { background: color-mix(in srgb, var(--line) 22%, var(--mist)); } /* every other month a shade off, so the months read in the shared weeks */
-.mb-days > .cal-day.is-alt:hover { background: color-mix(in srgb, var(--ink) 8%, var(--mist)); }
-.mb-days > .cal-day.is-lead { opacity: .45; } /* the tail of last month that fills the first week */
-.mb-days > .cal-day.is-mstart { box-shadow: inset 0 2px 0 var(--ink-soft); } /* the month's first week: a rule along the top of its days — a stair-step where the months share a week */
-.mb-days > .cal-day.is-first { box-shadow: inset 2px 2px 0 var(--ink-soft); }
-.mb-days > .cal-day.is-first.is-today, .mb-days > .cal-day.is-mstart.is-today { box-shadow: inset 0 0 0 1px var(--ink), inset 0 2px 0 var(--ink-soft); }
+.mb-days > .cal-day.is-blank { aspect-ratio: 1; margin: 0; width: auto; cursor: default; background: color-mix(in srgb, var(--line) 35%, var(--mist)); } /* a padding slot is a cell like the rest, a shade darker */
+.mb-days > .cal-day.is-blank:hover { background: color-mix(in srgb, var(--line) 35%, var(--mist)); }
 .mb-days .num { font-size: clamp(.72rem, 1.3vw, 1rem); line-height: 1; margin-bottom: .1rem; }
-.mb-days .cal-day.is-first .num { font-weight: 700; }
 .mb-days .hol { font-size: .58rem; line-height: 1.2; color: var(--gold); letter-spacing: .06em; text-transform: uppercase; }
 .mb-days .ticks { display: none; } /* phones only (below) */
 /* an event on a day: its name only (Steve, 2026-09-15 — no times), one line in its venue's colour */
-.mb-ev { display: block; flex: none; width: 100%; text-align: left; font-family: var(--body); font-size: .7rem; line-height: 1.25; color: var(--ink); background: color-mix(in srgb, var(--dot) var(--tint), transparent); border: 0; border-left: 3px solid var(--dot); border-radius: 4px; padding: .18rem .3rem; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.mb-ev:hover { background: color-mix(in srgb, var(--dot) calc(var(--tint) + 14%), transparent); }
+/* no venue colours on the names (Steve, 2026-09-15, late): plain ink, a neutral wash on hover and in the day's card */
+.mb-ev { display: block; flex: none; width: 100%; text-align: left; font-family: var(--body); font-size: .7rem; line-height: 1.25; color: var(--ink); background: none; border: 0; border-radius: 4px; padding: .12rem .2rem; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.mb-ev:hover { background: color-mix(in srgb, var(--ink) 10%, transparent); }
 .mb-ev[hidden] { display: none; }
 .mb-ev.is-off { text-decoration: line-through; opacity: .7; }
 .mb-more { flex: none; align-self: flex-start; font: inherit; font-family: var(--mono); font-size: .62rem; color: var(--ink-soft); background: none; border: 0; padding: .1rem .2rem; cursor: pointer; }
@@ -464,7 +469,8 @@ html.month-open .agenda-layout, html.month-open .cal-toggle { display: none; } /
 @media (prefers-reduced-motion: reduce) { .mb-pop { animation: none; } }
 .mb-pop h3 { font-family: var(--display); font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .5rem; display: flex; align-items: baseline; gap: .6rem; }
 .mb-pop h3 .mb-pop-n { font-family: var(--mono); font-weight: 400; font-size: .68rem; letter-spacing: .1em; color: var(--ink-soft); }
-.mb-pop .mb-ev { font-size: .85rem; padding: .4rem .6rem; margin-bottom: .35rem; white-space: normal; }
+.mb-pop .mb-ev { font-size: .85rem; padding: .4rem .6rem; margin-bottom: .35rem; white-space: normal; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.mb-pop .mb-ev:hover { background: color-mix(in srgb, var(--ink) 14%, transparent); }
 .mb-pop .mb-ev .mb-sub { display: block; font-family: var(--mono); font-weight: 400; font-size: .68rem; letter-spacing: .04em; color: var(--ink-soft); margin-top: .1rem; }
 .mb-pop .mb-none { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); margin: 0; }
 @media (max-width: 640px) { /* phones: the days are too small for names — they carry the venue ticks; the tap opens the same card */
@@ -479,7 +485,7 @@ html.month-open .agenda-layout, html.month-open .cal-toggle { display: none; } /
 .cal-today-tab {
   position: absolute; top: 100%; left: 50%; transform: translateX(-50%); z-index: 4; display: inline-flex; align-items: center; gap: .35rem;
   font: 700 .62rem/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #f4f4f4; background: #2b2d30;
-  border: 2px solid #c9cdd2; border-top: 0; border-radius: 0 0 6px 6px; padding: .28rem .7rem .24rem; cursor: pointer; zoom: 1.15;
+  border: 2px solid var(--ink-soft); border-top: 0; border-radius: 0 0 6px 6px; padding: .28rem .7rem .24rem; cursor: pointer; zoom: 1.15; /* the frame's own colour (Steve, 2026-09-15: the borders should match) */
   box-shadow: 0 3px 8px rgba(0, 0, 0, .25);
 }
 .cal-today-tab svg { width: .85rem; height: .85rem; }
@@ -851,7 +857,7 @@ footer .gw-credit { font-size: .9rem; letter-spacing: .1em; line-height: 1; } /*
 /* three things across the row — the credit, the Updated stamp, the links —
    spaced 1 : 2 : 2 : 1 (space-around; Steve, 2026-09-15) */
 footer .gw { order: 1; }
-footer .foot-updated { order: 2; font-family: var(--mono); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin: 0; white-space: nowrap; }
+footer .foot-updated { order: 2; font-family: var(--mono); font-size: .9rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin: 0; white-space: nowrap; } /* the Ghostwood credit's type (Steve, 2026-09-15: the two should match) */
 footer .foot-links { order: 3; display: flex; align-items: center; gap: 1.2rem; }
 footer .foot-link { order: 1; } /* Advertise, Embed, Sources */
 footer #embed { order: 2; }
@@ -859,7 +865,10 @@ footer .share.info { order: 3; position: relative; }
 /* the Advertise link: dressed as the Sources / Embed labels, after them */
 footer .foot-link { position: relative; top: -.5px; display: inline-flex; align-items: center; gap: .4rem; /* measured half a pixel under its neighbours' labels (Steve, 2026-09-15) */ font-family: var(--mono); font-size: .9rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ink); text-decoration: none; padding: .2rem 0; white-space: nowrap; }
 footer .foot-link:hover { color: var(--ink-soft); }
-footer .foot-link svg { width: 1.1rem; height: 1.1rem; }
+/* Advertise, Embed, Sources: one type, one colour; their icons one size, white on dark (Steve, 2026-09-15) */
+footer .foot-link, footer .share summary { font-family: var(--mono); font-size: .9rem; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+footer .foot-link svg, footer .share summary svg:not(.chev) { width: 1.1rem; height: 1.1rem; color: var(--ink-bright); }
+footer .share summary .chev { color: var(--ink-bright); }
 .foot-inner.is-stampless .foot-updated { display: none; } /* the first thing to go when the row is short of room */
 .foot-inner.is-tight .foot-link span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* the advertising page (advertise.html): a short column of prose under the masthead */
@@ -1462,7 +1471,7 @@ html:not(.teams-open) .team-strip { display: none; }
 
 /* phones follow the system light/dark setting, so no toggle; the query
    mirrors PHONE in index.html's head script — keep them in step */
-/* phones keep the four-way toggle too (Steve, 2026-09-15): its system stop follows the OS, and the palette must be reachable */
+/* phones keep the theme pill too (Steve, 2026-09-15): its system stop follows the OS */
 
 /* ---- phones: the event sheet ---- */
 .sheet { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; }
@@ -1518,7 +1527,7 @@ body.sheet-open { overflow: hidden; }
   #searchBox { font-size: 1rem; } /* under 16px iOS Safari zooms the page when the box gets focus */
   :root { --barh-base: 3.9rem; } /* = 2.75rem chips + the .filter-area padding */
   .theme-toggle { --tt: 2.6rem; }
-  .theme-toggle:not(.view-toggle) { --tt: 2.1rem; } /* the theme and palette pills fit the phone's row */
+  .theme-toggle:not(.view-toggle) { --tt: 2.1rem; } /* the theme pill fits the phone's row */
   .theme-toggle button { height: 2.35rem; }
   .cal-days > * { min-height: 2.75rem; }
   .cal-head button { min-width: 2.75rem; min-height: 2.75rem; }
@@ -1651,26 +1660,3 @@ body.sheet-open { overflow: hidden; }
 
 } /* end of the phone block (it ran to the end of the file unclosed, harmlessly, until rules followed it) */
 
-/* ---- the colour-blind palette (html.colorblind; the Colorblind chip in the
-   masthead) ---- Okabe–Ito's eight, told apart by the common colour-vision
-   deficiencies, over the venue hues in either theme (html:root.colorblind outranks
-   the theme blocks' :root rules). The venue name sits beside every colour
-   anyway; the last-five marks go blue (won) and vermillion (lost), with
-   the letter still on each.
-   Reviewed 2026-09-15 (Machado-simulated deutan / protan / tritan): the six
-   venues on by default get six different colours whose closest pairs sit
-   at ΔE 16–18 in the worst deficiency (orange / vermillion for deutans,
-   sky / green for tritans) — tellable, not vivid; hue alone can't carry
-   more than that for everyone, which is why the name is always printed.
-   Okabe–Ito's yellow (#f0e442) is left out: 1.2 : 1 against the light page,
-   invisible as a tick or wash. Vermillion is 3.4 : 1 on light, blue 3.4 : 1
-   on dark — the faintest, still legible for a 1rem label. */
-html:root.colorblind {
-  --v-cpa: #0072b2; --v-tmobile: #56b4e9; --v-lumen: #009e73; --v-seactr: #e69f00;
-  --v-mccaw: #cc79a7; --v-cornish: #d55e00; --v-siff: #d55e00; --v-vera: #56b4e9;
-  --v-otb: #cc79a7; --v-scc: #0072b2; --v-sct: #009e73; --v-mopop: #e69f00;
-  --v-pacsci: #56b4e9; --v-kexp: #d55e00; --v-goat: #009e73; --v-rep: #d55e00; --v-husky: #cc79a7;
-}
-html.colorblind .tf-run i.r-W { background: #0072b2; color: #fff; }
-html.colorblind .tf-run i.r-L { background: #d55e00; color: #fff; }
-html.colorblind .tf-run i.r-D { background: var(--line); color: var(--ink); }
