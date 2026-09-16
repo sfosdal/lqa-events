@@ -1550,8 +1550,7 @@ body.sheet-open { overflow: hidden; }
   .fp-preset { flex: none; }
   .fp-only { padding: .55em .6em; }
   .masthead { padding: 1.6rem 0 .8rem; gap: 1.1rem; }
-  h1 { font-size: clamp(2rem, 8.5vw, 3.2rem); } /* a size down (was 11vw): with the doubled eyebrow the theme pill had come down over the title's last letters (Steve's review, 2026-09-16) */
-  .masthead .eyebrow { line-height: 1.7; } /* the eyebrow's line is the pill's: tall enough that the title starts under the pill */
+  h1 { font-size: clamp(2.4rem, 11vw, 3.2rem); }
   .pop { left: 0; right: 0; width: auto; }
 
   /* day groups: date reads across the top instead of down a rail */
@@ -1641,7 +1640,7 @@ body.sheet-open { overflow: hidden; }
 @media (max-width: 640px) {
   /* a phone (these come last, after every desktop rule they override): the crests on one line, small, at either end; the scorebug under them at its natural size; the news and the strip below */
   .is-live .tf-main { flex-basis: 100%; }
-  .is-live .tf-wiki, .team-form > .tf-wiki { max-height: none; }
+  .is-live .tf-wiki, .team-form > .tf-wiki { max-height: none; } /* the column itself is unbounded on a phone; its lead (above) is what's capped */
   .is-live .tf-row { height: auto; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem .8rem; }
   .is-live .tf-row > img, .is-live .tf-row > img.tf-opp, .is-live .tf-row > .tf-opp-abbr { order: 0; margin-top: 0; min-width: 0; width: var(--crest); height: var(--crest); flex: none; }
   .is-live .tf-row > .tf-opp { order: 1; }
@@ -1652,18 +1651,27 @@ body.sheet-open { overflow: hidden; }
   .tf-bugwrap:has(> .is-pregame) { margin-bottom: 1.2rem; }
   .tf-bugwrap:has(> .is-pregame)::after { zoom: 1; }
   /* the watch strip's sections stack on a phone, each a full row from the left; the strip grows to hold them (blocks stack here, so nothing needs one height) */
-  .tf-watch { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: .3rem; height: auto; padding: .4rem 0 .55rem; }
-  .tf-sect { width: 100%; }
+  /* strictly one row (Steve, 2026-09-16): the sections side by side, each clipped to one line, the chevron at the right end opening them as a stack */
+  .tf-watch { flex-direction: row; align-items: center; justify-content: flex-start; gap: .8rem; height: 2.6rem; padding: 0 2.2rem 0 0; }
+  .tf-watch:not(.is-open) .tf-sect { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+  .tf-watch:not(.is-open) .tf-channels { flex-wrap: nowrap; white-space: nowrap; }
+  .tf-watch:not(.is-open) .tf-channels li { flex-wrap: nowrap; white-space: nowrap; }
+  .tf-watch.is-open { flex-direction: column; align-items: stretch; height: auto; padding: .4rem 2.2rem .55rem 0; gap: .3rem; }
+  .tf-watch.is-open .tf-sect { width: 100%; }
   .tf-sect.is-empty { display: none; }
   .tf-sect .tf-channels, .tf-sect.at-r .tf-channels { justify-content: flex-start; }
-  .tf-channels { max-height: none; gap: .25rem 1rem; }
+  .tf-channels { gap: .25rem 1rem; } /* one line a section, the rest behind the chevron — as on a desktop (Steve, 2026-09-16: "still way too much detail" on the phone) */
+  .tf-wmore { top: 50%; transform: translateY(-50%); }
+  .tf-watch.is-open .tf-wmore { top: .75rem; transform: none; }
+  .tf-wiki .tf-lead { max-height: 7.2rem; overflow: hidden; } /* four lines' room, the lower-priority lines dropped by app.js fitLead */
+  .tf-wiki.is-open .tf-lead { max-height: none; }
   .filterbar .search-wrap { flex: 1 1 4rem; min-width: 3rem; } /* the box gives way first: on a 375px phone the icon row needs the room */
   /* a phone's bar is always the icon-only row: measured, the labelled one runs past the edge and the view switch with it */
   .filterbar #filterToggle span, .filterbar #subscribeBtn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .filterbar #filterToggle, .filterbar #subscribeBtn { padding: .5em .7em; } /* phones: icons only (the chips moved into the bar 2026-09-16) */
   .filterbar #filterToggle svg, .filterbar #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
   /* the tools sit at the top right, on the eyebrow's line (short, so the room is there), clear of the title below; a flex row would cost the phone a line */
-  .masthead > .masthead-tools { position: absolute; right: 0; top: 0; gap: .4rem; }
+  .masthead > .masthead-tools, .bar-title .masthead-tools { display: none; } /* no theme pill on a phone (Steve, 2026-09-16): the site follows the system setting there */
   .masthead-tools .chip { min-height: 1.9rem; padding: .3em .55em; }
   /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
   .filterbar { gap: .4rem; }

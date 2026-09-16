@@ -1699,7 +1699,7 @@
   function foldWatch() {
     document.querySelectorAll('#teamHead .tf-watch').forEach(function (w) {
       if (w.classList.contains('is-open')) return;
-      var more = Array.prototype.some.call(w.querySelectorAll('.tf-channels'), function (ch) { return ch.scrollHeight > ch.clientHeight + 2; });
+      var more = Array.prototype.some.call(w.querySelectorAll('.tf-channels'), function (ch) { return ch.scrollHeight > ch.clientHeight + 2 || ch.scrollWidth > ch.clientWidth + 2; }); // wrapped past its line, or (a phone's one row) clipped at its end
       w.classList.toggle('has-more', more);
     });
   }
