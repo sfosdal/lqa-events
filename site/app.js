@@ -1957,8 +1957,18 @@
   // half-inning on every poll (30 s), runs trickling in, to the final after
   // the 9th — a game that plays out, for watching the block change state
   // (Steve, 2026-09-15). Without it: bottom of the 7th, standing still.
-  var DEMO_INNING = Number(new URLSearchParams(location.search).get('inning')) || 0;
-  var demoTicks = 0; // polls so far
+  // &period=N (or inning / quarter / half, whichever the sport calls it):
+  // the demo starts at that period and plays a step on every poll — a half-
+  // inning, a quarter of a quarter, a sixth of a half — to the final; the
+  // final stands for a minute, then the game starts over from the FIRST
+  // period (Steve, 2026-09-17). Without it: a still frame mid-game.
+  var DEMO_CLOCK = { baseball: { periods: 9, ticks: 2 }, football: { periods: 4, ticks: 4, len: 15 }, basketball: { periods: 4, ticks: 4, len: 10 }, hockey: { periods: 3, ticks: 4, len: 20 }, soccer: { periods: 2, ticks: 6, len: 45 }, rugby: { periods: 2, ticks: 6, len: 40 } };
+  // any word for it works for any sport (Steve, 2026-09-17): &inning=7 on a
+  // football page is folded into the sport's count — 7 mod 4 quarters = the 3rd
+  var demoQ = new URLSearchParams(location.search);
+  var DEMO_START = ['period', 'inning', 'quarter', 'half', 'frame', 'round', 'set', 'stage', 'start'].map(function (k) { return Number(demoQ.get(k)) || 0; }).filter(Boolean)[0] || 0;
+  var demoStart = DEMO_START; // the period this run began at (1 once the game has looped)
+  var demoTicks = 0; // polls so far in this run
   function demoEvent(team) {
     var today = todayStr(), gs = teamGames(team.slug) || [];
     var g = gs.filter(function (x) { return x.date === today; })[0] || gs.filter(function (x) { return x.date > today; })[0] || gs[gs.length - 1];
@@ -1971,42 +1981,56 @@
     if (state === 'pre') { st.type = { state: 'pre', detail: '7:10 PM PT', shortDetail: '7:10 PM PT' }; live.matchup[team.slug] = { id: ev.id, stage: 'pre', at: Date.now(), data: { chance: { us: 36, them: 64 }, series: null, starters: {}, leaders: {}, injured: {} } }; return ev; } // made-up odds: the ring shows
     us.score = '4'; them.score = '3';
     if (state === 'post') { st.type = { state: 'post', detail: 'Final', shortDetail: 'Final', completed: true }; us.winner = true; return ev; }
+    // the clock: how far the game has run, in steps (DEMO_CLOCK) — from the chosen period, else a still frame past the middle
+    var ck = DEMO_CLOCK[sport] || DEMO_CLOCK.hockey, total = ck.periods * ck.ticks;
+    var startAt = ((Math.max(1, demoStart) - 1) % ck.periods) + 1; // folded into the sport's count: inning 7 on a football page is the 3rd quarter
+    var t = DEMO_START ? (startAt - 1) * ck.ticks + demoTicks : Math.round(total * 0.7);
+    if (t >= total) { // the game has played out
+      us.score = String(sport === 'baseball' ? 5 : sport === 'football' ? 27 : sport === 'basketball' ? 84 : sport === 'rugby' ? 24 : 3);
+      them.score = String(sport === 'baseball' ? 3 : sport === 'football' ? 17 : sport === 'basketball' ? 79 : sport === 'rugby' ? 19 : 2);
+      st.type = { state: 'post', detail: 'Final', shortDetail: 'Final', completed: true }; us.winner = true; return ev;
+    }
+    var period = Math.floor(t / ck.ticks) + 1, k = t % ck.ticks, frac = t / total;
+    var ORD = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'];
+    st.period = period;
     if (sport === 'baseball') {
-      var halves = DEMO_INNING ? demoTicks : 13; // half-innings played: &inning=N starts at the top of the Nth; the still demo sits in the bottom of the 7th
-      var inning = (DEMO_INNING || 1) + Math.floor(halves / 2), bottom = halves % 2 === 1;
-      if (inning > 9) { // the game has played out
-        us.score = '5'; them.score = '3';
-        st.type = { state: 'post', detail: 'Final', shortDetail: 'Final', completed: true }; us.winner = true; return ev;
-      }
-      var ord = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'][inning];
-      var half = (bottom ? 'Bottom ' : 'Top ') + ord, short = (bottom ? 'Bot ' : 'Top ') + ord;
-      // runs trickle in as the innings go: 0-0 at the start of the 4th, 4-3 by the 7th, 5-3 at the end
-      var played = DEMO_INNING ? halves : 13;
+      var bottom = k === 1, played = t;
+      var half = (bottom ? 'Bottom ' : 'Top ') + ORD[period], short = (bottom ? 'Bot ' : 'Top ') + ORD[period];
+      // runs trickle in as the innings go: 0-0 at the start, 4-3 late, 5-3 at the end
       us.score = String(Math.min(5, Math.floor(played * 4 / 13))); them.score = String(Math.min(3, Math.floor(played * 3 / 13)));
-      st.type = { state: 'in', detail: half, shortDetail: short }; st.period = inning;
+      st.type = { state: 'in', detail: half, shortDetail: short };
       var outs = played % 3, onBase = played % 4;
       c.situation = { balls: played % 4, strikes: played % 3, outs: outs, onFirst: onBase >= 1, onSecond: onBase === 2, onThird: onBase >= 3,
         pitcher: { athlete: { id: 'demo-p', displayName: bottom ? 'José Ryan' : 'Bryan Woo', shortName: bottom ? 'J. Ryan' : 'B. Woo' } },
         batter: { athlete: { id: 'demo-b', displayName: bottom ? 'Julio Rodríguez' : 'Mike Trout', shortName: bottom ? 'J. Rodríguez' : 'M. Trout' }, summary: bottom ? '1-3, HR, 2 RBI' : '0-2, BB' } };
       live.pitches[team.slug] = { 'demo-p': 40 + played * 6 };
       live.lastPitch[team.slug] = { mph: 94 + (played % 4), type: ['Four-seam FB', 'Slider', 'Changeup', 'Sweeper'][played % 4], result: ['Strike Looking', 'Ball', 'Foul', 'Swinging Strike'][played % 4] };
-      live.lastOut[team.slug] = { id: 'demo-out-' + played, text: bottom ? 'Raleigh grounded out to second.' : 'Trout flied out to center.', batter: bottom ? 'C. Raleigh' : 'M. Trout', pitcher: bottom ? 'J. Ryan' : 'B. Woo', when: short };
-    } else if (sport === 'football') {
-      st.type = { state: 'in', detail: '8:42 - 3rd', shortDetail: '8:42 - 3rd' }; st.period = 3; st.displayClock = '8:42';
-      c.situation = { downDistanceText: '2nd & 7 at SEA 42', possession: ourId, lastPlay: { text: 'K. Walker III rushed for 5 yards to the SEA 42.' } };
-    } else if (sport === 'soccer') {
-      st.type = { state: 'in', detail: "64'", shortDetail: "64'" }; st.period = 2; st.displayClock = "64'";
-      us.statistics = [{ name: 'possessionPct', displayValue: '57' }];
-      c.details = [{ scoringPlay: true, team: { id: ourId }, athletesInvolved: [{ shortName: 'J. Morris' }], clock: { displayValue: "23'" }, type: { text: 'Goal' } },
-        { scoringPlay: true, team: { id: 'them' }, athletesInvolved: [{ shortName: 'D. Bouanga' }], clock: { displayValue: "41'" }, type: { text: 'Penalty - Scored' } },
-        { scoringPlay: true, team: { id: ourId }, athletesInvolved: [{ shortName: 'P. Arriola' }], clock: { displayValue: "58'" }, type: { text: 'Goal' } }];
-      c.situation = { lastPlay: { text: 'Corner, Seattle. Conceded by the visitors.' } };
-    } else { // hockey, basketball, rugby: a period and a clock
-      var per = sport === 'basketball' ? '3rd' : '2nd';
-      st.type = { state: 'in', detail: '12:34 - ' + per, shortDetail: '12:34 - ' + per }; st.period = sport === 'basketball' ? 3 : 2; st.displayClock = '12:34';
-      if (sport === 'hockey') c.details = [{ scoringPlay: true, team: { id: ourId }, athletesInvolved: [{ shortName: 'J. Eberle' }], clock: { displayValue: '4:12' }, type: { text: 'Goal' } },
-        { scoringPlay: true, team: { id: 'them' }, athletesInvolved: [{ shortName: 'N. MacKinnon' }], clock: { displayValue: '15:50' }, type: { text: 'Goal' } }];
-      c.situation = { lastPlay: { text: sport === 'basketball' ? 'N. Diggins-Smith makes 3-pt jump shot' : 'Shot on goal by Beniers, saved.' } };
+      live.lastOut[team.slug] = { id: 'demo-out-' + played, text: bottom ? 'Raleigh grounded out to second.' : 'Trout flied out to center.', batter: bottom ? 'C. Raleigh' : 'M. Trout', pitcher: bottom ? 'J. Ryan' : 'B. Woo', when: half };
+    } else if (sport === 'soccer' || sport === 'rugby') { // halves, the minute counting up
+      var minute = Math.round((period - 1) * ck.len + k * ck.len / ck.ticks), clock = minute + "'";
+      st.type = { state: 'in', detail: clock, shortDetail: clock }; st.displayClock = clock;
+      var goals = sport === 'soccer'
+        ? [{ min: 23, us: true, who: 'J. Morris', how: 'Goal' }, { min: 41, us: false, who: 'D. Bouanga', how: 'Penalty - Scored' }, { min: 58, us: true, who: 'P. Arriola', how: 'Goal' }, { min: 77, us: true, who: 'A. Roldan', how: 'Goal' }]
+        : [{ min: 12, us: true, who: 'J. Prat', how: 'Try' }, { min: 31, us: false, who: 'T. Bell', how: 'Try' }, { min: 55, us: true, who: 'M. Hill', how: 'Penalty' }, { min: 68, us: true, who: 'D. Sáyalo', how: 'Try' }];
+      var so = goals.filter(function (x) { return x.min <= minute; });
+      us.score = String(so.filter(function (x) { return x.us; }).length * (sport === 'rugby' ? 5 : 1)); them.score = String(so.filter(function (x) { return !x.us; }).length * (sport === 'rugby' ? 7 : 1));
+      us.statistics = [{ name: 'possessionPct', displayValue: String(52 + (t % 3) * 3) }];
+      c.details = so.map(function (x) { return { scoringPlay: true, team: { id: x.us ? ourId : 'them' }, athletesInvolved: [{ shortName: x.who }], clock: { displayValue: x.min + "'" }, type: { text: x.how } }; });
+      c.situation = { lastPlay: { text: ['Corner, Seattle. Conceded by the visitors.', 'Throw-in, visitors, in their own half.', 'Free kick, Seattle, 30 yards out.', 'Substitution, Seattle.'][t % 4] } };
+    } else { // football, basketball, hockey: periods with a clock counting down
+      var left = ck.len - k * ck.len / ck.ticks, mm = Math.floor(left), ss = Math.round((left - mm) * 60), clockDown = (k === 0 ? ck.len + ':00' : mm + ':' + (ss < 10 ? '0' : '') + ss);
+      var label = clockDown + ' - ' + ORD[period];
+      st.type = { state: 'in', detail: label, shortDetail: label }; st.displayClock = clockDown;
+      var finalUs = sport === 'football' ? 27 : sport === 'basketball' ? 84 : 3, finalThem = sport === 'football' ? 17 : sport === 'basketball' ? 79 : 2;
+      us.score = String(Math.floor(finalUs * frac / (sport === 'hockey' ? 1 : 7)) * (sport === 'hockey' ? 1 : 7)); them.score = String(Math.floor(finalThem * frac / (sport === 'hockey' ? 1 : 7)) * (sport === 'hockey' ? 1 : 7)); // in sevens for the ball games, whole goals for hockey
+      if (sport === 'football') c.situation = { downDistanceText: ['1st & 10 at SEA 25', '2nd & 7 at SEA 42', '3rd & 3 at ARI 38', '1st & goal at ARI 6'][t % 4], possession: t % 2 ? 'them' : ourId, lastPlay: { text: ['K. Walker III rushed for 5 yards to the SEA 42.', 'S. Darnold pass complete to J. Smith-Njigba for 14 yards.', 'Incomplete pass intended for T. Lockett.', 'J. Myers 44-yard field goal is good.'][t % 4] } };
+      if (sport === 'hockey') {
+        var hg = [{ p: 1, at: 4.2, us: true, who: 'J. Eberle' }, { p: 2, at: 15.8, us: false, who: 'N. MacKinnon' }, { p: 2, at: 6.5, us: true, who: 'M. Beniers' }, { p: 3, at: 11.1, us: true, who: 'J. Schwartz' }, { p: 3, at: 2.2, us: false, who: 'C. Makar' }];
+        var seen = hg.filter(function (x) { return x.p < period || (x.p === period && x.at >= left); }); // clocks count down: a goal "at 4.2" came with 4:12 left
+        us.score = String(seen.filter(function (x) { return x.us; }).length); them.score = String(seen.filter(function (x) { return !x.us; }).length);
+        c.details = seen.map(function (x) { var m = Math.floor(x.at), sx = Math.round((x.at - m) * 60); return { scoringPlay: true, team: { id: x.us ? ourId : 'them' }, athletesInvolved: [{ shortName: x.who }], clock: { displayValue: m + ':' + (sx < 10 ? '0' : '') + sx }, period: { number: x.p }, type: { text: 'Goal' } }; });
+      }
+      if (sport !== 'football') c.situation = { lastPlay: { text: sport === 'basketball' ? ['N. Diggins-Smith makes 3-pt jump shot', 'N. Ogwumike makes layup', 'E. Magbegor defensive rebound', 'J. Loyd misses free throw'][t % 4] : ['Shot on goal by Beniers, saved.', 'Penalty: hooking, 2 minutes.', 'Faceoff won by Wright.', 'Grubauer with the glove save.'][t % 4] } };
     }
     var titles = sport === 'baseball' ? ['Rodríguez launches a two-run homer to left', 'Raleigh guns down a runner at second', 'Woo strikes out the side in the 4th', 'Crawford\'s diving stop saves a run', 'Arozarena doubles off the wall'] :
       sport === 'football' ? ['Smith-Njigba takes a slant 45 yards to the house', 'Love goes airborne for the interception', 'Walker III bounces outside for 18', 'Williams sacks the quarterback on third down', 'Myers drills a 52-yard field goal'] :
@@ -2032,6 +2056,8 @@
     $('teamStrip').querySelectorAll('.team-tab').forEach(function (pill) { pill.classList.toggle('is-live', pill.dataset.slug === t.slug && state === 'in'); });
     live.shown = state || null; live.shownBy[t.slug] = state || null;
     if (teamSelected(t.slug)) { if (teamView.slugs.length > 1) syncHead(t); else swapFormBlock(t); } // its block only while it is the club on show
+    // a played-out game loops (Steve, 2026-09-16): the final stands for two polls, then the game starts over from the chosen inning
+    if (state === 'post' && DEMO_START) { demoTicks = 0; demoStart = 1; live.timer = setTimeout(pollLive, 2 * POLL_MS); return; } // the next poll draws the start of the 1st period
     live.timer = setTimeout(pollLive, state === 'in' ? POLL_MS : 10 * POLL_MS);
   }
   // Every club with a game on today is checked (one scoreboard call per

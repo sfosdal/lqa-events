@@ -371,20 +371,30 @@ const fresh = all
   .filter((e) => e.date && e.date >= cutoff && e.date <= horizon)
   .filter((e) => { const k = `${e.venue}|${e.title}|${e.date}`; if (seen.has(k)) return false; seen.add(k); return true; });
 
-// carry past events forward from the previously published feed
-let archived = [];
-try {
-  const r = await fetch(FEED_URL);
-  // normalized too, so past events published under old micro-venue names
-  // don't resurrect their filter chips
-  if (r.ok) {
+// carry past events forward from the previously published feed — the live
+// feed IS the archive, so a run that can't read it must not publish: on
+// 2026-09-07 one such run went out with 3 past events instead of 170 and
+// every run after carried only those, and the year of history was gone
+// (Steve noticed a McCaw Hall night missing). Three tries, then the run
+// fails and the last deploy stands.
+let archived = null;
+for (let attempt = 1; attempt <= 3 && archived === null; attempt++) {
+  try {
+    const r = await fetch(FEED_URL);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const d = await r.json();
+    // normalized too, so past events published under old micro-venue names
+    // don't resurrect their filter chips
     archived = (Array.isArray(d) ? d : (d.events || [])).map(normalizeVenue)
       // backfill the movie flag on entries archived before it existed
       .map((e) => (!e.movie && e.url && e.url.includes('/cinema/in-theaters/') ? { ...e, movie: true } : e));
+  } catch (err) {
+    console.error(`Archive fetch (try ${attempt} of 3) failed: ${err.message}`);
+    if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 20000));
   }
-  else console.error(`Archive fetch HTTP ${r.status} — past events not carried this run`);
-} catch (err) { console.error('Archive fetch failed:', err.message); }
+}
+if (archived === null && !process.env.ALLOW_NO_ARCHIVE) { console.error('No archive — not publishing (ALLOW_NO_ARCHIVE=1 to override for a first build)'); process.exit(1); }
+archived = archived || [];
 
 const merged = mergeWithArchive(fresh, archived, today, cutoff).slice(-MAX_EVENTS);
 
