@@ -1,0 +1,937 @@
+{
+ "events": [
+  {
+   "venue": "Starfire Stadium",
+   "title": "Seattle Seawolves vs Hartford Harpooners",
+   "date": "2026-03-28",
+   "time": "16:00:00",
+   "url": "https://tickets.seawolves.rugby/events",
+   "type": "sports"
+  },
+  {
+   "venue": "Starfire Stadium",
+   "title": "Seattle Seawolves vs Old Glory DC",
+   "date": "2026-04-03",
+   "time": "19:30:00",
+   "url": "https://tickets.seawolves.rugby/events",
+   "type": "sports"
+  },
+  {
+   "venue": "Starfire Stadium",
+   "title": "Seattle Seawolves vs Chicago Hounds",
+   "date": "2026-04-24",
+   "time": "19:00:00",
+   "url": "https://tickets.seawolves.rugby/events",
+   "type": "sports"
+  },
+  {
+   "venue": "Starfire Stadium",
+   "title": "Seattle Seawolves vs Anthem Rugby Carolina",
+   "date": "2026-05-17",
+   "time": "13:00:00",
+   "url": "https://tickets.seawolves.rugby/events",
+   "type": "sports"
+  },
+  {
+   "venue": "Starfire Stadium",
+   "title": "Seattle Seawolves vs New England Free Jacks",
+   "date": "2026-05-31",
+   "time": "18:00:00",
+   "url": "https://tickets.seawolves.rugby/events",
+   "type": "sports"
+  },
+  {
+   "venue": "Starfire Stadium",
+   "title": "Seattle Seawolves vs California Legion",
+   "date": "2026-06-07",
+   "time": "18:00:00",
+   "url": "https://tickets.seawolves.rugby/events",
+   "type": "sports"
+  },
+  {
+   "venue": "Starfire Stadium",
+   "title": "Seattle Seawolves vs California Legion",
+   "date": "2026-06-14",
+   "time": "19:30:00",
+   "url": "https://tickets.seawolves.rugby/events",
+   "type": "sports"
+  },
+  {
+   "venue": "KEXP",
+   "title": "zzzahara LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "date": "2026-08-13",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/zzzahara-live-on-kexp-kexp_505772/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Helado Tropical LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "date": "2026-08-18",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/helado-tropical-live-on-kexp-kexp_506396/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "PAX West 2026",
+   "date": "2026-09-04",
+   "time": "",
+   "url": "https://west.paxsite.com/",
+   "type": "expo",
+   "building": "Arch & Summit Buildings"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "PAX West 2026",
+   "date": "2026-09-05",
+   "time": "",
+   "url": "https://west.paxsite.com/",
+   "type": "expo",
+   "building": "Arch & Summit Buildings"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "PAX West 2026",
+   "date": "2026-09-06",
+   "time": "",
+   "url": "https://west.paxsite.com/",
+   "type": "expo",
+   "building": "Arch & Summit Buildings"
+  },
+  {
+   "venue": "Husky Stadium",
+   "title": "Washington Huskies vs Washington State Cougars",
+   "date": "2026-09-06",
+   "time": "13:00:00",
+   "url": "https://gohuskies.com/sports/football/tickets",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "NBC"
+    ]
+   }
+  },
+  {
+   "venue": "Convention Center",
+   "title": "PAX West 2026",
+   "date": "2026-09-07",
+   "time": "",
+   "url": "https://west.paxsite.com/",
+   "type": "expo",
+   "building": "Arch & Summit Buildings"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Death Cab for Cutie LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "date": "2026-09-07",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/death-cab-for-cutie-live-on-kexp-kexp_500824/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The Marching Band",
+   "date": "2026-09-07",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/the-marching-band",
+   "movie": true,
+   "end": "17:43:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Tony",
+   "date": "2026-09-07",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/tony",
+   "movie": true,
+   "end": "18:01:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-07",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "18:22:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "JAYMYLONI, BRUJITA XO, KNXTRNL +DJ Dazé",
+   "date": "2026-09-07",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/f236e53ed88e",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Guess What? Trivia!",
+   "date": "2026-09-07",
+   "time": "19:00:00"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Haute & Freddy LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "date": "2026-09-08",
+   "time": "15:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/haute-freddy-live-on-kexp-kexp_511072/",
+   "end": "15:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The Marching Band",
+   "date": "2026-09-08",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/the-marching-band",
+   "movie": true,
+   "end": "17:43:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Tony",
+   "date": "2026-09-08",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/tony",
+   "movie": true,
+   "end": "18:01:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-08",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "18:22:00"
+  },
+  {
+   "venue": "T-Mobile Park",
+   "title": "Seattle Mariners vs. Texas Rangers",
+   "date": "2026-09-08",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-mariners-vs-texas-rangers-seattle-washington-09-08-2026/event/0F00635BEEF3734C",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Mariners.TV"
+    ],
+    "radio": [
+     "Seattle Sports (710 AM)"
+    ]
+   }
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Juno Togiak, No Leaders Please!, Bag Ladies + more",
+   "date": "2026-09-08",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/rc17383e864c",
+   "type": "concert",
+   "end": "23:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "ANDREA BOCELLI \"Romanza - 30th Anniversary World Tour\"",
+   "date": "2026-09-08",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/andrea-bocelli-romanza-30th-anniversary-world-seattle-washington-09-08-2026/event/0F006435AE39BA5E",
+   "type": "concert"
+  },
+  {
+   "venue": "Pacific Science Center",
+   "title": "Seattle Center Blood Drive",
+   "date": "2026-09-09",
+   "time": "",
+   "url": "https://pacificsciencecenter.org/events/blood-drive/"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Altın Gün LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "date": "2026-09-09",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/altn-gun-live-on-kexp-kexp_511084/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "T-Mobile Park",
+   "title": "Seattle Mariners vs. Texas Rangers",
+   "date": "2026-09-09",
+   "time": "13:10:00",
+   "url": "https://www.ticketmaster.com/seattle-mariners-vs-texas-rangers-seattle-washington-09-09-2026/event/0F00635BEEF6734E",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Mariners.TV"
+    ],
+    "radio": [
+     "KTTH 770 AM"
+    ]
+   }
+  },
+  {
+   "venue": "Lumen Field",
+   "title": "USAA's Salute 250 Kickoff Concert featuring Luke Bryan",
+   "date": "2026-09-09",
+   "time": "14:30:00",
+   "url": "https://www.ticketmaster.com/usaas-salute-250-kickoff-concert-featuring-seattle-washington-09-09-2026/event/0F00650B6B462428",
+   "type": "concert"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The Marching Band",
+   "date": "2026-09-09",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/the-marching-band",
+   "movie": true,
+   "end": "17:43:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-09",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "18:22:00"
+  },
+  {
+   "venue": "Lumen Field",
+   "title": "Seattle Seahawks vs. New England Patriots",
+   "date": "2026-09-09",
+   "time": "17:20:00",
+   "url": "https://www.ticketmaster.com/seattle-seahawks-vs-new-england-patriots-seattle-washington-09-09-2026/event/0F006482E67E7496",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "NBC"
+    ]
+   }
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "SP 101: Intro to VERA's Screen Print Studio",
+   "date": "2026-09-09",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/E1c0435a46f9",
+   "type": "community",
+   "end": "20:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Faust with the Invincible Czars",
+   "date": "2026-09-09",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/faust-with-the-invincible-czars",
+   "movie": true,
+   "end": "20:46:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Tony",
+   "date": "2026-09-09",
+   "time": "19:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/tony",
+   "movie": true,
+   "end": "21:16:00"
+  },
+  {
+   "venue": "T-Mobile Park",
+   "title": "Seattle Mariners vs. Texas Rangers",
+   "date": "2026-09-10",
+   "time": "13:10:00",
+   "url": "https://www.ticketmaster.com/seattle-mariners-vs-texas-rangers-seattle-washington-09-10-2026/event/0F00635BEEFA7350",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Mariners.TV"
+    ],
+    "radio": [
+     "Seattle Sports (710 AM)"
+    ]
+   }
+  },
+  {
+   "venue": "KEXP",
+   "title": "Shabazz Palaces LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "date": "2026-09-10",
+   "time": "15:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/shabazz-palaces-live-on-kexp-kexp_511085/",
+   "end": "15:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-10",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "17:50:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-10",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "18:07:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The Marching Band",
+   "date": "2026-09-10",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/the-marching-band",
+   "movie": true,
+   "end": "18:13:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "LS 201: Small PA Mixing",
+   "date": "2026-09-10",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/zbdee599a114",
+   "type": "community",
+   "end": "20:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Found Footage Fest: Porcelain VHS Treasures",
+   "date": "2026-09-10",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/found-footage-festival-porcelain-vhs-treasures",
+   "movie": true,
+   "end": "20:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Tony",
+   "date": "2026-09-10",
+   "time": "19:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/tony",
+   "movie": true,
+   "end": "21:16:00"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "The Traveling Goat Presents: Piffle",
+   "date": "2026-09-10",
+   "time": "19:30:00"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "9/11 Remembrance Ceremony - 25th Anniversary",
+   "date": "2026-09-11",
+   "time": "12:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/9/11-remembrance-ceremony-25th-anniversary",
+   "free": true
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Screen Printing Open Session",
+   "date": "2026-09-11",
+   "time": "14:00:00",
+   "url": "https://link.dice.fm/k92b045662d4",
+   "type": "community",
+   "end": "18:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-11",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "17:50:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-11",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "18:06:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-11",
+   "time": "16:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "18:37:00"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Donor Benefits: Behind-the-Scenes Shops Tours",
+   "date": "2026-09-11",
+   "time": "17:00:00",
+   "url": "https://www.sct.org/onstage/productions/donor-benefits-behind-the-scenes-shops-tours/",
+   "type": "community"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "NFFTY Remix and Mingle",
+   "date": "2026-09-11",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/Sbdcd27acc5b",
+   "type": "movie",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Tony",
+   "date": "2026-09-11",
+   "time": "19:40:00",
+   "url": "https://www.siff.net/cinema/in-theaters/tony",
+   "movie": true,
+   "end": "21:26:00"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Tabor100 25th Captains of Industry Gala 2026",
+   "date": "2026-09-12",
+   "time": "",
+   "url": "https://www.tabor100.org/gala/",
+   "type": "community",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "ThriftCon 2026",
+   "date": "2026-09-12",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=37429",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "MoPOP",
+   "title": "The Brunch Bundle at MOPOP",
+   "date": "2026-09-12",
+   "time": "",
+   "url": "https://www.mopop.org/events/the-brunch-bundle-at-mopop-4"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Washington Home Show",
+   "date": "2026-09-12",
+   "time": "",
+   "url": "https://www.seattlecenter.com/events/event-calendar/washington-home-show-x47102",
+   "type": "expo"
+  },
+  {
+   "venue": "Pacific Science Center",
+   "title": "SIGNAL: Modular on the Spot: Seattle",
+   "date": "2026-09-12",
+   "time": "",
+   "url": "https://pacificsciencecenter.org/events/signal-modular/",
+   "free": true
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "SP 202: Fabric Printing",
+   "date": "2026-09-12",
+   "time": "12:00:00",
+   "url": "https://link.dice.fm/l2e42e04bfc0",
+   "type": "community",
+   "end": "15:00:00"
+  },
+  {
+   "venue": "Husky Stadium",
+   "title": "Washington Huskies vs Utah State Aggies",
+   "date": "2026-09-12",
+   "time": "12:30:00",
+   "url": "https://gohuskies.com/sports/football/tickets",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "BTN"
+    ]
+   }
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "DJ 101: Intro to Digital Deejaying",
+   "date": "2026-09-12",
+   "time": "13:00:00",
+   "url": "https://link.dice.fm/G8560547b42a",
+   "type": "community",
+   "end": "16:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "LS 202: Mixing for Monitors",
+   "date": "2026-09-12",
+   "time": "13:00:00",
+   "url": "https://link.dice.fm/wc49e65660ab",
+   "type": "community",
+   "end": "15:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-12",
+   "time": "13:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "15:10:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-12",
+   "time": "13:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "15:22:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-12",
+   "time": "13:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "15:21:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Tony",
+   "date": "2026-09-12",
+   "time": "16:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/tony",
+   "movie": true,
+   "end": "18:31:00"
+  },
+  {
+   "venue": "Lumen Field",
+   "title": "Seattle Reign FC vs. Bay FC",
+   "date": "2026-09-12",
+   "time": "17:00:00",
+   "url": "https://www.ticketmaster.com/seattle-reign-fc-vs-bay-fc-seattle-washington-09-12-2026/event/0F006454A559CF12",
+   "type": "sports"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "*FREE* LPL Capstone — Benefit Show!",
+   "date": "2026-09-12",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/R5b781e4aa39",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "MoPOP",
+   "title": "The Brunch Bundle at MOPOP",
+   "date": "2026-09-13",
+   "time": "",
+   "url": "https://www.mopop.org/events/the-brunch-bundle-at-mopop-9"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Forth Roadmap Conference 2026",
+   "date": "2026-09-13",
+   "time": "",
+   "url": "https://www.roadmapforth.org/",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Washington Home Show",
+   "date": "2026-09-13",
+   "time": "10:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/washington-home-show-x47103",
+   "type": "expo"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Live Aloha Hawaiian Cultural Festival",
+   "date": "2026-09-13",
+   "time": "11:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/live-aloha-hawaiian-cultural-festival",
+   "free": true,
+   "type": "community"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-13",
+   "time": "12:50:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "14:42:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-13",
+   "time": "13:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "15:10:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-13",
+   "time": "13:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "15:21:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Tony",
+   "date": "2026-09-13",
+   "time": "15:40:00",
+   "url": "https://www.siff.net/cinema/in-theaters/tony",
+   "movie": true,
+   "end": "17:26:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "WEEZER: The Gathering",
+   "date": "2026-09-13",
+   "time": "19:00:00",
+   "url": "https://www.ticketmaster.com/weezer-the-gathering-seattle-washington-09-13-2026/event/0F00646EEFA3BE60",
+   "type": "concert"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Forth Roadmap Conference 2026",
+   "date": "2026-09-14",
+   "time": "",
+   "url": "https://www.roadmapforth.org/",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-14",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "17:36:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-14",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "18:25:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Tony",
+   "date": "2026-09-14",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/tony",
+   "movie": true,
+   "end": "18:16:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Serial Mom",
+   "date": "2026-09-14",
+   "time": "18:30:00",
+   "url": "https://www.siff.net/programs-and-events/siff-movie-club/serial-mom",
+   "end": "20:03:00"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Guess What? Trivia!",
+   "date": "2026-09-14",
+   "time": "19:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-14",
+   "time": "19:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "21:07:00"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Forth Roadmap Conference 2026",
+   "date": "2026-09-15",
+   "time": "",
+   "url": "https://www.roadmapforth.org/",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "AOFAS Annual Meeting 2026",
+   "date": "2026-09-15",
+   "time": "",
+   "url": "https://www.aofas.org/annual-meeting/",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "KEXP",
+   "title": "anaiis LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "date": "2026-09-15",
+   "time": "14:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/anaiis-live-on-kexp-kexp_511109/",
+   "end": "14:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-15",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "18:10:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Screen Printing Open Session",
+   "date": "2026-09-15",
+   "time": "16:00:00",
+   "url": "https://link.dice.fm/i2e5f7787e33",
+   "type": "community",
+   "end": "20:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-15",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "18:07:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-15",
+   "time": "16:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "18:21:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Tony",
+   "date": "2026-09-15",
+   "time": "19:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/tony",
+   "movie": true,
+   "end": "21:16:00"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "AOFAS Annual Meeting 2026",
+   "date": "2026-09-16",
+   "time": "",
+   "url": "https://www.aofas.org/annual-meeting/",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-16",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "18:10:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-16",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "18:07:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Tony",
+   "date": "2026-09-16",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/tony",
+   "movie": true,
+   "end": "18:16:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "SY 101: Basics of Electronic Audio",
+   "date": "2026-09-16",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/P856c8142f1e",
+   "type": "community",
+   "end": "20:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "LS 101: Basics of Live Sound",
+   "date": "2026-09-16",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/l01043262f76",
+   "status": "cancelled",
+   "type": "community",
+   "end": "20:00:00",
+   "statusSince": "2026-09-16T00:58:38.860Z"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "SP 101: Intro to VERA's Screen Print Studio",
+   "date": "2026-09-16",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/N049c6b8f20b",
+   "type": "community",
+   "end": "20:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-16",
+   "time": "19:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "20:51:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Breathless",
+   "date": "2026-09-16",
+   "time": "19:30:00",
+   "url": "https://www.siff.net/programs-and-events/nouvelles-femmes/breathless",
+   "end": "21:00:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Good Flying Birds",
+   "date": "2026-09-16",
+   "time": "20:30:00",
+   "url": "https://link.dice.fm/o8332a274a00",
+   "type": "concert"
+  }
+ ]
+}
