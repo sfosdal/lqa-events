@@ -11,7 +11,7 @@
 import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
 import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents } from './sources.mjs';
-import { mergeWithArchive } from './merge.mjs';
+import { mergeWithArchive, unionArchives } from './merge.mjs';
 import { applySchedules } from './schedules.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
 
@@ -22,6 +22,10 @@ const ICS_OUT = new URL('../site/events.ics', import.meta.url);
 // see mergeWithArchive).
 const WINDOW_DAYS = 365;
 const FEED_URL = process.env.FEED_URL || 'https://fosdal.net/lqa-events/events.json';
+// the second copy of the archive: every past event ever published, kept on
+// the orphan `archive` branch by the workflow after each successful build
+const ARCHIVE_URL = process.env.ARCHIVE_URL || 'https://raw.githubusercontent.com/sfosdal/lqa-events/archive/events-archive.json';
+const ARCHIVE_OUT = new URL('../events-archive.json', import.meta.url); // repo root, ignored; the workflow commits it to the branch
 const MAX_EVENTS = 4000; // sanity cap, not a display cap — a year back plus a year ahead across 14 venues runs ~2,500
 
 const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
@@ -354,7 +358,7 @@ catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 // identity of their own keep their name.
 const CANONICAL_VENUES = new Set([
   'Climate Pledge Arena', 'T-Mobile Park', 'Lumen Field', 'Husky Stadium',
-  'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
+  'Starfire Stadium', 'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
   'SIFF Cinema Uptown', 'On the Boards', 'Convention Center',
   "Children's Theatre", 'MoPOP', 'Pacific Science Center', 'KEXP',
   'The Traveling Goat', 'Seattle Rep',
@@ -371,30 +375,47 @@ const fresh = all
   .filter((e) => e.date && e.date >= cutoff && e.date <= horizon)
   .filter((e) => { const k = `${e.venue}|${e.title}|${e.date}`; if (seen.has(k)) return false; seen.add(k); return true; });
 
-// carry past events forward from the previously published feed — the live
-// feed IS the archive, so a run that can't read it must not publish: on
-// 2026-09-07 one such run went out with 3 past events instead of 170 and
-// every run after carried only those, and the year of history was gone
-// (Steve noticed a McCaw Hall night missing). Three tries, then the run
-// fails and the last deploy stands.
-let archived = null;
-for (let attempt = 1; attempt <= 3 && archived === null; attempt++) {
-  try {
-    const r = await fetch(FEED_URL);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    // normalized too, so past events published under old micro-venue names
-    // don't resurrect their filter chips
-    archived = (Array.isArray(d) ? d : (d.events || [])).map(normalizeVenue)
-      // backfill the movie flag on entries archived before it existed
-      .map((e) => (!e.movie && e.url && e.url.includes('/cinema/in-theaters/') ? { ...e, movie: true } : e));
-  } catch (err) {
-    console.error(`Archive fetch (try ${attempt} of 3) failed: ${err.message}`);
-    if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 20000));
+// carry past events forward. Two copies of the archive: the live feed and
+// the `archive` branch's file (every past event ever published; the workflow
+// rewrites it after each build). Each is fetched with three tries; the build
+// goes on with the union of whatever it got and stops only when it got
+// neither — on 2026-09-07 a run that couldn't read the (then only) live copy
+// published 3 past events instead of 170 and the year of history was gone.
+// Since the union can only grow, a publish that lost history can no longer
+// shrink the record.
+const cleanArchive = (d) => (Array.isArray(d) ? d : (d.events || []))
+  // Seawolves matches archived before Starfire Stadium was a canonical venue
+  // (2026-09-17) had been renamed "Seattle Center" on read-back, which also
+  // defeated the duplicate guard below — 32 copies of each by the time it
+  // was caught. Put them back so the union folds them onto the real entry.
+  .map((e) => (e.venue === 'Seattle Center' && /^Seattle Seawolves vs /.test(e.title) ? { ...e, venue: 'Starfire Stadium' } : e))
+  .map(normalizeVenue)
+  // normalized too, so past events published under old micro-venue names
+  // don't resurrect their filter chips; backfill the movie flag on entries
+  // archived before it existed
+  .map((e) => (!e.movie && e.url && e.url.includes('/cinema/in-theaters/') ? { ...e, movie: true } : e));
+async function fetchArchive(url, what) {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const r = await fetch(url, { cache: 'no-store' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return cleanArchive(await r.json());
+    } catch (err) {
+      console.error(`${what} fetch (try ${attempt} of 3) failed: ${err.message}`);
+      if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 20000));
+    }
   }
+  return null;
 }
-if (archived === null && !process.env.ALLOW_NO_ARCHIVE) { console.error('No archive — not publishing (ALLOW_NO_ARCHIVE=1 to override for a first build)'); process.exit(1); }
-archived = archived || [];
+const [liveArchive, branchArchive] = await Promise.all([fetchArchive(FEED_URL, 'Live feed'), fetchArchive(ARCHIVE_URL, 'Archive branch')]);
+if (liveArchive === null && branchArchive === null && !process.env.ALLOW_NO_ARCHIVE) {
+  console.error('No archive from either copy — not publishing (ALLOW_NO_ARCHIVE=1 to override for a first build)');
+  process.exit(1);
+}
+if (liveArchive === null) console.error('Live feed unreadable — building on the archive branch copy');
+if (branchArchive === null) console.error('Archive branch unreadable — building on the live feed alone');
+const archived = unionArchives(liveArchive || [], branchArchive || []);
+console.log(`Archive: ${(liveArchive || []).length} events in the live feed, ${(branchArchive || []).length} on the archive branch, ${archived.length} in the union`);
 
 const merged = mergeWithArchive(fresh, archived, today, cutoff).slice(-MAX_EVENTS);
 
@@ -457,6 +478,11 @@ if (Object.keys(seasons).length) {
 }
 
 writeFileSync(JSON_OUT, JSON.stringify({ generated: new Date().toISOString(), events: merged }, null, 2) + '\n');
+// the archive record: this build's past events on top of everything already
+// recorded, never pruned (the feed keeps a year; the branch keeps it all)
+const record = unionArchives(merged.filter((e) => e.date < today), archived.filter((e) => e.date < today));
+writeFileSync(ARCHIVE_OUT, JSON.stringify({ events: record }, null, 1) + '\n'); // no timestamp: the branch commits only when the events change
+console.log(`Archive record: ${record.length} past events`);
 writeFileSync(ICS_OUT, buildIcs(merged));
 
 // Filtered subscribe feeds, one per venue and one per badge, so the site's

@@ -11,7 +11,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>/bin/zsh</string>
-    <string>/Users/sfosdal/Desktop/projects/lqa-events/repo/scripts/soldout-run.sh</string>
+    <string>/Users/sfosdal/repos/lqa-events/scripts/soldout-run.sh</string>
   </array>
   <key>StartCalendarInterval</key>
   <array>

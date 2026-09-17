@@ -30,3 +30,16 @@ export function mergeWithArchive(fresh, archived, todayStr, cutoffStr, nowISO = 
   return [...past, ...knownOff, ...stamped]
     .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
 }
+
+/**
+ * Union of two copies of the archive (the live feed and the `archive`
+ * branch's file): every event from either, `primary` winning a key
+ * collision, sorted like the feed. The second copy exists so a publish that
+ * lost history cannot wipe it — the union can only grow.
+ */
+export function unionArchives(primary, secondary) {
+  const byKey = new Map(secondary.map((e) => [key(e), e]));
+  for (const e of primary) byKey.set(key(e), e);
+  return [...byKey.values()]
+    .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+}
