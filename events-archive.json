@@ -932,6 +932,122 @@
    "time": "20:30:00",
    "url": "https://link.dice.fm/o8332a274a00",
    "type": "concert"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "AOFAS Annual Meeting 2026",
+   "date": "2026-09-17",
+   "time": "",
+   "url": "https://www.aofas.org/annual-meeting/",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Hope",
+   "date": "2026-09-17",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/hope",
+   "movie": true,
+   "end": "18:25:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-17",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "18:10:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-17",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "17:51:00"
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Artsfund 2026 Celebration of the Arts",
+   "date": "2026-09-17",
+   "time": "17:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/artsfund-2026-celebration-of-the-arts"
+  },
+  {
+   "venue": "Cornish Playhouse",
+   "title": "Artists at the Center: Path With Art",
+   "date": "2026-09-17",
+   "time": "18:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/artists-at-the-center-path-with-art",
+   "free": true,
+   "type": "arts"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Storm vs. Las Vegas Aces",
+   "date": "2026-09-17",
+   "time": "19:00:00",
+   "url": "https://www.ticketmaster.com/seattle-storm-vs-las-vegas-aces-seattle-washington-09-17-2026/event/0F00646A89F34DCB",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "USA Net",
+     "CNBC",
+     "CW Seattle",
+     "Vegas 34",
+     "Prime Video-Seattle"
+    ]
+   },
+   "tickets": {
+    "box": 264,
+    "resale": 537,
+    "checked": "2026-09-16T07:34:50.414Z",
+    "from": 28.4
+   }
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Trans WA Community Aid Benefit",
+   "date": "2026-09-17",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/j6637bf8d94e",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Edie Arnold is a Loser",
+   "date": "2026-09-17",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/edie-arnold-is-a-loser",
+   "movie": true,
+   "end": "20:13:00"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Storm Happy Hour",
+   "date": "2026-09-17",
+   "time": "19:00:00"
+  },
+  {
+   "venue": "On the Boards",
+   "title": "Clayton Lee",
+   "date": "2026-09-17",
+   "time": "19:30:00",
+   "url": "https://ontheboards.org/events/26-27/goldberg-variations"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Cass & Tay",
+   "date": "2026-09-17",
+   "time": "19:30:00"
   }
  ]
 }
