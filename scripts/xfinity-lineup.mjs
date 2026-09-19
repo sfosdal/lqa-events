@@ -37,6 +37,7 @@ export const CALL_SIGNS = {
   '^USA Net(work)?$': 'USAP',
   '^FS1$|Fox Sports 1': 'FS1',
   '^FS2$|Fox Sports 2': 'FS2',
+  '^BTN$|Big Ten Network': 'BIGTEN', // Big Ten Network — most Husky home games
   '^TNT$|^HBO MAX$|^Max$': 'TNTP',
   '^TBS$': 'TBSP',
   '^truTV$': 'TRUTVP',
@@ -68,7 +69,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const dataPath = join(here, 'data', 'xfinity-98109.json'), chPath = join(here, '..', 'site', 'channels.json');
   const data = JSON.parse(readFileSync(dataPath, 'utf8')), channels = JSON.parse(readFileSync(chPath, 'utf8'));
   const next = applyLineup(channels, data.lineup);
-  writeFileSync(chPath, JSON.stringify(next, null, 2) + '\n');
+  writeFileSync(chPath, JSON.stringify(next, null, 1) + '\n');
   const changed = channels.channels.map((c, i) => [c, next.channels[i]]).filter(([a, b]) => a.xfinity !== b.xfinity).map(([a, b]) => `${a.match}: ${a.xfinity ?? '—'} -> ${b.xfinity ?? '—'}`);
   console.log(`channels.json: ${changed.length} Xfinity numbers changed (lineup of ${data.fetched})`);
   changed.forEach((l) => console.log('  ' + l));

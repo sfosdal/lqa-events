@@ -142,7 +142,8 @@
     "Fubo",
     "Hulu + Live TV"
    ],
-   "note": "Big Ten Network — most Husky home games; the Xfinity King County lineup on file does not list it, add the number when known"
+   "note": "Big Ten Network — most Husky home games; Xfinity number from the King County lineup (call sign BIGTEN)",
+   "xfinity": "404"
   },
   {
    "match": "^TNT$|^HBO MAX$|^Max$",

@@ -1277,7 +1277,7 @@ html { overflow-anchor: none; }
 .bug-inn .bug-dn { border-top: .55rem solid #6a6d72; }
 .bug-inn .bug-up.is-on { border-bottom-color: var(--bug-on); }
 .bug-inn .bug-dn.is-on { border-top-color: var(--bug-on); }
-.bug-field { grid-area: 1 / 4 / 3 / 5; display: flex; align-items: center; gap: 1.1rem; padding: .2rem 1rem .2rem .9rem; border-left: 2px solid #c9cdd2; }
+.bug-field { grid-area: 1 / 4 / 3 / 5; display: flex; align-items: center; justify-content: center; gap: 1.1rem; padding: .2rem 1rem .2rem .9rem; border-left: 2px solid #c9cdd2; } /* centred: a long top line (the pitch, its result) widens the bug and the extra width lands in this cell — left-aligned, the count and the bases sat off-centre (Steve, 2026-09-18) */
 .bug-bases { width: 3.1rem; height: 1.9rem; }
 .bug-bases polygon { fill: transparent; stroke: #d5d8dc; stroke-width: 2; stroke-linejoin: round; }
 .bug-bases polygon.is-on { fill: var(--bug-on); stroke: #fff; }
