@@ -1012,7 +1012,8 @@
     var r = cell.getBoundingClientRect(), g = $('mbGrid').getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
     var w = Math.max(r.width, Math.min(20 * 16, g.width)), left = Math.min(r.left, vw - w - 8, g.right - w); left = Math.max(8, left);
     pop.style.width = w + 'px'; pop.style.left = left + 'px';
-    var hgt = pop.offsetHeight, top = r.top; if (top + hgt > vh - 8) top = Math.max(8, vh - 8 - hgt);
+    var foot = document.querySelector('footer'), floor = foot ? Math.min(vh, foot.getBoundingClientRect().top) : vh; // the footer is pinned at the foot: the card stays clear of it (Steve, 2026-09-18)
+    var hgt = pop.offsetHeight, top = r.top; if (top + hgt > floor - 8) top = Math.max(8, floor - 8 - hgt);
     pop.style.top = top + 'px';
     setTimeout(function () { document.addEventListener('click', dayPopOff, true); document.addEventListener('keydown', dayPopOff); window.addEventListener('scroll', closeDayPop, { passive: true }); }, 0);
   }
@@ -1357,7 +1358,7 @@
         var prow = document.createElement('div'); prow.className = 'ev is-post'; pbox.appendChild(prow);
         var ptime = document.createElement('span'); ptime.className = 'time'; ptime.textContent = r.tbd ? 'TBA' : ''; prow.appendChild(ptime);
         var pbody = document.createElement('div'); pbody.className = 'ev-body'; prow.appendChild(pbody);
-        var pwhere = document.createElement('span'); pwhere.className = 'venue is-away'; pwhere.textContent = r.site || roundSpan(r); pbody.appendChild(pwhere);
+        if (r.site) { var pwhere = document.createElement('span'); pwhere.className = 'venue is-away'; pwhere.textContent = r.site; pbody.appendChild(pwhere); } // the dates are the rail's; repeating them in the card said it twice (Steve, 2026-09-18)
         var ptitle = document.createElement('span'); ptitle.className = 'ev-title'; ptitle.textContent = r.name + ' '; pbody.appendChild(ptitle);
         if (r.tbd) { var badge = document.createElement('span'); badge.className = 'badge b-post'; badge.textContent = 'Dates TBA'; ptitle.appendChild(badge); } // a round whose dates are the usual calendar, not yet announced (Steve, 2026-09-14: no "if they qualify")
         pg.appendChild(li);
@@ -1768,7 +1769,7 @@
   // networks and radio in short — shown only while the block is compact.
   function buildBrief(lead, watch) {
     var brief = document.createElement('div'); brief.className = 'tf-brief'; brief.setAttribute('aria-hidden', 'true');
-    if (lead) lead.querySelectorAll('p').forEach(function (p) { if (!p.classList.contains('tf-blurb')) brief.appendChild(p.cloneNode(true)); });
+    if (lead) { var nx = lead.querySelector('.tf-next, .tf-state'); if (nx) brief.appendChild(nx.cloneNode(true)); } // the next game (or the game's state) only: eight lines ellipsised to a few letters each said nothing (Steve, 2026-09-18); the record and standing are the bar's head
     if (watch) {
       var tv = [], radio = [];
       watch.querySelectorAll('.tf-channels[data-kind="tv"] > li > b').forEach(function (b) { tv.push(b.textContent); });
@@ -2316,7 +2317,7 @@
     var p = s.predictor;
     if (p && p.homeTeam && p.awayTeam) {
       var usP = mine(p.homeTeam.id) ? p.homeTeam : p.awayTeam, themP = usP === p.homeTeam ? p.awayTeam : p.homeTeam;
-      if (usP.gameProjection) out.chance = { us: Math.round(+usP.gameProjection), them: Math.round(+themP.gameProjection), draw: 0, source: 'ESPN Matchup Predictor' };
+      if (usP.gameProjection) { var usR = Math.round(+usP.gameProjection); out.chance = { us: usR, them: 100 - usR, draw: 0, source: 'ESPN Matchup Predictor' }; } // one side rounded, the other its complement: 76 and 25 read as a mistake (Steve, 2026-09-18)
     }
     if (!out.chance && ev) out.chance = impliedChance(ev.competitions[0], team);
     // the series: the regular season's (or the head-to-head), its last completed meeting
@@ -3000,7 +3001,7 @@
     else if (t.box != null) parts.push(n(t.box) + (cap ? ' of ' + n(cap) : '') + ' tickets left');
     else parts.push('On sale'); // the checker saw tickets listed but no count
     if (t.resale) parts.push(n(t.resale) + ' resale');
-    if (t.from != null) parts.push('from $' + Math.round(t.from));
+    if (t.from != null && Math.round(t.from) > 0) parts.push('from $' + Math.round(t.from)); // a $0 floor reads as free; say nothing (Steve, 2026-09-18)
     return parts.join(' \u00b7 ');
   }
   function openSheet(e, anchor, point) {
@@ -3600,6 +3601,7 @@
     btn.hidden = !away;
   }
   var stuckPending = false, lastHeadH = '', lastFullH = 0;
+  var lastBarH = ''; // the measured --barh while the bar is pinned (markStuck)
   var COMPACT_BELOW = 0.75; // the pinned block goes compact once the list below it runs longer than this share of the window
   function markStuck() {
     stuckPending = false;
@@ -3641,7 +3643,12 @@
       var headH = compact ? th.offsetHeight + 'px' : ''; // the opponent bar and the month rows pin below the compact bar (the bar's top padding is the gap under the filter bar)
       if (headH !== lastHeadH) { lastHeadH = headH; if (headH) $('teamsView').style.setProperty('--head-h', headH); else $('teamsView').style.removeProperty('--head-h'); }
     }
-    var edge = document.querySelector('.filter-area').getBoundingClientRect().bottom + 1;
+    var faRect = document.querySelector('.filter-area').getBoundingClientRect();
+    if (faRect.top === 0 && document.scrollingElement.scrollTop > 0) { // pinned: its real height is what the sticky rows below offset by — the rem estimate ran 9px long and a sliver of list showed between the bar and the month rule (Steve, 2026-09-18)
+      var bh = Math.round(faRect.bottom) + 'px';
+      if (bh !== lastBarH) { lastBarH = bh; document.documentElement.style.setProperty('--barh', bh); }
+    } else if (lastBarH) { lastBarH = ''; document.documentElement.style.removeProperty('--barh'); }
+    var edge = faRect.bottom + 1;
     var rows = document.querySelectorAll('section:not([hidden]) .month-row'); // the list on show: agenda or Teams
     var stuck = null;
     rows.forEach(function (r) { if (r.getBoundingClientRect().top <= edge) stuck = r; });

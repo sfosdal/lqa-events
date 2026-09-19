@@ -12,6 +12,7 @@ import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
 import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents } from './sources.mjs';
 import { mergeWithArchive, unionArchives } from './merge.mjs';
+import { calmTitle, isNotice } from './titles.mjs';
 import { applySchedules } from './schedules.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
 
@@ -373,6 +374,8 @@ const cutoff = new Date(Date.now() - WINDOW_DAYS * 86400e3).toISOString().slice(
 const seen = new Set();
 const fresh = all
   .filter((e) => e.date && e.date >= cutoff && e.date <= horizon)
+  .filter((e) => !isNotice(e.title)) // a closure or construction notice is information, not an event (Steve, 2026-09-18)
+  .map((e) => ({ ...e, title: calmTitle(e.title) })) // shouted titles come down to Title Case (Steve, 2026-09-18)
   .filter((e) => { const k = `${e.venue}|${e.title}|${e.date}`; if (seen.has(k)) return false; seen.add(k); return true; });
 
 // carry past events forward. Two copies of the archive: the live feed and
@@ -390,6 +393,7 @@ const cleanArchive = (d) => (Array.isArray(d) ? d : (d.events || []))
   // was caught. Put them back so the union folds them onto the real entry.
   .map((e) => (e.venue === 'Seattle Center' && /^Seattle Seawolves vs /.test(e.title) ? { ...e, venue: 'Starfire Stadium' } : e))
   .map(normalizeVenue)
+  .filter((e) => !isNotice(e.title)).map((e) => ({ ...e, title: calmTitle(e.title) })) // the same title hygiene as fresh events, so the merge keys agree
   // normalized too, so past events published under old micro-venue names
   // don't resurrect their filter chips; backfill the movie flag on entries
   // archived before it existed
