@@ -55,6 +55,18 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+  canary:
+    # ESPN's API, asked for exactly what the browser asks for — its own job,
+    # so a change at ESPN turns the run red (and mails) without holding up
+    # the publish. scripts/espn-canary.mjs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: ESPN canary
+        run: node scripts/espn-canary.mjs
   deploy:
     needs: build
     runs-on: ubuntu-latest

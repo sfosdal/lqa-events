@@ -123,6 +123,10 @@ python3 -m http.server -d site 8087  # or any static server
 Without `TICKETMASTER_API_KEY` in the environment only McCaw Hall events
 appear — fine for previewing the UI.
 
+## The ESPN canary
+
+The live game block talks to ESPN from the browser, and ESPN changes its API without notice (2026-09-18: the scoreboard stopped taking a date range, and every club's block sat on the pregame card through a game in progress). `scripts/espn-canary.mjs` asks ESPN for exactly what the site asks for — today's scoreboard for every league in `site/filter.js`, then one game's summary — and exits 1 when an answer is not the shape the site reads. The workflow runs it as its own `canary` job every six hours, so a change at ESPN turns the run red and mails within six hours without blocking the publish. Run it by hand with `node scripts/espn-canary.mjs`.
+
 ## Secrets
 
 `TICKETMASTER_API_KEY` — free Ticketmaster Discovery API key, set as a repo
