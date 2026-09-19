@@ -2072,14 +2072,20 @@
     if (!playing.length) return;
     if (document.hidden && !force) { live.timer = setTimeout(pollLive, POLL_MS); return; }
     live.busy = true; $('teamHead').querySelectorAll('.tf-refresh').forEach(function (b) { b.classList.add('is-busy'); });
-    var today = todayStr(), span = dayBefore(today).replace(/-/g, '') + '-' + dayAfter(today, AHEAD_DAYS).replace(/-/g, ''); // yesterday through two days out
+    var today = todayStr(), days = [dayBefore(today), today]; for (var di = 1; di <= AHEAD_DAYS; di++) days.push(dayAfter(today, di)); // yesterday through two days out — a day per request: ESPN's scoreboard stopped taking a range (dates=A-B answered 400 "Failed to get events endpoint" from 2026-09-18, every league)
     var anyIn = false; // a game in progress somewhere: the quick poll; otherwise every few minutes
     var leagues = {};
     playing.forEach(function (t) { leagues[t.espn.sport + '/' + t.espn.league] = true; });
     Promise.all(Object.keys(leagues).map(function (k) {
-      return fetch(scoreboardUrl(k, span), { cache: 'no-store' })
-        .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
-        .then(function (j) { return [k, j]; });
+      return Promise.all(days.map(function (d) {
+        return fetch(scoreboardUrl(k, d.replace(/-/g, '')), { cache: 'no-store' })
+          .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+      })).then(function (boards) { // the days' boards as one: every day that answered, its events once each
+        var got = boards.filter(Boolean); if (!got.length) return [k, null];
+        var seen = {}, events = [];
+        got.forEach(function (j) { (j.events || []).forEach(function (e) { if (!seen[e.id]) { seen[e.id] = true; events.push(e); } }); });
+        return [k, { events: events }];
+      });
     })).then(function (pairs) {
       var boards = {};
       pairs.forEach(function (p) { boards[p[0]] = p[1]; });
