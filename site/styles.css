@@ -943,6 +943,8 @@ html.teams-open #teamsView { margin-top: .5rem; }
    pixels down and pins it compact (seen 2026-09-11). Nothing on the page
    loads late above the fold, so the anchoring is not missed. */
 html { overflow-anchor: none; }
+.team-form.is-wait { min-height: 15.9rem; border-color: transparent; background: transparent; box-shadow: none; } /* the block's frame, empty, while the first scoreboard poll is out (app.js teamBlock): the page keeps its shape instead of drawing the season card, then the news, then the highlights */
+@media (max-width: 640px) { .team-form.is-wait { min-height: 22rem; } }
 #teamHead.is-compact .team-form { box-shadow: 0 8px 28px rgba(15, 25, 35, .18); }
 #teamHead.is-compact .team-form { --crest: 2.6rem; align-items: center; justify-content: center; gap: .7rem; padding: .4rem .9rem; }
 #teamHead.is-compact .tf-wiki, #teamHead.is-compact .tf-refresh-wrap, #teamHead.is-compact .tf-lines > * { display: none; }

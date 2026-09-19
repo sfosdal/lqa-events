@@ -1232,7 +1232,8 @@
     if (played.length) {
       var fold = document.createElement('li'); fold.className = 'team-fold';
       var fb = document.createElement('button'); fb.type = 'button'; fb.className = 'chip';
-      fb.textContent = (teamView.showPast ? 'Hide the ' : 'Show the ') + played.length + ' played game' + (played.length === 1 ? '' : 's');
+      var nReg = played.filter(function (g) { return !g.pre; }).length; // the count the record counts: spring training and preseason games fold away with them but are not "played games" (Steve, 2026-09-18: 184 over a 71-82 record)
+      fb.textContent = (teamView.showPast ? 'Hide the ' : 'Show the ') + nReg + ' played game' + (nReg === 1 ? '' : 's');
       fb.addEventListener('click', function () { teamView.showPast = !teamView.showPast; renderTeams(teamView.slug); });
       fold.appendChild(fb); list.appendChild(fold);
     }
@@ -1906,15 +1907,15 @@
   // where to watch, and once it's final the result stays until the next
   // visit. The feed is ESPN's because it answers from the browser.
   var POLL_MS = 30000; // the scoreboard is asked this often while a game is on (styles.css tf-tick counts it down — keep the two in step)
-  var live = { slug: null, event: null, events: {}, shown: null, shownBy: {}, timer: null, at: null, busy: false, lastOut: {}, matchup: {}, pitches: {}, lastPitch: {}, highlights: {}, odds: {} };
+  var live = { slug: null, event: null, events: {}, shown: null, shownBy: {}, timer: null, at: null, busy: false, lastOut: {}, matchup: {}, pitches: {}, lastPitch: {}, highlights: {}, odds: {}, polled: {} }; // polled: the clubs a scoreboard poll has answered for (the first draw waits for it)
   // MLB's clips for the game (statsapi's content feed, open to the browser),
   // newest first, a few of them: linked to their pages on mlb.com. Fetched
   // with each poll while the game is on, once it is over, and kept by game.
-  function fetchHighlights(team, g) {
-    if (!g || !g.id) return;
+  function fetchHighlights(team, g, hold) { // hold: the caller redraws the block once everything is in (pollLive) — no redraw from here
+    if (!g || !g.id) return Promise.resolve();
     var have = live.highlights[team.slug];
-    if (have && have.id === g.id && have.final && Date.now() - have.at < 600000) return; // a final's clips: refreshed every ten minutes
-    fetch('https://statsapi.mlb.com/api/v1/game/' + g.id + '/content', { cache: 'no-store' })
+    if (have && have.id === g.id && have.final && Date.now() - have.at < 600000) return Promise.resolve(); // a final's clips: refreshed every ten minutes
+    return fetch('https://statsapi.mlb.com/api/v1/game/' + g.id + '/content', { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (c) {
         var items = ((((c || {}).highlights || {}).highlights || {}).items) || [];
@@ -1922,7 +1923,7 @@
         clips.sort(function (a, b) { return b.date.localeCompare(a.date); });
         var was = live.highlights[team.slug];
         live.highlights[team.slug] = { id: g.id, at: Date.now(), final: !!(g.res), clips: clips.slice(0, 5), n: clips.length };
-        if (teamSelected(team.slug) && (!was || was.id !== g.id || was.n !== clips.length)) swapFormBlock(team, true);
+        if (!hold && teamSelected(team.slug) && (!was || was.id !== g.id || was.n !== clips.length)) swapFormBlock(team, true);
       })
       .catch(function () { /* no clips: the column stands without them */ });
   }
@@ -2096,7 +2097,8 @@
       live.at = new Date();
       playing.forEach(function (t) {
         var j = boards[t.espn.sport + '/' + t.espn.league];
-        if (!j) return; // that league's board didn't come: leave what we had
+        if (!j) { if (waitingBlock(t.slug)) { live.polled[t.slug] = true; swapFormBlock(t, true); } return; } // that league's board didn't come: leave what we had (a placeholder gives way to the season card)
+        live.polled[t.slug] = true;
         var want = liveGameToday(t.slug), ours = (j.events || []).filter(function (e) {
           return (e.competitions[0].competitors || []).some(function (c) { return String(c.team.id) === t.espn.id; });
         });
@@ -2113,10 +2115,18 @@
           if (one) { live.event = ev || null; live.slug = t.slug; }
           // re-drawn while live (the score moves) and whenever the stage changes
           var prev = one ? live.shown : live.shownBy[t.slug];
-          if (want === 'in' || want !== prev) { live.shownBy[t.slug] = want; if (one) { live.shown = want; swapFormBlock(t); } else syncHead(t); }
-          if (want === 'in' && t.espn.sport === 'baseball') fetchLastOut(t, ev); // the play-by-play, for the last out
-          if ((want === 'in' || want === 'post') && t.espn.sport === 'baseball') fetchHighlights(t, liveGameToday(t.slug)); // the game's clips
-          if (want === 'pre' || want === 'post') fetchMatchup(t, ev, want); // the matchup before the game; the series line after
+          // one redraw, with the play-by-play (the last out, the pitch count) and the clips already in: drawn as each landed, the block
+          // showed three different things in its first second after a reload — the season card, the news column, then the highlights
+          // (Steve's recording, 2026-09-18). A first draw (the placeholder from teamBlock) always goes ahead, whatever the state.
+          var waits = [];
+          if (want === 'in' && t.espn.sport === 'baseball') waits.push(fetchLastOut(t, ev, true)); // the play-by-play, for the last out
+          if ((want === 'in' || want === 'post') && t.espn.sport === 'baseball') waits.push(fetchHighlights(t, liveGameToday(t.slug), true)); // the game's clips
+          var redraw = want === 'in' || want !== prev || waitingBlock(t.slug);
+          if (want === 'pre' || want === 'post') { var mp = fetchMatchup(t, ev, want, redraw); if (redraw) waits.push(mp); } // the matchup before the game; the series line after — held for the draw below when there is one
+          if (redraw) {
+            live.shownBy[t.slug] = want; if (one) live.shown = want;
+            Promise.all(waits).then(function () { if (one) swapFormBlock(t); else syncHead(t); });
+          }
         }
       });
     }).then(function () {
@@ -2140,8 +2150,8 @@
   // Baseball's most recent out, from ESPN's game summary: the last at-bat
   // that ended in one (its "Play Result" line names the batter and whoever
   // made the play), with the batter and the pitcher looked up in the rosters.
-  function fetchLastOut(team, ev) {
-    fetch('https://site.api.espn.com/apis/site/v2/sports/' + team.espn.sport + '/' + team.espn.league + '/summary?event=' + ev.id, { cache: 'no-store' })
+  function fetchLastOut(team, ev, hold) { // hold: as fetchHighlights
+    return fetch('https://site.api.espn.com/apis/site/v2/sports/' + team.espn.sport + '/' + team.espn.league + '/summary?event=' + ev.id, { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (s) {
         if (!s || !s.plays) return;
@@ -2169,7 +2179,7 @@
           id: out.id, text: out.text.replace(/\s+/g, ' ').trim(), batter: who.batter || null, pitcher: who.pitcher || null,
           when: out.period ? (out.period.type === 'Top' ? 'Top ' : out.period.type === 'Bottom' ? 'Bot ' : '') + ordinal(out.period.number) : '',
         };
-        if (teamSelected(team.slug) && teamStage(team.slug) === 'in') swapFormBlock(team, true); // the box score landed (a new out, a new pitch count): redraw without the flash
+        if (!hold && teamSelected(team.slug) && teamStage(team.slug) === 'in') swapFormBlock(team, true); // the box score landed (a new out, a new pitch count): redraw without the flash
       })
       .catch(function () { /* the play-by-play didn't come: the line just stays off */ });
   }
@@ -2181,15 +2191,15 @@
   // after ten minutes (the lists move on game day); the block is redrawn
   // quietly when it lands.
   var STAT_ABBR = { avg: 'avg', homeRuns: 'HR', RBIs: 'RBI', ERA: 'ERA', wins: 'W', strikeouts: 'K', saves: 'SV', goals: 'G', assists: 'A', points: 'PTS', plusMinus: '+/−', goalsAgainstAverage: 'GAA', savePct: 'SV%', passingYards: 'pass yds', rushingYards: 'rush yds', receivingYards: 'rec yds', passingTouchdowns: 'pass TD', rushingTouchdowns: 'rush TD', receivingTouchdowns: 'rec TD', rebounds: 'REB', totalShots: 'shots', accuratePasses: 'passes', defensiveInterventions: 'def. plays', saves_soccer: 'saves' };
-  function fetchMatchup(team, ev, stage) {
+  function fetchMatchup(team, ev, stage, hold) { // hold: as fetchHighlights — the first draw waits for the matchup too (the estimate, slower, still lands on its own)
     var have = live.matchup[team.slug];
-    if (have && have.id === ev.id && have.stage === stage && Date.now() - have.at < 600000) return;
-    fetch('https://site.api.espn.com/apis/site/v2/sports/' + team.espn.sport + '/' + team.espn.league + '/summary?event=' + ev.id, { cache: 'no-store' })
+    if (have && have.id === ev.id && have.stage === stage && Date.now() - have.at < 600000) return Promise.resolve();
+    return fetch('https://site.api.espn.com/apis/site/v2/sports/' + team.espn.sport + '/' + team.espn.league + '/summary?event=' + ev.id, { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (s) {
         if (!s) return;
         live.matchup[team.slug] = { id: ev.id, stage: stage, at: Date.now(), data: digestMatchup(s, team, ev) };
-        if (teamSelected(team.slug) && teamStage(team.slug) === stage) swapFormBlock(team, true);
+        if (!hold && teamSelected(team.slug) && teamStage(team.slug) === stage) swapFormBlock(team, true);
         if (stage === 'pre' && !live.matchup[team.slug].data.chance) estimateChance(team, ev).then(function (ch) { // nothing priced it: the estimate
           var m = live.matchup[team.slug];
           if (!ch || !m || m.id !== ev.id || m.data.chance) return;
@@ -2239,7 +2249,7 @@
       .then(function (o) {
         if (!o || !(o.chance || seriesText(o.series))) return;
         live.odds[team.slug] = { date: g.date, at: Date.now(), chance: o.chance, series: o.series, them: o.them, leaders: o.leaders, injured: o.injured }; // the leaders and the injured ride along for the block's column
-        if (teamSelected(team.slug) && !teamStage(team.slug)) swapFormBlock(team, true); // the season block is up: redraw it with the ring
+        if (teamSelected(team.slug) && !teamStage(team.slug) && !waitingBlock(team.slug)) swapFormBlock(team, true); // the season block is up: redraw it with the ring (not the placeholder — the poll draws that)
       })
       .catch(function () { /* no odds: the block stands without them */ });
   }
@@ -2700,6 +2710,7 @@
     head.classList.toggle('is-multi', show.length > 1);
     settleBlock();
   }
+  function waitingBlock(slug) { return $('teamHead').querySelector('.team-form.is-wait[data-slug="' + slug + '"]'); } // the placeholder still up
   function teamBlock(t, today) {
     if (!t.espn) { // no feed: the block from the schedule, and its odds (the build's estimate) as the matchup
       var sg = liveGameToday(t.slug); live.events[t.slug] = sg ? synthEvent(t, sg) : null;
@@ -2707,6 +2718,11 @@
     }
     var ev = live.events[t.slug] || null, stage = teamStage(t.slug);
     if (teamView.slugs.length === 1) { live.slug = t.slug; live.event = ev; live.shown = stage; } // one club picked: its game is the live game, as before
+    if (t.espn && !ev && !live.polled[t.slug] && liveGameToday(t.slug)) { // a game near and no poll yet: an empty frame of the block's height, the first poll fills it (or the season card, if the board never comes)
+      var w = document.createElement('div'); w.className = 'team-form is-wait'; w.setAttribute('aria-busy', 'true'); w.dataset.slug = t.slug;
+      setTimeout(function () { if (waitingBlock(t.slug)) { live.polled[t.slug] = true; swapFormBlock(t, true); } }, 3000);
+      return w;
+    }
     var b = stage ? renderTeamLive(t, ev) : renderTeamForm(t, teamGames(t.slug) || [], today);
     b.dataset.slug = t.slug;
     return b;
