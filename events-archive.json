@@ -58,7 +58,7 @@
   },
   {
    "venue": "KEXP",
-   "title": "zzzahara LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "title": "zzzahara Live on KEXP (Open To The Public)",
    "date": "2026-08-13",
    "time": "11:00:00",
    "url": "https://www.kexp.org/events/kexp-events/zzzahara-live-on-kexp-kexp_505772/",
@@ -66,7 +66,7 @@
   },
   {
    "venue": "KEXP",
-   "title": "Helado Tropical LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "title": "Helado Tropical Live on KEXP (Open To The Public)",
    "date": "2026-08-18",
    "time": "11:00:00",
    "url": "https://www.kexp.org/events/kexp-events/helado-tropical-live-on-kexp-kexp_506396/",
@@ -123,7 +123,7 @@
   },
   {
    "venue": "KEXP",
-   "title": "Death Cab for Cutie LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "title": "Death Cab for Cutie Live on KEXP (Open To The Public)",
    "date": "2026-09-07",
    "time": "11:00:00",
    "url": "https://www.kexp.org/events/kexp-events/death-cab-for-cutie-live-on-kexp-kexp_500824/",
@@ -158,7 +158,7 @@
   },
   {
    "venue": "The Vera Project",
-   "title": "JAYMYLONI, BRUJITA XO, KNXTRNL +DJ Dazé",
+   "title": "Jaymyloni, Brujita XO, Knxtrnl +DJ Dazé",
    "date": "2026-09-07",
    "time": "19:00:00",
    "url": "https://link.dice.fm/f236e53ed88e",
@@ -175,7 +175,7 @@
   },
   {
    "venue": "KEXP",
-   "title": "Haute & Freddy LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "title": "Haute & Freddy Live on KEXP (Open To The Public)",
    "date": "2026-09-08",
    "time": "15:00:00",
    "url": "https://www.kexp.org/events/kexp-events/haute-freddy-live-on-kexp-kexp_511072/",
@@ -236,7 +236,7 @@
   },
   {
    "venue": "Climate Pledge Arena",
-   "title": "ANDREA BOCELLI \"Romanza - 30th Anniversary World Tour\"",
+   "title": "Andrea Bocelli \"Romanza - 30th Anniversary World Tour\"",
    "date": "2026-09-08",
    "time": "20:00:00",
    "url": "https://www.ticketmaster.com/andrea-bocelli-romanza-30th-anniversary-world-seattle-washington-09-08-2026/event/0F006435AE39BA5E",
@@ -251,7 +251,7 @@
   },
   {
    "venue": "KEXP",
-   "title": "Altın Gün LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "title": "Altın Gün Live on KEXP (Open To The Public)",
    "date": "2026-09-09",
    "time": "11:00:00",
    "url": "https://www.kexp.org/events/kexp-events/altn-gun-live-on-kexp-kexp_511084/",
@@ -358,7 +358,7 @@
   },
   {
    "venue": "KEXP",
-   "title": "Shabazz Palaces LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "title": "Shabazz Palaces Live on KEXP (Open To The Public)",
    "date": "2026-09-10",
    "time": "15:00:00",
    "url": "https://www.kexp.org/events/kexp-events/shabazz-palaces-live-on-kexp-kexp_511085/",
@@ -625,7 +625,7 @@
   },
   {
    "venue": "The Vera Project",
-   "title": "*FREE* LPL Capstone — Benefit Show!",
+   "title": "*Free* LPL Capstone — Benefit Show!",
    "date": "2026-09-12",
    "time": "19:00:00",
    "url": "https://link.dice.fm/R5b781e4aa39",
@@ -790,7 +790,7 @@
   },
   {
    "venue": "KEXP",
-   "title": "anaiis LIVE on KEXP (OPEN TO THE PUBLIC)",
+   "title": "anaiis Live on KEXP (Open To The Public)",
    "date": "2026-09-15",
    "time": "14:00:00",
    "url": "https://www.kexp.org/events/kexp-events/anaiis-live-on-kexp-kexp_511109/",
@@ -1048,6 +1048,87 @@
    "title": "Cass & Tay",
    "date": "2026-09-17",
    "time": "19:30:00"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "AOFAS Annual Meeting 2026",
+   "date": "2026-09-18",
+   "time": "",
+   "url": "https://www.aofas.org/annual-meeting/",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "MoPOP",
+   "title": "Member Preview Day: Styled by the Streets",
+   "date": "2026-09-18",
+   "time": "",
+   "url": "https://www.mopop.org/events/styled-by-the-streets-member-preview"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Chelsea Wolfe Live on KEXP (Open To The Public)",
+   "date": "2026-09-18",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/chelsea-wolfe-live-on-kexp-kexp_513281/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Hope",
+   "date": "2026-09-18",
+   "time": "15:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/hope",
+   "movie": true,
+   "end": "18:10:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-18",
+   "time": "16:20:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "18:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-18",
+   "time": "17:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "18:51:00"
+  },
+  {
+   "venue": "On the Boards",
+   "title": "Clayton Lee",
+   "date": "2026-09-18",
+   "time": "19:30:00",
+   "url": "https://ontheboards.org/events/26-27/goldberg-variations"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-18",
+   "time": "19:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "21:37:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Johnny Blue Skies & the Dark Clouds - Mutiny for the Masses 2026 Tour",
+   "date": "2026-09-18",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/johnny-blue-skies-the-dark-clouds-seattle-washington-09-18-2026/event/0F00647ED717ABC3",
+   "type": "concert",
+   "tickets": {
+    "box": 1888,
+    "resale": 303,
+    "checked": "2026-09-16T07:34:52.576Z",
+    "from": 49.5
+   }
   }
  ]
 }
