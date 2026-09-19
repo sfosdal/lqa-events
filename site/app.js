@@ -2072,18 +2072,22 @@
     if (!playing.length) return;
     if (document.hidden && !force) { live.timer = setTimeout(pollLive, POLL_MS); return; }
     live.busy = true; $('teamHead').querySelectorAll('.tf-refresh').forEach(function (b) { b.classList.add('is-busy'); });
-    var today = todayStr(), days = [dayBefore(today), today]; for (var di = 1; di <= AHEAD_DAYS; di++) days.push(dayAfter(today, di)); // yesterday through two days out — a day per request: ESPN's scoreboard stopped taking a range (dates=A-B answered 400 "Failed to get events endpoint" from 2026-09-18, every league)
+    var today = todayStr();
     var anyIn = false; // a game in progress somewhere: the quick poll; otherwise every few minutes
-    var leagues = {};
-    playing.forEach(function (t) { leagues[t.espn.sport + '/' + t.espn.league] = true; });
-    Promise.all(Object.keys(leagues).map(function (k) {
-      return Promise.all(days.map(function (d) {
+    // a league's board: the day of each of its clubs' wanted game (liveGameToday) and the day after — ESPN files a game under its
+    // Eastern date, so a late Seattle start can sit on the next day's board — asked for a day at a time (ESPN's scoreboard stopped
+    // taking a range on 2026-09-18: dates=A-B answers 400, every league). Any day that fails fails the league's board: a partial
+    // board once read as "no game today" and the block flipped to the season card between polls (Steve's recording, 2026-09-18)
+    var dates = {};
+    playing.forEach(function (t) { var k = t.espn.sport + '/' + t.espn.league, g = liveGameToday(t.slug); var ds = dates[k] = dates[k] || {}; ds[g.date] = true; ds[dayAfter(g.date, 1)] = true; });
+    Promise.all(Object.keys(dates).map(function (k) {
+      return Promise.all(Object.keys(dates[k]).sort().map(function (d) {
         return fetch(scoreboardUrl(k, d.replace(/-/g, '')), { cache: 'no-store' })
           .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
-      })).then(function (boards) { // the days' boards as one: every day that answered, its events once each
-        var got = boards.filter(Boolean); if (!got.length) return [k, null];
+      })).then(function (boards) { // the days' boards as one, each event once
+        if (boards.some(function (b) { return !b || !Array.isArray(b.events); })) return [k, null];
         var seen = {}, events = [];
-        got.forEach(function (j) { (j.events || []).forEach(function (e) { if (!seen[e.id]) { seen[e.id] = true; events.push(e); } }); });
+        boards.forEach(function (j) { j.events.forEach(function (e) { if (!seen[e.id]) { seen[e.id] = true; events.push(e); } }); });
         return [k, { events: events }];
       });
     })).then(function (pairs) {
