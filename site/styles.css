@@ -1206,8 +1206,8 @@ html { overflow-anchor: none; }
 @media (min-width: 641px) {
   /* the sections' places (app.js buildWatchStrip counts them): three sit left, centre and right; two at the ends; one centred — the ends keep a floor, so a long list wraps behind the chevron rather than crushing its neighbour, and a section never spills into the next */
   .tf-watch { display: grid; grid-template-columns: minmax(7rem, 1fr) minmax(0, auto) minmax(7rem, 1fr); align-items: center; column-gap: 1rem; }
-  .tf-watch.has-3 { grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr); column-gap: .6rem; } /* minmax(0, …): a long TV list wraps inside its track (and folds behind the chevron) instead of running into the radio (Steve, 2026-09-16) */ /* the middle section dead centre, the outer two centred in their halves: the 1 : 2 : 2 : 1 spacing with the centre kept honest (Steve, 2026-09-15) */
-  .tf-watch.has-3 .tf-sect { justify-self: center; }
+  .tf-watch.has-3 { grid-template-columns: minmax(0, auto) minmax(0, auto) minmax(0, auto); justify-content: space-between; column-gap: 1.2rem; } /* minmax(0, …): a long list wraps inside its track (and folds behind the chevron) instead of running into its neighbour (Steve, 2026-09-16) */ /* each section its own width, the room left over split evenly between them: with a long streaming list and a short radio one, centring the middle section left it hard against the first and a hole before the third (Steve, 2026-09-19) */
+  .tf-watch.has-3 .tf-sect { justify-self: start; }
   .tf-watch.has-2 { grid-template-columns: minmax(7rem, auto) minmax(7rem, auto); justify-content: space-between; }
   .tf-watch.has-1, .tf-watch.has-0 { grid-template-columns: minmax(0, auto); justify-content: center; }
   .tf-sect { min-width: 0; overflow: hidden; }
