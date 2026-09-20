@@ -1,348 +1,325 @@
 {
- "generated": "2026-09-19T01:46:41.560Z",
+ "generated": "2026-09-20T23:06:54.740Z",
  "_": "scripts/soldout-check.mjs (a local run — Ticketmaster inventory as a real Chrome sees it; committed by scripts/soldout-run.sh). status: available = box-office tickets on sale; soldout = only resale left; none = the inventory call and the page both showed nothing (not treated as sold out); presale = public sale not started; unknown = the page gave no answer; a none/unknown run keeps the last real answer, its own checked time, note says so.",
  "events": {
-  "0F00647ED717ABC3": {
-   "status": "available",
-   "primary": 1630,
-   "resale": 318,
-   "fromPrimary": 49.5,
-   "fromResale": 62.89,
-   "name": "Johnny Blue Skies & the Dark Clouds - Mutiny for the Masses 2026 Tour",
-   "date": "2026-09-18",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:38:47.352Z"
-  },
-  "0F0064C4A026A1F5": {
-   "status": "available",
-   "primary": 82,
-   "resale": 777,
-   "fromPrimary": 35.79,
-   "fromResale": 24,
-   "name": "Preseason Game 1 - Seattle Kraken vs. Vancouver Canucks",
-   "date": "2026-09-19",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:38:49.610Z"
-  },
   "0F0064A5D6D516EE": {
    "status": "available",
-   "primary": 1356,
+   "primary": 1169,
    "resale": 0,
    "fromPrimary": 49.5,
    "fromResale": null,
    "name": "JOURNEY - Final Frontier Tour (An Evening With)",
    "date": "2026-09-21",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:38:51.556Z"
+   "checked": "2026-09-20T22:59:33.998Z"
   },
   "0F00646A89F64DD9": {
    "status": "available",
-   "primary": 144,
-   "resale": 517,
+   "primary": 133,
+   "resale": 411,
    "fromPrimary": 33.4,
    "fromResale": 20,
    "name": "Seattle Storm vs. Dallas Wings",
    "date": "2026-09-23",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:38:54.370Z"
+   "checked": "2026-09-20T22:59:35.519Z"
   },
   "0F0064C4A02BA20A": {
    "status": "available",
-   "primary": 574,
-   "resale": 1868,
+   "primary": 498,
+   "resale": 1775,
    "fromPrimary": 32.04,
-   "fromResale": 10,
+   "fromResale": 12,
    "name": "Preseason Game 2 - Seattle Kraken vs. Calgary Flames",
    "date": "2026-09-24",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:38:56.028Z"
+   "checked": "2026-09-20T22:59:38.088Z"
   },
   "0F0064D0C86ECCBA": {
    "status": "available",
-   "primary": 2958,
-   "resale": 41,
+   "primary": 2852,
+   "resale": 44,
    "fromPrimary": 37,
-   "fromResale": 64,
+   "fromResale": 40,
    "name": "THE B-52s * DEVO:  COSMIC DE-EVOLUTION TOUR",
    "date": "2026-09-25",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:38:57.622Z"
+   "checked": "2026-09-20T22:59:39.931Z"
   },
   "0F0064B5BED9CFB3": {
    "status": "available",
-   "primary": 1735,
-   "resale": 336,
+   "primary": 1546,
+   "resale": 304,
    "fromPrimary": 40.5,
    "fromResale": 50,
    "name": "THE KEHLANI WORLD TOUR: North America",
    "date": "2026-09-27",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:38:59.715Z"
+   "checked": "2026-09-20T22:59:41.851Z"
   },
   "0F00647BECDC2E37": {
-   "status": "available",
-   "primary": null,
+   "status": "soldout",
+   "primary": 0,
    "resale": 0,
-   "fromPrimary": 146.9,
-   "note": "5 box-office listed on the page, no count",
+   "fromResale": 111.86,
+   "note": "33 resale listed on the page",
    "name": "$uicideboy$ present Grey Day Tour 2026 w. Shoreline Mafia & more",
    "date": "2026-09-28",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:39:19.836Z"
+   "checked": "2026-09-20T23:00:02.031Z"
   },
   "0F006489CEB0AA1E": {
    "status": "available",
-   "primary": 2228,
+   "primary": 2102,
    "resale": 0,
    "fromPrimary": 39.5,
    "fromResale": null,
    "name": "SOMBR - You Are The Reason Tour",
    "date": "2026-10-01",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:39:21.782Z"
+   "checked": "2026-09-20T23:00:03.694Z"
   },
   "0F00637A77EA31DD": {
    "status": "available",
-   "primary": 282,
-   "resale": 53,
+   "primary": 258,
+   "resale": 69,
    "fromPrimary": 79.5,
-   "fromResale": 62.89,
+   "fromResale": 99.72,
    "name": "Tyler Childers - Snipe Hunt",
    "date": "2026-10-02",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:39:23.668Z"
+   "checked": "2026-09-20T23:00:06.347Z"
   },
   "0F006472DC10A896": {
    "status": "available",
-   "primary": 1729,
-   "resale": 64,
+   "primary": 1674,
+   "resale": 75,
    "fromPrimary": 49.5,
    "fromResale": 72.44,
    "name": "JUNGLE - World Tour 2026",
    "date": "2026-10-03",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:39:25.444Z"
+   "checked": "2026-09-20T23:00:11.179Z"
   },
   "0F0064C4A033A21E": {
    "status": "available",
-   "primary": 749,
-   "resale": 808,
+   "primary": 652,
+   "resale": 819,
    "fromPrimary": 62.04,
    "fromResale": 64,
    "name": "Seattle Kraken vs. Calgary Flames",
    "date": "2026-10-04",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:39:27.067Z"
+   "checked": "2026-09-20T23:00:13.719Z"
   },
   "0F0064C4A03AA22C": {
    "status": "available",
-   "primary": 944,
-   "resale": 1042,
+   "primary": 975,
+   "resale": 1065,
    "fromPrimary": 62.04,
    "fromResale": 50,
    "name": "Seattle Kraken vs. Vegas Golden Knights",
    "date": "2026-10-06",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:39:28.867Z"
+   "checked": "2026-09-20T23:00:15.556Z"
   },
   "0F00642CC9EC955F": {
    "status": "available",
-   "primary": 3893,
+   "primary": 3758,
    "resale": 0,
    "fromPrimary": 40.5,
    "fromResale": null,
    "name": "Carin Leon - De Sonora Para El Mundo Tour 2026",
    "date": "2026-10-08",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:39:30.420Z"
+   "checked": "2026-09-20T23:00:17.484Z"
   },
   "0F006495AC598426": {
    "status": "available",
-   "primary": 1874,
-   "resale": 167,
+   "primary": 1779,
+   "resale": 169,
    "fromPrimary": 69.5,
    "fromResale": 85,
    "name": "aespa LIVE TOUR - SYNK : COMPLæXITY - in SEATTLE",
    "date": "2026-10-09",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:39:32.198Z"
+   "checked": "2026-09-20T23:00:20.460Z"
   },
   "0F00634F0E7368B0": {
    "status": "available",
-   "primary": 70,
-   "resale": 318,
+   "primary": 44,
+   "resale": 305,
    "fromPrimary": 255,
    "fromResale": 275,
    "name": "RUSH: Fifty Something",
    "date": "2026-10-10",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-15T23:17:05.492Z",
-   "note": "kept from 2026-09-15: this run unknown (no inventory call)"
+   "checked": "2026-09-20T23:00:22.437Z"
   },
   "0F006355C70C4DD7": {
    "status": "available",
-   "primary": 500,
-   "resale": 363,
+   "primary": 483,
+   "resale": 349,
    "fromPrimary": 255,
-   "fromResale": 176,
+   "fromResale": 150,
    "name": "RUSH: Fifty Something",
    "date": "2026-10-12",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:39:54.722Z"
+   "checked": "2026-09-20T23:00:24.496Z"
   },
   "0F006482B3FBE83D": {
    "status": "available",
-   "primary": 3034,
-   "resale": 501,
+   "primary": 2975,
+   "resale": 492,
    "fromPrimary": 24.75,
-   "fromResale": 32,
+   "fromResale": 31,
    "name": "Young Miko - Late Checkout Tour",
    "date": "2026-10-13",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:39:56.616Z"
+   "checked": "2026-09-20T23:00:26.858Z"
   },
   "0F00633ADD435829": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 50.55,
-   "note": "27 box-office listed on the page, no count",
+   "note": "28 box-office listed on the page, no count",
    "name": "Doja Cat - Tour Ma Vie World Tour",
    "date": "2026-10-15",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:16.647Z"
+   "checked": "2026-09-20T23:00:47.081Z"
   },
   "0F006379C26F7724": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 74.4,
-   "note": "36 box-office listed on the page, no count",
+   "note": "33 box-office listed on the page, no count",
    "name": "Maná: Vivir Sin Aire Tour",
    "date": "2026-10-17",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:36.853Z"
+   "checked": "2026-09-20T23:01:07.273Z"
   },
   "0F0064C4A03FA23B": {
    "status": "available",
-   "primary": 979,
-   "resale": 1060,
+   "primary": 969,
+   "resale": 1088,
    "fromPrimary": 80.79,
    "fromResale": 55,
    "name": "Seattle Kraken vs. Detroit Red Wings",
    "date": "2026-10-20",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:39.001Z"
+   "checked": "2026-09-20T23:01:09.283Z"
   },
   "0F0064C4A045A24C": {
    "status": "available",
-   "primary": 796,
-   "resale": 1148,
+   "primary": 782,
+   "resale": 1167,
    "fromPrimary": 39.54,
    "fromResale": 39,
    "name": "Seattle Kraken vs. Utah Mammoth",
    "date": "2026-10-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:40.724Z"
+   "checked": "2026-09-20T23:01:11.912Z"
   },
   "0F0064C1A94186E6": {
    "status": "soldout",
    "primary": 0,
-   "resale": 147,
+   "resale": 133,
    "fromPrimary": null,
-   "fromResale": 154,
+   "fromResale": 159.9,
    "name": "Phoebe Bridgers: The Lost Tour",
    "date": "2026-10-23",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:42.702Z"
+   "checked": "2026-09-20T23:01:13.793Z"
   },
   "0F0064C4A04AA254": {
    "status": "available",
-   "primary": 858,
-   "resale": 622,
+   "primary": 809,
+   "resale": 619,
    "fromPrimary": 80.79,
    "fromResale": 89,
    "name": "Seattle Kraken vs. Minnesota Wild",
    "date": "2026-10-24",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:44.336Z"
+   "checked": "2026-09-20T23:01:16.397Z"
   },
   "0F006497D20909E0": {
    "status": "available",
-   "primary": 2864,
+   "primary": 2822,
    "resale": 0,
    "fromPrimary": 40.5,
    "fromResale": null,
    "name": "Kacey Musgraves - Middle of Nowhere Tour ",
    "date": "2026-10-26",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:45.755Z"
+   "checked": "2026-09-20T23:01:18.063Z"
   },
   "0F00649CAFFEADD8": {
    "status": "available",
-   "primary": 4857,
+   "primary": 4808,
    "resale": 0,
    "fromPrimary": 40.5,
    "fromResale": null,
    "name": "Kacey Musgraves - Middle of Nowhere Tour ",
    "date": "2026-10-27",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:47.337Z"
+   "checked": "2026-09-20T23:01:20.723Z"
   },
   "0F0064C4A04FA269": {
    "status": "available",
-   "primary": 1194,
-   "resale": 1100,
+   "primary": 1188,
+   "resale": 1122,
    "fromPrimary": 105.79,
    "fromResale": 64,
    "name": "Seattle Kraken vs. Toronto Maple Leafs",
    "date": "2026-10-28",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:48.935Z"
+   "checked": "2026-09-20T23:01:22.590Z"
   },
   "0F0064D676143312": {
    "status": "available",
-   "primary": 2900,
-   "resale": 237,
+   "primary": 2846,
+   "resale": 216,
    "fromPrimary": 39.95,
-   "fromResale": 51,
+   "fromResale": 45,
    "name": "beabadoobee: The Powerlines Tour",
    "date": "2026-10-29",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:50.282Z"
+   "checked": "2026-09-20T23:01:24.833Z"
   },
   "0F006459EB45A052": {
    "status": "available",
    "primary": 19,
-   "resale": 389,
+   "resale": 386,
    "fromPrimary": 400.5,
-   "fromResale": 174,
+   "fromResale": 159,
    "name": "Gorillaz - The Mountain Tour",
    "date": "2026-10-31",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:52.678Z"
+   "checked": "2026-09-20T23:01:26.700Z"
   },
   "0F0064BADFD7E266": {
    "status": "available",
-   "primary": 6923,
-   "resale": 300,
+   "primary": 6801,
+   "resale": 299,
    "fromPrimary": 29.5,
-   "fromResale": 45,
+   "fromResale": 42,
    "name": "Bryson Tiller Presents: The Neo Trapsoul Tour",
    "date": "2026-11-01",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:54.712Z"
+   "checked": "2026-09-20T23:01:29.364Z"
   },
   "0F0064C4A055A26F": {
    "status": "available",
-   "primary": 947,
-   "resale": 1096,
+   "primary": 935,
+   "resale": 1118,
    "fromPrimary": 43.29,
    "fromResale": 38,
    "name": "Seattle Kraken vs. Calgary Flames",
    "date": "2026-11-04",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:56.411Z"
+   "checked": "2026-09-20T23:01:31.860Z"
   },
   "0F00648DA6968E56": {
    "status": "available",
@@ -353,29 +330,30 @@
    "name": "Teddy Swims: The UGLY Tour",
    "date": "2026-11-05",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:40:58.070Z"
+   "checked": "2026-09-19T01:40:58.070Z",
+   "note": "kept from 2026-09-19: this run none"
   },
   "0F0064AF79DC5465": {
    "status": "available",
-   "primary": 3216,
-   "resale": 158,
+   "primary": 3119,
+   "resale": 151,
    "fromPrimary": 39.5,
    "fromResale": 60,
    "name": "The Smashing Pumpkins: The Rats In A Cage Tour",
    "date": "2026-11-06",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:00.203Z"
+   "checked": "2026-09-20T23:01:42.644Z"
   },
   "0F0064C4A05AA27A": {
    "status": "available",
-   "primary": 990,
-   "resale": 810,
+   "primary": 972,
+   "resale": 779,
    "fromPrimary": 125.79,
    "fromResale": 88,
    "name": "Seattle Kraken vs. New York Rangers",
    "date": "2026-11-07",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:02.110Z"
+   "checked": "2026-09-20T23:01:44.924Z"
   },
   "0F006514BB51AC7E": {
    "status": "available",
@@ -386,51 +364,51 @@
    "name": "Ms Lauryn Hill & Wyclef Jean: Celebrating 30 Years of Fugees'The Score",
    "date": "2026-11-10",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:22.130Z"
+   "checked": "2026-09-20T23:02:05.134Z"
   },
   "0F0064A9D030C333": {
    "status": "soldout",
    "primary": 0,
-   "resale": 619,
+   "resale": 602,
    "fromPrimary": null,
    "fromResale": 257,
    "name": "KATSEYE: THE WILDWORLD TOUR",
    "date": "2026-11-17",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:24.001Z"
+   "checked": "2026-09-20T23:02:07.046Z"
   },
   "0F0064C4A060A28A": {
    "status": "available",
-   "primary": 1007,
-   "resale": 1079,
+   "primary": 994,
+   "resale": 1089,
    "fromPrimary": 62.04,
    "fromResale": 52,
    "name": "Seattle Kraken vs. Vancouver Canucks",
    "date": "2026-11-19",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:26.944Z"
+   "checked": "2026-09-20T23:02:09.710Z"
   },
   "0F0064C4A06BA2A4": {
    "status": "available",
-   "primary": 1185,
-   "resale": 987,
+   "primary": 1180,
+   "resale": 1004,
    "fromPrimary": 54.54,
-   "fromResale": 48,
+   "fromResale": 47,
    "name": "Seattle Kraken vs. Anaheim Ducks",
    "date": "2026-11-23",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:28.826Z"
+   "checked": "2026-09-20T23:02:12.262Z"
   },
   "0F0064C4A071A2AD": {
    "status": "available",
-   "primary": 1411,
-   "resale": 922,
+   "primary": 1403,
+   "resale": 913,
    "fromPrimary": 125.79,
    "fromResale": 75,
    "name": "Seattle Kraken vs. Chicago Blackhawks",
    "date": "2026-11-25",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:31.176Z"
+   "checked": "2026-09-20T23:02:14.404Z"
   },
   "0F0064C4A077A2BA": {
    "status": "available",
@@ -441,29 +419,30 @@
    "name": "Seattle Kraken vs. Edmonton Oilers",
    "date": "2026-11-28",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:33.297Z"
+   "checked": "2026-09-19T01:41:33.297Z",
+   "note": "kept from 2026-09-19: this run none"
   },
   "0F00650EA2EC8956": {
    "status": "available",
-   "primary": 4036,
+   "primary": 3586,
    "resale": 62,
    "fromPrimary": 48.5,
-   "fromResale": 99,
+   "fromResale": 97,
    "name": "Trans-Siberian Orchestra - The Ghosts Of Christmas Eve",
    "date": "2026-11-29",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:35.420Z"
+   "checked": "2026-09-20T23:02:25.824Z"
   },
   "0F00650EA29F88DC": {
    "status": "available",
-   "primary": 4415,
+   "primary": 4291,
    "resale": 82,
    "fromPrimary": 48.5,
    "fromResale": 76,
    "name": "Trans-Siberian Orchestra - The Ghosts Of Christmas Eve",
    "date": "2026-11-29",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:38.023Z"
+   "checked": "2026-09-20T23:02:28.260Z"
   },
   "0F0064C4A07DA2C0": {
    "status": "available",
@@ -479,36 +458,36 @@
   },
   "0F0064C4A082A2C8": {
    "status": "available",
-   "primary": 749,
-   "resale": 1034,
+   "primary": 725,
+   "resale": 1051,
    "fromPrimary": 54.54,
    "fromResale": 49,
    "name": "Seattle Kraken vs. Dallas Stars",
    "date": "2026-12-03",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:48.941Z"
+   "checked": "2026-09-20T23:02:39.849Z"
   },
   "0F00650D9D7768D8": {
    "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 111.7,
-   "note": "kept from 2026-09-16: this run none",
+   "primary": 2160,
+   "resale": 391,
+   "fromPrimary": 49.95,
+   "fromResale": 90,
    "name": "Jonas Brothers: The Burning Up Tour All Over Again",
    "date": "2026-12-05",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-16T07:37:45.668Z"
+   "checked": "2026-09-20T23:02:41.788Z"
   },
   "0F0064C4A088A2D0": {
    "status": "available",
-   "primary": 842,
-   "resale": 857,
+   "primary": 815,
+   "resale": 862,
    "fromPrimary": 54.54,
    "fromResale": 58,
    "name": "Seattle Kraken vs. Buffalo Sabres",
    "date": "2026-12-06",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:41:59.944Z"
+   "checked": "2026-09-20T23:02:44.804Z"
   },
   "0F00649DD1062FF0": {
    "status": "unknown",
@@ -516,7 +495,7 @@
    "name": "Olivia Rodrigo: The Unraveled Tour",
    "date": "2026-12-07",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:42:20.123Z"
+   "checked": "2026-09-20T23:03:04.820Z"
   },
   "0F00649DE731624A": {
    "status": "unknown",
@@ -524,162 +503,161 @@
    "name": "Olivia Rodrigo: The Unraveled Tour",
    "date": "2026-12-08",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:42:40.363Z"
+   "checked": "2026-09-20T23:03:24.943Z"
   },
   "0F0064C4A08EA2DD": {
    "status": "available",
-   "primary": 647,
-   "resale": 895,
+   "primary": 643,
+   "resale": 905,
    "fromPrimary": 54.54,
    "fromResale": 56,
    "name": "Seattle Kraken vs. Washington Capitals",
    "date": "2026-12-10",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:42:42.751Z"
+   "checked": "2026-09-20T23:03:27.537Z"
   },
   "0F0064C4A094A2E8": {
    "status": "available",
-   "primary": 968,
-   "resale": 885,
+   "primary": 953,
+   "resale": 893,
    "fromPrimary": 62.04,
    "fromResale": 68,
    "name": "Seattle Kraken vs. Nashville Predators",
    "date": "2026-12-12",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:42:45.337Z"
+   "checked": "2026-09-20T23:03:30.281Z"
   },
   "0F0064DD9FEB8A18": {
    "status": "available",
-   "primary": 3086,
+   "primary": 3077,
    "resale": 0,
    "fromPrimary": 60.5,
    "fromResale": null,
    "name": "Seattle Holiday Classic: SU v WSU and UW v Baylor",
    "date": "2026-12-19",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:42:47.716Z"
+   "checked": "2026-09-20T23:03:32.486Z"
   },
   "0F0064C4A099A2F2": {
    "status": "available",
-   "primary": 607,
-   "resale": 706,
+   "primary": 586,
+   "resale": 708,
    "fromPrimary": 58.29,
    "fromResale": 66,
    "name": "Seattle Kraken vs. San Jose Sharks",
    "date": "2026-12-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:42:49.809Z"
+   "checked": "2026-09-20T23:03:34.893Z"
   },
   "0F0064C4A09FA2FA": {
    "status": "available",
-   "primary": 890,
+   "primary": 884,
    "resale": 897,
    "fromPrimary": 62.04,
-   "fromResale": 73,
+   "fromResale": 74,
    "name": "Seattle Kraken vs. Philadelphia Flyers",
    "date": "2026-12-29",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:42:51.923Z"
+   "checked": "2026-09-20T23:03:37.263Z"
   },
   "0F0064C4A0A5A304": {
    "status": "available",
-   "primary": 1073,
-   "resale": 845,
+   "primary": 1057,
+   "resale": 858,
    "fromPrimary": 62.04,
-   "fromResale": 74,
+   "fromResale": 73,
    "name": "Seattle Kraken vs. New York Islanders",
    "date": "2027-01-02",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:42:54.745Z"
+   "checked": "2026-09-20T23:03:39.744Z"
   },
   "0F0064C4A0AAA30B": {
    "status": "available",
-   "primary": 985,
-   "resale": 837,
+   "primary": 979,
+   "resale": 849,
    "fromPrimary": 105.79,
    "fromResale": 76,
    "name": "Seattle Kraken vs. Vancouver Canucks",
    "date": "2027-01-03",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:42:57.142Z"
+   "checked": "2026-09-20T23:03:42.155Z"
   },
   "0F0064C4A0B0A312": {
    "status": "available",
    "primary": 1575,
-   "resale": 828,
+   "resale": 843,
    "fromPrimary": 39.54,
-   "fromResale": 49,
+   "fromResale": 48,
    "name": "Seattle Kraken vs. Tampa Bay Lightning",
    "date": "2027-01-05",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:42:59.112Z"
+   "checked": "2026-09-20T23:03:44.608Z"
   },
   "0F0064C4A0B6A31C": {
    "status": "available",
-   "primary": 1615,
-   "resale": 778,
+   "primary": 1604,
+   "resale": 791,
    "fromPrimary": 39.54,
    "fromResale": 40,
    "name": "Seattle Kraken vs. Florida Panthers",
    "date": "2027-01-12",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:01.039Z"
+   "checked": "2026-09-20T23:03:46.746Z"
   },
   "0F0064C4A0BDA322": {
    "status": "available",
-   "primary": 889,
-   "resale": 712,
+   "primary": 869,
+   "resale": 710,
    "fromPrimary": 62.04,
    "fromResale": 74,
    "name": "Seattle Kraken vs. San Jose Sharks",
    "date": "2027-01-16",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:02.958Z"
+   "checked": "2026-09-20T23:03:48.383Z"
   },
   "0F0064C4A007A195": {
    "status": "available",
-   "primary": 1446,
-   "resale": 751,
+   "primary": 1440,
+   "resale": 762,
    "fromPrimary": 54.54,
    "fromResale": 57,
    "name": "Seattle Kraken vs. Columbus Blue Jackets",
    "date": "2027-01-18",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:05.594Z"
+   "checked": "2026-09-20T23:03:50.359Z"
   },
   "0F0064AEAA9AA408": {
    "status": "available",
-   "primary": 2741,
+   "primary": 2739,
    "resale": 1354,
    "fromPrimary": 59.5,
    "fromResale": 52,
    "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
    "date": "2027-01-26",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:07.821Z"
+   "checked": "2026-09-20T23:03:52.730Z"
   },
   "0F0064BBF94F49AA": {
    "status": "available",
-   "primary": 2562,
-   "resale": 1331,
+   "primary": 2558,
+   "resale": 1354,
    "fromPrimary": 59.5,
-   "fromResale": 51,
+   "fromResale": 47,
    "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
    "date": "2027-01-27",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-16T07:38:52.730Z",
-   "note": "kept from 2026-09-16: this run none"
+   "checked": "2026-09-20T23:03:56.085Z"
   },
   "0F0064BBF95C49C8": {
    "status": "available",
-   "primary": 633,
-   "resale": 1115,
+   "primary": 628,
+   "resale": 1111,
    "fromPrimary": 79.5,
-   "fromResale": 72,
+   "fromResale": 71,
    "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
    "date": "2027-01-29",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:20.430Z"
+   "checked": "2026-09-20T23:03:59.325Z"
   },
   "0F0064C4A0C3A335": {
    "status": "available",
@@ -690,52 +668,52 @@
    "name": "Seattle Kraken vs. New Jersey Devils",
    "date": "2027-01-31",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:22.336Z"
+   "checked": "2026-09-19T01:43:22.336Z",
+   "note": "kept from 2026-09-19: this run none"
   },
   "0F0064C4A0C8A341": {
    "status": "available",
-   "primary": 1442,
+   "primary": 1438,
    "resale": 721,
    "fromPrimary": 62.04,
    "fromResale": 73,
    "name": "Seattle Kraken vs. Montreal Canadiens",
    "date": "2027-02-03",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:23.953Z"
+   "checked": "2026-09-20T23:04:10.722Z"
   },
   "0F0064D566E22386": {
    "status": "available",
-   "primary": 4897,
+   "primary": 4886,
    "resale": 0,
    "fromPrimary": 66.5,
    "fromResale": null,
    "name": "Don Omar \"The Last King World Tour\"",
    "date": "2027-02-07",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:25.778Z"
+   "checked": "2026-09-20T23:04:12.805Z"
   },
   "0F0064C4A0D0A352": {
    "status": "available",
-   "primary": 1498,
-   "resale": 679,
+   "primary": 1477,
+   "resale": 683,
    "fromPrimary": 105.79,
    "fromResale": 75,
    "name": "Seattle Kraken vs. St. Louis Blues",
    "date": "2027-02-13",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:28.005Z"
+   "checked": "2026-09-20T23:04:15.166Z"
   },
   "0F0064C4A0D5A35B": {
    "status": "available",
-   "primary": 1035,
+   "primary": 1135,
    "resale": 630,
    "fromPrimary": 125.79,
-   "fromResale": 89,
+   "fromResale": 99,
    "name": "Seattle Kraken vs. Pittsburgh Penguins",
    "date": "2027-02-15",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-16T07:39:13.875Z",
-   "note": "kept from 2026-09-16: this run none"
+   "checked": "2026-09-20T23:04:16.939Z"
   },
   "0F0064C4A0DBA369": {
    "status": "available",
@@ -746,63 +724,63 @@
    "name": "Seattle Kraken vs. Ottawa Senators",
    "date": "2027-02-17",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:39.945Z"
+   "checked": "2026-09-19T01:43:39.945Z",
+   "note": "kept from 2026-09-19: this run none"
   },
   "0F0064C4A00DA1AA": {
    "status": "available",
-   "primary": 1459,
-   "resale": 661,
+   "primary": 1449,
+   "resale": 656,
    "fromPrimary": 105.79,
    "fromResale": 75,
    "name": "Seattle Kraken vs. Boston Bruins",
    "date": "2027-02-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:41.944Z"
+   "checked": "2026-09-20T23:04:29.737Z"
   },
   "0F0064C4A013A1BA": {
    "status": "available",
-   "primary": 1131,
+   "primary": 1110,
    "resale": 662,
    "fromPrimary": 62.04,
    "fromResale": 79,
    "name": "Seattle Kraken vs. Winnipeg Jets",
    "date": "2027-02-27",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:44.852Z"
+   "checked": "2026-09-20T23:04:32.086Z"
   },
   "0F0064C4A019A1C3": {
    "status": "available",
-   "primary": 1767,
-   "resale": 684,
+   "primary": 1771,
+   "resale": 690,
    "fromPrimary": 54.54,
-   "fromResale": 71,
+   "fromResale": 74,
    "name": "Seattle Kraken vs. Los Angeles Kings",
    "date": "2027-03-11",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-16T07:39:29.197Z",
-   "note": "kept from 2026-09-16: this run none"
+   "checked": "2026-09-20T23:04:34.055Z"
   },
   "0F0064C4A020A1E8": {
    "status": "available",
-   "primary": 1287,
-   "resale": 657,
+   "primary": 1282,
+   "resale": 655,
    "fromPrimary": 125.79,
    "fromResale": 74,
    "name": "Seattle Kraken vs. Edmonton Oilers",
    "date": "2027-03-13",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:56.776Z"
+   "checked": "2026-09-20T23:04:37.184Z"
   },
   "0F0064C4A0E1A372": {
    "status": "available",
    "primary": 1306,
-   "resale": 717,
+   "resale": 719,
    "fromPrimary": 62.04,
    "fromResale": 52,
    "name": "Seattle Kraken vs. St. Louis Blues",
    "date": "2027-03-15",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:43:59.525Z"
+   "checked": "2026-09-20T23:04:39.392Z"
   },
   "0F0064C4A066A29F": {
    "status": "available",
@@ -818,48 +796,47 @@
   },
   "0F0064C4A0E7A37D": {
    "status": "available",
-   "primary": 1750,
-   "resale": 676,
+   "primary": 1748,
+   "resale": 678,
    "fromPrimary": 62.04,
    "fromResale": 74,
    "name": "Seattle Kraken vs. Los Angeles Kings",
    "date": "2027-03-21",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:44:11.033Z"
+   "checked": "2026-09-20T23:04:51.045Z"
   },
   "0F0064C4A0ECA388": {
    "status": "available",
    "primary": 1015,
-   "resale": 694,
+   "resale": 696,
    "fromPrimary": 54.54,
    "fromResale": 69,
    "name": "Seattle Kraken vs. Vegas Golden Knights",
    "date": "2027-03-23",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:44:13.376Z"
+   "checked": "2026-09-20T23:04:53.182Z"
   },
   "0F0064C4A0F3A396": {
    "status": "available",
-   "primary": 1936,
-   "resale": 689,
+   "primary": 1925,
+   "resale": 691,
    "fromPrimary": 39.54,
    "fromResale": 50,
    "name": "Seattle Kraken vs. Anaheim Ducks",
    "date": "2027-03-25",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:44:15.963Z"
+   "checked": "2026-09-20T23:04:55.113Z"
   },
   "0F0064C4A0F9A39D": {
    "status": "available",
-   "primary": 1630,
-   "resale": 683,
+   "primary": 1638,
+   "resale": 687,
    "fromPrimary": 54.54,
    "fromResale": 66,
    "name": "Seattle Kraken vs. Utah Mammoth",
    "date": "2027-03-30",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-16T07:39:56.806Z",
-   "note": "kept from 2026-09-16: this run none"
+   "checked": "2026-09-20T23:04:57.685Z"
   },
   "0F0064C4A0FFA3A7": {
    "status": "available",
@@ -870,51 +847,52 @@
    "name": "Seattle Kraken vs. Winnipeg Jets",
    "date": "2027-04-03",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:44:27.083Z"
+   "checked": "2026-09-19T01:44:27.083Z",
+   "note": "kept from 2026-09-19: this run none"
   },
   "0F0064A6DAB644A1": {
    "status": "available",
-   "primary": 3742,
-   "resale": 93,
+   "primary": 3740,
+   "resale": 96,
    "fromPrimary": 59.5,
    "fromResale": 78,
    "name": "Niall Horan: Dinner Party Live On Tour",
    "date": "2027-05-27",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:44:29.415Z"
+   "checked": "2026-09-20T23:05:09.865Z"
   },
   "0F00635BEEFD7352": {
    "status": "available",
-   "primary": 10592,
+   "primary": 9998,
    "resale": 0,
    "fromPrimary": 0,
    "fromResale": null,
    "name": "Seattle Mariners vs. Houston Astros",
    "date": "2026-09-22",
    "venue": "T-Mobile Park",
-   "checked": "2026-09-19T01:44:31.595Z"
+   "checked": "2026-09-20T23:05:12.297Z"
   },
   "0F00635BEF007354": {
    "status": "available",
-   "primary": 16979,
+   "primary": 16645,
    "resale": 0,
    "fromPrimary": 0,
    "fromResale": null,
    "name": "Seattle Mariners vs. Houston Astros",
    "date": "2026-09-23",
    "venue": "T-Mobile Park",
-   "checked": "2026-09-19T01:44:34.020Z"
+   "checked": "2026-09-20T23:05:14.176Z"
   },
   "0F00635BEF047356": {
    "status": "available",
-   "primary": 11637,
+   "primary": 11329,
    "resale": 0,
    "fromPrimary": 0,
    "fromResale": null,
    "name": "Seattle Mariners vs. Los Angeles Angels",
    "date": "2026-09-24",
    "venue": "T-Mobile Park",
-   "checked": "2026-09-19T01:44:37.159Z"
+   "checked": "2026-09-20T23:05:16.105Z"
   },
   "0F00635BEF08735B": {
    "status": "available",
@@ -930,14 +908,14 @@
   },
   "0F00635BEF0D735D": {
    "status": "available",
-   "primary": 2868,
+   "primary": 2542,
    "resale": 0,
    "fromPrimary": 0,
    "fromResale": null,
    "name": "Seattle Mariners vs. Los Angeles Angels",
    "date": "2026-09-26",
    "venue": "T-Mobile Park",
-   "checked": "2026-09-19T01:44:49.152Z"
+   "checked": "2026-09-20T23:05:29.438Z"
   },
   "0F00635BEF11735F": {
    "status": "available",
@@ -951,149 +929,111 @@
    "checked": "2026-09-16T07:40:28.762Z",
    "note": "kept from 2026-09-16: this run none"
   },
-  "0F0064D9D5BE1CA7": {
-   "status": "available",
-   "primary": 10145,
-   "resale": 435,
-   "fromPrimary": 25,
-   "fromResale": 32,
-   "name": "Monster Jam",
-   "date": "2026-09-19",
-   "venue": "Lumen Field",
-   "checked": "2026-09-19T01:45:00.752Z"
-  },
   "0F006482E69574CD": {
    "status": "available",
-   "primary": 40,
-   "resale": 2681,
-   "fromPrimary": 185,
-   "fromResale": 195,
+   "primary": 24,
+   "resale": 2589,
+   "fromPrimary": 215,
+   "fromResale": 190,
    "name": "Seattle Seahawks vs. Los Angeles Chargers",
    "date": "2026-10-04",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:45:04.295Z"
+   "checked": "2026-09-20T23:05:41.004Z"
   },
   "0F006482E6A774FD": {
    "status": "available",
-   "primary": 104,
-   "resale": 2459,
+   "primary": 96,
+   "resale": 2323,
    "fromPrimary": 345,
-   "fromResale": 270,
+   "fromResale": 274,
    "name": "Seattle Seahawks vs. San Francisco 49ers",
    "date": "2026-10-11",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:45:06.691Z"
+   "checked": "2026-09-20T23:05:43.873Z"
   },
   "0F006482E69174BF": {
    "status": "available",
-   "primary": 101,
-   "resale": 2815,
+   "primary": 93,
+   "resale": 2723,
    "fromPrimary": 330,
-   "fromResale": 255,
+   "fromResale": 275,
    "name": "Seattle Seahawks vs. Kansas City Chiefs",
    "date": "2026-10-25",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:45:08.782Z"
+   "checked": "2026-09-20T23:05:46.988Z"
   },
   "0F006482E68774AB": {
    "status": "available",
-   "primary": 412,
-   "resale": 3429,
+   "primary": 374,
+   "resale": 3436,
    "fromPrimary": 250,
    "fromResale": 225,
    "name": "Seattle Seahawks vs. Chicago Bears",
    "date": "2026-11-02",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:45:11.703Z"
+   "checked": "2026-09-20T23:05:49.605Z"
   },
   "0F006482E68374A4": {
    "status": "available",
-   "primary": 199,
-   "resale": 3139,
+   "primary": 165,
+   "resale": 3068,
    "fromPrimary": 135,
-   "fromResale": 138,
+   "fromResale": 120,
    "name": "Seattle Seahawks vs. Arizona Cardinals",
    "date": "2026-11-08",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:45:13.798Z"
+   "checked": "2026-09-20T23:05:52.078Z"
   },
   "0F006482E68C74B1": {
    "status": "available",
-   "primary": 613,
-   "resale": 4116,
+   "primary": 609,
+   "resale": 4099,
    "fromPrimary": 265,
-   "fromResale": 251,
+   "fromResale": 250,
    "name": "Seattle Seahawks vs. Dallas Cowboys",
    "date": "2026-12-07",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:45:16.236Z"
+   "checked": "2026-09-20T23:05:55.195Z"
   },
   "0F006482E69E74E3": {
    "status": "available",
-   "primary": 844,
-   "resale": 3466,
+   "primary": 807,
+   "resale": 3397,
    "fromPrimary": 145,
    "fromResale": 150,
    "name": "Seattle Seahawks vs. New York Giants",
    "date": "2026-12-13",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:45:19.383Z"
+   "checked": "2026-09-20T23:05:57.429Z"
   },
   "0F006482E69A74E0": {
    "status": "available",
-   "primary": 438,
-   "resale": 4895,
+   "primary": 412,
+   "resale": 4873,
    "fromPrimary": 245,
-   "fromResale": 220,
+   "fromResale": 225,
    "name": "Seattle Seahawks vs. Los Angeles Rams",
    "date": "2026-12-25",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:45:22.371Z"
+   "checked": "2026-09-20T23:06:00.079Z"
   },
   "1E006478043637A2": {
    "status": "available",
-   "primary": 29,
-   "resale": 4156,
+   "primary": 34,
+   "resale": 4194,
    "fromPrimary": 226,
-   "fromResale": 218,
+   "fromResale": 220,
    "name": "Denver Broncos vs. Seattle Seahawks",
    "date": "2026-10-15",
    "venue": "Empower Field At Mile High",
    "club": "seahawks",
    "away": true,
-   "checked": "2026-09-16T07:45:31.648Z",
-   "note": "kept from 2026-09-16: this run none"
-  },
-  "1E00636AD3C79146": {
-   "status": "available",
-   "primary": 5603,
-   "resale": 0,
-   "fromPrimary": 22,
-   "fromResale": null,
-   "name": "Colorado Rockies vs. Seattle Mariners",
-   "date": "2026-09-19",
-   "venue": "Coors Field",
-   "club": "mariners",
-   "away": true,
-   "checked": "2026-09-19T01:45:35.787Z"
-  },
-  "1E00636AD3CB9148": {
-   "status": "available",
-   "primary": 4348,
-   "resale": 0,
-   "fromPrimary": 12,
-   "fromResale": null,
-   "name": "Colorado Rockies vs. Seattle Mariners",
-   "date": "2026-09-20",
-   "venue": "Coors Field",
-   "club": "mariners",
-   "away": true,
-   "checked": "2026-09-19T01:45:38.730Z"
+   "checked": "2026-09-20T23:06:02.473Z"
   },
   "110064FB8BD53440": {
    "status": "available",
-   "primary": 933,
-   "resale": 1187,
+   "primary": 905,
+   "resale": 753,
    "fromPrimary": null,
    "fromResale": null,
    "name": "Calgary Flames vs Seattle Kraken Presented by Molson",
@@ -1101,12 +1041,12 @@
    "venue": "Scotiabank Saddledome",
    "club": "kraken",
    "away": true,
-   "checked": "2026-09-19T01:45:43.049Z"
+   "checked": "2026-09-20T23:06:06.508Z"
   },
   "11006503F075BB27": {
    "status": "available",
-   "primary": 1031,
-   "resale": 636,
+   "primary": 954,
+   "resale": 604,
    "fromPrimary": null,
    "fromResale": null,
    "name": "Vancouver Canucks vs. Seattle Kraken",
@@ -1114,12 +1054,12 @@
    "venue": "Rogers Arena",
    "club": "kraken",
    "away": true,
-   "checked": "2026-09-19T01:45:44.677Z"
+   "checked": "2026-09-20T23:06:08.428Z"
   },
   "110064FC82C03262": {
    "status": "available",
-   "primary": 372,
-   "resale": 1246,
+   "primary": 348,
+   "resale": 1266,
    "fromPrimary": null,
    "fromResale": null,
    "name": "Calgary Flames vs Seattle Kraken Presented by Scotia Perks",
@@ -1127,8 +1067,7 @@
    "venue": "Scotiabank Saddledome",
    "club": "kraken",
    "away": true,
-   "checked": "2026-09-16T07:45:42.574Z",
-   "note": "kept from 2026-09-16: this run unknown (no inventory call)"
+   "checked": "2026-09-20T23:06:12.637Z"
   },
   "11006513A5E5A439": {
    "status": "available",
@@ -1141,12 +1080,13 @@
    "venue": "Rogers Place",
    "club": "kraken",
    "away": true,
-   "checked": "2026-09-19T01:46:06.531Z"
+   "checked": "2026-09-19T01:46:06.531Z",
+   "note": "kept from 2026-09-19: this run none"
   },
   "080064EED7B47FB2": {
    "status": "available",
-   "primary": 1357,
-   "resale": 968,
+   "primary": 1348,
+   "resale": 977,
    "fromPrimary": 47,
    "fromResale": 28,
    "name": "Detroit Red Wings vs. Seattle Kraken",
@@ -1154,20 +1094,20 @@
    "venue": "Little Caesars Arena",
    "club": "kraken",
    "away": true,
-   "checked": "2026-09-19T01:46:08.746Z"
+   "checked": "2026-09-20T23:06:24.334Z"
   },
   "150064F0345FE283": {
    "status": "available",
-   "primary": 2715,
-   "resale": 1571,
+   "primary": 2689,
+   "resale": 1568,
    "fromPrimary": 58,
-   "fromResale": 42,
+   "fromResale": 41,
    "name": "Washington Capitals vs. Seattle Kraken",
    "date": "2026-10-11",
    "venue": "Capital One Arena",
    "club": "kraken",
    "away": true,
-   "checked": "2026-09-19T01:46:11.126Z"
+   "checked": "2026-09-20T23:06:26.179Z"
   },
   "300064EEEE94E14E": {
    "status": "available",
@@ -1180,25 +1120,26 @@
    "venue": "Xfinity Mobile Arena",
    "club": "kraken",
    "away": true,
-   "checked": "2026-09-19T01:46:13.461Z"
+   "checked": "2026-09-19T01:46:13.461Z",
+   "note": "kept from 2026-09-19: this run none"
   },
   "0D0064F8CF2C9D79": {
    "status": "available",
-   "primary": 600,
-   "resale": 1718,
+   "primary": 571,
+   "resale": 1731,
    "fromPrimary": 31.25,
-   "fromResale": 28,
+   "fromResale": 29,
    "name": "Tampa Bay Lightning vs. Seattle Kraken",
    "date": "2026-10-15",
    "venue": "Benchmark International Arena",
    "club": "kraken",
    "away": true,
-   "checked": "2026-09-19T01:46:15.597Z"
+   "checked": "2026-09-20T23:06:37.440Z"
   },
   "110064FB961D3ED6": {
    "status": "available",
-   "primary": 968,
-   "resale": 1533,
+   "primary": 947,
+   "resale": 1541,
    "fromPrimary": null,
    "fromResale": null,
    "name": "Calgary Flames vs. Seattle Kraken",
@@ -1206,34 +1147,7 @@
    "venue": "Scotiabank Saddledome",
    "club": "kraken",
    "away": true,
-   "checked": "2026-09-19T01:46:17.529Z"
-  },
-  "1C006435CB7B38AA": {
-   "status": "available",
-   "primary": 8,
-   "resale": 592,
-   "fromPrimary": 90,
-   "fromResale": 93,
-   "name": "Golden State Valkyries vs. Seattle Storm",
-   "date": "2026-09-19",
-   "venue": "Chase Center",
-   "club": "storm",
-   "away": true,
-   "checked": "2026-09-16T07:44:20.527Z",
-   "note": "kept from 2026-09-16: this run none"
-  },
-  "1E006393B6D57AA2": {
-   "status": "available",
-   "primary": 806,
-   "resale": 552,
-   "fromPrimary": 25,
-   "fromResale": 28,
-   "name": "Colorado Rapids vs. Seattle Sounders FC",
-   "date": "2026-09-19",
-   "venue": "DICK'S Sporting Goods Park",
-   "club": "sounders",
-   "away": true,
-   "checked": "2026-09-19T01:46:28.355Z"
+   "checked": "2026-09-20T23:06:39.849Z"
   },
   "01006435F20B2BCE": {
    "status": "available",
@@ -1246,12 +1160,13 @@
    "venue": "Gillette Stadium",
    "club": "sounders",
    "away": true,
-   "checked": "2026-09-19T01:46:30.694Z"
+   "checked": "2026-09-19T01:46:30.694Z",
+   "note": "kept from 2026-09-19: this run none"
   },
   "0A006427D5DB6F73": {
    "status": "available",
-   "primary": 3530,
-   "resale": 1539,
+   "primary": 3449,
+   "resale": 1494,
    "fromPrimary": 31,
    "fromResale": 28,
    "name": "San Diego FC vs Seattle Sounders FC",
@@ -1259,13 +1174,12 @@
    "venue": "Snapdragon Stadium",
    "club": "sounders",
    "away": true,
-   "checked": "2026-09-16T07:44:25.410Z",
-   "note": "kept from 2026-09-16: this run none"
+   "checked": "2026-09-20T23:06:51.826Z"
   },
   "1100639FFC8C9CA9": {
    "status": "available",
-   "primary": 1979,
-   "resale": 828,
+   "primary": 1929,
+   "resale": 836,
    "fromPrimary": null,
    "fromResale": null,
    "name": "Vancouver Whitecaps FC vs. Seattle Sounders FC",
@@ -1273,77 +1187,77 @@
    "venue": "BC Place",
    "club": "sounders",
    "away": true,
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.739Z"
   },
   "0F006529E2ABFCEB": {
    "status": "presale",
    "name": "Hans Zimmer",
    "date": "2027-04-09",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "0F006383C4568451": {
    "status": "presale",
    "name": "Seattle Sounders FC vs. Real Salt Lake",
    "date": "2026-09-23",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "0F006454A55ECF22": {
    "status": "presale",
    "name": "Seattle Reign FC vs. Boston Legacy FC",
    "date": "2026-09-25",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "0F006383C471846B": {
    "status": "presale",
    "name": "Seattle Sounders FC vs. Minnesota United FC",
    "date": "2026-09-26",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "0F006383ED609A52": {
    "status": "presale",
    "name": "Seattle Sounders FC vs. Sporting Kansas City",
    "date": "2026-10-01",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "0F006454A564CF2E": {
    "status": "presale",
    "name": "Seattle Reign FC vs. North Carolina Courage",
    "date": "2026-10-02",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "0F006383C475846F": {
    "status": "presale",
    "name": "Seattle Sounders FC vs. CF Montréal",
    "date": "2026-10-17",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "0F006383ED639A54": {
    "status": "presale",
    "name": "Seattle Sounders FC vs. Houston Dynamo",
    "date": "2026-10-28",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "0F006454A56ACF3B": {
    "status": "presale",
    "name": "Seattle Reign FC vs. Orlando Pride",
    "date": "2026-11-01",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "0F006383C3AA8409": {
    "status": "presale",
    "name": "Seattle Sounders FC vs. Los Angeles Football Club",
    "date": "2026-11-07",
    "venue": "Lumen Field",
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "1900646DDA0EC026": {
    "status": "presale",
@@ -1352,7 +1266,7 @@
    "venue": "State Farm Stadium",
    "club": "seahawks",
    "away": true,
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
   },
   "1500647995405B94": {
    "status": "presale",
@@ -1361,7 +1275,16 @@
    "venue": "Northwest Stadium",
    "club": "seahawks",
    "away": true,
-   "checked": "2026-09-19T01:46:41.560Z"
+   "checked": "2026-09-20T23:06:54.740Z"
+  },
+  "1E00636AD3CB9148": {
+   "status": "presale",
+   "name": "Colorado Rockies vs. Seattle Mariners",
+   "date": "2026-09-20",
+   "venue": "Coors Field",
+   "club": "mariners",
+   "away": true,
+   "checked": "2026-09-20T23:06:54.740Z"
   }
  }
 }
