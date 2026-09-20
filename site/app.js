@@ -1701,7 +1701,7 @@
   function foldWatch() {
     document.querySelectorAll('#teamHead .tf-watch').forEach(function (w) {
       if (w.classList.contains('is-open')) return;
-      var more = Array.prototype.some.call(w.querySelectorAll('.tf-channels'), function (ch) { return ch.scrollHeight > ch.clientHeight + 2 || ch.scrollWidth > ch.clientWidth + 2; }); // wrapped past its line, or (a phone's one row) clipped at its end
+      var more = Array.prototype.some.call(w.querySelectorAll('.tf-channels'), function (ch) { return ch.scrollHeight > ch.clientHeight + 2 || ch.scrollWidth > ch.clientWidth + 2; }); // wrapped past its line, or (a phone's one row) clipped at its end — the chevron only then (Steve, 2026-09-19: all three sections stay, the arrow only when it gets noisy)
       w.classList.toggle('has-more', more);
     });
   }
@@ -1836,7 +1836,7 @@
       var k = set ? JSON.stringify([info.ota, info.directv, info.dish, info.xfinity]) : String(n).toLowerCase();
       if (seen[k]) return; seen[k] = true;
       if (set || !info) tv.push(n);
-      else stream.push({ name: n, ways: (info.stream || []).filter(function (x) { return x.toLowerCase() !== String(n).toLowerCase(); }), apps: info.apps || null, via: false });
+      else stream.push({ name: n, ways: (info.stream || []).filter(function (x) { return x.toLowerCase() !== String(n).toLowerCase(); }), apps: info.apps || null, bars: info.bars || null, via: false });
     });
     tv.forEach(function (n) { // the networks' carriers, after the services named outright — one group per distinct set of carriers
       var info = channelInfo(n), k = info && JSON.stringify(info.stream || []);
@@ -1890,6 +1890,7 @@
         if (g.via && i === 0) sp.insertBefore(document.createTextNode('via '), sp.firstChild);
         li.appendChild(sp);
       });
+      if (g.bars) { var bs = document.createElement('span'); bs.appendChild(document.createTextNode('bars: ')); g.bars.forEach(function (b, i) { if (i) bs.appendChild(document.createTextNode(' · ')); var e = watchEntry('span', b); while (e.firstChild) bs.appendChild(e.firstChild); }); li.appendChild(bs); } // the commercial service a venue subscribes to for it (channels.json bars)
       if (g.apps) Object.keys(g.apps).forEach(function (dev, i) {
         var sp = document.createElement('span'), a = document.createElement('a');
         a.href = g.apps[dev]; a.target = '_blank'; a.rel = 'noopener'; a.textContent = dev; a.title = 'Install the ' + g.name + ' app on ' + dev;
@@ -2025,7 +2026,8 @@
       st.type = { state: 'in', detail: label, shortDetail: label }; st.displayClock = clockDown;
       var finalUs = sport === 'football' ? 27 : sport === 'basketball' ? 84 : 3, finalThem = sport === 'football' ? 17 : sport === 'basketball' ? 79 : 2;
       us.score = String(Math.floor(finalUs * frac / (sport === 'hockey' ? 1 : 7)) * (sport === 'hockey' ? 1 : 7)); them.score = String(Math.floor(finalThem * frac / (sport === 'hockey' ? 1 : 7)) * (sport === 'hockey' ? 1 : 7)); // in sevens for the ball games, whole goals for hockey
-      if (sport === 'football') c.situation = { downDistanceText: ['1st & 10 at SEA 25', '2nd & 7 at SEA 42', '3rd & 3 at ARI 38', '1st & goal at ARI 6'][t % 4], possession: t % 2 ? 'them' : ourId, lastPlay: { text: ['K. Walker III rushed for 5 yards to the SEA 42.', 'S. Darnold pass complete to J. Smith-Njigba for 14 yards.', 'Incomplete pass intended for T. Lockett.', 'J. Myers 44-yard field goal is good.'][t % 4] } };
+      if (sport === 'football') { us.records = [{ type: 'total', summary: '2-0' }]; them.records = [{ type: 'total', summary: '1-2' }]; } // the records beside the names, as on a broadcast
+      if (sport === 'football') c.situation = { downDistanceText: ['1st & 10 at SEA 25', '2nd & 7 at SEA 42', '3rd & 3 at ARI 38', '1st & goal at ARI 6'][t % 4], possession: t % 2 ? 'them' : ourId, shortDownDistanceText: ['1st & 10', '2nd & 7', '3rd & 3', '1st & Goal'][t % 4], isRedZone: t % 4 === 3, homeTimeouts: 3 - (period > 2 ? 1 : 0), awayTimeouts: 3 - (t % 3), lastPlay: { text: ['K. Walker III rushed for 5 yards to the SEA 42.', 'S. Darnold pass complete to J. Smith-Njigba for 14 yards.', 'Incomplete pass intended for T. Lockett.', 'J. Myers 44-yard field goal is good.'][t % 4] } };
       if (sport === 'hockey') {
         var hg = [{ p: 1, at: 4.2, us: true, who: 'J. Eberle' }, { p: 2, at: 15.8, us: false, who: 'N. MacKinnon' }, { p: 2, at: 6.5, us: true, who: 'M. Beniers' }, { p: 3, at: 11.1, us: true, who: 'J. Schwartz' }, { p: 3, at: 2.2, us: false, who: 'C. Makar' }];
         var seen = hg.filter(function (x) { return x.p < period || (x.p === period && x.at >= left); }); // clocks count down: a goal "at 4.2" came with 4:12 left
@@ -2475,6 +2477,15 @@
       if (poss && poss.displayValue) right = 'Possession ' + esc(us.team.abbreviation) + ' ' + Math.round(+poss.displayValue) + '%';
     }
     if (!right && st.displayClock && detail.indexOf(st.displayClock) < 0 && !/^(HT|FT|Final)/i.test(detail)) right = st.displayClock;
+    var redZone = sport === 'football' && !final && !!s.isRedZone; // the broadcast turns the down and distance red inside the 20
+    var foot = null; // football in play: the quarter, the clock and the down and distance on a tab under the rows, as the broadcast draws it (the top row is left off)
+    if (sport === 'football' && !final) {
+      var ORD = ['', '1st', '2nd', '3rd', '4th'], per = st.period > 4 ? 'OT' + (st.period > 5 ? st.period - 4 : '') : ORD[st.period] || '';
+      var pause = /half|end of|delay|final/i.test(detail) ? detail : ''; // Halftime, End of 3rd: the tab says so instead of a clock
+      var dd = s.shortDownDistanceText || s.downDistanceText || '';
+      foot = pause ? [pause] : [per, st.displayClock || '', dd];
+      right = ''; top = '';
+    }
     var col = function (side) { return sideColor(side, us, team); };
     var goals = {}; // team id -> [text]
     (c.details || []).forEach(function (d) {
@@ -2484,15 +2495,23 @@
       (goals[d.team.id] = goals[d.team.id] || []).push(esc((who ? who.shortName || who.displayName : 'Goal') + (d.clock && d.clock.displayValue ? ' ' + d.clock.displayValue : '') + mark));
     });
     var order = us.homeAway === 'home' ? [them, us] : [us, them];
+    var timeouts = function (side) { return side.homeAway === 'home' ? s.homeTimeouts : s.awayTimeouts; }; // the league's count, when its feed carries the situation
+    var record = function (side) { var r = (side.records || []).filter(function (x) { return x.type === 'total' || /^overall$/i.test(x.name || ''); })[0] || (side.records || [])[0]; return r && r.summary; };
     var rows = order.map(function (side) {
-      var ev = goals[side.team.id] ? goals[side.team.id].join(', ') : '';
-      if (sport === 'football' && s.possession && String(s.possession) === String(side.team.id)) ev = '<i class="bug-ball" title="Possession"></i>' + ev;
-      return teamCell(side, team, col(side)) + '<span class="bug-score">' + esc(side.score || 0) + '</span><span class="bug-ev">' + ev + '</span>';
+      var ev = goals[side.team.id] ? goals[side.team.id].join(', ') : '', extra = '';
+      if (sport === 'football' && !final) { // as the broadcast draws it: the record with the name, the ball and the timeouts left beside the score
+        var to = timeouts(side), rec = record(side);
+        if (rec) extra = '<small class="bug-rec">' + esc(rec) + '</small>';
+        if (typeof to === 'number') { var pips = ''; for (var i = 0; i < 3; i++) pips += '<b' + (i < to ? ' class="on"' : '') + '></b>'; ev = '<i class="bug-to" title="' + to + ' timeout' + (to === 1 ? '' : 's') + ' left">' + pips + '</i>' + ev; }
+        if (s.possession && String(s.possession) === String(side.team.id)) extra = BALL_SVG + extra; // the ball at the left edge of the name cell (styles.css .bug-poss)
+      }
+      return teamCell(side, team, col(side), extra) + '<span class="bug-score">' + esc(side.score || 0) + '</span><span class="bug-ev">' + ev + '</span>';
     });
     var b = document.createElement('div'); b.className = 'tf-bug is-generic'; b.title = detail;
-    var anyEv = Object.keys(goals).length || (sport === 'football' && s.possession); // nothing to put beside the scores: the bug is just the rows
-    b.innerHTML = '<div class="bug-top"><span class="bug-pitcher">' + esc(top) + '</span>' + (right ? '<span class="bug-pc">' + esc(right) + '</span>' : '') + '</div>' +
-      '<div class="bug-grid bug-grid-2' + (anyEv ? '' : ' no-ev') + '">' + rows.join('') + '</div>';
+    var anyEv = Object.keys(goals).length || (sport === 'football' && !final && (s.possession || typeof s.homeTimeouts === 'number')); // nothing to put beside the scores: the bug is just the rows
+    b.innerHTML = (foot ? '' : '<div class="bug-top"><span class="bug-pitcher">' + esc(top) + '</span>' + (right ? '<span class="bug-pc">' + esc(right) + '</span>' : '') + '</div>') +
+      '<div class="bug-grid bug-grid-2' + (anyEv ? '' : ' no-ev') + '">' + rows.join('') + '</div>' +
+      (foot ? '<div class="bug-foot' + (foot.length === 1 ? ' is-pause' : '') + '">' + foot.map(function (x, i) { return '<span class="' + ['bug-per', 'bug-clock', 'bug-dd' + (redZone ? ' is-redzone' : '')][foot.length === 1 ? 0 : i] + '"' + (i === 2 && redZone ? ' title="Red zone"' : '') + '>' + esc(x) + '</span>'; }).join('') + '</div>' : '');
     return b;
   }
   // Before the game, in the same frame: the day and the start along the
@@ -2554,10 +2573,11 @@
     }
     return pick || '#555';
   }
-  function teamCell(side, team, color) { // the abbreviation on the block, the nickname on the compact bar (styles.css .bug-abbr / .bug-nick)
+  var BALL_SVG = '<svg class="bug-poss" viewBox="0 0 24 16" aria-hidden="true"><title>Possession</title><ellipse cx="12" cy="8" rx="11" ry="6" transform="rotate(-25 12 8)" fill="#b5652a" stroke="#f4f4f4" stroke-width="1.2"/><path d="M8.5 9.8 15.5 6.2M10 7.4l1 2M11.8 6.6l1 2M13.6 5.8l1 2" stroke="#f4f4f4" stroke-width="1.1" stroke-linecap="round"/></svg>'; // the football that marks possession
+  function teamCell(side, team, color, extra) { // the abbreviation on the block, the nickname on the compact bar (styles.css .bug-abbr / .bug-nick); extra: markup that rides with the abbreviation (the record) and goes with it on the compact bar
     function esc(x) { return String(x).replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; }); }
     var abbr = (side.isUs && clubAbbr(team)) || side.team.abbreviation || side.team.shortDisplayName, nick = side.isUs ? team.label : nickname(side.team); // our side as the league lists it
-    return '<span class="bug-team" style="background:' + color + '"><i class="bug-abbr">' + esc(abbr) + '</i><i class="bug-nick">' + esc(nick || abbr) + '</i></span>';
+    return '<span class="bug-team" style="background:' + color + '"><i class="bug-abbr">' + esc(abbr) + (extra || '') + '</i><i class="bug-nick">' + esc(nick || abbr) + '</i></span>';
   }
   function renderTeamLive(team, ev) {
     function esc(s) { return String(s).replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; }); }

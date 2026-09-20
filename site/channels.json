@@ -1,5 +1,6 @@
 {
  "_": "How to watch a network from Seattle, for the live game block (app.js renderTeamLive). Keys are regexes matched against ESPN's broadcast names, case-insensitive; first match wins. DirecTV and Dish numbers are the national ones; xfinity = the Xfinity 'King County South' lineup number (scripts/xfinity-lineup.mjs applies it from scripts/data/xfinity-98109.json — don't hand-edit those); ota = the Seattle over-the-air station and channel; stream = the services that carry it. A streaming-only service lists just its name, and its own ways in stream (free at…); apps = device → the page to install its app from (app.js buildStreamList links each).",
+ "_bars": "bars = the commercial service a venue subscribes to for it: EverPass carries the streaming-only games (Sunday Ticket, the Peacock, Netflix and Prime games, Apple's MLS) to bars and restaurants; it does not carry cable networks like BTN. DAZN agreed to buy it in August 2026. app.js buildStreamList prints it as \"bars: EverPass\" after the ways.",
  "channels": [
   {
    "match": "^ESPN2$",
@@ -249,18 +250,27 @@
    "match": "^Prime Video$|Amazon",
    "stream": [
     "Prime Video"
+   ],
+   "bars": [
+    "EverPass"
    ]
   },
   {
    "match": "Apple TV|MLS Season Pass",
    "stream": [
     "Apple TV"
+   ],
+   "bars": [
+    "EverPass"
    ]
   },
   {
    "match": "^Peacock$|Peacock/NBCSN|^NBCSN$|NBC Sports Network",
    "stream": [
     "Peacock"
+   ],
+   "bars": [
+    "EverPass"
    ]
   },
   {
@@ -273,6 +283,9 @@
    "match": "Netflix",
    "stream": [
     "Netflix"
+   ],
+   "bars": [
+    "EverPass"
    ]
   },
   {
@@ -462,7 +475,8 @@
   "USA Network": "https://www.usanetwork.com/live",
   "CNBC": "https://www.cnbc.com/live-tv/",
   "FOX Deportes": "https://www.foxdeportes.com/",
-  "Prime Video (Washington)": "https://www.amazon.com/gp/video/storefront"
+  "Prime Video (Washington)": "https://www.amazon.com/gp/video/storefront",
+  "EverPass": "https://everpass.com/"
  },
  "_hide": "An entry with hide: true is a feed a Seattle viewer can't use (Canadian regional and national feeds, the other side's stations): the strip leaves it out.",
  "clubs": {

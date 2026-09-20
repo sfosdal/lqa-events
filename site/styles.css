@@ -1155,6 +1155,19 @@ html { overflow-anchor: none; }
 .bug-ball { display: inline-block; vertical-align: middle; margin-right: .4rem; }
 .bug-grid.bug-grid-2.no-ev { grid-template-columns: 8rem minmax(4.4rem, max-content); } .bug-grid-2.no-ev .bug-ev { display: none; } /* a final with nothing beside the scores */
 .bug-ball { width: .55rem; height: .55rem; border-radius: 50%; background: var(--bug-on); flex: none; }
+.bug-team { position: relative; } .bug-poss { position: absolute; left: .3rem; top: 50%; width: 1rem; height: .7rem; transform: translateY(-50%); } /* the football at the left edge of the name cell: who has the ball */
+#teamHead.is-compact .bug-poss { width: .8rem; height: .55rem; left: .15rem; }
+.bug-abbr:has(.bug-rec) { display: inline-flex; align-items: center; gap: .35rem; } /* the record sits on the abbreviation's centre line, not its baseline */
+.bug-rec { font-family: var(--mono); font-size: .6rem; font-weight: 600; letter-spacing: .02em; line-height: 1; opacity: .8; text-shadow: none; } /* the record beside the abbreviation (football), as the broadcast prints it — goes with the abbreviation on the compact bar */
+.bug-to { display: inline-flex; gap: .16rem; vertical-align: middle; margin-right: .5rem; } /* the timeouts left: three dashes, the spent ones dimmed (football) */
+.bug-to b { display: block; width: .55rem; height: .2rem; border-radius: 1px; background: #5c6167; }
+.bug-to b.on { background: var(--bug-on); }
+.bug-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 1.2rem; padding: .18rem .8rem .12rem; border-top: 2px solid #c9cdd2; font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; } /* football in play: the quarter, the clock, the down and distance on a tab under the rows, as the broadcast draws it */
+.bug-foot > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.bug-foot .bug-clock { flex: 1 1 auto; text-align: center; }
+.bug-foot.is-pause { justify-content: center; } /* Halftime, End of 3rd */
+.bug-foot .bug-dd.is-redzone { color: #ff7b7b; } /* the down and distance, red inside the 20 */
+#teamHead.is-compact .bug-foot { display: none; }
 #teamHead.is-compact .bug-ev { display: none; }
 #teamHead.is-compact .bug-grid.bug-grid-2 { grid-template-columns: minmax(2.7rem, max-content) 1.6rem; }
 /* compact: the scorebug stays, slimmed — no pitcher rows, no last out — in place of the score and the state line */
