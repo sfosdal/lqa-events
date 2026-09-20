@@ -1908,7 +1908,7 @@
   // where to watch, and once it's final the result stays until the next
   // visit. The feed is ESPN's because it answers from the browser.
   var POLL_MS = 30000; // the scoreboard is asked this often while a game is on (styles.css tf-tick counts it down — keep the two in step)
-  var live = { slug: null, event: null, events: {}, shown: null, shownBy: {}, timer: null, at: null, busy: false, lastOut: {}, matchup: {}, pitches: {}, lastPitch: {}, highlights: {}, odds: {}, polled: {} }; // polled: the clubs a scoreboard poll has answered for (the first draw waits for it)
+  var live = { slug: null, event: null, events: {}, shown: null, shownBy: {}, timer: null, at: null, busy: false, lastOut: {}, matchup: {}, pitches: {}, lastPitch: {}, highlights: {}, odds: {}, polled: {}, hockey: {} }; // hockey: per club, what the game summary adds to the bug (the shots, the power plays) // polled: the clubs a scoreboard poll has answered for (the first draw waits for it)
   // MLB's clips for the game (statsapi's content feed, open to the browser),
   // newest first, a few of them: linked to their pages on mlb.com. Fetched
   // with each poll while the game is on, once it is over, and kept by game.
@@ -1979,7 +1979,7 @@
     var sport = team.espn ? team.espn.sport : team.sport, state = DEMO === 'pre' ? 'pre' : DEMO === 'final' ? 'post' : 'in';
     var ev = synthEvent(team, Object.assign({}, g, { res: null, date: today }));
     ev.id = 'demo-' + team.slug;
-    var c = ev.competitions[0], us = c.competitors[0], them = c.competitors[1], st = c.status;
+    var c = ev.competitions[0], us = c.competitors[0], them = c.competitors[1], st = c.status; c.id = ev.id; // the league's competitions carry the event's id; the bug looks its extras up by it
     var ourId = team.espn ? team.espn.id : 'us'; us.team.id = ourId; // the block finds us by the feed's id
     if (state === 'pre') { st.type = { state: 'pre', detail: '7:10 PM PT', shortDetail: '7:10 PM PT' }; live.matchup[team.slug] = { id: ev.id, stage: 'pre', at: Date.now(), data: { chance: { us: 36, them: 64 }, series: null, starters: {}, leaders: {}, injured: {} } }; return ev; } // made-up odds: the ring shows
     us.score = '4'; them.score = '3';
@@ -2017,8 +2017,10 @@
         : [{ min: 12, us: true, who: 'J. Prat', how: 'Try' }, { min: 31, us: false, who: 'T. Bell', how: 'Try' }, { min: 55, us: true, who: 'M. Hill', how: 'Penalty' }, { min: 68, us: true, who: 'D. Sáyalo', how: 'Try' }];
       var so = goals.filter(function (x) { return x.min <= minute; });
       us.score = String(so.filter(function (x) { return x.us; }).length * (sport === 'rugby' ? 5 : 1)); them.score = String(so.filter(function (x) { return !x.us; }).length * (sport === 'rugby' ? 7 : 1));
-      us.statistics = [{ name: 'possessionPct', displayValue: String(52 + (t % 3) * 3) }];
+      us.statistics = [{ name: 'possessionPct', displayValue: String(52 + (t % 3) * 3) }, { name: 'totalShots', displayValue: String(3 + t) }, { name: 'shotsOnTarget', displayValue: String(1 + (t >> 1)) }]; them.statistics = [{ name: 'possessionPct', displayValue: String(48 - (t % 3) * 3) }, { name: 'totalShots', displayValue: String(2 + (t >> 1)) }, { name: 'shotsOnTarget', displayValue: '1' }];
+      us.records = [{ type: 'total', summary: sport === 'soccer' ? '11-4-9' : '9-4' }]; them.records = [{ type: 'total', summary: sport === 'soccer' ? '8-8-8' : '6-7' }];
       c.details = so.map(function (x) { return { scoringPlay: true, team: { id: x.us ? ourId : 'them' }, athletesInvolved: [{ shortName: x.who }], clock: { displayValue: x.min + "'" }, type: { text: x.how } }; });
+      if (minute >= 30) c.details.push({ team: { id: 'them' }, type: { text: 'Yellow Card' } }); if (minute >= 50) c.details.push({ team: { id: 'them' }, type: { text: 'Yellow Card' } }); if (minute >= 70) c.details.push({ team: { id: ourId }, type: { text: 'Red Card' } }); // the bookings, as the match wears on
       c.situation = { lastPlay: { text: ['Corner, Seattle. Conceded by the visitors.', 'Throw-in, visitors, in their own half.', 'Free kick, Seattle, 30 yards out.', 'Substitution, Seattle.'][t % 4] } };
     } else { // football, basketball, hockey: periods with a clock counting down
       var left = ck.len - k * ck.len / ck.ticks, mm = Math.floor(left), ss = Math.round((left - mm) * 60), clockDown = (k === 0 ? ck.len + ':00' : mm + ':' + (ss < 10 ? '0' : '') + ss);
@@ -2026,7 +2028,11 @@
       st.type = { state: 'in', detail: label, shortDetail: label }; st.displayClock = clockDown;
       var finalUs = sport === 'football' ? 27 : sport === 'basketball' ? 84 : 3, finalThem = sport === 'football' ? 17 : sport === 'basketball' ? 79 : 2;
       us.score = String(Math.floor(finalUs * frac / (sport === 'hockey' ? 1 : 7)) * (sport === 'hockey' ? 1 : 7)); them.score = String(Math.floor(finalThem * frac / (sport === 'hockey' ? 1 : 7)) * (sport === 'hockey' ? 1 : 7)); // in sevens for the ball games, whole goals for hockey
-      if (sport === 'football') { us.records = [{ type: 'total', summary: '2-0' }]; them.records = [{ type: 'total', summary: '1-2' }]; } // the records beside the names, as on a broadcast
+      us.records = [{ type: 'total', summary: sport === 'hockey' ? '3-1-0' : sport === 'basketball' ? '8-33' : '2-0' }]; them.records = [{ type: 'total', summary: sport === 'hockey' ? '2-2-1' : sport === 'basketball' ? '30-11' : '1-2' }]; // the records beside the names, as on a broadcast
+      if (sport === 'hockey') { us.statistics = [{ name: 'saves', displayValue: String(9 + t) }]; them.statistics = [{ name: 'saves', displayValue: String(12 + t) }]; // the other side's saves make the shots on goal
+        var hs = {}; hs[ourId] = 12 + t; hs.them = 9 + t; var hpp = {}; hpp[ourId] = (t > 4 ? 1 : 0) + '/' + Math.min(3, 1 + (t >> 2)); hpp.them = '0/' + Math.min(2, t >> 2);
+        live.hockey[team.slug] = { id: ev.id, at: Date.now(), sog: hs, pp: hpp, powerPlay: t % 3 === 1 ? { team: ourId, short: 'them', left: 83, two: false } : t % 3 === 2 ? { team: 'them', short: ourId, left: 41, two: t % 6 === 5 } : null }; } // the summary's extras, as the poll would set them
+      if (sport === 'basketball') { us.leaders = [{ name: 'points', leaders: [{ displayValue: String(9 + t * 2), athlete: { shortName: 'N. Diggins-Smith' } }] }]; them.leaders = [{ name: 'points', leaders: [{ displayValue: String(7 + t * 2), athlete: { shortName: 'L. Amihere' } }] }]; us.statistics = [{ name: 'fieldGoalPct', displayValue: '47.1' }]; them.statistics = [{ name: 'fieldGoalPct', displayValue: '38.5' }]; }
       if (sport === 'football') c.situation = { downDistanceText: ['1st & 10 at SEA 25', '2nd & 7 at SEA 42', '3rd & 3 at ARI 38', '1st & goal at ARI 6'][t % 4], possession: t % 2 ? 'them' : ourId, shortDownDistanceText: ['1st & 10', '2nd & 7', '3rd & 3', '1st & Goal'][t % 4], isRedZone: t % 4 === 3, homeTimeouts: 3 - (period > 2 ? 1 : 0), awayTimeouts: 3 - (t % 3), lastPlay: { text: ['K. Walker III rushed for 5 yards to the SEA 42.', 'S. Darnold pass complete to J. Smith-Njigba for 14 yards.', 'Incomplete pass intended for T. Lockett.', 'J. Myers 44-yard field goal is good.'][t % 4] } };
       if (sport === 'hockey') {
         var hg = [{ p: 1, at: 4.2, us: true, who: 'J. Eberle' }, { p: 2, at: 15.8, us: false, who: 'N. MacKinnon' }, { p: 2, at: 6.5, us: true, who: 'M. Beniers' }, { p: 3, at: 11.1, us: true, who: 'J. Schwartz' }, { p: 3, at: 2.2, us: false, who: 'C. Makar' }];
@@ -2034,7 +2040,7 @@
         us.score = String(seen.filter(function (x) { return x.us; }).length); them.score = String(seen.filter(function (x) { return !x.us; }).length);
         c.details = seen.map(function (x) { var m = Math.floor(x.at), sx = Math.round((x.at - m) * 60); return { scoringPlay: true, team: { id: x.us ? ourId : 'them' }, athletesInvolved: [{ shortName: x.who }], clock: { displayValue: m + ':' + (sx < 10 ? '0' : '') + sx }, period: { number: x.p }, type: { text: 'Goal' } }; });
       }
-      if (sport !== 'football') c.situation = { lastPlay: { text: sport === 'basketball' ? ['N. Diggins-Smith makes 3-pt jump shot', 'N. Ogwumike makes layup', 'E. Magbegor defensive rebound', 'J. Loyd misses free throw'][t % 4] : ['Shot on goal by Beniers, saved.', 'Penalty: hooking, 2 minutes.', 'Faceoff won by Wright.', 'Grubauer with the glove save.'][t % 4] } };
+      if (sport !== 'football') c.situation = { lastPlay: { text: sport === 'basketball' ? ['N. Diggins-Smith makes 3-pt jump shot', 'N. Ogwumike makes layup', 'E. Magbegor defensive rebound', 'J. Loyd misses free throw'][t % 4] : ['Shot on goal by Beniers, saved.', 'Penalty: hooking, 2 minutes.', 'Faceoff won by Wright.', 'Grubauer with the glove save.'][t % 4], probability: sport === 'basketball' ? { homeWinPercentage: 0.38 + frac * 0.2, awayWinPercentage: 0.62 - frac * 0.2 } : undefined } };
     }
     var titles = sport === 'baseball' ? ['Rodríguez launches a two-run homer to left', 'Raleigh guns down a runner at second', 'Woo strikes out the side in the 4th', 'Crawford\'s diving stop saves a run', 'Arozarena doubles off the wall'] :
       sport === 'football' ? ['Smith-Njigba takes a slant 45 yards to the house', 'Love goes airborne for the interception', 'Walker III bounces outside for 18', 'Williams sacks the quarterback on third down', 'Myers drills a 52-yard field goal'] :
@@ -2122,6 +2128,7 @@
           // (Steve's recording, 2026-09-18). A first draw (the placeholder from teamBlock) always goes ahead, whatever the state.
           var waits = [];
           if (want === 'in' && t.espn.sport === 'baseball') waits.push(fetchLastOut(t, ev, true)); // the play-by-play, for the last out
+          if (want === 'in' && t.espn.sport === 'hockey') waits.push(fetchHockey(t, ev, true)); // the box score's shots and the penalties, for the power play
           if ((want === 'in' || want === 'post') && t.espn.sport === 'baseball') waits.push(fetchHighlights(t, liveGameToday(t.slug), true)); // the game's clips
           var redraw = want === 'in' || want !== prev || waitingBlock(t.slug);
           if (want === 'pre' || want === 'post') { var mp = fetchMatchup(t, ev, want, redraw); if (redraw) waits.push(mp); } // the matchup before the game; the series line after — held for the draw below when there is one
@@ -2184,6 +2191,53 @@
         if (!hold && teamSelected(team.slug) && teamStage(team.slug) === 'in') swapFormBlock(team, true); // the box score landed (a new out, a new pitch count): redraw without the flash
       })
       .catch(function () { /* the play-by-play didn't come: the line just stays off */ });
+  }
+  // ---- hockey's extras, from ESPN's game summary (the scoreboard carries neither) ----
+  // The box score's shots on goal and power-play line per side, and the
+  // penalties from the play list, from which the power play on right now
+  // is worked out: a penalty called at 7:55 in the 1st runs to 5:55, so
+  // while the clock is between them the other side is up a skater;
+  // coincidental penalties cancel, a double minor runs four, a major five,
+  // misconducts (10) bench nobody's side; a power-play goal ends a minor.
+  function fetchHockey(team, ev, hold) { // hold: as fetchHighlights
+    return fetch('https://site.api.espn.com/apis/site/v2/sports/' + team.espn.sport + '/' + team.espn.league + '/summary?event=' + ev.id, { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (s) {
+        if (!s) return;
+        var out = { id: ev.id, at: Date.now(), sog: {}, pp: {}, powerPlay: null };
+        ((s.boxscore && s.boxscore.teams) || []).forEach(function (t) {
+          var st = {}; (t.statistics || []).forEach(function (x) { st[x.name] = x.displayValue; });
+          if (st.shotsTotal != null) out.sog[t.team.id] = +st.shotsTotal;
+          if (st.powerPlayOpportunities != null) out.pp[t.team.id] = (st.powerPlayGoals || 0) + '/' + st.powerPlayOpportunities;
+        });
+        var c = ev.competitions[0], stt = c.status, per = stt.period || 0;
+        var secs = function (clock) { var m = /(\d+):(\d+)/.exec(String(clock || '')); return m ? +m[1] * 60 + +m[2] : null; };
+        var plen = function (n) { return n > 3 && !/playoff/i.test(String(ev.season && ev.season.type || '')) ? 300 : 1200; }; // regulation periods 20 minutes, the regular season's OT 5
+        var at = function (n, clock) { var t = 0; for (var i = 1; i < n; i++) t += plen(i); var left = secs(clock); return left == null ? null : t + plen(n) - left; }; // game seconds elapsed
+        var now = at(per, stt.displayClock);
+        var pens = [], goals = [];
+        (s.plays || []).forEach(function (p) {
+          var mins = p.type && +p.type.penaltyMinutes, pn = p.period && p.period.number, t0 = pn ? at(pn, p.clock && p.clock.displayValue) : null;
+          if (t0 == null) return;
+          if (mins && mins !== 10 && p.team) pens.push({ team: String(p.team.id), start: t0, end: t0 + mins * 60, minor: mins < 5 });
+          if (p.scoringPlay && p.team) goals.push({ team: String(p.team.id), t: t0 });
+        });
+        if (now != null) {
+          var active = pens.filter(function (q) { return q.start <= now && now < q.end; });
+          active.forEach(function (q) { if (q.minor) goals.forEach(function (g) { if (g.team !== q.team && g.t > q.start && g.t < q.end && g.t <= now) q.end = g.t; }); }); // a power-play goal ends a minor
+          active = active.filter(function (q) { return now < q.end; });
+          var ids = c.competitors.map(function (x) { return String(x.team.id); });
+          var n = {}; ids.forEach(function (id) { n[id] = active.filter(function (q) { return q.team === id; }).length; });
+          if (n[ids[0]] !== n[ids[1]]) {
+            var short = n[ids[0]] > n[ids[1]] ? ids[0] : ids[1], up = short === ids[0] ? ids[1] : ids[0];
+            var theirs = active.filter(function (q) { return q.team === short; }).sort(function (a, b) { return a.end - b.end; });
+            out.powerPlay = { team: up, short: short, left: theirs[0].end - now, two: Math.abs(n[ids[0]] - n[ids[1]]) >= 2 };
+          }
+        }
+        live.hockey[team.slug] = out;
+        if (!hold && teamSelected(team.slug) && teamStage(team.slug) === 'in') swapFormBlock(team, true);
+      })
+      .catch(function () { /* the summary didn't come: the derived shots stay */ });
   }
   // ---- the matchup, from ESPN's game summary ----
   // Before the game: ESPN's matchup predictor, the season series and the
@@ -2478,17 +2532,30 @@
     }
     if (!right && st.displayClock && detail.indexOf(st.displayClock) < 0 && !/^(HT|FT|Final)/i.test(detail)) right = st.displayClock;
     var redZone = sport === 'football' && !final && !!s.isRedZone; // the broadcast turns the down and distance red inside the 20
-    var foot = null; // football in play: the quarter, the clock and the down and distance on a tab under the rows, as the broadcast draws it (the top row is left off)
-    if (sport === 'football' && !final) {
-      var ORD = ['', '1st', '2nd', '3rd', '4th'], per = st.period > 4 ? 'OT' + (st.period > 5 ? st.period - 4 : '') : ORD[st.period] || '';
-      var pause = /half|end of|delay|final/i.test(detail) ? detail : ''; // Halftime, End of 3rd: the tab says so instead of a clock
-      var dd = s.shortDownDistanceText || s.downDistanceText || '';
-      foot = pause ? [pause] : [per, st.displayClock || '', dd];
+    var stat = function (side, name) { var x = (side.statistics || []).filter(function (q) { return q.name === name; })[0]; return x && x.displayValue != null && x.displayValue !== '' ? +x.displayValue : null; };
+    var abbr = function (side) { return (side === us && clubAbbr(team)) || side.team.abbreviation || side.team.shortDisplayName; };
+    var hk = sport === 'hockey' && live.hockey[team.slug] && String(live.hockey[team.slug].id) === String(c.id) ? live.hockey[team.slug] : null; // the summary's extras for this game, once fetched
+    var foot = null; // in play, every sport: the period, the clock and the sport's own state on a tab under the rows, as a broadcast draws it (the top row is left off)
+    if (!final) {
+      var ORD = ['', '1st', '2nd', '3rd', '4th'], p = st.period || 0, per = '';
+      if (sport === 'hockey') per = p > 3 ? (/shootout|\bSO\b/i.test(detail) ? 'SO' : 'OT' + (p > 4 ? p - 3 : '')) : ORD[p] || '';
+      else if (sport === 'soccer') per = p === 1 ? '1st half' : p === 2 ? '2nd half' : p ? 'Extra time' : '';
+      else per = p > 4 ? 'OT' + (p > 5 ? p - 4 : '') : ORD[p] || '';
+      var pause = /half|end of|delay|intermission|break|postpon|suspend/i.test(detail) && !/^\d/.test(detail) ? detail : ''; // Halftime, End of 3rd, Delay: the tab says so instead of a clock
+      var third = '';
+      if (sport === 'football') third = s.shortDownDistanceText || s.downDistanceText || '';
+      else if (sport === 'soccer') { var pu = stat(us, 'possessionPct'); if (pu) third = 'Poss ' + abbr(us) + ' ' + Math.round(pu) + '%'; }
+      else if (sport === 'basketball') { var pr = s.lastPlay && s.lastPlay.probability, w = pr ? (us.homeAway === 'home' ? pr.homeWinPercentage : pr.awayWinPercentage) : null; if (typeof w === 'number') third = abbr(us) + ' win ' + Math.round(w * 100) + '%'; } // ESPN's live win probability
+      else if (sport === 'hockey' && hk && hk.powerPlay) { var pp = hk.powerPlay, upSide = String(us.team.id) === pp.team ? us : them, mm = Math.floor(pp.left / 60), ss = pp.left % 60; third = abbr(upSide) + (pp.two ? ' 5-on-3 ' : ' PP ') + mm + ':' + (ss < 10 ? '0' : '') + ss; } // the power play on right now, from the penalties
+      var clock = sport === 'soccer' && /'/.test(detail) ? detail : (st.displayClock || ''); // soccer's clock is the minute ESPN prints: 45'+2
+      foot = pause ? [pause] : [per, clock, third];
       right = ''; top = '';
     }
     var col = function (side) { return sideColor(side, us, team); };
-    var goals = {}; // team id -> [text]
+    var goals = {}, cards = {}; // team id -> [text]; team id -> { y, r }
     (c.details || []).forEach(function (d) {
+      var kind = String((d.type && d.type.text) || '');
+      if (d.team && /card/i.test(kind)) { var cc = cards[d.team.id] = cards[d.team.id] || { y: 0, r: 0 }; if (/red/i.test(kind)) cc.r++; else cc.y++; }
       if (!d.scoringPlay || !d.team) return;
       var who = (d.athletesInvolved || [])[0], t = String((d.type && d.type.text) || '');
       var mark = /own goal/i.test(t) ? ' (og)' : /penalty/i.test(t) ? ' (pen)' : '';
@@ -2497,18 +2564,38 @@
     var order = us.homeAway === 'home' ? [them, us] : [us, them];
     var timeouts = function (side) { return side.homeAway === 'home' ? s.homeTimeouts : s.awayTimeouts; }; // the league's count, when its feed carries the situation
     var record = function (side) { var r = (side.records || []).filter(function (x) { return x.type === 'total' || /^overall$/i.test(x.name || ''); })[0] || (side.records || [])[0]; return r && r.summary; };
+    var evs = [];
     var rows = order.map(function (side) {
-      var ev = goals[side.team.id] ? goals[side.team.id].join(', ') : '', extra = '';
-      if (sport === 'football' && !final) { // as the broadcast draws it: the record with the name, the ball and the timeouts left beside the score
-        var to = timeouts(side), rec = record(side);
+      var ev = goals[side.team.id] ? goals[side.team.id].join(', ') : '', extra = '', lead = '';
+      if (!final) { // as a broadcast draws it: the record with the name; beside the score what the sport counts, then the scorers
+        var rec = record(side), other = side === us ? them : us;
         if (rec) extra = '<small class="bug-rec">' + esc(rec) + '</small>';
-        if (typeof to === 'number') { var pips = ''; for (var i = 0; i < 3; i++) pips += '<b' + (i < to ? ' class="on"' : '') + '></b>'; ev = '<i class="bug-to" title="' + to + ' timeout' + (to === 1 ? '' : 's') + ' left">' + pips + '</i>' + ev; }
-        if (s.possession && String(s.possession) === String(side.team.id)) extra = BALL_SVG + extra; // the ball at the left edge of the name cell (styles.css .bug-poss)
+        if (sport === 'football') {
+          var to = timeouts(side);
+          if (typeof to === 'number') { var pips = ''; for (var i = 0; i < 3; i++) pips += '<b' + (i < to ? ' class="on"' : '') + '></b>'; lead = '<i class="bug-to" title="' + to + ' timeout' + (to === 1 ? '' : 's') + ' left">' + pips + '</i>'; }
+          if (s.possession && String(s.possession) === String(side.team.id)) extra = BALL_SVG + extra; // the ball at the left edge of the name cell (styles.css .bug-poss)
+        } else if (sport === 'hockey') { // shots on goal from the box score, else the other side's saves plus what went in; the power-play line when the box score has it
+          var sog = hk && hk.sog[side.team.id] != null ? hk.sog[side.team.id] : null, sv = stat(other, 'saves');
+          if (sog == null && sv != null) sog = sv + (+side.score || 0);
+          var hp = []; if (sog != null) hp.push(sog + ' SOG'); if (hk && hk.pp[side.team.id]) hp.push(hk.pp[side.team.id] + ' PP');
+          lead = hp.join(' · ');
+          if (hk && hk.powerPlay && hk.powerPlay.short === String(side.team.id)) extra = '<small class="bug-sh" title="Short-handed">SH</small>' + extra;
+        } else if (sport === 'soccer') { // the shots (on target) and the cards
+          var sh = stat(side, 'totalShots'), ot = stat(side, 'shotsOnTarget'), cd = cards[side.team.id];
+          if (sh != null) lead = sh + ' shot' + (sh === 1 ? '' : 's') + (ot != null ? ' (' + ot + ' on)' : '');
+          if (cd) { var cm = ''; for (var y = 0; y < cd.y; y++) cm += '<i class="bug-card is-y" title="Yellow card"></i>'; for (var r = 0; r < cd.r; r++) cm += '<i class="bug-card is-r" title="Red card"></i>'; lead = cm + lead; }
+        } else if (sport === 'basketball') { // the points leader and the shooting
+          var pl = (side.leaders || []).filter(function (l) { return l.name === 'points'; })[0], l0 = pl && (pl.leaders || [])[0], fg = stat(side, 'fieldGoalPct');
+          var parts = []; if (l0 && l0.athlete) parts.push(esc(l0.athlete.shortName || l0.athlete.displayName) + ' ' + esc(l0.displayValue)); if (fg != null) parts.push(Math.round(fg) + '% FG');
+          lead = parts.join(' · ');
+        }
       }
+      if (lead && ev) ev = lead + ' · ' + ev; else ev = lead || ev;
+      evs.push(!!ev);
       return teamCell(side, team, col(side), extra) + '<span class="bug-score">' + esc(side.score || 0) + '</span><span class="bug-ev">' + ev + '</span>';
     });
     var b = document.createElement('div'); b.className = 'tf-bug is-generic'; b.title = detail;
-    var anyEv = Object.keys(goals).length || (sport === 'football' && !final && (s.possession || typeof s.homeTimeouts === 'number')); // nothing to put beside the scores: the bug is just the rows
+    var anyEv = evs.some(Boolean); // nothing to put beside the scores: the bug is just the rows
     b.innerHTML = (foot ? '' : '<div class="bug-top"><span class="bug-pitcher">' + esc(top) + '</span>' + (right ? '<span class="bug-pc">' + esc(right) + '</span>' : '') + '</div>') +
       '<div class="bug-grid bug-grid-2' + (anyEv ? '' : ' no-ev') + '">' + rows.join('') + '</div>' +
       (foot ? '<div class="bug-foot' + (foot.length === 1 ? ' is-pause' : '') + '">' + foot.map(function (x, i) { return '<span class="' + ['bug-per', 'bug-clock', 'bug-dd' + (redZone ? ' is-redzone' : '')][foot.length === 1 ? 0 : i] + '"' + (i === 2 && redZone ? ' title="Red zone"' : '') + '>' + esc(x) + '</span>'; }).join('') + '</div>' : '');
