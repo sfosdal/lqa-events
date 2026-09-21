@@ -1279,6 +1279,66 @@
    "url": "https://www.siff.net/cinema/in-theaters/late-fame",
    "movie": true,
    "end": "21:21:00"
+  },
+  {
+   "venue": "MoPOP",
+   "title": "The Brunch Bundle at MOPOP",
+   "date": "2026-09-20",
+   "time": "",
+   "url": "https://www.mopop.org/events/the-brunch-bundle-at-mopop-6"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "It’s Negroni Week! Sept 21-27",
+   "date": "2026-09-20",
+   "time": ""
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Sea Mar Fiestas Patrias 2026",
+   "date": "2026-09-20",
+   "time": "11:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/sea-mar-fiestas-patrias-2026-x50382",
+   "free": true,
+   "type": "community"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-20",
+   "time": "12:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "14:25:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Hope",
+   "date": "2026-09-20",
+   "time": "12:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/hope",
+   "movie": true,
+   "end": "15:25:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-20",
+   "time": "14:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "16:22:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-20",
+   "time": "17:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "18:51:00"
   }
  ]
 }
