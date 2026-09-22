@@ -64,6 +64,7 @@
   // VENUE_CAPACITY), biggest first; a venue the table doesn't know sorts
   // after the known ones, busiest first.
   var VENUE_CAPACITY = LQAFilter.VENUE_CAPACITY;
+  var CAP_BANDS = LQAFilter.CAP_BANDS;
   function venueOrder(counts) {
     return function (a, b) {
       var ca = VENUE_CAPACITY[a] || 0, cb = VENUE_CAPACITY[b] || 0;
@@ -85,17 +86,21 @@
     return null;
   }
 
-  // Kayak-style checkboxes: each filter map holds name → 'ex' for unchecked
-  // (hidden); absent = checked (shown). Everything starts checked except SIFF
-  // movies — see applyDefaultFilters.
-  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, q: '', holidays: false, soldOnly: false, month: null, showPast: false, pastFrom: null, series: [] };
+  // Three-state boxes (Steve, 2026-09-22): each filter map holds name → 'in'
+  // (checked: show these) | 'ex' (X: hide these); absent = no preference.
+  // The rule is LQAFilter.matchesFilter; no box ever changes another. The
+  // usual view starts with the small rooms and movies X'd — applyDefaultFilters.
+  var MODE_MAPS = ['venueMode', 'badgeMode', 'teamMode', 'capMode'];
+  var state = { events: [], byDate: {}, venues: [], venueMode: {}, badgeMode: {}, teamMode: {}, capMode: {}, q: '', holidays: false, soldOnly: false, month: null, showPast: false, pastFrom: null, series: [] };
 
   function modeKeys(map, mode) {
     return Object.keys(map).filter(function (k) { return map[k] === mode; });
   }
-  function setChecked(map, key, on) {
-    if (on) delete map[key]; else map[key] = 'ex';
+  function setMode(map, key, mode) { // 'in' | 'ex' | null (no preference)
+    if (mode) map[key] = mode; else delete map[key];
   }
+  function currentModes() { return { venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode, capMode: state.capMode }; }
+  function anyIncluded() { return MODE_MAPS.some(function (m) { return modeKeys(state[m], 'in').length > 0; }); }
 
   var $ = function (id) { return document.getElementById(id); };
   var pad = function (n) { return (n < 10 ? '0' : '') + n; };
@@ -286,6 +291,10 @@
   var DEFAULT_VENUES_ON = ['Climate Pledge Arena', 'Seattle Center', 'McCaw Hall', 'Lumen Field', 'T-Mobile Park', 'Seattle Rep'];
   var DEFAULT_VENUES_OFF = ['MoPOP', "Children's Theatre", 'Cornish Playhouse', 'SIFF Cinema Uptown', 'Pacific Science Center',
     'The Vera Project', 'On the Boards', 'KEXP', 'Convention Center', 'Starfire Stadium', 'Husky Stadium'];
+  // Capacity bands: LQAFilter.CAP_BANDS, a filter option each (2026-09-22:
+  // no longer a switch over the venue rows — nothing changes another box)
+  var BAND_BY_KEY = {};
+  CAP_BANDS.forEach(function (b) { BAND_BY_KEY[b.key] = b; });
   var BIG_NIGHT_SEATS = 2000; // the Capacity preset's floor; McCaw Hall (2,900) is the smallest venue in
   var PRESETS = [
     { key: 'default', label: 'Default', title: 'The big rooms — ' + DEFAULT_VENUES_ON.join(', ') + ' — every team and type except Movies',
@@ -298,18 +307,19 @@
     { key: 'big', label: 'Capacity > 2K', title: 'Only the places that hold ' + BIG_NIGHT_SEATS.toLocaleString('en-US') + ' or more — the stadiums, the arena, McCaw Hall',
       venuesOff: function () { return state.venues.filter(function (v) { return (VENUE_CAPACITY[v] || 0) < BIG_NIGHT_SEATS; }); }, typesOff: ['bar'] },
   ];
-  function applyPreset(p) {
-    state.venueMode = {}; state.badgeMode = {}; state.teamMode = {};
+  function applyPreset(p) { // a preset is X's only — nothing checked
+    state.venueMode = {}; state.badgeMode = {}; state.teamMode = {}; state.capMode = {};
     p.venuesOff().forEach(function (v) { state.venueMode[v] = 'ex'; });
     p.typesOff.forEach(function (t) { state.badgeMode[t] = 'ex'; });
     if (p.teamsOff) groupInfo('team').keys.forEach(function (t) { state.teamMode[t] = 'ex'; });
     if (p.holidays !== undefined) state.holidays = p.holidays;
-    state.soldOnly = false; // a preset is a whole state: the Sold Out & Nearly switch goes off with it (Steve, 2026-09-15)
+    state.soldOnly = false; // a preset is a whole state: the Sold Out (or Nearly) switch goes off with it (Steve, 2026-09-15)
   }
   // Does the panel's current state equal this preset? Compares what's off in
   // each group against the preset's lists (only keys the panel shows count,
   // so a saved exclusion for a venue that left the feed can't spoil a match).
   function presetMatches(p) {
+    if (anyIncluded() || modeKeys(state.capMode, 'ex').length) return false; // presets X things; a check or a band anywhere is a view of its own
     var off = function (g) {
       var gi = groupInfo(g);
       return gi.keys.filter(function (k) { return gi.map[k] === 'ex'; }).sort().join('|');
@@ -340,22 +350,19 @@
   }
   function applyDefaultFilters() {
     state.badgeMode = { movie: 'ex' };
-    state.venueMode = {};
+    state.venueMode = {}; state.teamMode = {}; state.capMode = {};
     DEFAULT_VENUES_OFF.forEach(function (v) { state.venueMode[v] = 'ex'; });
   }
+  // The one test of "the usual view" — the funnel chip, the Default chip
+  // and the view note all use it, so they can't disagree (2026-09-20).
   function isDefaultState() {
-    if (Object.keys(state.teamMode).length) return false;
-    if (state.q || state.holidays || state.soldOnly) return false;
-    var v = Object.keys(state.venueMode);
-    if (v.length !== DEFAULT_VENUES_OFF.length || !DEFAULT_VENUES_OFF.every(function (x) { return state.venueMode[x] === 'ex'; })) return false;
-    var k = Object.keys(state.badgeMode);
-    return k.length === 1 && state.badgeMode.movie === 'ex';
+    return !state.q && presetMatches(PRESETS[0]);
   }
   // Matching itself lives in filter.js so other sites filtering this feed
   // (e.g. river's Neighborhood section) can't drift from these rules.
   function filtered(list) {
     return list.filter(function (e) {
-      return LQAFilter.matchesFilter(e, { venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode, soldOnly: state.soldOnly })
+      return LQAFilter.matchesFilter(e, Object.assign(currentModes(), { soldOnly: state.soldOnly }))
         && LQAFilter.matchesSearch(e, state.q);
     });
   }
@@ -412,32 +419,32 @@
   // ---- filter panel ----
   // Kayak-style groups of checkbox rows, dropped open under the bar by the
   // funnel chip and closed by it or a click anywhere else.
-  // One panel row: [✓] name  only  count. The native checkbox stays in the
-  // DOM (visually replaced by .cb) so keyboard and screen-reader behavior
-  // come for free; "only" unchecks everything else in the group.
+  // One panel row: name  count [Show|Hide]. The two words at the row's end
+  // are a pair of buttons (Steve, 2026-09-22, third pass): Show pressed =
+  // show these, Hide pressed = never these, neither = no preference. A
+  // press on a lit word clears it; a tap on the name works Show.
   function filterRow(group, key, nameEl, count, title) {
     var row = document.createElement('div');
     row.className = 'fp-row';
-    var lab = document.createElement('label');
+    var lab = document.createElement('span');
     lab.className = 'fp-check';
     if (title) lab.title = title;
-    var input = document.createElement('input');
-    input.type = 'checkbox';
-    input.dataset[group] = key;
-    var box = document.createElement('span');
-    box.className = 'cb';
-    lab.appendChild(input); lab.appendChild(box); lab.appendChild(nameEl);
-    var only = document.createElement('button');
-    only.type = 'button';
-    only.className = 'fp-only';
-    only.dataset.group = group;
-    only.dataset.key = key;
-    only.textContent = 'only';
-    only.title = 'Show only this one';
+    var name = nameEl.textContent;
+    lab.appendChild(nameEl);
     var cnt = document.createElement('span');
     cnt.className = 'fp-count';
     cnt.textContent = count;
-    row.appendChild(lab); row.appendChild(only); row.appendChild(cnt);
+    cnt.dataset.total = count; // syncLiveCounts rewrites it as "n of N" while the rest of the filter hides some
+    var seg = document.createElement('span');
+    seg.className = 'fp-seg'; seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', name);
+    seg.dataset.group = group; seg.dataset.key = key; seg.dataset[group] = key;
+    [['in', 'Show'], ['ex', 'Hide']].forEach(function (m) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'fp-seg-b'; b.dataset.mode = m[0]; b.textContent = m[1];
+      b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', m[1] + ' ' + name);
+      seg.appendChild(b);
+    });
+    row.appendChild(lab); row.appendChild(cnt); row.appendChild(seg);
     return row;
   }
   // Panel rows are plain text: the venue / type / team colours show on the
@@ -476,20 +483,24 @@
     var upcoming = state.events.filter(function (e) { return e.date >= today; });
     var pv = $('panelVenues'), pt = $('panelVenuesTown');
     pv.innerHTML = ''; pt.innerHTML = '';
-    state.venues.forEach(function (v) {
-      var n = upcoming.filter(function (e) { return e.venue === v; }).length;
-      var cap = VENUE_CAPACITY[v];
-      (venueArea(v) === 'town' ? pt : pv).appendChild(filterRow('venue', v, venueName(v), n, cap ? 'Holds about ' + cap.toLocaleString('en-US') : undefined));
-    });
-    var pt = $('panelTeams');
-    pt.innerHTML = '';
-    TEAMS.forEach(function (t) {
+    // a team's row
+    function teamRow(t) {
       var name = document.createElement('span');
       name.className = 'fp-name';
       name.appendChild(extLink(t.label, t.schedule, t.label + ' schedule'));
       var n = upcoming.filter(function (e) { return t.re.test(e.title || ''); }).length;
-      pt.appendChild(filterRow('team', t.slug, name, n, t.label + ' home games'));
+      return filterRow('team', t.slug, name, n, t.label + ' home games');
+    }
+    state.venues.forEach(function (v) {
+      var n = upcoming.filter(function (e) { return e.venue === v; }).length;
+      var cap = VENUE_CAPACITY[v];
+      var list = venueArea(v) === 'town' ? pt : pv;
+      list.appendChild(filterRow('venue', v, venueName(v), n, cap ? 'Holds about ' + cap.toLocaleString('en-US') : undefined));
     });
+    // capacity bands keep their state, rule and share-code slots but no panel rows (Steve, 2026-09-22: "we do not need a specific capacity section")
+    var pt = $('panelTeams');
+    pt.innerHTML = '';
+    TEAMS.forEach(function (t) { pt.appendChild(teamRow(t)); });
     var pb = $('panelBadges');
     pb.innerHTML = '';
     TYPE_LIST.forEach(function (t) {
@@ -499,19 +510,17 @@
     syncFilters();
     syncPresets(); // the chips are new; light the one that matches
   }
-  // Every checkbox in the panel syncs from state in one pass, so presets and
-  // "only" land in the same place.
+  // Every box in the panel syncs from state in one pass, so presets, the
+  // sheet's chips and Undo all land in the same place. Each row shows its
+  // own state and nothing else: no dashes, no greying (Steve, 2026-09-22).
   function syncFilters() {
     syncPresets();
-    document.querySelectorAll('input[data-venue]').forEach(function (c) {
-      c.checked = state.venueMode[c.dataset.venue] !== 'ex';
+    document.querySelectorAll('#filterPanel .fp-seg[data-group]').forEach(function (seg) {
+      var mode = state[GROUP_MAP[seg.dataset.group]][seg.dataset.key] || '';
+      seg.dataset.mode = mode;
+      seg.querySelectorAll('.fp-seg-b').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === mode ? 'true' : 'false'); });
     });
-    document.querySelectorAll('input[data-badge]').forEach(function (c) {
-      c.checked = state.badgeMode[c.dataset.badge] !== 'ex';
-    });
-    document.querySelectorAll('input[data-team]').forEach(function (c) {
-      c.checked = state.teamMode[c.dataset.team] !== 'ex';
-    });
+    syncLiveCounts();
     $('holidaysToggle').checked = state.holidays;
     $('soldOnlyToggle').checked = state.soldOnly;
     if ($('searchBox').value.trim() !== state.q) $('searchBox').value = state.q;
@@ -521,7 +530,7 @@
   // Filter choices persist per-browser (no login — just localStorage).
   function saveFilters() {
     try {
-      localStorage.setItem('lqa-filters', JSON.stringify({ v: 3, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode, hol: state.holidays, so: state.soldOnly }));
+      localStorage.setItem('lqa-filters', JSON.stringify({ v: 4, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode, caps: state.capMode, hol: state.holidays, so: state.soldOnly }));
     } catch (e) { /* private mode etc. — filters just won't persist */ }
   }
   function loadFilters() {
@@ -530,12 +539,14 @@
     if (raw == null) { applyDefaultFilters(); return; } // first visit
     try {
       var s = JSON.parse(raw);
-      if (s.v === 3 || s.v === 2) {
-        // v2 was the tri-state era: its 'in' entries have no checkbox
-        // equivalent and are dropped; 'ex' carries over as unchecked.
-        Object.keys(s.venues || {}).forEach(function (v) { if (s.venues[v] === 'ex') state.venueMode[v] = 'ex'; });
-        Object.keys(s.badges || {}).forEach(function (k) { if (TYPE_KEYS[k] && s.badges[k] === 'ex') state.badgeMode[k] = 'ex'; });
-        Object.keys(s.teams || {}).forEach(function (k) { if (TEAM_BY_SLUG[k] && s.teams[k] === 'ex') state.teamMode[k] = 'ex'; });
+      if (s.v === 4 || s.v === 3 || s.v === 2) {
+        // v4 is the three-state panel; v3 (two-state) and v2 (the first
+        // tri-state) hold the same 'in' / 'ex' words, so all three load alike
+        var ok = function (m) { return m === 'in' || m === 'ex' ? m : null; };
+        Object.keys(s.venues || {}).forEach(function (v) { if (ok(s.venues[v])) state.venueMode[v] = s.venues[v]; });
+        Object.keys(s.badges || {}).forEach(function (k) { if (TYPE_KEYS[k] && ok(s.badges[k])) state.badgeMode[k] = s.badges[k]; });
+        Object.keys(s.teams || {}).forEach(function (k) { if (TEAM_BY_SLUG[k] && ok(s.teams[k])) state.teamMode[k] = s.teams[k]; });
+        Object.keys(s.caps || {}).forEach(function (k) { if (BAND_BY_KEY[k] && ok(s.caps[k])) state.capMode[k] = s.caps[k]; });
         // a ?h=1 / ?so=1 link sets these before the saved prefs load — keep them
         state.holidays = state.holidays || !!s.hol;
         state.soldOnly = state.soldOnly || !!s.so;
@@ -561,103 +572,144 @@
     state.venueMode = parsed.venueMode;
     state.badgeMode = parsed.badgeMode;
     state.teamMode = parsed.teamMode;
+    state.capMode = parsed.capMode || {};
     return true;
   }
   // a filter change also rewinds the agenda to its first page
-  function applyFilters() { syncFilters(); renderCal(); renderAgenda(); renderBoard(); updateSubscribe(); saveFilters(); }
+  function applyFilters() { syncFilters(); renderViewNote(); renderCal(); renderAgenda(); renderBoard(); updateSubscribe(); saveFilters(); }
+  // ---- the view note (2026-09-20, for readers who never open the panel) ----
+  // One plain line above the list while the view is not the usual one: the
+  // preset's name when one matches, else what is hidden or added compared
+  // with the usual view ("Also hiding Kraken games and McCaw Hall · Also
+  // showing MoPOP"), the search and the sold-out switch named too. A button
+  // takes the view back. Nothing shows in the usual view.
+  var PRESET_PHRASE = { all: 'Showing everything.', none: 'Showing nothing yet — open Filter and pick some venues.', neighborhood: 'Showing the neighborhood only, no stadiums.', big: 'Showing the big rooms only — the arena, the stadiums, McCaw Hall.' };
+  function listWords(items) { // "a", "a and b", "a, b and c", "a, b and 3 more"
+    if (items.length <= 3) return items.length < 2 ? items.join('') : items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
+    return items.slice(0, 2).join(', ') + ' and ' + (items.length - 2) + ' more';
+  }
+  function describeView() {
+    var parts = [];
+    var preset = PRESETS.filter(function (p) { return p.key !== 'default' && presetMatches(p); })[0];
+    if (preset) parts.push(PRESET_PHRASE[preset.key] || 'Showing ' + preset.label + '.');
+    else {
+      // the checks: what the view is narrowed to
+      var only = [], kinds = [];
+      state.venues.forEach(function (v) { if (state.venueMode[v] === 'in') only.push(v); });
+      CAP_BANDS.forEach(function (b) { if (state.capMode[b.key] === 'in') only.push(b.label.toLowerCase()); });
+      TEAMS.forEach(function (t) { if (state.teamMode[t.slug] === 'in') only.push(t.label + ' games'); });
+      TYPE_LIST.forEach(function (t) { if (state.badgeMode[t.key] === 'in') kinds.push(t.label.toLowerCase()); });
+      if (only.length) parts.push('Only ' + listWords(only) + '.');
+      if (kinds.length) parts.push('Just ' + listWords(kinds) + '.');
+      // the X's, compared with the usual view
+      var hiding = [], showing = [];
+      state.venues.forEach(function (v) {
+        var off = state.venueMode[v] === 'ex', usual = DEFAULT_VENUES_OFF.indexOf(v) < 0;
+        if (off && usual) hiding.push(v); else if (!off && !usual && !only.length) showing.push(v);
+      });
+      CAP_BANDS.forEach(function (b) { if (state.capMode[b.key] === 'ex') hiding.push(b.label.toLowerCase()); });
+      TEAMS.forEach(function (t) { if (state.teamMode[t.slug] === 'ex') hiding.push(t.label + ' games'); });
+      TYPE_LIST.forEach(function (t) {
+        var off = state.badgeMode[t.key] === 'ex';
+        if (off && t.key !== 'movie') hiding.push(t.label.toLowerCase()); else if (!off && t.key === 'movie' && !kinds.length && !only.length) showing.push('movies');
+      });
+      if (hiding.length) parts.push((only.length || kinds.length ? 'Hiding ' : 'Also hiding ') + listWords(hiding) + '.');
+      if (showing.length) parts.push('Also showing ' + listWords(showing) + '.');
+    }
+    if (state.soldOnly) parts.push('Sold out and nearly sold out only.');
+    if (state.q) parts.push('Matching \u201c' + state.q + '\u201d.');
+    return parts.join(' ');
+  }
+  function renderViewNote() {
+    var note = $('viewNote'), text = describeView();
+    var usual = isDefaultState() || (!text);
+    note.hidden = usual;
+    if (!usual) $('viewNoteText').textContent = text;
+  }
+  $('viewNoteReset').addEventListener('click', function () {
+    applyPreset(PRESETS[0]); state.q = ''; $('searchBox').value = '';
+    applyFilters();
+  });
+  // ---- the toast: a word after hiding something from the sheet, with Undo ----
+  var toastTimer = null, toastUndo = null;
+  function showToast(text, undo) {
+    var t = $('toast'); $('toastText').textContent = text; toastUndo = undo || null;
+    $('toastUndo').hidden = !undo;
+    t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, 7000);
+  }
+  function hideToast() { $('toast').hidden = true; toastUndo = null; clearTimeout(toastTimer); }
+  $('toastUndo').addEventListener('click', function () { if (toastUndo) toastUndo(); hideToast(); });
+  // a snapshot of the three maps, for Undo
+  function filterSnapshot() {
+    var snap = {};
+    MODE_MAPS.forEach(function (m) { snap[m] = JSON.parse(JSON.stringify(state[m])); });
+    return snap;
+  }
+  function restoreSnapshot(snap) { MODE_MAPS.forEach(function (m) { state[m] = snap[m] || {}; }); applyFilters(); }
 
-  // Each group's map and full key list, for "only" and Select/Clear all.
+  // Each group's map and full key list, for the presets and All / None.
+  var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode', cap: 'capMode' };
   function groupInfo(g) {
     if (g === 'venue') return { map: state.venueMode, keys: state.venues.slice() };
     if (g === 'team') return { map: state.teamMode, keys: TEAMS.map(function (t) { return t.slug; }) };
+    if (g === 'cap') return { map: state.capMode, keys: CAP_BANDS.map(function (b) { return b.key; }) };
     return { map: state.badgeMode, keys: TYPE_LIST.map(function (t) { return t.key; }) };
   }
-  function ensureTeamVenue(slug) {
-    var t = TEAM_BY_SLUG[slug];
-    if (t && t.venue) setChecked(state.venueMode, t.venue, true);
+  // The sheet's Only Venue: this venue checked and no other check in the
+  // "where" groups, every event type welcome — so the list is exactly what's
+  // on there. X's on other venues stay (they hide nothing here anyway).
+  function onlyVenue(v) {
+    ['venueMode', 'teamMode', 'capMode'].forEach(function (m) { modeKeys(state[m], 'in').forEach(function (k) { delete state[m][k]; }); });
+    state.badgeMode = {};
+    state.venueMode[v] = 'in';
   }
-  // Team exclusion alone only drops a few teams' games — everything else
-  // (concerts, arts, festivals, other venues) passes right through, since
-  // matchesFilter's team check only fires for events matching an excluded
-  // team's regex. So "only Reign" has to isolate venue and event-type too,
-  // not just the team: the team's home venue is the only one that can host
-  // its games, and a home game always classifies as 'sports'.
-  function onlyTeam(slug) {
-    var t = TEAM_BY_SLUG[slug];
-    TEAMS.forEach(function (x) { state.teamMode[x.slug] = 'ex'; });
-    delete state.teamMode[slug];
-    if (t && t.venue) {
-      state.venues.forEach(function (v) { state.venueMode[v] = 'ex'; });
-      delete state.venueMode[t.venue];
-    }
-    TYPE_LIST.forEach(function (ty) { state.badgeMode[ty.key] = 'ex'; });
-    delete state.badgeMode.sports;
-  }
-  // The venue counterpart: keep the teams that play there, and the event
-  // types that actually occur there (a venue with nothing upcoming leaves
-  // the types alone — there's nothing to narrow to).
-  // And the type counterpart: keep the venues that host that type (from the
-  // upcoming events) and, for Sports, the teams with upcoming games; any
-  // other type drops every team (their games are all Sports anyway).
-  function onlyType(key) {
-    TYPE_LIST.forEach(function (ty) { state.badgeMode[ty.key] = 'ex'; });
-    delete state.badgeMode[key];
+  // A row's count reads "n of N" once the rest of the filter hides some of
+  // its events — the venue rows show what the Event Type line took away
+  // (SIFF "0 of 66" with Movies X'd), the type rows what the venues took
+  // away. An X'd row keeps its plain total.
+  function syncLiveCounts() {
     var today = todayStr();
-    var upcoming = state.events.filter(function (e) { return e.date >= today && eventType(e) === key; });
-    var venuesHosting = {};
-    upcoming.forEach(function (e) { venuesHosting[e.venue] = true; });
-    if (upcoming.length) {
-      state.venues.forEach(function (v) { setChecked(state.venueMode, v, !!venuesHosting[v]); });
-    }
-    TEAMS.forEach(function (t) {
-      var plays = key === 'sports' && upcoming.some(function (e) { return t.re.test(e.title || ''); });
-      setChecked(state.teamMode, t.slug, plays);
+    var mode = currentModes();
+    var upcoming = state.events.filter(function (e) { return e.date >= today; });
+    var passing = upcoming.filter(function (e) { return LQAFilter.matchesFilter(e, mode); });
+    document.querySelectorAll('#filterPanel .fp-row').forEach(function (row) {
+      var b = row.querySelector('.fp-seg[data-group]'), cnt = row.querySelector('.fp-count');
+      if (!b || !cnt || cnt.dataset.total == null) return;
+      var total = Number(cnt.dataset.total), key = b.dataset.key, n;
+      var off = state[GROUP_MAP[b.dataset.group]][key] === 'ex';
+      if (b.dataset.group === 'venue') n = passing.filter(function (e) { return e.venue === key; }).length;
+      else if (b.dataset.group === 'badge') n = passing.filter(function (e) { return eventType(e) === key; }).length;
+      else if (b.dataset.group === 'cap') n = passing.filter(function (e) { return LQAFilter.bandOf(e.venue) === key; }).length;
+      else { var t = TEAM_BY_SLUG[key]; n = t ? passing.filter(function (e) { return t.re.test(e.title || ''); }).length : total; }
+      if (!off && n < total) { cnt.textContent = ''; cnt.appendChild(document.createTextNode(String(n))); var sm = document.createElement('small'); sm.textContent = ' of ' + total; cnt.appendChild(sm); }
+      else cnt.textContent = String(total);
     });
   }
-  function onlyVenue(v, everything) { // everything: every type and every club on, so nothing at the venue is hidden (the event sheet's Only)
-    state.venues.forEach(function (x) { state.venueMode[x] = 'ex'; });
-    delete state.venueMode[v];
-    TEAMS.forEach(function (t) { setChecked(state.teamMode, t.slug, everything || t.venue === v); });
-    if (everything) { TYPE_LIST.forEach(function (ty) { setChecked(state.badgeMode, ty.key, ty.key !== 'bar'); }); return; } // every type but the bars' nights, which are not at the venue
-    var today = todayStr();
-    var present = {};
-    state.events.forEach(function (e) { if (e.venue === v && e.date >= today) present[eventType(e)] = true; });
-    if (Object.keys(present).length) {
-      TYPE_LIST.forEach(function (ty) { setChecked(state.badgeMode, ty.key, !!present[ty.key]); });
-    }
-  }
-  // Panel checkboxes drive state through the native change event…
-  document.addEventListener('change', function (e) {
-    var c = e.target;
-    if (!(c instanceof HTMLInputElement) || c.type !== 'checkbox') return;
-    if (c.dataset.venue != null) { setChecked(state.venueMode, c.dataset.venue, c.checked); applyFilters(); }
-    else if (c.dataset.badge != null) { setChecked(state.badgeMode, c.dataset.badge, c.checked); applyFilters(); }
-    else if (c.dataset.team != null) {
-      setChecked(state.teamMode, c.dataset.team, c.checked);
-      if (c.checked) ensureTeamVenue(c.dataset.team);
-      applyFilters();
-    }
-  });
-  // …while the "only" links and group links are buttons.
+  // A press on a row's Show or Hide sets that one option to it, or clears
+  // it if it was already lit; a tap on the name works Show. Nothing else
+  // moves (Steve, 2026-09-22: "don't auto check or uncheck any filters").
+  // The name's outbound link still just follows the link.
   document.addEventListener('click', function (e) {
-    var ab = e.target.closest('.fp-set'); // a group's All / None (Steve, 2026-09-14)
-    if (ab) {
-      var on = ab.dataset.on === '1', scope = ab.dataset.scope;
-      if (scope === 'campus' || scope === 'town') state.venues.forEach(function (v) { if ((venueArea(v) === 'town') === (scope === 'town')) setChecked(state.venueMode, v, on); });
-      else if (scope === 'team') TEAMS.forEach(function (t) { setChecked(state.teamMode, t.slug, on); });
-      else TYPE_LIST.forEach(function (t) { setChecked(state.badgeMode, t.key, on); });
+    var sb = e.target.closest('#filterPanel .fp-seg-b'), want = 'in', seg;
+    if (sb) { seg = sb.closest('.fp-seg'); want = sb.dataset.mode; }
+    else {
+      var chk = e.target.closest('#filterPanel .fp-check');
+      if (chk && !e.target.closest('a')) seg = chk.closest('.fp-row').querySelector('.fp-seg[data-group]');
+    }
+    if (seg) {
+      var map = state[GROUP_MAP[seg.dataset.group]];
+      setMode(map, seg.dataset.key, map[seg.dataset.key] === want ? null : want);
       applyFilters();
       return;
     }
-    var o = e.target.closest('.fp-only');
-    if (o) {
-      if (o.dataset.group === 'team') {
-        onlyTeam(o.dataset.key);
-      } else if (o.dataset.group === 'venue') {
-        onlyVenue(o.dataset.key);
-      } else {
-        onlyType(o.dataset.key);
-      }
+    var ab = e.target.closest('.fp-set[data-scope]'); // a group's Show All / Hide All (Steve, 2026-09-14): every row in it set to Show, or every one to Hide
+    if (ab) {
+      var mode = ab.dataset.on === '1' ? 'in' : 'ex', scope = ab.dataset.scope;
+      if (scope === 'campus' || scope === 'town') state.venues.forEach(function (v) { if ((venueArea(v) === 'town') === (scope === 'town')) setMode(state.venueMode, v, mode); });
+      else if (scope === 'team') TEAMS.forEach(function (t) { setMode(state.teamMode, t.slug, mode); });
+      else if (scope === 'cap') CAP_BANDS.forEach(function (b) { setMode(state.capMode, b.key, mode); });
+      else TYPE_LIST.forEach(function (t) { setMode(state.badgeMode, t.key, mode); });
       applyFilters();
       return;
     }
@@ -3158,11 +3210,17 @@
       w.appendChild(b); w.appendChild(document.createTextNode(watch[k[0]].join(', ')));
     });
     w.hidden = !w.childNodes.length;
-    var t = $('sheetTickets'); t.href = e.url || '#'; t.hidden = !e.url;
-    var v = $('sheetVenueLink'); v.href = VENUE_URL[e.venue] || '#'; v.hidden = !VENUE_URL[e.venue]; v.textContent = 'What\u2019s on at ' + e.venue + ' \u2197'; // the venue's own calendar
-    var ov = $('sheetOnlyVenue'); ov.textContent = 'Only ' + e.venue; ov.hidden = state.venues.indexOf(e.venue) < 0 || eventType(e) === 'bar'; ov.dataset.venue = e.venue; // the filter, narrowed to this venue (bars are a type, not a venue)
+    // Tickets — only where there are tickets to buy. A bar night's link is the
+    // bar's events page (the venue chip below already goes there), so no chip;
+    // a free event's link is its details page, so the chip says so (Steve, 2026-09-21)
+    var t = $('sheetTickets'); t.href = e.url || '#'; t.hidden = !e.url || eventType(e) === 'bar';
+    t.textContent = e.free ? 'Details \u00b7 Free' : 'Tickets';
+    var v = $('sheetVenueLink'); v.href = VENUE_URL[e.venue] || '#'; v.hidden = !VENUE_URL[e.venue]; v.textContent = 'Venue Site \u2197'; v.title = 'What\u2019s on at ' + e.venue; // the venue's own calendar (short: the name is the sheet's eyebrow — Steve, 2026-09-21)
+    var ov = $('sheetOnlyVenue'); ov.textContent = 'Only Venue'; ov.title = 'Only ' + e.venue; ov.hidden = state.venues.indexOf(e.venue) < 0 || eventType(e) === 'bar'; ov.dataset.venue = e.venue; // the filter, narrowed to this venue (bars are a type, not a venue)
     var team = TEAMS.filter(function (t) { return t.re.test(e.title || '') && t.venue === e.venue; })[0]; // a home game: the club's season, in the Teams view
-    var tb = $('sheetTeam'); tb.hidden = !team; if (team) { tb.textContent = team.label + ' season'; tb.dataset.slug = team.slug; }
+    var tb = $('sheetTeam'); tb.hidden = !team; if (team) { tb.textContent = 'Season'; tb.title = team.label + ' season, in the Teams view'; tb.dataset.slug = team.slug; }
+    var hv = $('sheetHideVenue'); hv.textContent = 'Hide Venue'; hv.title = 'Hide ' + e.venue; hv.hidden = ov.hidden; hv.dataset.venue = e.venue;
+    var ht = $('sheetHideTeam'); ht.hidden = !team; if (team) { ht.textContent = 'Hide ' + team.label; ht.title = 'Hide ' + team.label + ' home games'; ht.dataset.slug = team.slug; }
     var phone = matchMedia(sheetTouch).matches;
     var sheet = $('sheet');
     sheetAnchor = anchor || null; sheetPoint = point && (point.x || point.y) ? point : null;
@@ -3182,12 +3240,24 @@
     document.body.classList.remove('sheet-open');
   }
   $('sheetClose').addEventListener('click', closeSheet);
-  $('sheetOnlyVenue').addEventListener('click', function () { // the events list, narrowed to this venue with everything at it showing
-    var v = this.dataset.venue; closeSheet();
+  $('sheetOnlyVenue').addEventListener('click', function () { // the events list, narrowed to this venue with everything at it showing — with a way back, like Hide
+    var v = this.dataset.venue, snap = filterSnapshot(); closeSheet();
     if (!$('teamsView').hidden) setTeamsView(null, true);
-    onlyVenue(v, true); applyFilters();
+    onlyVenue(v); applyFilters();
+    showToast('Only ' + v, function () { restoreSnapshot(snap); });
   });
   $('sheetTeam').addEventListener('click', function () { var slug = this.dataset.slug; closeSheet(); setTeamsView(slug, true); });
+  $('sheetHideVenue').addEventListener('click', function () { // this venue off, with a way back
+    var v = this.dataset.venue, snap = filterSnapshot(); closeSheet();
+    setMode(state.venueMode, v, 'ex'); applyFilters();
+    showToast(v + ' hidden', function () { restoreSnapshot(snap); });
+  });
+  $('sheetHideTeam').addEventListener('click', function () { // this club's home games off (the venue stays), with a way back
+    var t = TEAM_BY_SLUG[this.dataset.slug], snap = filterSnapshot(); closeSheet();
+    if (!t) return;
+    setMode(state.teamMode, t.slug, 'ex'); applyFilters();
+    showToast(t.label + ' games hidden', function () { restoreSnapshot(snap); });
+  });
   $('sheetBack').addEventListener('click', closeSheet);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('sheet').hidden) closeSheet(); });
   // a click anywhere outside the pop closes it (the opening click never gets
@@ -3218,7 +3288,7 @@
     });
   }
   $('copyFilterLink').addEventListener('click', function () {
-    var code = LQAFilter.encodeFilterCode({ venueMode: state.venueMode, badgeMode: state.badgeMode, teamMode: state.teamMode });
+    var code = LQAFilter.encodeFilterCode(currentModes());
     var url = location.origin + location.pathname + '?f=' + code;
     if (state.q) url += '&s=' + LQAFilter.encodeSearch(state.q);
     if (state.holidays) url += '&h=1';
@@ -3844,6 +3914,7 @@
       return;
     }
     var filteredFile = null;
+    if (anyIncluded() || modeKeys(state.capMode, 'ex').length) { $('subFilterRow').hidden = true; setSubscribeFile('events.ics'); return; } // a checked box or an X'd band: no ready-made feed matches
     var vEx = modeKeys(state.venueMode, 'ex');
     var bEx = modeKeys(state.badgeMode, 'ex');
     var tEx = modeKeys(state.teamMode, 'ex');

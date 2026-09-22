@@ -122,6 +122,7 @@
     'Climate Pledge Arena': 18100, 'Seattle Center': 10000, 'McCaw Hall': 2900, 'Seattle Rep': 850,
     'MoPOP': 800, "Children's Theatre": 480, 'Cornish Playhouse': 460, 'SIFF Cinema Uptown': 450,
     'Pacific Science Center': 400, 'The Vera Project': 300, 'On the Boards': 300, 'KEXP': 200,
+    'Starfire Stadium': 4500, // the Seawolves' ground in Tukwila
   };
 
   // Ticket state from the feed's `tickets` and `soldOut`: 'soldout' (the box
@@ -136,6 +137,21 @@
     return t.box <= (cap ? Math.ceil(cap * 0.05) : 100) ? 'nearly' : '';
   }
 
+  // Capacity bands (Steve, 2026-09-20): four house-size ranges over
+  // VENUE_CAPACITY, a filter option each. A venue with no capacity on file
+  // counts as a small room.
+  var CAP_BANDS = [
+    { key: 'stadium', label: 'Stadiums', note: '40K+', min: 40000, max: Infinity },
+    { key: 'arena', label: 'Arenas & Grounds', note: '5K\u201340K', min: 5000, max: 40000 },
+    { key: 'hall', label: 'Halls', note: '800\u20135K', min: 800, max: 5000 },
+    { key: 'room', label: 'Small Rooms', note: 'under 800', min: 0, max: 800 },
+  ];
+  function bandOf(venue) {
+    var c = VENUE_CAPACITY[venue] || 0;
+    for (var i = 0; i < CAP_BANDS.length; i++) if (c >= CAP_BANDS[i].min && c < CAP_BANDS[i].max) return CAP_BANDS[i].key;
+    return 'room';
+  }
+
   // The campus venues walk a crowd past Lower Queen Anne; these three are a
   // bus ride away and listed for their size (a venue missing here is campus).
   var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town', 'Starfire Stadium': 'town', 'Husky Stadium': 'town' };
@@ -144,35 +160,47 @@
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
 
-  // Purely subtractive: everything shows until unchecked. An unchecked venue
-  // drops its events, an unchecked team drops its home games, and an
-  // unchecked type drops every event inferred into it.
+  // Three states per option (Steve, 2026-09-22): checked = 'in', X = 'ex',
+  // absent = no preference. An X always hides. Checks in the "where" groups
+  // (venues, capacity bands, teams) add up: once any is checked, only events
+  // matching one of them show. Checked event types then narrow that to those
+  // kinds. Nothing checked anywhere = everything but the X's. No option ever
+  // changes another.
   function matchesFilter(e, mode) {
     mode = mode || {};
-    var venueMode = mode.venueMode || {};
-    var badgeMode = mode.badgeMode || {};
-    var teamMode = mode.teamMode || {};
+    var venueMode = mode.venueMode || {}, badgeMode = mode.badgeMode || {}, teamMode = mode.teamMode || {}, capMode = mode.capMode || {};
+    var band = bandOf(e.venue), type = eventType(e), title = e.title || '';
     if (venueMode[e.venue] === 'ex') return false;
-    if (badgeMode[eventType(e)] === 'ex') return false;
-    if (mode.soldOnly && !ticketState(e)) return false; // the "Sold Out & Nearly" switch: only those
-    var title = e.title || '';
-    for (var slug in teamMode) {
-      if (teamMode[slug] === 'ex' && TEAM_BY_SLUG[slug] && TEAM_BY_SLUG[slug].re.test(title)) return false;
+    if (capMode[band] === 'ex') return false;
+    if (badgeMode[type] === 'ex') return false;
+    if (mode.soldOnly && !ticketState(e)) return false; // the "Sold Out (or Nearly)" switch: only those
+    var k, anyWhere = false, hitWhere = false, anyType = false;
+    for (k in teamMode) {
+      if (teamMode[k] === 'ex' && TEAM_BY_SLUG[k] && TEAM_BY_SLUG[k].re.test(title)) return false;
+      if (teamMode[k] === 'in') { anyWhere = true; if (TEAM_BY_SLUG[k] && TEAM_BY_SLUG[k].re.test(title)) hitWhere = true; }
     }
-    return true;
+    for (k in venueMode) if (venueMode[k] === 'in') { anyWhere = true; if (k === e.venue) hitWhere = true; }
+    for (k in capMode) if (capMode[k] === 'in') { anyWhere = true; if (k === band) hitWhere = true; }
+    if (anyWhere && !hitWhere) return false;
+    for (k in badgeMode) if (badgeMode[k] === 'in') { anyType = true; if (k === type) return true; }
+    return !anyType;
   }
 
   // Compact filter code <-> filter state, for share links (?f=CODE).
   // REGISTRY is every filterable key in a fixed order; the code is the set of
-  // EXCLUDED entries as a bitmask written in upper-case base 36, zero-padded
-  // to CODE_LENGTH characters ("000000" means everything shown); parsing
-  // accepts either case. Append-only:
+  // EXCLUDED (X) entries as a bitmask written in upper-case base 36,
+  // zero-padded to CODE_LENGTH characters ("000000" means everything shown);
+  // parsing accepts either case. Since the three-state panel (2026-09-22) a
+  // view with checked entries writes a second mask after a dot — "EX.IN" —
+  // and a code without the dot is the old kind, X's only. Append-only:
   // adding an entry adds a bit and every existing code keeps meaning what it
-  // meant. Six base-36 digits hold 31 bits, so the registry can grow to 31
-  // entries before CODE_LENGTH needs a bump (old, shorter codes still parse).
+  // meant. Eight base-36 digits hold 41 bits, so the registry can grow to 41
+  // entries before CODE_LENGTH needs a bump (old, shorter codes still parse —
+  // 6 → 7 on 2026-09-20 for Starfire and the Seawolves, 7 → 8 on 2026-09-22
+  // for the capacity bands).
   // A venue the feed turns up that isn't listed here can't be encoded and
   // drops out of the link.
-  var CODE_LENGTH = 6;
+  var CODE_LENGTH = 8;
   var REGISTRY = [
     ['venue', 'Climate Pledge Arena'], ['venue', 'McCaw Hall'], ['venue', 'Seattle Center'],
     ['venue', 'Cornish Playhouse'], ['venue', 'The Vera Project'], ['venue', 'SIFF Cinema Uptown'],
@@ -186,24 +214,32 @@
     ['badge', 'bar'],
     ['venue', 'Husky Stadium'], ['team', 'huskies'],
     ['venue', 'Seattle Rep'],
+    ['venue', 'Starfire Stadium'], ['team', 'seawolves'],
+    ['cap', 'stadium'], ['cap', 'arena'], ['cap', 'hall'], ['cap', 'room'],
   ];
-  var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode' };
-  function encodeFilterCode(mode) {
+  var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode', cap: 'capMode' };
+  function maskOf(mode, which) {
     var mask = 0;
     REGISTRY.forEach(function (entry, i) {
       var map = mode[GROUP_MAP[entry[0]]] || {};
-      if (map[entry[1]] === 'ex') mask += Math.pow(2, i);
+      if (map[entry[1]] === which) mask += Math.pow(2, i);
     });
     var code = mask.toString(36).toUpperCase();
     while (code.length < CODE_LENGTH) code = '0' + code;
     return code;
   }
+  function encodeFilterCode(mode) {
+    var ex = maskOf(mode, 'ex'), inn = maskOf(mode, 'in');
+    return /^0+$/.test(inn) ? ex : ex + '.' + inn;
+  }
   function parseFilterCode(code) {
-    var mode = { venueMode: {}, badgeMode: {}, teamMode: {} };
-    var mask = parseInt(code, 36);
-    if (isNaN(mask) || mask < 0) return null;
+    var mode = { venueMode: {}, badgeMode: {}, teamMode: {}, capMode: {} };
+    var parts = String(code).split('.');
+    var masks = [parseInt(parts[0], 36), parts.length > 1 ? parseInt(parts[1], 36) : 0];
+    if (masks.some(function (m) { return isNaN(m) || m < 0; })) return null;
     REGISTRY.forEach(function (entry, i) {
-      if (Math.floor(mask / Math.pow(2, i)) % 2 === 1) mode[GROUP_MAP[entry[0]]][entry[1]] = 'ex';
+      if (Math.floor(masks[0] / Math.pow(2, i)) % 2 === 1) mode[GROUP_MAP[entry[0]]][entry[1]] = 'ex';
+      else if (Math.floor(masks[1] / Math.pow(2, i)) % 2 === 1) mode[GROUP_MAP[entry[0]]][entry[1]] = 'in';
     });
     return mode;
   }
@@ -535,6 +571,8 @@
     VENUE_ICON: VENUE_ICON,
     VENUE_COLOR: VENUE_COLOR,
     VENUE_CAPACITY: VENUE_CAPACITY,
+    CAP_BANDS: CAP_BANDS,
+    bandOf: bandOf,
     VENUE_AREA: VENUE_AREA,
     slugify: slugify,
     eventType: eventType,

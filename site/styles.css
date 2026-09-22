@@ -122,7 +122,35 @@ h1 {
   line-height: .92; text-transform: uppercase; letter-spacing: .01em; margin: 0;
 }
 .masthead-text { min-width: 0; max-width: 100%; } /* a flex item would grow to its widest line and push past a phone's edge */
-.masthead .eyebrow { font-size: calc(clamp(2.6rem, 7vw, 4.2rem) * .5); font-weight: 500; letter-spacing: .14em; margin-bottom: .1rem; line-height: 1; } /* "Seattle": half the title's size (Steve, 2026-09-16: twice the quarter it was), a shade bolder */
+/* the mark and the name as one thing: the mark stretches to the text's
+   height (eyebrow + title) and keeps square, in the footer mark's white */
+.masthead { --mast-title: clamp(2.6rem, 7vw, 4.2rem); } /* the title's size; the eyebrow and the mark are cut from it */
+.masthead h1 { font-size: var(--mast-title); }
+/* the picture (Steve, 2026-09-21: line art, the Needle's crown the focus):
+   the top of the Space Needle from the Highsmith aerial, traced to single
+   smooth lines at build (a gradient-magnitude pass over the photo, see the
+   memory note), a 4.4:1 window with the crown at 55% of the width. The
+   drawing is a luminance mask (masthead-lines.png, white = line) over a box
+   of ink, so the lines are the palette's own ink in either theme. A band
+   behind the masthead, the Needle toward the right, dissolving into the page
+   on every side — no hard edge where the art stops (Steve, 2026-09-21) */
+.masthead { min-height: 11rem; overflow: hidden; isolation: isolate; } /* a slim band (Steve, 2026-09-20: minimal) */
+.masthead-photo { /* the right half, pinned to the top of the band so the Needle's crown always shows with sky over it */
+  position: absolute; top: 0; right: 0; bottom: 0; z-index: -1; width: 52%; height: 100%;
+  background: var(--ink); pointer-events: none;
+  opacity: .6;
+  -webkit-mask-image: url(masthead-lines.png), linear-gradient(to right, transparent 0%, #000 35%, #000 78%, transparent 100%), linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
+  mask-image: url(masthead-lines.png), linear-gradient(to right, transparent 0%, #000 35%, #000 78%, transparent 100%), linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
+  -webkit-mask-size: cover, 100% 100%, 100% 100%; mask-size: cover, 100% 100%, 100% 100%;
+  -webkit-mask-position: 50% 0%, 0 0, 0 0; mask-position: 50% 0%, 0 0, 0 0;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  mask-mode: luminance, alpha, alpha;
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+:root[data-theme="light"] .masthead-photo { opacity: .5; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .masthead-photo { opacity: .5; } }
+.masthead-text { position: relative; }
+.masthead .eyebrow { font-size: calc(var(--mast-title) * .5); font-weight: 500; letter-spacing: .14em; margin-bottom: .1rem; line-height: 1; } /* "Seattle": half the title's size (Steve, 2026-09-16: twice the quarter it was), a shade bolder */
 /* the masthead's tools (Steve, 2026-09-14): the poster chip (Teams view
    only, see #teamPdfBtn), Add To Calendar and the theme pill at the
    masthead's right end, bottom-aligned with the stamp line — the bar below
@@ -314,7 +342,24 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
   .fp-group + .fp-group { border-left: 0; border-top: 1px solid var(--line); padding-top: 1.1rem; }
 }
 /* top row: preset chips (the lit one matches the current state) with the
-   Holidays switch pushed to the right */
+   Sold Out and Holidays switches pushed to the right. They are switches, not
+   allow boxes like the rows below (one narrows the list, one adds days), so
+   they wear a pill-and-knob face instead of the tick box */
+.fp-switch { position: relative; display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+.fp-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.sw {
+  flex: none; width: 2rem; height: 1.15rem; position: relative;
+  border: 1.5px solid var(--ink-soft); border-radius: 1rem; background: var(--mist);
+  transition: background .15s, border-color .15s;
+}
+.sw::after {
+  content: ""; position: absolute; top: .1rem; left: .1rem; width: .75rem; height: .75rem;
+  border-radius: 50%; background: var(--ink-soft); transition: transform .15s, background .15s;
+}
+.fp-switch input:checked + .sw { background: var(--ink); border-color: var(--ink); }
+.fp-switch input:checked + .sw::after { transform: translateX(.85rem); background: var(--mist); }
+.fp-switch:hover .sw { border-color: var(--ink); }
+.fp-switch input:focus-visible + .sw { outline: 2px solid var(--ink-soft); outline-offset: 2px; }
 .fp-top { display: flex; align-items: center; gap: 1rem; padding: 0 1.25rem; margin: 0 0 1.1rem; }
 .fp-presets { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; flex: 1; min-width: 0; }
 .fp-soldout { margin-left: auto; white-space: nowrap; flex: none; }
@@ -324,11 +369,11 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 .fp-preset.is-on { background: var(--ink); color: var(--sky); border-color: var(--ink); }
 .fp-group h3 {
   font-family: var(--mono); font-size: .68rem; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--ink-soft); margin: 0 0 .35rem; font-weight: 500;
+  letter-spacing: .1em; color: var(--ink); margin: 0 0 .35rem; font-weight: 700; /* bold, ink (Steve, 2026-09-22) */
   display: flex; align-items: baseline; gap: .6rem;
 }
 /* All · None at the heading's right end: plain words in the heading's own face, not chips */
-.fp-allnone { margin-left: auto; display: inline-flex; align-items: baseline; gap: .35rem; }
+.fp-allnone { margin-left: auto; display: inline-flex; align-items: baseline; gap: .35rem; font-weight: 500; color: var(--ink-soft); } /* the links stay quiet next to the bold title */
 .fp-allnone i { font-style: normal; opacity: .6; }
 .fp-set { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ink-soft); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--ink-soft) 50%, transparent); text-underline-offset: 2px; }
 .fp-set:hover { color: var(--ink); text-decoration-color: currentColor; }
@@ -337,36 +382,30 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 .fp-row { display: flex; align-items: center; gap: .5rem; padding: .3rem .35rem; border-radius: 6px; }
 .fp-row:hover { background: var(--sky); }
 .fp-check { position: relative; display: flex; align-items: center; gap: .6rem; cursor: pointer; min-width: 0; }
-/* the native checkbox stays for keyboard + screen readers; .cb is its face */
-.fp-check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.cb {
-  flex: none; width: 1.1rem; height: 1.1rem; position: relative;
-  border: 1.5px solid var(--ink-soft); border-radius: 4px; background: var(--mist);
+/* the Show | Hide pair at the row's end (Steve, 2026-09-22, third pass):
+   two small words joined into one pill. Neither lit = no preference; the
+   lit one is ink. Hide lit strikes the row's name */
+.fp-seg { flex: none; display: inline-flex; margin-left: .5rem; border: 1.5px solid var(--line); border-radius: 999px; background: var(--mist); overflow: hidden; }
+.fp-seg-b {
+  font: inherit; font-size: .68rem; line-height: 1; letter-spacing: .02em; color: var(--ink-soft);
+  background: none; border: 0; padding: .28rem .55rem; margin: 0; cursor: pointer;
 }
-/* checked = ink box with a page-colored tick; hover brightens the box's
-   edge, like every other hover on the site */
-.fp-check input:checked + .cb { background: var(--ink); border-color: var(--ink); }
-.fp-check input:checked + .cb::after {
-  content: ""; position: absolute; left: .3rem; top: .1rem;
-  width: .28rem; height: .55rem;
-  border: solid var(--mist); border-width: 0 2px 2px 0; transform: rotate(45deg);
-}
-.fp-check:hover .cb { border-color: var(--ink); }
-.fp-check:hover input:checked + .cb { background: var(--ink-soft); border-color: var(--ink-soft); }
-.fp-check input:focus-visible + .cb { outline: 2px solid var(--ink-soft); outline-offset: 2px; }
+.fp-seg-b + .fp-seg-b { border-left: 1.5px solid var(--line); }
+.fp-seg-b:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.fp-seg-b[aria-pressed="true"] { color: var(--mist); background: var(--ink); }
+.fp-seg-b:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 2px; }
+.fp-check:hover .fp-name { color: var(--ink); }
 .fp-name { font-size: .88rem; display: flex; align-items: center; gap: .45rem; white-space: nowrap; min-width: 0; }
 .fp-name > * { overflow: hidden; text-overflow: ellipsis; } /* never wraps; a too-narrow column clips with an ellipsis */
 .fp-name a { text-decoration-color: var(--line); }
 .fp-name a:hover { text-decoration-color: var(--ink-soft); }
-.fp-row:has(input:not(:checked)) .fp-name { opacity: .5; }
-.fp-only {
-  font: 700 .72rem/1 var(--body); color: var(--ink); background: none; border: 0;
-  padding: .15em .35em; cursor: pointer; visibility: hidden;
-}
-.fp-only:hover { color: var(--ink-soft); }
-.fp-row:hover .fp-only, .fp-row:focus-within .fp-only { visibility: visible; }
-@media (hover: none) { .fp-only { visibility: visible; } }
-.fp-count { margin-left: auto; font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); }
+.fp-row:has(.fp-seg[data-mode="ex"]) .fp-name { opacity: .55; text-decoration: line-through; text-decoration-color: var(--ink-soft); } /* a hidden row reads struck */
+.fp-count { margin-left: auto; font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); white-space: nowrap; }
+/* three groups — the two venue lists (Lower Queen Anne the wider), Teams
+   (Steve, 2026-09-20; Capacity rows dropped 2026-09-22) */
+@media (min-width: 641px) { .fp-tree .fp-cols { grid-template-columns: 1.2fr 1.1fr .85fr; } }
+.fp-note { font-family: var(--mono); font-size: .66rem; color: var(--ink-soft); letter-spacing: .04em; margin-left: .35rem; } /* a band's seat range after its name */
+.fp-count small { font-size: .62rem; opacity: .65; }
 .chip {
   font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
   padding: .5em .95em; background: var(--mist); color: var(--ink);
@@ -375,6 +414,16 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 
 /* ---- agenda layout: list + docked mini calendar ---- */
 .agenda { margin-top: 1.6rem; }
+/* the view note: one plain line above the list while the view is not the
+   usual one, the way back at its right (app.js renderViewNote) */
+.view-note { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin: 0 0 1.1rem; padding: .55rem .9rem; border: 1px solid var(--line); border-radius: 10px; background: var(--mist); font-size: .88rem; }
+.view-note[hidden] { display: none; }
+.view-note .chip { margin-left: auto; font-size: .78rem; padding: .3em .75em; min-height: 1.9rem; }
+/* the toast: a word above the footer after hiding something from the sheet, with Undo */
+.toast { position: fixed; left: 50%; bottom: calc(3.6rem + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 40; display: flex; align-items: center; gap: 1rem; padding: .6rem .6rem .6rem 1rem; border-radius: 999px; background: var(--ink); color: var(--sky); font-size: .88rem; box-shadow: 0 12px 36px rgba(0, 0, 0, .35); max-width: calc(100vw - 2rem); }
+.toast[hidden] { display: none; }
+.toast button { font: 700 .82rem/1 var(--body); color: var(--gold); background: none; border: 1px solid color-mix(in srgb, var(--sky) 35%, transparent); border-radius: 999px; padding: .45em .9em; cursor: pointer; }
+.toast button:hover { border-color: var(--sky); }
 .agenda, .teams { margin-bottom: 1.5rem; } /* the gap above the footer (its own top margin is auto) */
 .agenda-layout {
   display: grid; grid-template-columns: minmax(0, 1fr) 18rem;
@@ -1522,10 +1571,15 @@ html:not(.teams-open) .team-strip { display: none; }
 .sheet-watch b { font: 500 .66rem/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; margin-right: .3rem; }
 .sheet-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; } /* smaller chips, as many to a line as fit, centred (Steve, 2026-09-15) */
 .sheet-actions .chip[hidden], .sheet-actions .btn-cal[hidden] { display: none; } /* the chip rule below sets a display, which would otherwise beat the hidden attribute — an empty pill where a club's "season" chip isn't (Steve, 2026-09-15) */
+/* short, button-like (Steve, 2026-09-21): two words each, the venue's name
+   is the eyebrow above; solid pills of one height, Tickets in ink as the one
+   primary, the rest in the page's mist */
 .sheet-actions .btn-cal, .sheet-actions .chip {
   display: inline-flex; justify-content: center; align-items: center; min-height: 2.2rem;
-  font-size: .82rem; padding: .4em .85em; text-decoration: none; margin: 0;
+  font-size: .82rem; font-weight: 600; padding: .4em 1em; text-decoration: none; margin: 0;
+  border: 1px solid transparent;
 }
+.sheet-actions .chip { background: var(--mist); border-color: var(--line); }
 body.sheet-open { overflow: hidden; }
 /* wider screens: the same sheet is a pop hanging off the clicked card — the
    site's floating-panel look (see .pop), placed by app.js, no backdrop, no
@@ -1563,13 +1617,14 @@ body.sheet-open { overflow: hidden; }
   .fp-row { padding: .55rem .35rem; }
   /* presets: one swipeable row instead of three stacked ones; no label */
   .fp-top { gap: .6rem; margin: 0 -1rem 1rem; padding: 0 1rem; flex-wrap: wrap; }
-  .fp-top .fp-presets { flex-basis: 100%; } /* the presets take the row; Sold Out & Nearly and Holidays go to the next (they had sat over the chips) */
+  .fp-top .fp-presets { flex-basis: 100%; } /* the presets take the row; Sold Out (or Nearly) and Holidays go to the next (they had sat over the chips) */
   .fp-presets { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 0 0 .2rem; }
   .fp-presets::-webkit-scrollbar { display: none; }
   .fp-preset { flex: none; }
-  .fp-only { padding: .55em .6em; }
   .masthead { padding: 1.6rem 0 .8rem; gap: 1.1rem; }
   h1 { font-size: clamp(2.4rem, 11vw, 3.2rem); }
+  .masthead { min-height: 9rem; }
+  .masthead-photo { width: 100%; opacity: .4; -webkit-mask-position: 60% 0%, 0 0, 0 0; mask-position: 60% 0%, 0 0, 0 0; } /* the whole width on a phone, the Needle a little right of centre; the same fades */
   .pop { left: 0; right: 0; width: auto; }
 
   /* day groups: date reads across the top instead of down a rail */

@@ -59,6 +59,15 @@
 </svg>
 
 <header class="masthead">
+  <!-- the neighbourhood itself behind the name (Steve, 2026-09-20: a legally
+       clear picture of Lower Queen Anne in place of the mark): Seattle Center
+       from the air — the Needle over the arena roof, the Science Center
+       arches, MoPOP, Queen Anne Hill behind. Carol M. Highsmith, 2006, Library
+       of Congress Prints & Photographs, no known restrictions (public domain);
+       the Needle sits inside the whole cityscape, the framing its trademark
+       owner's own page calls acceptable. Grayscale at build (scratch crop of
+       LoC item 2010646305), faded into the page from the left by CSS -->
+  <div class="masthead-photo" aria-hidden="true"></div><!-- the line drawing: masthead-lines.png is a luminance mask over ink (styles.css), so it takes the palette's own colour -->
   <div class="masthead-text">
     <p class="eyebrow">Seattle</p>
     <h1>Lower Queen Anne</h1> <!-- just the name: one line on any screen -->
@@ -182,47 +191,73 @@
   </button>
 </nav>
 <!-- the funnel in the bar drops this open below it -->
-<div id="filterPanel" class="filter-panel" hidden>
+<div id="filterPanel" class="filter-panel fp-tree" hidden>
   <!-- top row: presets (chips injected by app.js; the one matching the
-       current state is lit) with the Holidays switch at the right (off by
-       default; US, WA and Seattle holidays computed from the rules in app.js) -->
+       current state is lit), the Sold Out (or Nearly) switch and the Holidays
+       switch (off by default; US, WA and Seattle holidays from app.js) -->
   <div class="fp-top">
     <div class="fp-presets" id="fpPresets"></div>
-    <!-- Sold Out & Nearly: only the events the checker (or a source) marks
+    <!-- Sold Out (or Nearly): only the events the checker (or a source) marks
          sold out, or within 5% of the house — LQAFilter.ticketState -->
-    <label class="fp-check fp-soldout">
-      <input type="checkbox" id="soldOnlyToggle" autocomplete="off">
-      <span class="cb"></span>
-      <span class="fp-name">Sold Out &amp; Nearly</span>
+    <!-- these two are switches, not allow boxes like the rows below: Sold Out
+         narrows the list to those, Holidays adds days — so they wear a
+         different face (.sw) -->
+    <label class="fp-switch fp-soldout">
+      <input type="checkbox" role="switch" id="soldOnlyToggle" autocomplete="off">
+      <span class="sw"></span>
+      <span class="fp-name">Sold Out (or Nearly)</span>
     </label>
-    <label class="fp-check fp-holidays">
-      <input type="checkbox" id="holidaysToggle" autocomplete="off">
-      <span class="cb"></span>
+    <label class="fp-switch fp-holidays">
+      <input type="checkbox" role="switch" id="holidaysToggle" autocomplete="off">
+      <span class="sw"></span>
       <span class="fp-name">Holidays</span>
     </label>
   </div>
-  <!-- three even columns: the 11 campus venues; the teams; the downtown
-       venues over the 7 types (Steve, 2026-09-14: Downtown & SoDo above Event Type) -->
+  <!-- Four groups — Venues (two lists), Event Type under the second, Teams
+       (capacity bands keep state + share-code slots but no rows since
+       2026-09-22), every row three-state (Steve, 2026-09-22: "check,
+       unchecked or X for exclude, same for every filter option, don't auto
+       check or uncheck any filters"), worn as a Show | Hide word pair at
+       the row's end (third pass the same day, after a three-face box and
+       then a tick box + x):
+       · Show lit = show these. Shows among venues and
+         teams add up (any of them); shown event types then narrow to
+         those kinds.
+       · Hide lit = never these (the name struck).
+       · neither  = no preference.
+       One tap sets a word, a second tap on it clears it — no cycling. No
+       row ever changes another: no dashes, no greying, no bulk switches
+       apart from a group's own Show All / Hide All. The rule is
+       LQAFilter.matchesFilter; the pair is a role="group" of two
+       aria-pressed buttons (app.js filterRow). Every
+       row's count reads "n of N" once another control hides some of its
+       events (app.js syncLiveCounts). The everyday way to hide things is on
+       the event sheet (Hide chips + Undo), with the view note above the list
+       saying what is hidden. -->
   <div class="fp-cols">
     <div class="fp-group">
-      <h3>Lower Queen Anne<span class="fp-allnone"><button type="button" class="fp-set" data-scope="campus" data-on="1">All</button><i>·</i><button type="button" class="fp-set" data-scope="campus" data-on="0">None</button></span></h3>
+      <h3>Lower Queen Anne<span class="fp-allnone"><button type="button" class="fp-set" data-scope="campus" data-on="1">Show All</button><i>·</i><button type="button" class="fp-set" data-scope="campus" data-on="0">Hide All</button></span></h3>
       <div id="panelVenues" class="fp-list"><!-- campus venue rows injected by app.js --></div>
     </div>
     <div class="fp-group">
-      <h3>Home Games<span class="fp-allnone"><button type="button" class="fp-set" data-scope="team" data-on="1">All</button><i>·</i><button type="button" class="fp-set" data-scope="team" data-on="0">None</button></span></h3>
-      <div id="panelTeams" class="fp-list"><!-- team rows injected by app.js --></div>
+      <h3>Downtown &amp; SoDo<span class="fp-allnone"><button type="button" class="fp-set" data-scope="town" data-on="1">Show All</button><i>·</i><button type="button" class="fp-set" data-scope="town" data-on="0">Hide All</button></span></h3>
+      <div id="panelVenuesTown" class="fp-list"><!-- the stadiums, the Convention Center, injected by app.js --></div>
+      <h3>Event Type<span class="fp-allnone"><button type="button" class="fp-set" data-scope="type" data-on="1">Show All</button><i>·</i><button type="button" class="fp-set" data-scope="type" data-on="0">Hide All</button></span></h3>
+      <div id="panelBadges" class="fp-list"><!-- the seven kinds, injected by app.js; stacked under Downtown & SoDo since 2026-09-22 --></div>
     </div>
     <div class="fp-group">
-      <h3>Downtown &amp; SoDo<span class="fp-allnone"><button type="button" class="fp-set" data-scope="town" data-on="1">All</button><i>·</i><button type="button" class="fp-set" data-scope="town" data-on="0">None</button></span></h3>
-      <div id="panelVenuesTown" class="fp-list"><!-- downtown venue rows injected by app.js --></div>
-      <h3>Event Type<span class="fp-allnone"><button type="button" class="fp-set" data-scope="badge" data-on="1">All</button><i>·</i><button type="button" class="fp-set" data-scope="badge" data-on="0">None</button></span></h3>
-      <div id="panelBadges" class="fp-list"><!-- type rows injected by app.js --></div>
+      <h3>Teams<span class="fp-allnone"><button type="button" class="fp-set" data-scope="team" data-on="1">Show All</button><i>·</i><button type="button" class="fp-set" data-scope="team" data-on="0">Hide All</button></span></h3>
+      <div id="panelTeams" class="fp-list"><!-- team rows injected by app.js --></div>
     </div>
   </div>
 </div>
 </div>
 
 <section class="agenda" aria-label="Upcoming events">
+  <!-- the view note: one plain line, only while the view is not the usual one,
+       saying what is hidden or added compared with it, with a way back
+       (app.js renderViewNote) -->
+  <div id="viewNote" class="view-note" hidden><span id="viewNoteText"></span><button id="viewNoteReset" type="button" class="chip">Usual View</button></div>
   <div class="agenda-layout">
     <ol id="agenda"><li class="empty">Loading events…</li></ol>
     <aside class="cal-side" aria-label="Month calendar">
@@ -295,6 +330,9 @@
   </div>
 </section>
 
+<!-- a word after hiding something from the sheet, with Undo (app.js toast) -->
+<div id="toast" class="toast" role="status" aria-live="polite" hidden><span id="toastText"></span><button id="toastUndo" type="button">Undo</button></div>
+
 <!-- pinned to the bottom edge; Sources (the info mark) and Embed open upward from it,
      floating over the list -->
 <footer>
@@ -344,6 +382,10 @@
         <div>
           <h3>The final word</h3>
           <p>Refreshed every few hours. Every listing links to the venue or ticket page — check there before you go.</p>
+        </div>
+        <div>
+          <h3>The picture</h3>
+          <p>A line drawing traced from “Seattle Center from the air”, 2006 — Carol M. Highsmith Archive, Library of Congress, Prints and Photographs Division. No known restrictions on publication.</p>
         </div>
       </div>
     </div>
@@ -404,6 +446,9 @@
       <!-- order: the short chips first so they share a line, the long venue link after (Steve, 2026-09-15) -->
       <a id="sheetTickets" class="btn-cal" href="#" target="_blank" rel="noopener">Tickets</a>
       <button id="sheetOnlyVenue" class="chip" type="button" title="Show only this venue's events"></button>
+      <!-- the plain way to hide things (2026-09-20): this venue, or this club's home games; an Undo toast follows -->
+      <button id="sheetHideVenue" class="chip" type="button" title="Hide this venue's events"></button>
+      <button id="sheetHideTeam" class="chip" type="button" title="Hide this club's home games" hidden></button>
       <button id="sheetTeam" class="chip" type="button" title="This club's whole season in the Teams view" hidden></button>
       <a id="sheetVenueLink" class="chip" href="#" target="_blank" rel="noopener"></a>
       <button id="sheetClose" class="chip" type="button">Close</button>
