@@ -431,10 +431,6 @@
     if (title) lab.title = title;
     var name = nameEl.textContent;
     lab.appendChild(nameEl);
-    var cnt = document.createElement('span');
-    cnt.className = 'fp-count';
-    cnt.textContent = count;
-    cnt.dataset.total = count; // syncLiveCounts rewrites it as "n of N" while the rest of the filter hides some
     var seg = document.createElement('span');
     seg.className = 'fp-seg'; seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', name);
     seg.dataset.group = group; seg.dataset.key = key; seg.dataset[group] = key;
@@ -444,7 +440,7 @@
       b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', m[1] + ' ' + name);
       seg.appendChild(b);
     });
-    row.appendChild(lab); row.appendChild(cnt); row.appendChild(seg);
+    row.appendChild(lab); row.appendChild(seg); // no counts on the rows (Steve, 2026-09-22: "drop the counts")
     return row;
   }
   // Panel rows are plain text: the venue / type / team colours show on the
@@ -520,7 +516,6 @@
       seg.dataset.mode = mode;
       seg.querySelectorAll('.fp-seg-b').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === mode ? 'true' : 'false'); });
     });
-    syncLiveCounts();
     $('holidaysToggle').checked = state.holidays;
     $('soldOnlyToggle').checked = state.soldOnly;
     if ($('searchBox').value.trim() !== state.q) $('searchBox').value = state.q;
@@ -663,28 +658,6 @@
     ['venueMode', 'teamMode', 'capMode'].forEach(function (m) { modeKeys(state[m], 'in').forEach(function (k) { delete state[m][k]; }); });
     state.badgeMode = {};
     state.venueMode[v] = 'in';
-  }
-  // A row's count reads "n of N" once the rest of the filter hides some of
-  // its events — the venue rows show what the Event Type line took away
-  // (SIFF "0 of 66" with Movies X'd), the type rows what the venues took
-  // away. An X'd row keeps its plain total.
-  function syncLiveCounts() {
-    var today = todayStr();
-    var mode = currentModes();
-    var upcoming = state.events.filter(function (e) { return e.date >= today; });
-    var passing = upcoming.filter(function (e) { return LQAFilter.matchesFilter(e, mode); });
-    document.querySelectorAll('#filterPanel .fp-row').forEach(function (row) {
-      var b = row.querySelector('.fp-seg[data-group]'), cnt = row.querySelector('.fp-count');
-      if (!b || !cnt || cnt.dataset.total == null) return;
-      var total = Number(cnt.dataset.total), key = b.dataset.key, n;
-      var off = state[GROUP_MAP[b.dataset.group]][key] === 'ex';
-      if (b.dataset.group === 'venue') n = passing.filter(function (e) { return e.venue === key; }).length;
-      else if (b.dataset.group === 'badge') n = passing.filter(function (e) { return eventType(e) === key; }).length;
-      else if (b.dataset.group === 'cap') n = passing.filter(function (e) { return LQAFilter.bandOf(e.venue) === key; }).length;
-      else { var t = TEAM_BY_SLUG[key]; n = t ? passing.filter(function (e) { return t.re.test(e.title || ''); }).length : total; }
-      if (!off && n < total) { cnt.textContent = ''; cnt.appendChild(document.createTextNode(String(n))); var sm = document.createElement('small'); sm.textContent = ' of ' + total; cnt.appendChild(sm); }
-      else cnt.textContent = String(total);
-    });
   }
   // A press on a row's Show or Hide sets that one option to it, or clears
   // it if it was already lit; a tap on the name works Show. Nothing else

@@ -385,7 +385,7 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 /* the Show | Hide pair at the row's end (Steve, 2026-09-22, third pass):
    two small words joined into one pill. Neither lit = no preference; the
    lit one is ink. Hide lit strikes the row's name */
-.fp-seg { flex: none; display: inline-flex; margin-left: .5rem; border: 1.5px solid var(--line); border-radius: 999px; background: var(--mist); overflow: hidden; }
+.fp-seg { flex: none; display: inline-flex; margin-left: auto; border: 1.5px solid var(--line); border-radius: 999px; background: var(--mist); overflow: hidden; }
 .fp-seg-b {
   font: inherit; font-size: .68rem; line-height: 1; letter-spacing: .02em; color: var(--ink-soft);
   background: none; border: 0; padding: .28rem .55rem; margin: 0; cursor: pointer;
@@ -400,12 +400,10 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 .fp-name a { text-decoration-color: var(--line); }
 .fp-name a:hover { text-decoration-color: var(--ink-soft); }
 .fp-row:has(.fp-seg[data-mode="ex"]) .fp-name { opacity: .55; text-decoration: line-through; text-decoration-color: var(--ink-soft); } /* a hidden row reads struck */
-.fp-count { margin-left: auto; font-family: var(--mono); font-size: .72rem; color: var(--ink-soft); white-space: nowrap; }
 /* three groups — the two venue lists (Lower Queen Anne the wider), Teams
    (Steve, 2026-09-20; Capacity rows dropped 2026-09-22) */
 @media (min-width: 641px) { .fp-tree .fp-cols { grid-template-columns: 1.2fr 1.1fr .85fr; } }
 .fp-note { font-family: var(--mono); font-size: .66rem; color: var(--ink-soft); letter-spacing: .04em; margin-left: .35rem; } /* a band's seat range after its name */
-.fp-count small { font-size: .62rem; opacity: .65; }
 .chip {
   font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
   padding: .5em .95em; background: var(--mist); color: var(--ink);
