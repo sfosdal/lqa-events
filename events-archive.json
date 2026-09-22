@@ -1339,6 +1339,79 @@
    "url": "https://www.siff.net/cinema/in-theaters/late-fame",
    "movie": true,
    "end": "18:51:00"
+  },
+  {
+   "venue": "MoPOP",
+   "title": "Sensory-Friendly Day: September",
+   "date": "2026-09-21",
+   "time": "",
+   "url": "https://www.mopop.org/events/sensory-friendly-days"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Sweeping Promises Live on KEXP (Open To The Public)",
+   "date": "2026-09-21",
+   "time": "15:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/sweeping-promises-live-on-kexp-kexp_511121/",
+   "end": "15:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Hope",
+   "date": "2026-09-21",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/hope",
+   "movie": true,
+   "end": "18:25:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-21",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "17:52:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-21",
+   "time": "16:20:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "18:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-21",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "20:36:00"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Guess What? Trivia!",
+   "date": "2026-09-21",
+   "time": "19:00:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "JOURNEY - Final Frontier Tour (An Evening With)",
+   "date": "2026-09-21",
+   "time": "19:30:00",
+   "url": "https://www.ticketmaster.com/journey-final-frontier-tour-an-evening-seattle-washington-09-21-2026/event/0F0064A5D6D516EE",
+   "type": "concert",
+   "tickets": {
+    "box": 1324,
+    "resale": 0,
+    "checked": "2026-09-21T22:07:11.085Z",
+    "from": 49.5
+   }
   }
  ]
 }
