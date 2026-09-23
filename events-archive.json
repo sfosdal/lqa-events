@@ -1412,6 +1412,73 @@
     "checked": "2026-09-21T22:07:11.085Z",
     "from": 49.5
    }
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Hope",
+   "date": "2026-09-22",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/hope",
+   "movie": true,
+   "end": "18:25:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Screen Printing Open Session",
+   "date": "2026-09-22",
+   "time": "16:00:00",
+   "url": "https://link.dice.fm/e15484c9b7fb",
+   "type": "community",
+   "end": "20:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-22",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "17:51:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-22",
+   "time": "16:20:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "18:30:00"
+  },
+  {
+   "venue": "T-Mobile Park",
+   "title": "Seattle Mariners vs. Houston Astros",
+   "date": "2026-09-22",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-mariners-vs-houston-astros-seattle-washington-09-22-2026/event/0F00635BEEFD7352",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Mariners.TV"
+    ],
+    "radio": [
+     "Seattle Sports (710 AM)"
+    ]
+   },
+   "tickets": {
+    "box": 8594,
+    "resale": 0,
+    "checked": "2026-09-23T00:07:14.392Z",
+    "from": 0
+   }
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Townsend's Solitaire, Sabrina Saed + More",
+   "date": "2026-09-22",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/Qaa9778af683",
+   "type": "concert",
+   "end": "23:00:00"
   }
  ]
 }
