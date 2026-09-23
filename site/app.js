@@ -519,6 +519,7 @@
     $('holidaysToggle').checked = state.holidays;
     $('soldOnlyToggle').checked = state.soldOnly;
     if ($('searchBox').value.trim() !== state.q) $('searchBox').value = state.q;
+    if (state.q) document.querySelector('.filterbar .search-wrap').classList.add('is-open'); // a phone's search chip stays open while it holds a query
     var any = !isDefaultState();
     $('filterToggle').classList.toggle('is-on', any);
   }
@@ -690,7 +691,7 @@
   function setPanelOpen(open) {
     $('filterPanel').hidden = !open;
     $('filterToggle').setAttribute('aria-expanded', String(open));
-    if (open) fitPops(true);
+    if (open) { fitPops(true); presetEdge(); }
   }
   function togglePanel() { setPanelOpen($('filterPanel').hidden); }
   $('filterToggle').addEventListener('click', togglePanel);
@@ -710,6 +711,17 @@
   });
   // the search applies as you type, a beat after the last keystroke
   var searchTimer = null;
+  // phones: the search box is an icon chip until tapped; it stays open while
+  // it holds a query (CSS .search-wrap.is-open, ≤640px only)
+  (function () {
+    var wrap = document.querySelector('.filterbar .search-wrap'), box = $('searchBox');
+    function open() { wrap.classList.add('is-open'); }
+    function settle() { if (!box.value.trim()) wrap.classList.remove('is-open'); }
+    box.addEventListener('focus', open);
+    box.addEventListener('blur', function () { setTimeout(settle, 120); });
+    box.addEventListener('input', function () { if (box.value.trim()) open(); });
+    if (state.q) open();
+  })();
   $('searchBox').addEventListener('input', function () {
     var v = this.value.trim();
     clearTimeout(searchTimer);
@@ -3457,6 +3469,10 @@
     stripEdge();
   }
   // more crests beyond the strip's right edge: a fade says so, lifted once scrolled to the end
+  // the preset strip's own fade (same rule as the team strip's)
+  function presetEdge() { var el = document.querySelector('#filterPanel .fp-presets'); if (el) el.classList.toggle('is-more-right', el.scrollLeft + el.clientWidth < el.scrollWidth - 2); }
+  document.querySelector('#filterPanel .fp-presets').addEventListener('scroll', presetEdge, { passive: true });
+  window.addEventListener('resize', presetEdge);
   function stripEdge() { var strip = $('teamStrip'); strip.classList.toggle('is-more-right', strip.scrollLeft + strip.clientWidth < strip.scrollWidth - 2); }
   $('teamStrip').addEventListener('scroll', stripEdge, { passive: true });
   // Re-render the month cards with a reel move: forward (dir > 0) the top
@@ -3670,7 +3686,7 @@
           row.appendChild(logo);
         }
         titleLine.appendChild(a);
-        if (sn) titleLine.appendChild(sn);
+        if (sn) row.appendChild(sn); // lower right of the card (CSS)
         body.appendChild(venue); body.appendChild(titleLine);
         // a show that's off: struck through, with a third line saying so
         // (and when we noticed, if the feed knows)
