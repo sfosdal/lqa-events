@@ -1479,6 +1479,111 @@
    "url": "https://link.dice.fm/Qaa9778af683",
    "type": "concert",
    "end": "23:00:00"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Iguana Death Cult Live on KEXP (Open To The Public)",
+   "date": "2026-09-23",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/iguana-death-cult-live-on-kexp-kexp_505827/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Hope",
+   "date": "2026-09-23",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/hope",
+   "movie": true,
+   "end": "18:25:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Late Fame",
+   "date": "2026-09-23",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/late-fame",
+   "movie": true,
+   "end": "17:51:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-23",
+   "time": "16:20:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "18:30:00"
+  },
+  {
+   "venue": "Lumen Field",
+   "title": "Seattle Sounders FC vs. Real Salt Lake",
+   "date": "2026-09-23",
+   "time": "18:30:00",
+   "url": "https://www.ticketmaster.com/seattle-sounders-fc-vs-real-salt-seattle-washington-09-23-2026/event/0F006383C4568451",
+   "type": "sports"
+  },
+  {
+   "venue": "T-Mobile Park",
+   "title": "Seattle Mariners vs. Houston Astros",
+   "date": "2026-09-23",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-mariners-vs-houston-astros-seattle-washington-09-23-2026/event/0F00635BEF007354",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "ESPN/ESPN App"
+    ],
+    "radio": [
+     "Seattle Sports (710 AM)"
+    ]
+   },
+   "tickets": {
+    "box": 16458,
+    "resale": 0,
+    "checked": "2026-09-23T23:53:14.561Z",
+    "from": 0
+   }
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Storm vs. Dallas Wings",
+   "date": "2026-09-23",
+   "time": "19:00:00",
+   "url": "https://www.ticketmaster.com/seattle-storm-vs-dallas-wings-seattle-washington-09-23-2026/event/0F00646A89F64DD9",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "USA Net",
+     "CNBC",
+     "CW Seattle",
+     "KFAA-TV",
+     "Prime Video-Seattle"
+    ]
+   },
+   "tickets": {
+    "box": 79,
+    "resale": 167,
+    "checked": "2026-09-23T23:47:23.966Z",
+    "from": 28.4
+   }
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Radiator Hospital",
+   "date": "2026-09-23",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/Pdd7e3ff3361",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Jules and Jim",
+   "date": "2026-09-23",
+   "time": "19:30:00",
+   "url": "https://www.siff.net/programs-and-events/nouvelles-femmes/jules-and-jim",
+   "end": "21:15:00"
   }
  ]
 }
