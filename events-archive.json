@@ -1837,6 +1837,24 @@
    "time": "19:30:00",
    "url": "https://www.mccawhall.com/events/detail/serenade",
    "type": "arts"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-09-25",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts",
+   "soldOut": true
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eulogy",
+   "date": "2026-09-25",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/events/special-events/eulogy",
+   "type": "arts",
+   "soldOut": true
   }
  ]
 }
