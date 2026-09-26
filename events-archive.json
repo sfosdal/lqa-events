@@ -1715,6 +1715,128 @@
    "url": "https://www.siff.net/cinema/in-theaters/primetime",
    "movie": true,
    "end": "21:32:00"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Hermanos Gutiérrez Live (Gathering Space)",
+   "date": "2026-09-25",
+   "time": "12:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/hermanos-gutierrez-live-in-the-kexp-gathering-space-kexp_505848/",
+   "end": "12:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-25",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "17:55:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Ha-Chan, Shake Your Booty",
+   "date": "2026-09-25",
+   "time": "16:20:00",
+   "url": "https://www.siff.net/cinema/in-theaters/ha-chan-shake-your-booty",
+   "movie": true,
+   "end": "18:22:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-09-25",
+   "time": "16:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "18:32:00"
+  },
+  {
+   "venue": "Lumen Field",
+   "title": "Seattle Reign FC vs. Boston Legacy FC",
+   "date": "2026-09-25",
+   "time": "17:30:00",
+   "url": "https://www.ticketmaster.com/seattle-reign-fc-vs-boston-legacy-seattle-washington-09-25-2026/event/0F006454A55ECF22",
+   "type": "sports"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "The B-52s * Devo:  Cosmic DE-EVOLUTION Tour",
+   "date": "2026-09-25",
+   "time": "19:00:00",
+   "url": "https://www.ticketmaster.com/the-b52s-devo-cosmic-deevolution-tour-seattle-washington-09-25-2026/event/0F0064D0C86ECCBA",
+   "type": "concert",
+   "tickets": {
+    "box": 2364,
+    "resale": 78,
+    "checked": "2026-09-25T22:07:12.652Z",
+    "from": 49.5
+   }
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Portrayal of Guilt",
+   "date": "2026-09-25",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/nb6063c23b2c",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-25",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "20:52:00"
+  },
+  {
+   "venue": "T-Mobile Park",
+   "title": "Seattle Mariners vs. Los Angeles Angels",
+   "date": "2026-09-25",
+   "time": "19:10:00",
+   "url": "https://www.ticketmaster.com/seattle-mariners-vs-los-angeles-angels-seattle-washington-09-25-2026/event/0F00635BEF08735B",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Mariners.TV"
+    ],
+    "radio": [
+     "Seattle Sports (710 AM)"
+    ]
+   },
+   "tickets": {
+    "box": 4266,
+    "resale": 0,
+    "checked": "2026-09-25T22:13:32.667Z",
+    "from": 0
+   }
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day: Preview Performance",
+   "date": "2026-09-25",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eulogy: Opening Night",
+   "date": "2026-09-25",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/events/special-events/eulogy",
+   "type": "arts",
+   "soldOut": true
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Serenade",
+   "date": "2026-09-25",
+   "time": "19:30:00",
+   "url": "https://www.mccawhall.com/events/detail/serenade",
+   "type": "arts"
   }
  ]
 }
