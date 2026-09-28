@@ -2019,6 +2019,120 @@
      "FOX"
     ]
    }
+  },
+  {
+   "venue": "MoPOP",
+   "title": "Member Morning x Curator Talk: Styled by the Streets",
+   "date": "2026-09-27",
+   "time": "",
+   "url": "https://www.mopop.org/events/sbts-member-morning-curator-talk"
+  },
+  {
+   "venue": "MoPOP",
+   "title": "The Brunch Bundle at MOPOP",
+   "date": "2026-09-27",
+   "time": "",
+   "url": "https://www.mopop.org/events/the-brunch-bundle-at-mopop-8"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Base 2 Space 2026",
+   "date": "2026-09-27",
+   "time": "",
+   "url": "https://www.seattlecenter.com/events/event-calendar/base-2-space-2026",
+   "type": "community"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "The Italian Festival",
+   "date": "2026-09-27",
+   "time": "",
+   "url": "https://www.seattlecenter.com/events/event-calendar/the-italian-festival",
+   "free": true,
+   "type": "community"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Northwest Tea Festival",
+   "date": "2026-09-27",
+   "time": "10:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/northwest-tea-festival-x43877",
+   "type": "expo"
+  },
+  {
+   "venue": "T-Mobile Park",
+   "title": "Seattle Mariners vs. Los Angeles Angels",
+   "date": "2026-09-27",
+   "time": "12:10:00",
+   "url": "https://www.ticketmaster.com/seattle-mariners-vs-los-angeles-angels-seattle-washington-09-27-2026/event/0F00635BEF11735F",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Mariners.TV"
+    ],
+    "radio": [
+     "KTTH 770 AM"
+    ]
+   }
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-27",
+   "time": "12:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "14:37:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Ha-Chan, Shake Your Booty",
+   "date": "2026-09-27",
+   "time": "13:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/ha-chan-shake-your-booty",
+   "movie": true,
+   "end": "15:17:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-09-27",
+   "time": "13:50:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "15:37:00"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eulogy",
+   "date": "2026-09-27",
+   "time": "14:00:00",
+   "url": "https://www.seattlerep.org/events/special-events/eulogy",
+   "type": "arts",
+   "soldOut": true
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-27",
+   "time": "15:50:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "18:00:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "The Kehlani World Tour: North America",
+   "date": "2026-09-27",
+   "time": "18:30:00",
+   "url": "https://www.ticketmaster.com/the-kehlani-world-tour-north-america-seattle-washington-09-27-2026/event/0F0064B5BED9CFB3",
+   "type": "concert",
+   "tickets": {
+    "box": 1663,
+    "resale": 158,
+    "checked": "2026-09-28T00:37:53.495Z",
+    "from": 30.5
+   }
   }
  ]
 }
