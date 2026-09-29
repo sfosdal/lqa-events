@@ -2133,6 +2133,64 @@
     "checked": "2026-09-28T00:37:53.495Z",
     "from": 30.5
    }
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Ha-Chan, Shake Your Booty",
+   "date": "2026-09-28",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/ha-chan-shake-your-booty",
+   "movie": true,
+   "end": "18:02:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-28",
+   "time": "16:10:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "18:02:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-09-28",
+   "time": "16:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "18:32:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "$uicideboy$ present Grey Day Tour 2026 w. Shoreline Mafia & more",
+   "date": "2026-09-28",
+   "time": "18:30:00",
+   "url": "https://www.ticketmaster.com/uicideboy-present-grey-day-tour-2026-seattle-washington-09-28-2026/event/0F00647BECDC2E37",
+   "type": "concert",
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-09-28T22:07:28.144Z",
+    "from": 93.6
+   }
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-28",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "21:10:00"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Guess What? Trivia!",
+   "date": "2026-09-28",
+   "time": "19:00:00"
   }
  ]
 }
