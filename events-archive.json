@@ -2191,6 +2191,78 @@
    "title": "Guess What? Trivia!",
    "date": "2026-09-28",
    "time": "19:00:00"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Neighborcare All Staff Celebration",
+   "date": "2026-09-29",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=37942",
+   "type": "community",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "PSBJ Excellence in Wellbeing Awards",
+   "date": "2026-09-29",
+   "time": "",
+   "url": "https://nam04.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.bizjournals.com%2Fseattle%2Fevent%2F172274%2F2026%2Fexcellence-in-wellbeing-awards&data=05%7C02%7Cbrian.sloan%40seattlecc.com%7C3d59781ff89a43134c7b08def244af9f%7Cd7fcd9f7d2aa44c1a43040",
+   "type": "community",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-09-29",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "17:55:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Ha-Chan, Shake Your Booty",
+   "date": "2026-09-29",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/ha-chan-shake-your-booty",
+   "movie": true,
+   "end": "18:02:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-09-29",
+   "time": "16:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "18:32:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "LS 301: Front of House Mixing",
+   "date": "2026-09-29",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/h001332ed974",
+   "type": "community",
+   "end": "21:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-09-29",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "20:52:00"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day: Preview Performance",
+   "date": "2026-09-29",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
   }
  ]
 }
