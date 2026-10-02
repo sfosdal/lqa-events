@@ -2351,6 +2351,123 @@
    "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
    "type": "arts",
    "soldOut": true
+  },
+  {
+   "venue": "Convention Center",
+   "title": "AAOMS 2026 Annual Meeting",
+   "date": "2026-10-01",
+   "time": "",
+   "url": "https://aaoms.org/education-meetings/meetings/2026-annual-meeting/",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "SASE 2026 National Convention",
+   "date": "2026-10-01",
+   "time": "",
+   "url": "https://www.saseconnect.org/home",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-10-01",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "17:32:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "date": "2026-10-01",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/teenage-sex-and-death-at-camp-miasma",
+   "movie": true,
+   "end": "17:52:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Ha-Chan, Shake Your Booty",
+   "date": "2026-10-01",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/ha-chan-shake-your-booty",
+   "movie": true,
+   "end": "18:32:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Aren't We Amphibians",
+   "date": "2026-10-01",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/q05153d65790",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Leonardo! A Wonderful Show about a Terrible Monster",
+   "date": "2026-10-01",
+   "time": "18:00:00",
+   "url": "https://www.sct.org/onstage/productions/leonardo-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "Lumen Field",
+   "title": "Seattle Sounders FC vs. Sporting Kansas City",
+   "date": "2026-10-01",
+   "time": "18:30:00",
+   "url": "https://www.ticketmaster.com/seattle-sounders-fc-vs-sporting-kansas-seattle-washington-10-01-2026/event/0F006383ED609A52",
+   "type": "sports"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "SOMBR - You Are The Reason Tour",
+   "date": "2026-10-01",
+   "time": "19:00:00",
+   "url": "https://www.ticketmaster.com/sombr-you-are-the-reason-tour-seattle-washington-10-01-2026/event/0F006489CEB0AA1E",
+   "type": "concert",
+   "tickets": {
+    "box": 1326,
+    "resale": 0,
+    "checked": "2026-09-29T22:07:16.793Z",
+    "from": 39.5
+   }
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Practical Magic 2",
+   "date": "2026-10-01",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/practical-magic-2",
+   "movie": true,
+   "end": "21:10:00"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-10-01",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eulogy",
+   "date": "2026-10-01",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/events/special-events/eulogy",
+   "type": "arts"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "The Traveling Goat Presents: Jules Morrow",
+   "date": "2026-10-01",
+   "time": "19:30:00"
   }
  ]
 }
