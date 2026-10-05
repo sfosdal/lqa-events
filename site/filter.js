@@ -173,7 +173,7 @@
     if (venueMode[e.venue] === 'ex') return false;
     if (capMode[band] === 'ex') return false;
     if (badgeMode[type] === 'ex') return false;
-    if (mode.soldOnly && !ticketState(e)) return false; // the "Sold Out (or Nearly)" switch: only those
+    if (mode.soldOnly && !ticketState(e)) return false; // the "Only Sold" switch: only those
     var k, anyWhere = false, hitWhere = false, anyType = false;
     for (k in teamMode) {
       if (teamMode[k] === 'ex' && TEAM_BY_SLUG[k] && TEAM_BY_SLUG[k].re.test(title)) return false;

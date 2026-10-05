@@ -48,7 +48,7 @@ all / none.
 Two optional parameters ride along: `s=` carries the search box's text,
 encoded (UTF-8 bytes XOR-ed with a fixed key, URL-safe base64 — not readable
 in the address bar, but reversible; `LQAFilter.encodeSearch`/`decodeSearch`),
-`h=1` switches the US & WA holidays rows on, and `so=1` the Sold Out & Nearly switch (only events the feed marks sold out or within 5% of the house — `LQAFilter.ticketState`).
+`h=1` switches the US & WA holidays rows on, and `so=1` the Only Sold switch (only events the feed marks sold out or within 5% of the house — `LQAFilter.ticketState`).
 `filter.js` exposes `LQAFilter.parseFilterCode`/`encodeFilterCode`/
 `matchesFilter` so another site can apply the same code to its own copy of
 `events.json`.

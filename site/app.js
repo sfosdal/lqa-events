@@ -298,7 +298,7 @@
     p.typesOff.forEach(function (t) { state.badgeMode[t] = 'ex'; });
     if (p.teamsOff) groupInfo('team').keys.forEach(function (t) { state.teamMode[t] = 'ex'; });
     if (p.holidays !== undefined) state.holidays = p.holidays;
-    state.soldOnly = false; // a preset is a whole state: the Sold Out (or Nearly) switch goes off with it (Steve, 2026-09-15)
+    state.soldOnly = false; // a preset is a whole state: the Only Sold switch goes off with it (Steve, 2026-09-15)
   }
   // Does the panel's current state equal this preset? Compares what's off in
   // each group against the preset's lists (only keys the panel shows count,

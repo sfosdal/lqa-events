@@ -193,11 +193,11 @@
 <!-- the funnel in the bar drops this open below it -->
 <div id="filterPanel" class="filter-panel fp-tree" hidden>
   <!-- top row: presets (chips injected by app.js; the one matching the
-       current state is lit), the Sold Out (or Nearly) switch and the Holidays
+       current state is lit), the Only Sold switch and the Include Holidays
        switch (off by default; US, WA and Seattle holidays from app.js) -->
   <div class="fp-top">
     <div class="fp-presets" id="fpPresets"></div>
-    <!-- Sold Out (or Nearly): only the events the checker (or a source) marks
+    <!-- Only Sold: only the events the checker (or a source) marks
          sold out, or within 5% of the house — LQAFilter.ticketState -->
     <!-- these two are switches, not allow boxes like the rows below: Sold Out
          narrows the list to those, Holidays adds days — so they wear a
@@ -205,12 +205,12 @@
     <label class="fp-switch fp-soldout">
       <input type="checkbox" role="switch" id="soldOnlyToggle" autocomplete="off">
       <span class="sw"></span>
-      <span class="fp-name">Sold Out (or Nearly)</span>
+      <span class="fp-name">Only Sold</span> <!-- the words Steve set 2026-10-05 ("only sold"), in the panel's Title Case; was "Sold Out (or Nearly)" -->
     </label>
     <label class="fp-switch fp-holidays">
       <input type="checkbox" role="switch" id="holidaysToggle" autocomplete="off">
       <span class="sw"></span>
-      <span class="fp-name">Holidays</span>
+      <span class="fp-name">Include Holidays</span> <!-- "include holidays", Steve 2026-10-05; was "Holidays" -->
     </label>
   </div>
   <!-- Four groups — Venues (two lists), Event Type under the second, Teams
