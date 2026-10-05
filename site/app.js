@@ -219,21 +219,6 @@
         var barOnly = {};
         list.forEach(function (e) { barOnly[e.venue] = (barOnly[e.venue] !== false) && e.type === 'bar'; });
         state.venues = Object.keys(vs).filter(function (v) { return !barOnly[v]; }).sort(venueOrder(vs));
-        if (!Array.isArray(data) && data.generated) {
-          var gen = new Date(data.generated);
-          // Relative stamp, re-rendered every minute so it never goes stale
-          // while the tab sits open.
-          var stamp = function () {
-            var mins = Math.round((Date.now() - gen.getTime()) / 60000);
-            // the stamp's style (Steve, 2026-09-15, late): "4hrs fresh", "1hr fresh", "fresh just now" under an hour, "2 days old" past two days
-            var h = Math.round(mins / 60), d = Math.round(mins / 1440);
-            var text = mins < 60 ? 'Fresh just now' : mins < 48 * 60 ? h + (h === 1 ? 'hr' : 'hrs') + ' Fresh' : d + ' days old'; // "8hrs Fresh", as Steve wrote it (2026-09-16) — not all caps
-            $('updated').textContent = text;
-            // (the compact bar no longer repeats it — Steve, 2026-09-16: once, in the footer)
-          };
-          stamp();
-          setInterval(stamp, 60000);
-        }
         var now = new Date();
         state.month = new Date(now.getFullYear(), now.getMonth(), 1);
         // forget saved venues that no longer appear in the feed
@@ -2688,12 +2673,18 @@
     var rgb = function (c) { var n = parseInt(c.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
     var dist = function (a, b) { a = rgb(a); b = rgb(b); return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]); };
     var lighten = function (c, k) { return '#' + rgb(c).map(function (v) { return ('0' + Math.round(v + (255 - v) * k).toString(16)).slice(-2); }).join(''); };
+    var darken = function (c, k) { return '#' + rgb(c).map(function (v) { return ('0' + Math.round(v * (1 - k)).toString(16)).slice(-2); }).join(''); };
+    var LIGHT = 0.3; // white text needs a face darker than this (3:1 against #fff, the floor for the row's bold display size; Sporting KC's sky blue sits near 0.5, the Sounders' green just under)
     c0 = hex(c0); c1 = hex(c1);
-    var pick = c0;
+    var pick = c0, ours = side !== us ? sideColor(us, us, team) : null;
     if (ok(c0) && ok(c1) && lum(c0) < 0.03 && lum(c1) > lum(c0)) pick = c1;
     if (side !== us && ok(pick)) { // theirs too close to ours (the Kraken and the Canucks, two navies): the alternate if it stands apart, else theirs lightened
-      var ours = sideColor(us, us, team);
       if (ok(ours) && dist(pick, ours) < 140) pick = ok(c1) && dist(c1, ours) >= 140 ? c1 : lighten(pick, 0.4);
+    }
+    if (ok(pick) && lum(pick) > LIGHT) { // a pale face (Sporting KC, the Storm's gold) loses the white name: the alternate when it is dark enough and still stands apart from ours, else the face itself darkened until the name reads
+      var alt = ok(c1) && lum(c1) <= LIGHT && lum(c1) >= 0.03 && (!ok(ours) || dist(c1, ours) >= 140) ? c1 : null;
+      pick = alt || darken(pick, 0.4);
+      if (lum(pick) > LIGHT) pick = darken(pick, 0.3);
     }
     return pick || '#555';
   }
@@ -2701,7 +2692,7 @@
   function teamCell(side, team, color, extra) { // the abbreviation on the block, the nickname on the compact bar (styles.css .bug-abbr / .bug-nick); extra: markup that rides with the abbreviation (the record) and goes with it on the compact bar
     function esc(x) { return String(x).replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; }); }
     var abbr = (side.isUs && clubAbbr(team)) || side.team.abbreviation || side.team.shortDisplayName, nick = side.isUs ? team.label : nickname(side.team); // our side as the league lists it
-    return '<span class="bug-team" style="background:' + color + '"><i class="bug-abbr">' + esc(abbr) + (extra || '') + '</i><i class="bug-nick">' + esc(nick || abbr) + '</i></span>';
+    return '<span class="bug-team" style="background:' + color + '"><i class="bug-abbr">' + (extra ? '<b class="bug-ab">' + esc(abbr) + '</b><span class="bug-xtra">' + extra + '</span>' : esc(abbr)) + '</i><i class="bug-nick">' + esc(nick || abbr) + '</i></span>';
   }
   function renderTeamLive(team, ev) {
     function esc(s) { return String(s).replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; }); }
@@ -3869,13 +3860,13 @@
   }, { passive: true });
   $('toTop').addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
-  // The footer keeps to one line: when it wouldn't fit, the Updated stamp
-  // goes first (Steve, 2026-09-15); then Sources, Embed and Advertise drop
-  // to their icons; if it still doesn't fit, the credit drops to its mark.
+  // The footer keeps to one line: when it wouldn't fit, Sources, Embed and
+  // Advertise drop to their icons; if it still doesn't fit, the credit drops
+  // to its mark. (The Updated stamp, which used to go first, was removed
+  // 2026-10-05 — Steve.)
   function fitFooter() {
     var inner = document.querySelector('.foot-inner');
-    inner.classList.remove('is-stampless', 'is-tight', 'is-tighter');
-    if (inner.scrollWidth > inner.clientWidth + 1) inner.classList.add('is-stampless');
+    inner.classList.remove('is-tight', 'is-tighter');
     if (inner.scrollWidth > inner.clientWidth + 1) inner.classList.add('is-tight');
     if (inner.scrollWidth > inner.clientWidth + 1) inner.classList.add('is-tighter');
   }

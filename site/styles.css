@@ -406,7 +406,7 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 .fp-name > * { overflow: hidden; text-overflow: ellipsis; } /* never wraps; a too-narrow column clips with an ellipsis */
 .fp-name a { text-decoration-color: var(--line); }
 .fp-name a:hover { text-decoration-color: var(--ink-soft); }
-.fp-row:has(.fp-seg[data-mode="ex"]) .fp-name { opacity: .55; text-decoration: line-through; text-decoration-color: var(--ink-soft); } /* a hidden row reads struck */
+.fp-row:has(.fp-seg[data-mode="ex"]) .fp-name { opacity: .55; } /* a hidden row reads dimmed — the colour change alone, no strike-through (Steve, 2026-10-05) */
 /* three groups — the two venue lists (Lower Queen Anne the wider), Teams
    (Steve, 2026-09-20; Capacity rows dropped 2026-09-22) */
 @media (min-width: 641px) and (max-width: 899px) { .fp-tree .fp-cols { grid-template-columns: 1.1fr 1fr; } .fp-tree .fp-group:nth-child(3) { grid-column: 1; border-left: 0; padding-left: 0; padding-right: 1.25rem; border-top: 1px solid var(--line); padding-top: 1rem; margin-top: -.25rem; } } /* tablets: two columns, Teams under Lower Queen Anne (three squeezed the headings into wraps) */
@@ -899,24 +899,17 @@ footer::after {
   position: relative; max-width: calc(var(--pagew) - 2.5rem); margin: 0 auto;
   display: flex; align-items: center; justify-content: space-around; gap: 1.2rem; white-space: nowrap;
 }
-/* three things across: the middle one dead centre, the outer two centred in
-   their halves — the 1 : 2 : 2 : 1 spacing with the centre kept honest
-   (Steve, 2026-09-15) */
+/* two things across, one at each end — the credit and the links (the Updated
+   stamp that sat dead centre between them was removed 2026-10-05, Steve) */
 @media (min-width: 641px) {
-  .foot-inner { display: grid; grid-template-columns: 1fr auto 1fr; }
-  .foot-inner > * { justify-self: center; }
-  /* the stamp gone (is-stampless): two things left, one at each end (Steve, 2026-09-15) */
-  .foot-inner.is-stampless { grid-template-columns: auto auto; justify-content: space-between; }
-  .foot-inner.is-stampless > * { justify-self: auto; }
+  .foot-inner { display: grid; grid-template-columns: auto auto; justify-content: space-between; }
 }
 footer p { color: var(--ink-soft); font-size: .72rem; margin: 0; }
 .gw { display: flex; align-items: center; gap: .7rem; }
 .gw-logo { width: 32px; height: 32px; color: var(--ink-bright); flex: none; } /* pure white on dark */
 footer .gw-credit { font-size: .9rem; letter-spacing: .1em; line-height: 1; } /* same size as Sources / Embed */
-/* three things across the row — the credit, the Updated stamp, the links —
-   spaced 1 : 2 : 2 : 1 (space-around; Steve, 2026-09-15) */
+/* the credit, then the links (space-around on phones; Steve, 2026-09-15) */
 footer .gw { order: 1; }
-footer .foot-updated { order: 2; font-family: var(--mono); font-size: .9rem; font-weight: 500; letter-spacing: .1em; color: var(--gold); margin: 0; white-space: nowrap; } /* the Ghostwood credit's type (Steve, 2026-09-15: the two should match) */
 footer .foot-links { order: 3; display: flex; align-items: center; gap: 1.2rem; }
 footer .foot-link { order: 1; } /* Advertise, Embed, Sources */
 footer #embed { order: 2; }
@@ -928,7 +921,6 @@ footer .foot-link:hover { color: var(--ink-soft); }
 footer .foot-link, footer .share summary { font-family: var(--mono); font-size: .9rem; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
 footer .foot-link svg, footer .share summary svg:not(.chev) { width: 1.1rem; height: 1.1rem; color: var(--ink-bright); }
 footer .share summary .chev { color: var(--ink-bright); }
-.foot-inner.is-stampless .foot-updated { display: none; } /* the first thing to go when the row is short of room */
 .foot-inner.is-tight .foot-link span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* the advertising page (advertise.html): a short column of prose under the masthead */
 .ad-page { max-width: 40rem; margin: 0 auto 4rem; padding: 0 1.25rem; }
@@ -950,6 +942,8 @@ footer .share summary { font-size: .9rem; white-space: nowrap; }
   letter-spacing: .1em; color: var(--ink); white-space: nowrap; margin: 0;
 }
 .gw-credit strong { font-weight: 500; color: var(--gold); }
+.gw-credit a { text-decoration: none; } /* the credit links to ghostwoodlabs.com (2026-10-04); bare like the other footer links */
+.gw-credit a:hover strong { color: var(--ink-bright); }
 
 /* ---- the Teams view: the home teams' seasons, home and away ---- */
 .teams { width: 100%; margin: 1.6rem auto 0; } /* width: as a body flex item, auto margins would shrink it to its content and it would shift per team */
@@ -1203,7 +1197,7 @@ html { overflow-anchor: none; }
 .tf-wiki .tf-lead p:first-child { margin-top: 0; }
 .tf-wiki .tf-lead .tf-blurb { font-family: var(--body); font-size: .85rem; line-height: 1.4; color: var(--ink); max-width: none; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 /* the other sports' bug: team, score, that side's goals (or the ball) */
-.bug-grid.bug-grid-2 { grid-template-columns: 6.6rem minmax(3.6rem, max-content) minmax(5rem, 1fr); } /* the goals column takes what the row allows and trims with an ellipsis */
+.bug-grid.bug-grid-2 { grid-template-columns: minmax(6.6rem, max-content) minmax(3.6rem, max-content) minmax(5rem, 1fr); } /* the name column grows for a record with a tag beside it (SH, the ball) rather than wrapping it */ /* the goals column takes what the row allows and trims with an ellipsis */
 /* (doubled class: these outrank the baseball grid's pins further down) */
 .bug-grid.bug-grid-2 > :nth-child(3) { grid-area: 1 / 3; } .bug-grid.bug-grid-2 > :nth-child(6) { grid-area: 2 / 3; }
 .bug-grid.bug-grid-2 > :nth-child(4) { grid-area: 2 / 1; } .bug-grid.bug-grid-2 > :nth-child(5) { grid-area: 2 / 2; }
@@ -1214,7 +1208,10 @@ html { overflow-anchor: none; }
 .bug-ball { width: .55rem; height: .55rem; border-radius: 50%; background: var(--bug-on); flex: none; }
 .bug-team { position: relative; } .bug-poss { position: absolute; left: .3rem; top: 50%; width: 1rem; height: .7rem; transform: translateY(-50%); } /* the football at the left edge of the name cell: who has the ball */
 #teamHead.is-compact .bug-poss { width: .8rem; height: .55rem; left: .15rem; }
-.bug-abbr:has(.bug-rec) { display: inline-flex; align-items: center; gap: .35rem; } /* the record sits on the abbreviation's centre line, not its baseline */
+.bug-abbr:has(.bug-xtra) { display: grid; grid-template-columns: 3.1rem max-content; justify-items: start; align-items: center; gap: .3rem; width: 100%; box-sizing: border-box; padding: 0 .4rem; } /* the name in a fixed column, what rides with it (the record, SH, the ball) after: both rows' names start on one line and both records on another, whatever their lengths (Steve, 2026-10-01: SKC 6-3-17 over SEA 9-8-9 sat staggered when the pair was centred); the cell widens for a long extra (bug-grid-2 below) */
+.bug-ab { font-weight: inherit; }
+.bug-xtra { display: inline-flex; align-items: center; gap: .3rem; white-space: nowrap; } /* the record sits on the name's centre line, not its baseline */
+.bug-grid:has(.bug-poss) .bug-abbr:has(.bug-xtra) { padding-left: 1.5rem; } /* room for the ball at the left edge — in both rows, so the names stay in line */
 .bug-rec { font-family: var(--mono); font-size: .6rem; font-weight: 600; letter-spacing: .02em; line-height: 1; opacity: .8; text-shadow: none; } /* the record beside the abbreviation (football), as the broadcast prints it — goes with the abbreviation on the compact bar */
 .bug-to { display: inline-flex; gap: .16rem; vertical-align: middle; margin-right: .5rem; } /* the timeouts left: three dashes, the spent ones dimmed (football) */
 .bug-to b { display: block; width: .55rem; height: .2rem; border-radius: 1px; background: #5c6167; }
@@ -1622,8 +1619,6 @@ body.sheet-open { overflow: hidden; }
   .theme-toggle button { height: 2.35rem; }
   .cal-days > * { min-height: 2.75rem; }
   .cal-head button { min-width: 2.75rem; min-height: 2.75rem; }
-  .fp-row { padding: .3rem .35rem; }
-  .fp-seg-b { padding: .7rem .75rem; font-size: .74rem; } /* ~2.2rem tall: a thumb target (Steve, 2026-09-22) */
   /* presets: one swipeable row instead of three stacked ones; no label */
   .fp-top { gap: .6rem; margin: 0 -1rem 1rem; padding: 0 1rem; flex-wrap: wrap; }
   .fp-top .fp-presets { flex-basis: 100%; } /* the presets take the row; Sold Out (or Nearly) and Holidays go to the next (they had sat over the chips) */
@@ -1716,6 +1711,18 @@ body.sheet-open { overflow: hidden; }
   .tf-more { width: 100%; margin-top: .5rem; min-height: 2.25rem; font-size: .85rem; }
 }
 
+/* ---- touch screens at any width — phones and tablets, portrait or landscape
+   (Steve, 2026-09-22): the panel's small targets grow to thumb size. Keyed on
+   the pointer, not the width, so a tablet in landscape (wider than some
+   laptops) still gets them and a laptop with a mouse does not ---- */
+@media (pointer: coarse) {
+  .fp-seg-b { padding: .7rem .75rem; font-size: .74rem; } /* ~2.2rem tall */
+  .fp-set { padding: .5rem .2rem; margin: -.5rem -.2rem; } /* Show All · Hide All: the same words, a taller hit area */
+  .fp-switch { padding: .4rem 0; }
+  .sw { width: 2.4rem; height: 1.4rem; }
+  .sw::after { width: 1.05rem; height: 1.05rem; }
+  .fp-switch input:checked + .sw::after { transform: translateX(1rem); }
+}
 /* ---- phones: the game block stacked (kept at the end of the file so it outranks the desktop rules above) ---- */
 @media (max-width: 640px) {
   /* a phone (these come last, after every desktop rule they override): the crests on one line, small, at either end; the scorebug under them at its natural size; the news and the strip below */
