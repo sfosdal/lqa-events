@@ -25,6 +25,7 @@
     'Seattle Rep': '--v-rep',
     'Capitol Hill Block Party': '--v-chbp',
     'Bumbershoot': '--v-bumber', 'Northwest Folklife': '--v-folklife', 'PrideFest': '--v-pride', // the festivals (2026-10-05)
+    'Paramount Theatre': '--v-paramount', 'Showbox at the Market': '--v-showbox', 'Showbox SoDo': '--v-sodo', 'The Crocodile': '--v-croc', // Around Town's music rooms (2026-10-05)
   };
   // Unexpected venues draw from the same cool, web-safe family as the
   // curated ones, hashed from the name so the pick is stable day to day.
@@ -64,6 +65,9 @@
     'Bumbershoot': 'https://bumbershoot.com/schedule',
     'Northwest Folklife': 'https://www.nwfolklife.org/festival/',
     'PrideFest': 'https://www.seattlepridefest.org/schedule',
+    'Paramount Theatre': 'https://www.stgpresents.org/stg-venues/paramount-theatre/', // the music rooms around town: STG's page for the Paramount, one Showbox page for both rooms, the Crocodile's calendar
+    'Showbox at the Market': 'https://www.showboxpresents.com/events', 'Showbox SoDo': 'https://www.showboxpresents.com/events',
+    'The Crocodile': 'https://calendar.thecrocodile.com/',
   };
 
   // Venue list order = how big a crowd the place can hold (LQAFilter.
@@ -282,8 +286,9 @@
   // view keeps showing them.
   var DEFAULT_VENUES_ON = ['Climate Pledge Arena', 'Seattle Center', 'McCaw Hall', 'Lumen Field', 'T-Mobile Park', 'Seattle Rep'];
   var DEFAULT_VENUES_OFF = ['MoPOP', "Children's Theatre", 'Cornish Playhouse', 'SIFF Cinema Uptown', 'Pacific Science Center',
-    'The Vera Project', 'On the Boards', 'KEXP', 'Convention Center', 'Starfire Stadium', 'Husky Stadium', 'Capitol Hill Block Party']; // the campus festivals (Bumbershoot, Folklife, PrideFest) show by default; the Block Party is a bus ride away
-  var VENUES_BEFORE_KNOWN = DEFAULT_VENUES_OFF.slice(0, -1); // the default-off venues every saved pref set already knew before prefs recorded `known` (2026-10-05)
+    'The Vera Project', 'On the Boards', 'KEXP', 'Convention Center', 'Starfire Stadium', 'Husky Stadium', 'Capitol Hill Block Party', // the campus festivals (Bumbershoot, Folklife, PrideFest) show by default; the Block Party is a bus ride away
+    'Paramount Theatre', 'Showbox at the Market', 'Showbox SoDo', 'The Crocodile']; // the music rooms around town (2026-10-05) start off like the other bus rides
+  var VENUES_BEFORE_KNOWN = DEFAULT_VENUES_OFF.slice(0, DEFAULT_VENUES_OFF.indexOf('Capitol Hill Block Party')); // the default-off venues every saved pref set already knew before prefs recorded `known` (2026-10-05, with the Block Party)
   // Capacity bands: LQAFilter.CAP_BANDS, a filter option each (2026-09-22:
   // no longer a switch over the venue rows — nothing changes another box)
   var BAND_BY_KEY = {};
@@ -3138,7 +3143,7 @@
     var rounds = teamPostseason(team.slug), fin = rounds.filter(function (r) { return r.final; })[0];
     var pf = $('printFoot'); pf.innerHTML = '<span class="pf-home">Home</span><span class="pf-away">Away</span>' +
       (rounds.length ? '<span class="pf-post">Playoffs</span>' : '') + (fin ? '<span class="pf-final">' + esc(fin.name) + (fin.site ? ' · ' + esc(fin.site) : '') + '</span>' : '') +
-      '<span>Start times Pacific, subject to change</span><span>fosdal.net/lqa-events</span>';
+      '<span>Start times Pacific, subject to change</span><span>lqa.here.events</span>';
     // the sheet: square months on one portrait page (like the wall posters),
     // two, three or four across — whichever leaves them biggest. Letter
     // less 8mm margins is 200 × 263mm; the banner and legend take ~36mm.

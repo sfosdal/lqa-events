@@ -10,7 +10,7 @@
  */
 import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
-import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates } from './sources.mjs';
+import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates, parseShowboxEvents } from './sources.mjs';
 import { mergeWithArchive, unionArchives } from './merge.mjs';
 import { calmTitle, isNotice } from './titles.mjs';
 import { applySchedules } from './schedules.mjs';
@@ -23,7 +23,12 @@ const ICS_OUT = new URL('../site/events.ics', import.meta.url);
 // are kept for a year (carried forward from the previously published feed —
 // see mergeWithArchive).
 const WINDOW_DAYS = 365;
-const FEED_URL = process.env.FEED_URL || 'https://fosdal.net/lqa-events/events.json';
+// The live feed is read from the site's own domain (lqa.here.events since the
+// move, 2026-10-05) with the old fosdal.net address as a fallback: whichever
+// answers during the switch keeps the archive union going (a build that reads
+// neither copy of the archive refuses to publish — see mergeWithArchive).
+const FEED_URL = process.env.FEED_URL || 'https://lqa.here.events/events.json';
+const FEED_URL_OLD = 'https://fosdal.net/lqa-events/events.json';
 // the second copy of the archive: every past event ever published, kept on
 // the orphan `archive` branch by the workflow after each successful build
 const ARCHIVE_URL = process.env.ARCHIVE_URL || 'https://raw.githubusercontent.com/sfosdal/lqa-events/archive/events-archive.json';
@@ -68,16 +73,29 @@ async function ticketmasterVenue({ venueId, venueMatch, label, fallbackUrl, excl
     if (page + 1 >= (data?.page?.totalPages || 1)) break;
   }
   console.log(`Ticketmaster ${label}: ${all.length} events`);
-  return all
+  const rows = all
     .filter((e) => (e._embedded?.venues?.[0]?.name || '').toLowerCase().includes(venueMatch))
-    .filter((e) => !exclude || !exclude.test(e.name || ''))
+    .filter((e) => !exclude || !exclude.test(e.name || ''));
+  // Ticketmaster's resale marketplace (source "tmr": an id starting "Z7r9j",
+  // a ticketmaster.com/event/ link) lists shows whose box office is elsewhere
+  // — every Showbox night (AXS), and at the Crocodile (TicketWeb, which the
+  // API carries as its own source) a second listing beside the primary, four
+  // of 33 on 2026-10-05, each titled differently so the duplicate guard can't
+  // fold them. A resale listing is kept only when no primary one shares its
+  // date, and it links to the box office the listing names (the Showboxes'
+  // site) or the venue's own page, never to the resale offer.
+  const isResale = (e) => /^Z7r9j/.test(e.id || '');
+  const primaryDates = new Set(rows.filter((e) => !isResale(e)).map((e) => e.dates?.start?.localDate));
+  return rows
+    .filter((e) => !isResale(e) || !primaryDates.has(e.dates?.start?.localDate))
     .map((e) => {
+      const boxOffice = (e.outlets || []).find((o) => o.type === 'venueBoxOffice')?.url;
       const ev = {
         venue: label,
         title: e.name,
         date: e.dates?.start?.localDate || '',
         time: e.dates?.start?.localTime || '',
-        url: e.url || fallbackUrl,
+        url: isResale(e) ? (boxOffice || fallbackUrl) : (e.url || fallbackUrl),
       };
       if (e.ageRestrictions?.legalAgeEnforced) ev.age21 = true;
       const type = tmType(e.classifications?.[0]);
@@ -381,12 +399,30 @@ async function folklife() {
   return evs;
 }
 
+// Showbox at the Market + Showbox SoDo: AEG's whole Northwest listing on
+// one server-rendered page, the two Seattle rooms kept — parseShowboxEvents.
+async function showbox() {
+  const evs = parseShowboxEvents(await pageText('https://www.showboxpresents.com/events/all'));
+  console.log(`Showbox: ${evs.length} shows (${evs.filter((e) => e.venue === 'Showbox SoDo').length} in SoDo)`);
+  return evs;
+}
+
 // Dedicated per-venue sources run first (better times and ticket links)...
 const sources = [
   () => ticketmasterVenue({ venueId: 'KovZ917Ahkk', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/', exclude: /arena tours?|all access pass/i }),
   // The SoDo stadiums: not Seattle Center, but big enough to move the whole city.
   () => ticketmasterVenue({ venueId: 'KovZpZAEevAA', venueMatch: 't-mobile park', label: 'T-Mobile Park', fallbackUrl: 'https://www.mlb.com/mariners', exclude: /ballpark tour|flex membership/i }),
   () => ticketmasterVenue({ venueId: 'KovZpZAEknnA', venueMatch: 'lumen field', label: 'Lumen Field', fallbackUrl: 'https://www.lumenfield.com/events', exclude: /stadium tour|notification list/i }),
+  // Around Town's music rooms (Steve, 2026-10-05): the Paramount (STG's
+  // downtown theatre — Broadway runs, concerts, comedy) and the Crocodile in
+  // Belltown, whose box office is TicketWeb — the Discovery API carries those
+  // listings under the same venue id (Madame Lou's and Here-After, the
+  // smaller rooms in its building, list under it too). The two Showboxes
+  // sell through AXS, so they come from their own listing (showbox below);
+  // Ticketmaster has them only as resale offers.
+  () => ticketmasterVenue({ venueId: 'KovZpZAFkvEA', venueMatch: 'paramount', label: 'Paramount Theatre', fallbackUrl: 'https://www.stgpresents.org/stg-venues/paramount-theatre/', exclude: /theatre tours?/i }),
+  () => ticketmasterVenue({ venueId: 'KovZpZA1vFtA', venueMatch: 'crocodile', label: 'The Crocodile', fallbackUrl: 'https://calendar.thecrocodile.com/' }),
+  showbox,
   // McCaw Hall comes from the Seattle Center sweep below (every performance,
   // with times); its RSS only supplies the venue's own detail-page links.
   veraProjectDice,
@@ -422,6 +458,7 @@ const CANONICAL_VENUES = new Set([
   'SIFF Cinema Uptown', 'On the Boards', 'Convention Center',
   "Children's Theatre", 'MoPOP', 'Pacific Science Center', 'KEXP',
   'The Traveling Goat', 'Seattle Rep', 'Capitol Hill Block Party', 'Bumbershoot', 'PrideFest', 'Northwest Folklife',
+  'Paramount Theatre', 'Showbox at the Market', 'Showbox SoDo', 'The Crocodile', // Around Town's music rooms (2026-10-05)
 ]);
 const normalizeVenue = (e) => (CANONICAL_VENUES.has(e.venue) ? e : { ...e, venue: 'Seattle Center' });
 all = all.map(normalizeVenue);
@@ -470,7 +507,10 @@ async function fetchArchive(url, what) {
   }
   return null;
 }
-const [liveArchive, branchArchive] = await Promise.all([fetchArchive(FEED_URL, 'Live feed'), fetchArchive(ARCHIVE_URL, 'Archive branch')]);
+const [liveArchive, branchArchive] = await Promise.all([
+  fetchArchive(FEED_URL, 'Live feed').then((a) => (a !== null || process.env.FEED_URL ? a : fetchArchive(FEED_URL_OLD, 'Live feed (old address)'))),
+  fetchArchive(ARCHIVE_URL, 'Archive branch'),
+]);
 if (liveArchive === null && branchArchive === null && !process.env.ALLOW_NO_ARCHIVE) {
   console.error('No archive from either copy — not publishing (ALLOW_NO_ARCHIVE=1 to override for a first build)');
   process.exit(1);
@@ -580,7 +620,7 @@ for (const t of TEAMS) {
 const seasonEvents = (slug, label, games) => games.map((g) => ({
   title: `${label} ${g.home ? 'vs' : 'at'} ${g.opp.name}${g.pre ? ' (preseason)' : g.playoff ? ' (playoff)' : ''}`,
   venue: g.venue || (g.home ? '' : g.opp.name), date: g.date, time: g.tbd ? null : g.time, ...(g.tbd ? { dateTbd: true } : {}),
-  url: `https://fosdal.net/lqa-events/?team=${slug}`,
+  url: `https://lqa.here.events/?team=${slug}`,
 }));
 const allSeasons = [];
 for (const t of TEAMS) {

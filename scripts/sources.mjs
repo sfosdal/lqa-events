@@ -641,3 +641,49 @@ export function parseFolklifeDates(html) {
   }
   return out;
 }
+
+/**
+ * Showbox Presents (showboxpresents.com/events/all): AEG's listing for its
+ * Northwest rooms, server-rendered — one `div.entry` per show with the
+ * headliner (h3), a "with …" support line (h4), "Tue, Oct 6, 2026", "Show
+ * 8:00 PM", the room after an "@" and the AXS ticket button, whose text
+ * says when a show is postponed, cancelled or sold out. Only the two Seattle
+ * rooms are kept (the same page lists WAMU, the Crystal Ballroom and a dozen
+ * more); "The Showbox" is the Market room. Ticketmaster carries these nights
+ * only as resale offers, so this is the box office. Returns [{ venue,
+ * title, date, time, url, status?, soldOut? }].
+ */
+const SHOWBOX_ROOMS = { 'The Showbox': 'Showbox at the Market', 'Showbox SoDo': 'Showbox SoDo' };
+export function parseShowboxEvents(html) {
+  const out = [];
+  for (const entry of String(html).split(/<div class="entry /).slice(1)) {
+    const seg = entry.replace(/\s+/g, ' ');
+    const room = seg.match(/<span class="venue">.*?<\/span>\s*([^<]+)<\/span>/);
+    const venue = room && SHOWBOX_ROOMS[room[1].trim()];
+    if (!venue) continue;
+    const h3 = seg.match(/<h3[^>]*>\s*<a[^>]*>\s*([^<]*?)\s*<\/a>/);
+    const dm = seg.match(/<span class="date">.*?<\/span>\s*(?:[A-Za-z]{3},\s*)?([A-Za-z]+)\.? (\d{1,2}), (\d{4})\s*</);
+    if (!h3 || !dm) continue;
+    const mon = MONTHS[Object.keys(MONTHS).find((k) => k.startsWith(dm[1].slice(0, 3).toLowerCase()))];
+    if (!mon) continue;
+    let title = decodeEntities(h3[1]);
+    const h4 = seg.match(/<h4[^>]*>([^<]+)<\/h4>/);
+    const support = h4 && decodeEntities(h4[1]).trim();
+    if (support && /^with /i.test(support)) title += ` ${support}`;
+    const tm = seg.match(/<span class="time">.*?<\/span>\s*(?:Show|Doors)?\s*(\d{1,2}:\d{2}\s*[AP]M)/i);
+    const tickets = seg.match(/href="([^"]+)"[^>]*class="btn-tickets[^"]*"[^>]*>(?:<i[^>]*><\/i>)?\s*([^<]*)</);
+    const detail = seg.match(/href="(https?:\/\/www\.showboxpresents\.com\/events\/detail\/\d+)"/);
+    const ev = {
+      venue, title,
+      date: `${dm[3]}-${pad(mon)}-${pad(dm[2])}`,
+      time: tm ? parseClockTime(tm[1]) : '',
+      url: (tickets && tickets[1]) || (detail && detail[1]) || 'https://www.showboxpresents.com/events',
+    };
+    const word = tickets ? tickets[2].trim().toLowerCase() : '';
+    if (/postponed|rescheduled/.test(word)) ev.status = 'postponed';
+    else if (/cancel/.test(word)) ev.status = 'cancelled';
+    else if (/sold out/.test(word)) ev.soldOut = true;
+    out.push(ev);
+  }
+  return out;
+}

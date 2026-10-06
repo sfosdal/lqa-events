@@ -40,3 +40,11 @@ test('nothing on Show anywhere: everything but the Hides; the Only Sold switch a
   assert.equal(F.matchesFilter(party, {}), true);
   assert.equal(F.matchesFilter(party, { soldOnly: true, venueMode: { 'Capitol Hill Block Party': 'in' } }), false);
 });
+
+test('share codes: nine digits since the music rooms around town (2026-10-05); the new venues round-trip and an old eight-digit code still parses', () => {
+  const m = { venueMode: { 'The Crocodile': 'ex', 'Paramount Theatre': 'in', 'Showbox SoDo': 'in' }, badgeMode: {}, teamMode: {}, capMode: {} };
+  const code = F.encodeFilterCode(m);
+  assert.equal(code.split('.')[0].length, 9);
+  assert.deepEqual(F.parseFilterCode(code).venueMode, m.venueMode);
+  assert.equal(F.parseFilterCode('00000001').venueMode['Climate Pledge Arena'], 'ex'); // bit 0, as every code since the first
+});

@@ -33,6 +33,7 @@
   --v-rep: #c0392b;      /* Seattle Rep: a stage-curtain red, the one warm hue */
   --v-chbp: #7a8c2e;     /* the festivals (2026-10-05): the Block Party an olive green-gold, */
   --v-bumber: #c47a2b; --v-folklife: #5a8f3c; --v-pride: #c04a8a; /* Bumbershoot amber, Folklife leaf green, PrideFest pink */
+  --v-paramount: #a0522d; --v-showbox: #b8860b; --v-sodo: #5b6b8a; --v-croc: #3b9142; /* Around Town's music rooms (2026-10-05): the Paramount's brick sienna, the Market's neon gold, SoDo slate, crocodile green */
   --venue-text: 72%;     /* how much of the venue hue the card's venue label keeps (light mode) */
   --tint: 26%;           /* the venue wash behind each card (light mode; 13% in the dark palette) */
   /* event-type hues (calendar ticks, agenda right edge): concerts salmon and
@@ -66,6 +67,7 @@
     --v-cornish: #3ecf97; --v-cpa: #4da3f0; --v-tmobile: #8ad8e0; --v-seactr: #6a72e6;
     --v-lumen: #8b8fe8; --v-husky: #c4a0f0; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
     --v-scc: #7fa7cc; --v-sct: #6cc9db; --v-mopop: #e88ad8; --v-pacsci: #62b8f7; --v-kexp: #b48cf5; --v-goat: #5fb3a1; --v-rep: #f0827a;
+    --v-paramount: #e39a6e; --v-showbox: #e8c45a; --v-sodo: #aab8d6; --v-croc: #7ed67f;
     --venue-text: 100%; --tint: 13%;
     --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
     --t-movie: #8b9db0; --t-community: #e660a8; --t-expo: #4fd1c5; --t-bar: #e3ad3c; --alert: #ff4b3e;
@@ -78,6 +80,7 @@
   --v-cornish: #3ecf97; --v-cpa: #4da3f0; --v-tmobile: #8ad8e0; --v-seactr: #6a72e6;
   --v-lumen: #8b8fe8; --v-husky: #c4a0f0; --v-siff: #b596e0; --v-vera: #a26be6; --v-otb: #e07ae0; --v-mccaw: #d158a7;
   --v-scc: #7fa7cc; --v-sct: #6cc9db; --v-mopop: #e88ad8; --v-pacsci: #62b8f7; --v-kexp: #b48cf5; --v-goat: #5fb3a1; --v-rep: #f0827a;
+  --v-paramount: #e39a6e; --v-showbox: #e8c45a; --v-sodo: #aab8d6; --v-croc: #7ed67f;
   --venue-text: 100%; --tint: 13%;
   --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
   --t-movie: #8b9db0; --t-community: #e660a8; --t-expo: #4fd1c5; --t-bar: #e3ad3c; --alert: #ff4b3e;

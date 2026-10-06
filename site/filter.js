@@ -54,6 +54,7 @@
     'Seattle Center': 'community', 'SIFF Cinema Uptown': 'community', // SIFF specials = festival programming
     'Convention Center': 'expo',
     "Children's Theatre": 'arts', 'MoPOP': 'community', 'Pacific Science Center': 'community', 'KEXP': 'concert',
+    'Paramount Theatre': 'concert', 'Showbox at the Market': 'concert', 'Showbox SoDo': 'concert', 'The Crocodile': 'concert', // the music rooms around town; Ticketmaster's own segment (a Broadway run is Arts & Theatre) comes first
   };
   var TYPE_KEYS_OK = { concert: 1, sports: 1, arts: 1, movie: 1, community: 1, expo: 1, bar: 1 };
   // Order: the movie flag and a home team / "vs" are certain. Then the
@@ -99,6 +100,9 @@
     'Bumbershoot': favicon('bumbershoot.com'),
     'Northwest Folklife': favicon('nwfolklife.org'),
     'PrideFest': favicon('www.seattlepridefest.org'),
+    'Paramount Theatre': favicon('www.stgpresents.org'), // Around Town's music rooms (2026-10-05): the Paramount is STG's, the Showboxes share a site
+    'Showbox at the Market': favicon('www.showboxpresents.com'), 'Showbox SoDo': favicon('www.showboxpresents.com'),
+    'The Crocodile': favicon('www.thecrocodile.com'),
     // local bars: the bar's logo reduced to line art (scripts/make-mark.py),
     // shown on its agenda rows like a team crest — a path under site/
     'The Traveling Goat': 'marks/traveling-goat.png',
@@ -115,6 +119,7 @@
     'The Traveling Goat': '#5fb3a1', // bars: a muted sea-green, off the fallback hash's neon
     'Capitol Hill Block Party': '#a6b85a', // the festivals (2026-10-05): the Block Party an olive green-gold,
     'Bumbershoot': '#e8a35a', 'Northwest Folklife': '#8fc26a', 'PrideFest': '#e07bb5', // Bumbershoot amber, Folklife leaf green, PrideFest pink
+    'Paramount Theatre': '#e39a6e', 'Showbox at the Market': '#e8c45a', 'Showbox SoDo': '#aab8d6', 'The Crocodile': '#7ed67f', // the music rooms (2026-10-05): the Paramount's brick sienna, the Market's neon gold, SoDo slate, crocodile green
   };
 
   // How many people each place holds — the one measure of an event's size
@@ -131,6 +136,7 @@
     'Starfire Stadium': 4500, // the Seawolves' ground in Tukwila
     'Capitol Hill Block Party': 30000, // the festivals: a day's crowd, not a room
     'Bumbershoot': 25000, 'Northwest Folklife': 50000, 'PrideFest': 50000,
+    'Paramount Theatre': 2800, 'Showbox SoDo': 1800, 'Showbox at the Market': 1150, 'The Crocodile': 750, // the music rooms around town: seats at the Paramount, standing floors at the rest
   };
 
   // Ticket state from the feed's `tickets` and `soldOut`: 'soldout' (the box
@@ -160,9 +166,12 @@
     return 'room';
   }
 
-  // The campus venues walk a crowd past Lower Queen Anne; these three are a
-  // bus ride away and listed for their size (a venue missing here is campus).
-  var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town', 'Starfire Stadium': 'town', 'Husky Stadium': 'town', 'Capitol Hill Block Party': 'town' };
+  // The campus venues walk a crowd past Lower Queen Anne; these are a bus
+  // ride away — the stadiums and the Convention Center listed for their
+  // size, the music rooms downtown, in SoDo and Belltown for their nights
+  // out (2026-10-05). A venue missing here is campus.
+  var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town', 'Starfire Stadium': 'town', 'Husky Stadium': 'town', 'Capitol Hill Block Party': 'town',
+    'Paramount Theatre': 'town', 'Showbox at the Market': 'town', 'Showbox SoDo': 'town', 'The Crocodile': 'town' };
   // The festivals (2026-10-05): each its own venue, its rows together in the
   // panel's Festivals group whatever its area — the area still says which
   // presets turn it off (the Block Party is a bus ride away; Bumbershoot,
@@ -214,13 +223,14 @@
   // view with checked entries writes a second mask after a dot — "EX.IN" —
   // and a code without the dot is the old kind, X's only. Append-only:
   // adding an entry adds a bit and every existing code keeps meaning what it
-  // meant. Eight base-36 digits hold 41 bits, so the registry can grow to 41
+  // meant. Nine base-36 digits hold 46 bits, so the registry can grow to 46
   // entries before CODE_LENGTH needs a bump (old, shorter codes still parse —
   // 6 → 7 on 2026-09-20 for Starfire and the Seawolves, 7 → 8 on 2026-09-22
-  // for the capacity bands).
+  // for the capacity bands, 8 → 9 on 2026-10-05 when the music rooms around
+  // town took the registry past 41).
   // A venue the feed turns up that isn't listed here can't be encoded and
   // drops out of the link.
-  var CODE_LENGTH = 8;
+  var CODE_LENGTH = 9;
   var REGISTRY = [
     ['venue', 'Climate Pledge Arena'], ['venue', 'McCaw Hall'], ['venue', 'Seattle Center'],
     ['venue', 'Cornish Playhouse'], ['venue', 'The Vera Project'], ['venue', 'SIFF Cinema Uptown'],
@@ -238,6 +248,7 @@
     ['cap', 'stadium'], ['cap', 'arena'], ['cap', 'hall'], ['cap', 'room'],
     ['venue', 'Capitol Hill Block Party'], // 2026-10-05, the Block Party (named 'Capitol Hill' for a few hours, never deployed)
     ['venue', 'Bumbershoot'], ['venue', 'Northwest Folklife'], ['venue', 'PrideFest'], // 2026-10-05, the Festivals group
+    ['venue', 'Paramount Theatre'], ['venue', 'Showbox at the Market'], ['venue', 'Showbox SoDo'], ['venue', 'The Crocodile'], // 2026-10-05, Around Town's music rooms
   ];
   var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode', cap: 'capMode' };
   function maskOf(mode, which) {

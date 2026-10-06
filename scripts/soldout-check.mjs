@@ -35,8 +35,9 @@ const VENUES = [ // Discovery venue ids, as in fetch-events.mjs
   { id: 'KovZ917Ahkk', label: 'Climate Pledge Arena' },
   { id: 'KovZpZAEevAA', label: 'T-Mobile Park' },
   { id: 'KovZpZAEknnA', label: 'Lumen Field' },
+  { id: 'KovZpZAFkvEA', label: 'Paramount Theatre' }, // Around Town's one Ticketmaster room (Steve, 2026-10-05: "add paramount"); the Showboxes are AXS and the Crocodile TicketWeb — other page layouts, not checked
 ];
-const SKIP = /parking|parkwhiz|arena tours?|all access pass|stadium tour|ballpark tour|notification list|flex membership/i;
+const SKIP = /parking|parkwhiz|arena tours?|all access pass|stadium tour|ballpark tour|theatre tours?|notification list|flex membership/i;
 // the home teams' AWAY games too (Steve, 2026-09-16): the host club's Ticketmaster
 // listing, found by the club's name within the window; only a primary listing
 // (a 16-hex event id in its URL — the resale-only listings Ticketmaster carries

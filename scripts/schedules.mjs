@@ -19,7 +19,7 @@ import { cleanMarks } from './marks.mjs';
 import { addClips } from './highlights.mjs';
 import { readFileSync } from 'node:fs';
 
-const UA = 'Mozilla/5.0 (compatible; lqa-events/1.0; +https://fosdal.net/lqa-events/)';
+const UA = 'Mozilla/5.0 (compatible; lqa-events/1.0; +https://lqa.here.events/)';
 const seattleDate = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
 const seattleTime = (iso) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: 'America/Los_Angeles', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 // MLB's team-logos/<id>.svg files are the caps' on-dark variants; all keep

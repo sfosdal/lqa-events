@@ -3,7 +3,7 @@
  *
  * Usage on any site:
  *   <div id="lqa-events"></div>
- *   <script src="https://fosdal.net/lqa-events/embed.js" data-max="8" defer></script>
+ *   <script src="https://lqa.here.events/embed.js" data-max="8" defer></script>
  *
  * Options (data- attributes on the script tag):
  *   data-max     max events to show (default 8)

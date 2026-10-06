@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates } from './sources.mjs';
+import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates, parseShowboxEvents } from './sources.mjs';
 
 // --- Seattle Center calendar HTML (event cards; dates live on detail pages) ---
 
@@ -506,4 +506,24 @@ test('Folklife: the heading\'s date range becomes one all-day free entry per day
   assert.deepEqual(parseFolklifeDates(html)[0], { title: 'Northwest Folklife Festival', date: '2027-05-28', time: '', free: true });
   assert.deepEqual(parseFolklifeDates('<h2>May 30–June 1, 2026</h2>').map((e) => e.date), ['2026-05-30', '2026-05-31', '2026-06-01']); // a range across the month's end
   assert.deepEqual(parseFolklifeDates('<h2>Festival</h2><p>Dates to be announced</p>'), []);
+});
+
+// --- Showbox Presents: the AEG listing, two Seattle rooms out of a dozen ---
+function showboxEntry(room, title, support, date, time, btn = 'Buy Tickets', id = '1488033') {
+  return `<div class="entry  showboxpresents clearfix " data-state="WA"> <div class="thumb"> <a href="https://www.showboxpresents.com/events/detail/${id}" title="More Info"> <img src="x.jpg" alt=""/> </a> </div>
+    <div class="info"> <div class="title"> <h5 class="accentColor animated">Showbox Presents</h5> <h5>Some Tour</h5> <h3 class="carousel_item_title_small"> <a href="https://www.showboxpresents.com/events/detail/${id}" title="More Info" class="">
+    ${title} </a> </h3> ${support ? `<h4 class="animated">${support}</h4>` : ''} </div>
+    <div class="date-time-container"> <span class="date"> <span class="fa fa-calendar-o"></span> ${date} </span> <span class="time"> <span class="fa fa-clock-o"></span> ${time} </span> <span class="venue"><span class="accentColor">@</span> ${room}</span> </div> </div>
+    <div class="buttons"> <a href="https://www.axs.com/events/${id}/x-tickets?skin=showboxpresents" title="Buy Tickets" target="_blank" class="btn-tickets accentBackground tickets status_1"><i class="fa fa-ticket fa-secondary"></i>${btn}</a> </div> </div>`;
+}
+test('Showbox: the two Seattle rooms by name, headliner with support, date and show time, the AXS link; other rooms skipped', () => {
+  const html = showboxEntry('The Showbox', 'Dead Kennedys', 'with Flipper &amp; Dish Pit', 'Tue, Oct 6, 2026', 'Show 8:00 PM', 'Buy Tickets', '1542155')
+    + showboxEntry('Showbox SoDo', 'Fruit Bats', '', 'Fri, Oct 9, 2026', 'Show 8:00 PM', 'Buy Tickets', '1382157')
+    + showboxEntry('WAMU Theater', 'Someone Else', 'with Nobody', 'Sat, Oct 10, 2026', 'Show 7:00 PM')
+    + showboxEntry('Showbox SoDo', 'Moved Band', 'with Support', 'Sun, Nov 1, 2026', 'Show 7:30 PM', 'Postponed', '1');
+  assert.deepEqual(parseShowboxEvents(html), [
+    { venue: 'Showbox at the Market', title: 'Dead Kennedys with Flipper & Dish Pit', date: '2026-10-06', time: '20:00:00', url: 'https://www.axs.com/events/1542155/x-tickets?skin=showboxpresents' },
+    { venue: 'Showbox SoDo', title: 'Fruit Bats', date: '2026-10-09', time: '20:00:00', url: 'https://www.axs.com/events/1382157/x-tickets?skin=showboxpresents' },
+    { venue: 'Showbox SoDo', title: 'Moved Band with Support', date: '2026-11-01', time: '19:30:00', url: 'https://www.axs.com/events/1/x-tickets?skin=showboxpresents', status: 'postponed' },
+  ]);
 });
