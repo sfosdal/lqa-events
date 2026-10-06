@@ -57,6 +57,591 @@
    "type": "sports"
   },
   {
+   "venue": "PrideFest",
+   "type": "community",
+   "title": "PrideFest Capitol Hill",
+   "date": "2026-06-27",
+   "time": "12:00",
+   "end": "20:00",
+   "url": "https://www.seattlepridefest.org/schedule/2026/6/27/pridefest-capitol-hill",
+   "free": true
+  },
+  {
+   "venue": "PrideFest",
+   "type": "community",
+   "title": "PrideFest Seattle Center",
+   "date": "2026-06-28",
+   "time": "12:00",
+   "end": "20:00",
+   "url": "https://www.seattlepridefest.org/schedule/2026/6/28/pridefest-seattle-center",
+   "free": true
+  },
+  {
+   "venue": "Capitol Hill Block Party",
+   "type": "concert",
+   "url": "https://www.capitolhillblockparty.com/artists",
+   "title": "MUNA, Magdalena Bay, DJ Trixie Mattel",
+   "date": "2026-08-07",
+   "time": "14:35",
+   "lineup": [
+    "MUNA",
+    "Magdalena Bay",
+    "DJ Trixie Mattel",
+    "Between Friends",
+    "nimino",
+    "Frost Children",
+    "Ninajirachi",
+    "After",
+    "Aliyah's Interlude",
+    "Gelli Haha",
+    "Otha",
+    "Avery Cochrane",
+    "Dark Chisme",
+    "Casi",
+    "Glass Egg",
+    "Clover",
+    "Fleetwood Snack",
+    "Emi Pop",
+    "Camille Cano",
+    "Drew Martin",
+    "Give Me The Money",
+    "Lovely Colours",
+    "Girl Parallel",
+    "Zailee Haze"
+   ],
+   "sets": [
+    {
+     "stage": "Main Stage",
+     "acts": [
+      {
+       "act": "Avery Cochrane",
+       "start": "15:15",
+       "end": "15:45"
+      },
+      {
+       "act": "Aliyah's Interlude",
+       "start": "16:15",
+       "end": "16:45"
+      },
+      {
+       "act": "nimino",
+       "start": "17:15",
+       "end": "18:00"
+      },
+      {
+       "act": "Between Friends",
+       "start": "18:30",
+       "end": "19:15"
+      },
+      {
+       "act": "DJ Trixie Mattel",
+       "start": "19:30",
+       "end": "20:30"
+      },
+      {
+       "act": "Magdalena Bay",
+       "start": "21:00",
+       "end": "22:00"
+      },
+      {
+       "act": "MUNA",
+       "start": "22:40",
+       "end": "close"
+      }
+     ]
+    },
+    {
+     "stage": "Daydream Stage",
+     "acts": [
+      {
+       "act": "Girl Parallel",
+       "start": "14:35",
+       "end": "15:05"
+      },
+      {
+       "act": "Zailee Haze",
+       "start": "15:35",
+       "end": "16:05"
+      },
+      {
+       "act": "Otha",
+       "start": "16:35",
+       "end": "17:20"
+      },
+      {
+       "act": "Gelli Haha",
+       "start": "17:50",
+       "end": "18:35"
+      },
+      {
+       "act": "After",
+       "start": "19:05",
+       "end": "19:50"
+      },
+      {
+       "act": "Ninajirachi",
+       "start": "20:20",
+       "end": "21:20"
+      },
+      {
+       "act": "Frost Children",
+       "start": "22:00",
+       "end": "23:00"
+      }
+     ]
+    },
+    {
+     "stage": "Neumos Stage",
+     "acts": [
+      {
+       "act": "Camille Cano",
+       "start": "17:45",
+       "end": "18:30"
+      },
+      {
+       "act": "Fleetwood Snack",
+       "start": "19:00",
+       "end": "19:45"
+      },
+      {
+       "act": "Lovely Colours",
+       "start": "20:15",
+       "end": "21:00"
+      },
+      {
+       "act": "Casi",
+       "start": "21:30",
+       "end": "22:15"
+      },
+      {
+       "act": "Dark Chisme",
+       "start": "22:45",
+       "end": "23:30"
+      },
+      {
+       "act": "Afters: Frost Children (DJ set) + DJ Thank You",
+       "start": "23:30",
+       "end": "close"
+      }
+     ]
+    },
+    {
+     "stage": "Barboza Stage",
+     "acts": [
+      {
+       "act": "Give Me The Money",
+       "start": "17:15",
+       "end": "18:00"
+      },
+      {
+       "act": "Emi Pop",
+       "start": "18:30",
+       "end": "19:15"
+      },
+      {
+       "act": "Clover",
+       "start": "19:45",
+       "end": "20:30"
+      },
+      {
+       "act": "Drew Martin",
+       "start": "21:00",
+       "end": "21:45"
+      },
+      {
+       "act": "Glass Egg",
+       "start": "22:15",
+       "end": "23:00"
+      },
+      {
+       "act": "Afters: Double Sunrise Club",
+       "start": "23:30",
+       "end": "close"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "venue": "Capitol Hill Block Party",
+   "type": "concert",
+   "url": "https://www.capitolhillblockparty.com/artists",
+   "title": "Disco Lines, Tinashe DJ Set, Amber Mark",
+   "date": "2026-08-08",
+   "time": "14:20",
+   "lineup": [
+    "Disco Lines",
+    "Tinashe DJ Set",
+    "Amber Mark",
+    "Jigitz",
+    "Momma",
+    "Mallrat",
+    "Rochelle Jordan",
+    "Night Tapes",
+    "Whatmore",
+    "MGNA CRRRTA",
+    "Oxis",
+    "Nickcheo",
+    "Samara Lennoxx",
+    "RUB",
+    "Kenshi Killzzz",
+    "J-Henry",
+    "Vika & The Velvets",
+    "slone",
+    "poached",
+    "The Requisite",
+    "Pink Steam",
+    "Tiny Monsters",
+    "The Floor Is Not Lava",
+    "Bazaar",
+    "Rose Peak",
+    "Makenna DeCaro",
+    "Slaone Motion"
+   ],
+   "sets": [
+    {
+     "stage": "Main Stage",
+     "acts": [
+      {
+       "act": "Sloane Motion",
+       "start": "14:45",
+       "end": "15:15"
+      },
+      {
+       "act": "MGNA CRRRTA",
+       "start": "15:45",
+       "end": "16:30"
+      },
+      {
+       "act": "Momma",
+       "start": "17:00",
+       "end": "17:45"
+      },
+      {
+       "act": "Jigitz",
+       "start": "18:15",
+       "end": "19:00"
+      },
+      {
+       "act": "Amber Mark",
+       "start": "19:30",
+       "end": "20:30"
+      },
+      {
+       "act": "Tinashe (DJ set)",
+       "start": "21:00",
+       "end": "22:00"
+      },
+      {
+       "act": "Disco Lines",
+       "start": "22:40",
+       "end": "close"
+      }
+     ]
+    },
+    {
+     "stage": "Daydream Stage",
+     "acts": [
+      {
+       "act": "Makenna DeCaro",
+       "start": "14:20",
+       "end": "14:50"
+      },
+      {
+       "act": "Oxis",
+       "start": "15:20",
+       "end": "16:05"
+      },
+      {
+       "act": "Nickcheo",
+       "start": "16:35",
+       "end": "17:20"
+      },
+      {
+       "act": "Whatmore",
+       "start": "17:50",
+       "end": "18:35"
+      },
+      {
+       "act": "Night Tapes",
+       "start": "19:05",
+       "end": "19:50"
+      },
+      {
+       "act": "Mallrat",
+       "start": "20:20",
+       "end": "21:20"
+      },
+      {
+       "act": "Rochelle Jordan",
+       "start": "22:00",
+       "end": "23:00"
+      }
+     ]
+    },
+    {
+     "stage": "Neumos Stage",
+     "acts": [
+      {
+       "act": "Tiny Monsters",
+       "start": "16:00",
+       "end": "16:45"
+      },
+      {
+       "act": "Samara Lennoxx",
+       "start": "17:15",
+       "end": "18:00"
+      },
+      {
+       "act": "Kenshi Killzzz",
+       "start": "18:30",
+       "end": "19:15"
+      },
+      {
+       "act": "The Requisite",
+       "start": "19:45",
+       "end": "20:30"
+      },
+      {
+       "act": "Vika & The Velvets",
+       "start": "21:00",
+       "end": "21:45"
+      },
+      {
+       "act": "RUB",
+       "start": "22:15",
+       "end": "23:00"
+      },
+      {
+       "act": "Afters: Nickcheo",
+       "start": "23:15",
+       "end": "close"
+      }
+     ]
+    },
+    {
+     "stage": "Barboza Stage",
+     "acts": [
+      {
+       "act": "Rose Peak",
+       "start": "16:15",
+       "end": "16:45"
+      },
+      {
+       "act": "The Floor Is Not Lava",
+       "start": "17:15",
+       "end": "17:45"
+      },
+      {
+       "act": "slone",
+       "start": "18:15",
+       "end": "18:45"
+      },
+      {
+       "act": "poached",
+       "start": "19:15",
+       "end": "19:45"
+      },
+      {
+       "act": "Pink Steam",
+       "start": "20:15",
+       "end": "20:45"
+      },
+      {
+       "act": "J.Henry",
+       "start": "21:15",
+       "end": "21:45"
+      },
+      {
+       "act": "Bazaar",
+       "start": "22:15",
+       "end": "22:45"
+      },
+      {
+       "act": "Afters: DJ_Dave + MGNA CRRRTA (DJ sets)",
+       "start": "23:00",
+       "end": "close"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "venue": "Capitol Hill Block Party",
+   "type": "concert",
+   "url": "https://www.capitolhillblockparty.com/artists",
+   "title": "Wet Leg, Parcels, Zack Fox",
+   "date": "2026-08-09",
+   "time": "13:45",
+   "lineup": [
+    "Wet Leg",
+    "Parcels",
+    "Zack Fox",
+    "MPH",
+    "haute & freddy",
+    "Lucy Bedroque",
+    "Avalon Emerson & The Charm",
+    "babymorocco",
+    "DJ Dave",
+    "Work Wife",
+    "instant crush",
+    "John-Robert",
+    "Henry Mansfield",
+    "Beach Vacation",
+    "Plugged In!",
+    "Rodney Tristan",
+    "dsrt flwr",
+    "Middle Names",
+    "Clouds of the West",
+    "Fatal Femmes",
+    "Scott Yoder",
+    "CSFS",
+    "Rianbow Jackson"
+   ],
+   "sets": [
+    {
+     "stage": "Main Stage",
+     "acts": [
+      {
+       "act": "Instant Crush",
+       "start": "13:45",
+       "end": "14:15"
+      },
+      {
+       "act": "DJ_Dave",
+       "start": "14:45",
+       "end": "15:15"
+      },
+      {
+       "act": "Haute & Freddy",
+       "start": "15:55",
+       "end": "16:40"
+      },
+      {
+       "act": "Zack Fox",
+       "start": "17:20",
+       "end": "18:20"
+      },
+      {
+       "act": "Parcels",
+       "start": "19:00",
+       "end": "20:00"
+      },
+      {
+       "act": "Wet Leg",
+       "start": "20:40",
+       "end": "close"
+      }
+     ]
+    },
+    {
+     "stage": "Daydream Stage",
+     "acts": [
+      {
+       "act": "Cal State Football Stadium",
+       "start": "14:30",
+       "end": "15:00"
+      },
+      {
+       "act": "Rainbow Jackson",
+       "start": "15:30",
+       "end": "16:00"
+      },
+      {
+       "act": "Babymorocco",
+       "start": "16:30",
+       "end": "17:15"
+      },
+      {
+       "act": "Avalon Emerson & The Charm",
+       "start": "17:55",
+       "end": "18:40"
+      },
+      {
+       "act": "Lucy Bedroque",
+       "start": "19:20",
+       "end": "20:20"
+      },
+      {
+       "act": "MPH",
+       "start": "21:00",
+       "end": "close"
+      }
+     ]
+    },
+    {
+     "stage": "Neumos Stage",
+     "acts": [
+      {
+       "act": "Beach Vacation",
+       "start": "16:15",
+       "end": "16:45"
+      },
+      {
+       "act": "John-Robert",
+       "start": "17:30",
+       "end": "18:00"
+      },
+      {
+       "act": "Plugged In!",
+       "start": "18:30",
+       "end": "19:15"
+      },
+      {
+       "act": "Work Wife",
+       "start": "19:45",
+       "end": "20:30"
+      },
+      {
+       "act": "Clouds of the West",
+       "start": "21:00",
+       "end": "21:45"
+      },
+      {
+       "act": "Afters: DJ100PROOF + The Last Skeptik",
+       "start": "22:00",
+       "end": "close"
+      }
+     ]
+    },
+    {
+     "stage": "Barboza Stage",
+     "acts": [
+      {
+       "act": "Scott Yoder",
+       "start": "16:30",
+       "end": "17:00"
+      },
+      {
+       "act": "DSRT FLWR",
+       "start": "17:30",
+       "end": "18:00"
+      },
+      {
+       "act": "Rodney Tristan",
+       "start": "18:30",
+       "end": "19:00"
+      },
+      {
+       "act": "Middle Names",
+       "start": "19:30",
+       "end": "20:00"
+      },
+      {
+       "act": "Henry Mansfield",
+       "start": "20:30",
+       "end": "21:00"
+      },
+      {
+       "act": "Fatal Femmes",
+       "start": "21:30",
+       "end": "22:00"
+      }
+     ]
+    }
+   ]
+  },
+  {
    "venue": "KEXP",
    "title": "zzzahara Live on KEXP (Open To The Public)",
    "date": "2026-08-13",
@@ -91,6 +676,172 @@
    "building": "Arch & Summit Buildings"
   },
   {
+   "venue": "Bumbershoot",
+   "type": "concert",
+   "url": "https://bumbershoot.com/schedule",
+   "title": "Turnstile, Blood Orange, Lucy Dacus",
+   "date": "2026-09-05",
+   "time": "13:20",
+   "lineup": [
+    "Turnstile",
+    "Blood Orange",
+    "Lucy Dacus",
+    "Chase & Status",
+    "Bikini Kill",
+    "Molchat Doma",
+    "Joey Valence & Brae",
+    "Peaches",
+    "Die Spitz",
+    "Silvana Estrada",
+    "Pixel Grip",
+    "Cain Culto",
+    "Travis Thompson",
+    "XCOMM",
+    "Sera Cahoone",
+    "Oblé Reed",
+    "Suzzallo",
+    "Anthers",
+    "Juliet Daniel",
+    "Aryana León",
+    "Bexley",
+    "Hard Maybe",
+    "Mofiyah"
+   ],
+   "sets": [
+    {
+     "stage": "Fisher Stage",
+     "acts": [
+      {
+       "act": "Hard Maybe",
+       "start": "13:20",
+       "end": "13:50"
+      },
+      {
+       "act": "Travis Thompson",
+       "start": "14:20",
+       "end": "14:50"
+      },
+      {
+       "act": "Pixel Grip",
+       "start": "15:15",
+       "end": "15:45"
+      },
+      {
+       "act": "Die Spitz",
+       "start": "16:15",
+       "end": "17:00"
+      },
+      {
+       "act": "Joey Valence & Brae",
+       "start": "17:30",
+       "end": "18:15"
+      },
+      {
+       "act": "Lucy Dacus",
+       "start": "18:45",
+       "end": "19:45"
+      },
+      {
+       "act": "Blood Orange",
+       "start": "20:15",
+       "end": "21:30"
+      },
+      {
+       "act": "Turnstile",
+       "start": "22:15",
+       "end": "23:30"
+      }
+     ]
+    },
+    {
+     "stage": "Mural Stage",
+     "acts": [
+      {
+       "act": "XCOMM",
+       "start": "14:00",
+       "end": "14:30"
+      },
+      {
+       "act": "Cain Culto",
+       "start": "14:50",
+       "end": "15:20"
+      },
+      {
+       "act": "Silvana Estrada",
+       "start": "15:50",
+       "end": "16:35"
+      },
+      {
+       "act": "Peaches",
+       "start": "17:00",
+       "end": "17:45"
+      },
+      {
+       "act": "Bikini Kill",
+       "start": "18:15",
+       "end": "19:15"
+      },
+      {
+       "act": "Molchat Doma",
+       "start": "19:45",
+       "end": "20:45"
+      },
+      {
+       "act": "Mofiyah",
+       "start": "21:30",
+       "end": "21:55"
+      },
+      {
+       "act": "Chase & Status",
+       "start": "22:00",
+       "end": "23:15"
+      }
+     ]
+    },
+    {
+     "stage": "Upper NW Courtyard",
+     "acts": [
+      {
+       "act": "Meat Hair",
+       "start": "14:30",
+       "end": "15:00"
+      },
+      {
+       "act": "Bexley",
+       "start": "15:30",
+       "end": "16:00"
+      },
+      {
+       "act": "Aryana León",
+       "start": "16:30",
+       "end": "17:00"
+      },
+      {
+       "act": "Juliet Daniel",
+       "start": "17:40",
+       "end": "18:10"
+      },
+      {
+       "act": "Anthers",
+       "start": "18:50",
+       "end": "19:20"
+      },
+      {
+       "act": "Sera Cahoone",
+       "start": "19:55",
+       "end": "20:40"
+      },
+      {
+       "act": "Oblé Reed",
+       "start": "21:40",
+       "end": "22:40"
+      }
+     ]
+    }
+   ],
+   "arts": 34
+  },
+  {
    "venue": "Convention Center",
    "title": "PAX West 2026",
    "date": "2026-09-06",
@@ -111,6 +862,166 @@
      "NBC"
     ]
    }
+  },
+  {
+   "venue": "Bumbershoot",
+   "type": "concert",
+   "url": "https://bumbershoot.com/schedule",
+   "title": "Death Cab for Cutie, Orville Peck, De La Soul",
+   "date": "2026-09-06",
+   "time": "13:20",
+   "lineup": [
+    "Death Cab for Cutie",
+    "Orville Peck",
+    "De La Soul",
+    "Sudan Archives",
+    "ATARASHII GAKKO!",
+    "Tokimonsta",
+    "Goldie Boutilier",
+    "Noname - 10th Anniversary of “Telefone”",
+    "Racing Mount Pleasant",
+    "W.I.T.C.H.",
+    "Sextile",
+    "PawPaw Rod",
+    "Takuya Nakamura",
+    "Meat Hair",
+    "Midpak",
+    "Daughters of Venus",
+    "American Flats",
+    "Lucha Luna",
+    "Morgan Paris Lanza",
+    "Hannah Duckworth",
+    "Noire Svlon",
+    "Muckleshoot Canoe Family"
+   ],
+   "sets": [
+    {
+     "stage": "Fisher Stage",
+     "acts": [
+      {
+       "act": "Noire Svlon",
+       "start": "13:20",
+       "end": "13:50"
+      },
+      {
+       "act": "PawPaw Rod",
+       "start": "14:20",
+       "end": "14:50"
+      },
+      {
+       "act": "Sextile",
+       "start": "15:15",
+       "end": "15:45"
+      },
+      {
+       "act": "Muckleshoot",
+       "start": "16:10",
+       "end": "16:20"
+      },
+      {
+       "act": "Racing Mount Pleasant",
+       "start": "16:25",
+       "end": "17:05"
+      },
+      {
+       "act": "ATARASHII GAKKO!",
+       "start": "17:35",
+       "end": "18:15"
+      },
+      {
+       "act": "De La Soul",
+       "start": "18:45",
+       "end": "19:45"
+      },
+      {
+       "act": "Orville Peck",
+       "start": "20:15",
+       "end": "21:30"
+      },
+      {
+       "act": "Death Cab for Cutie",
+       "start": "22:15",
+       "end": "23:30"
+      }
+     ]
+    },
+    {
+     "stage": "Mural Stage",
+     "acts": [
+      {
+       "act": "Takuya Nakamura",
+       "start": "14:00",
+       "end": "15:15"
+      },
+      {
+       "act": "W.I.T.C.H.",
+       "start": "15:45",
+       "end": "16:30"
+      },
+      {
+       "act": "Goldie Boutilier",
+       "start": "17:00",
+       "end": "17:45"
+      },
+      {
+       "act": "Noname - 10th Anniversary of “Telefone”",
+       "start": "18:15",
+       "end": "19:00"
+      },
+      {
+       "act": "Sudan Archives",
+       "start": "19:45",
+       "end": "20:45"
+      },
+      {
+       "act": "Tokimonsta",
+       "start": "21:30",
+       "end": "23:00"
+      }
+     ]
+    },
+    {
+     "stage": "Upper NW Courtyard",
+     "acts": [
+      {
+       "act": "American Flats",
+       "start": "14:30",
+       "end": "15:00"
+      },
+      {
+       "act": "Midpak",
+       "start": "15:30",
+       "end": "16:00"
+      },
+      {
+       "act": "Hannah Duckworth",
+       "start": "16:30",
+       "end": "17:00"
+      },
+      {
+       "act": "Morgan Paris Lanza",
+       "start": "17:40",
+       "end": "18:10"
+      },
+      {
+       "act": "Lucha Luna",
+       "start": "18:50",
+       "end": "19:20"
+      },
+      {
+       "act": "Daughters of Venus",
+       "start": "19:55",
+       "end": "20:40"
+      },
+      {
+       "act": "Suzzallo",
+       "start": "21:40",
+       "end": "22:40"
+      }
+     ]
+    }
+   ],
+   "arts": 32
   },
   {
    "venue": "Convention Center",
@@ -2906,6 +3817,59 @@
    "time": "19:30:00",
    "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
    "type": "arts"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Slalom R4 2026",
+   "date": "2026-10-05",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=36315",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Filipiñana",
+   "date": "2026-10-05",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/filipinana",
+   "movie": true,
+   "end": "17:55:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-10-05",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "18:17:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Maria West, Mount Planet, Niko Haley",
+   "date": "2026-10-05",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/v12816e843d6",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The History of Concrete",
+   "date": "2026-10-05",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/the-history-of-concrete",
+   "movie": true,
+   "end": "20:41:00"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Guess What? Trivia!",
+   "date": "2026-10-05",
+   "time": "19:00:00"
   }
  ]
 }
