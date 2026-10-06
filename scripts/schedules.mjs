@@ -275,17 +275,19 @@ async function espnHomeCity(sport, league, teamId) {
   return Object.keys(n).sort((a, b) => n[b] - n[a])[0] || null;
 }
 async function espnForm(sport, league, teamId, name, slug) {
-  const [t, news, prev, city] = await Promise.all([
+  const [t, news, prev, city, splits, leaders] = await Promise.all([
     getJson(`https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/teams/${teamId}`, true).then((d) => d.team || {}),
     clubNews(slug, name, espnNews(sport, league, teamId, name).catch((e) => { console.error(`news: ${league}/${teamId} skipped — ${e.message}`); return []; })),
     espnPrev(sport, league, teamId).catch((e) => { console.error(`prev: ${league}/${teamId} skipped — ${e.message}`); return null; }),
     espnHomeCity(sport, league, teamId).catch((e) => { console.error(`city: ${league}/${teamId} skipped — ${e.message}`); return null; }),
+    espnSplits(sport, league, teamId).catch((e) => { console.error(`splits: ${league}/${teamId} skipped — ${e.message}`); return {}; }),
+    espnLeaders(sport, league, teamId).catch((e) => { console.error(`leaders: ${league}/${teamId} skipped — ${e.message}`); return []; }),
   ]);
   const items = t.record?.items || [];
   const total = items.find((i) => i.type === 'total') || items[0];
   const home = items.find((i) => i.type === 'home');
   const club = { ...(t.displayName ? { name: t.displayName } : {}), ...(t.abbreviation ? { abbr: t.abbreviation } : {}), ...(city ? { city } : {}) }; // as the league lists them: "Washington Huskies", WASH, Seattle, WA
-  return { record: total?.summary, standing: t.standingSummary, ...(home?.summary ? { home: home.summary } : {}), ...(news.length ? { news } : {}), ...(prev ? { prev } : {}), ...(Object.keys(club).length ? { club } : {}) };
+  return { record: total?.summary, standing: t.standingSummary, ...(home?.summary ? { home: home.summary } : {}), ...splits, ...(leaders.length ? { leaders } : {}), ...(news.length ? { news } : {}), ...(prev ? { prev } : {}), ...(Object.keys(club).length ? { club } : {}) };
 }
 // ESPN names a season by the year it starts in; hockey and football seasons
 // start in the autumn, so from January to June the season in progress is
@@ -294,13 +296,82 @@ export function seasonStartYear(sport, date = new Date()) {
   const y = date.getFullYear();
   return /^(hockey|football)$/.test(sport) && date.getMonth() < 6 ? y - 1 : y;
 }
+// The number ESPN's core API files the season in progress under: the start
+// year, except hockey, which it names by the year the season ends (the
+// Kraken's 2026–27 is seasons/2027; seasons/2026 is 2025–26 — verified
+// 2026-10-05 against the records).
+export function espnSeason(sport, date = new Date()) {
+  return seasonStartYear(sport, date) + (sport === 'hockey' ? 1 : 0);
+}
+// The season's record against the division and the conference, where the
+// league has them — ESPN's core record carries "vs. Div." for the NHL and
+// NFL, "vs. Conf." for the NFL and college football, neither for MLB (the
+// Mariners' comes from the results, divisionRecord below), the WNBA or the
+// soccer leagues. { vsDiv?: '16-9-1', vsConf?: '9-3' }
+export function pickSplits(items) {
+  const out = {};
+  for (const i of items || []) {
+    if (!i?.summary) continue;
+    if (/^vsdiv$/i.test(i.type || '') || /^vs\.? div/i.test(i.name || '')) out.vsDiv = i.summary;
+    else if (/^vsconf$/i.test(i.type || '') || /^vs\.? conf/i.test(i.name || '')) out.vsConf = i.summary;
+  }
+  return out;
+}
+async function espnSplits(sport, league, teamId) {
+  const d = await getJson(`https://sports.core.api.espn.com/v2/sports/${sport}/leagues/${league}/seasons/${espnSeason(sport)}/types/2/teams/${teamId}/record`, true);
+  return pickSplits(d.items);
+}
+// The season's leaders among the club's players, from ESPN's core leaders
+// feed — the categories a fan asks after, by sport, each the top player with
+// the figure, in words a reader needn't decode: [{ stat: 'Home runs', name:
+// 'Randy Arozarena', value: '26', pos?: 'LF' }]. The feed names the player
+// only by a link, so each leader's record is fetched once for the name.
+export const LEADER_CATS = {
+  baseball: [['homeRuns', 'Home runs'], ['RBIs', 'RBI'], ['avg', 'Average'], ['wins', 'Wins'], ['ERA', 'ERA'], ['strikeouts', 'Strikeouts']],
+  hockey: [['goals', 'Goals'], ['assists', 'Assists'], ['points', 'Points'], ['savePct', 'Save pct'], ['wins', 'Wins']],
+  football: [['passingYards', 'Passing yds'], ['rushingYards', 'Rushing yds'], ['receivingYards', 'Receiving yds'], ['sacks', 'Sacks'], ['interceptions', 'Picks'], ['totalTackles', 'Tackles']],
+  basketball: [['pointsPerGame', 'Points'], ['reboundsPerGame', 'Rebounds'], ['assistsPerGame', 'Assists'], ['stealsPerGame', 'Steals'], ['blocksPerGame', 'Blocks']],
+  soccer: [['goals', 'Goals'], ['assists', 'Assists'], ['saves', 'Saves']],
+};
+// the categories picked out of the feed, each with its leader's figure and the link to the player: [{ stat, value, ref }]
+export function pickLeaders(sport, categories) {
+  const out = [];
+  for (const [key, stat] of LEADER_CATS[sport] || []) {
+    const c = (categories || []).find((x) => x.name === key), l = c?.leaders?.[0], ref = l?.athlete?.$ref;
+    if (!ref || l.displayValue == null || /^[-0.,]*$/.test(String(l.displayValue))) continue; // nothing yet: a dash or a zero before the season
+    out.push({ stat, value: String(l.displayValue), ref });
+  }
+  return out;
+}
+async function espnLeaders(sport, league, teamId) {
+  const d = await getJson(`https://sports.core.api.espn.com/v2/sports/${sport}/leagues/${league}/seasons/${espnSeason(sport)}/types/2/teams/${teamId}/leaders`, true);
+  const picked = pickLeaders(sport, d.categories), refs = [...new Set(picked.map((x) => x.ref))], who = {};
+  const players = await Promise.all(refs.map((r) => getJson(r.replace(/^http:/, 'https:'), true).catch(() => null)));
+  refs.forEach((r, i) => { who[r] = players[i]; });
+  return picked.map(({ stat, value, ref }) => {
+    const a = who[ref];
+    return a?.displayName ? { stat, value, name: a.displayName, ...(a.position?.abbreviation ? { pos: a.position.abbreviation } : {}) } : null;
+  }).filter(Boolean);
+}
+// The record against a set of opponents, from the season's results — the
+// Mariners' AL West, which ESPN's record leaves out: 'W-L' (with a third
+// figure for the draws where a sport has them), or null with no such game.
+export const DIVISION = { mariners: ['HOU', 'LAA', 'ATH', 'TEX'] }; // AL West, by the abbreviations the schedule carries (ATH since the Athletics left Oakland)
+export function divisionRecord(games, opps) {
+  let w = 0, l = 0, d = 0;
+  for (const g of games || []) {
+    if (!g.res || g.pre || g.playoff || !opps.includes(g.opp?.abbrev)) continue;
+    if (g.res.won) w++; else if (g.res.us === g.res.them) d++; else l++;
+  }
+  return w + l + d ? [w, l].concat(d ? [d] : []).join('-') : null;
+}
 // Last season's line: { season: '2025' | '2025–26', record, seed?, rank? }.
 // The core API's record has the summary and a playoff seed; the soccer
 // leagues have no record there, so their standings table gives rank and
 // W-L-D instead.
 async function espnPrev(sport, league, teamId) {
-  const start = seasonStartYear(sport) - 1;
-  const season = /^(hockey|football)$/.test(sport) && sport === 'hockey' ? `${start}–${String(start + 1).slice(2)}` : String(start);
+  const start = espnSeason(sport) - 1; // the number before the season in progress — hockey's is named by its end year (the Kraken's line read 2024–25's record as 2025–26 until 2026-10-05)
+  const season = sport === 'hockey' ? `${start - 1}–${String(start).slice(2)}` : String(start);
   const d = await getJson(`https://sports.core.api.espn.com/v2/sports/${sport}/leagues/${league}/seasons/${start}/types/2/teams/${teamId}/record`, true);
   const total = (d.items || []).find((i) => i.type === 'total') || (d.items || [])[0];
   if (total?.summary) {
@@ -607,6 +678,8 @@ export async function applySchedules(events) {
       const cities = {}; bySlug[slug].forEach((g) => { if (g.city) cities[g.city] = (cities[g.city] || 0) + 1; }); // the home ground's city, as the league lists it (the commonest, for a club with a neutral-site "home" game)
       const city = Object.keys(cities).sort((a, b) => cities[b] - cities[a])[0];
       if (city) form[slug] = { ...(form[slug] || {}), club: { ...((form[slug] || {}).club || {}), city } };
+      const div = DIVISION[slug] && !(form[slug] || {}).vsDiv ? divisionRecord(r.value, DIVISION[slug]) : null; // the division record the league's feed doesn't give, from the results
+      if (div) form[slug] = { ...(form[slug] || {}), vsDiv: div };
       const tbd = bySlug[slug].filter((g) => g.tbd).length;
       console.error(`schedules: ${slug} ${r.value.length} games, ${bySlug[slug].length} home, ${tbd} TBD`);
     } else {

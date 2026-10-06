@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseYoutube, matchYoutube, parseNflPage, titleDate } from './highlights.mjs';
-import { applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, pwhlOdds, wikiTitle, pickNews, seasonStartYear, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
+import { applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, pwhlOdds, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
 
 const feed = () => [
   { venue: 'Lumen Field', title: 'Seattle Seahawks vs. Dallas Cowboys', date: '2026-12-07', time: '17:15:00' },
@@ -308,4 +308,42 @@ test('PWHL odds: log5 on points shares with a home nudge, played games and unkno
   assert.ok(out[2].odds && out[2].odds.us === 56, 'no standings row for the opponent: taken as .500 (home: .53 vs .47 → 56%)');
   assert.equal(out[3].odds, undefined, 'a played game');
   assert.deepEqual(pwhlOdds(games, [], 8).map((g) => g.odds), [undefined, undefined, undefined, undefined]);
+});
+
+test('espnSeason: ESPN files hockey under the year the season ends, every other sport under its start year', () => {
+  assert.equal(espnSeason('hockey', new Date(2026, 9, 5)), 2027); // the Kraken's 2026–27
+  assert.equal(espnSeason('hockey', new Date(2027, 2, 1)), 2027);
+  assert.equal(espnSeason('football', new Date(2026, 9, 5)), 2026);
+  assert.equal(espnSeason('baseball', new Date(2026, 9, 5)), 2026);
+});
+
+test('pickSplits: the division and conference records out of the core record items', () => {
+  const items = [{ name: 'overall', type: 'total', summary: '14-3' }, { name: 'Home', type: 'home', summary: '6-2' }, { name: 'vs. Div.', type: 'vsdiv', summary: '4-2' }, { name: 'vs. Conf.', type: 'vsconf', summary: '9-3' }];
+  assert.deepEqual(pickSplits(items), { vsDiv: '4-2', vsConf: '9-3' });
+  assert.deepEqual(pickSplits([{ name: 'overall', summary: '76-86' }]), {});
+  assert.deepEqual(pickSplits(undefined), {});
+});
+
+test('pickLeaders: the sport\'s categories in order, in words, each with its leader\'s figure and link; empty ones skipped', () => {
+  const cats = [
+    { name: 'avg', leaders: [{ displayValue: '.281', athlete: { $ref: 'http://x/a/1' } }] },
+    { name: 'homeRuns', leaders: [{ displayValue: '26', athlete: { $ref: 'http://x/a/1' } }] },
+    { name: 'ERA', leaders: [{ displayValue: '3.73', athlete: { $ref: 'http://x/a/2' } }] },
+    { name: 'saves', leaders: [{ displayValue: '28', athlete: { $ref: 'http://x/a/3' } }] }, // not one the tile shows
+    { name: 'wins', leaders: [] },
+    { name: 'strikeouts', leaders: [{ displayValue: '-', athlete: { $ref: 'http://x/a/4' } }] }, // nothing yet
+  ];
+  assert.deepEqual(pickLeaders('baseball', cats), [
+    { stat: 'Home runs', value: '26', ref: 'http://x/a/1' },
+    { stat: 'Average', value: '.281', ref: 'http://x/a/1' },
+    { stat: 'ERA', value: '3.73', ref: 'http://x/a/2' },
+  ]);
+  assert.deepEqual(pickLeaders('rugby', cats), []);
+});
+
+test('divisionRecord: the results against the division, the preseason and playoffs left out', () => {
+  const g = (abbrev, us, them, extra) => ({ opp: { abbrev }, res: { us, them, won: us > them }, ...extra });
+  const games = [g('HOU', 5, 3), g('HOU', 1, 2), g('TEX', 4, 4), g('NYY', 9, 0), g('LAA', 2, 1, { pre: true }), g('ATH', 0, 1, { playoff: true }), { opp: { abbrev: 'ATH' } }];
+  assert.equal(divisionRecord(games, ['HOU', 'LAA', 'ATH', 'TEX']), '1-1-1');
+  assert.equal(divisionRecord([g('NYY', 9, 0)], ['HOU']), null);
 });

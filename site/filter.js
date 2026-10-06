@@ -95,6 +95,10 @@
     'T-Mobile Park': favicon('www.mlb.com'),
     'Lumen Field': favicon('www.lumenfield.com'),
     'Husky Stadium': favicon('gohuskies.com'),
+    'Capitol Hill Block Party': favicon('www.capitolhillblockparty.com'), // the festivals (2026-10-05): each its own venue, named for itself
+    'Bumbershoot': favicon('bumbershoot.com'),
+    'Northwest Folklife': favicon('nwfolklife.org'),
+    'PrideFest': favicon('www.seattlepridefest.org'),
     // local bars: the bar's logo reduced to line art (scripts/make-mark.py),
     // shown on its agenda rows like a team crest — a path under site/
     'The Traveling Goat': 'marks/traveling-goat.png',
@@ -109,6 +113,8 @@
     "Children's Theatre": '#6cc9db', 'MoPOP': '#e88ad8', 'Pacific Science Center': '#62b8f7', 'KEXP': '#b48cf5',
     'Seattle Rep': '#f0827a',
     'The Traveling Goat': '#5fb3a1', // bars: a muted sea-green, off the fallback hash's neon
+    'Capitol Hill Block Party': '#a6b85a', // the festivals (2026-10-05): the Block Party an olive green-gold,
+    'Bumbershoot': '#e8a35a', 'Northwest Folklife': '#8fc26a', 'PrideFest': '#e07bb5', // Bumbershoot amber, Folklife leaf green, PrideFest pink
   };
 
   // How many people each place holds — the one measure of an event's size
@@ -123,6 +129,8 @@
     'MoPOP': 800, "Children's Theatre": 480, 'Cornish Playhouse': 460, 'SIFF Cinema Uptown': 450,
     'Pacific Science Center': 400, 'The Vera Project': 300, 'On the Boards': 300, 'KEXP': 200,
     'Starfire Stadium': 4500, // the Seawolves' ground in Tukwila
+    'Capitol Hill Block Party': 30000, // the festivals: a day's crowd, not a room
+    'Bumbershoot': 25000, 'Northwest Folklife': 50000, 'PrideFest': 50000,
   };
 
   // Ticket state from the feed's `tickets` and `soldOut`: 'soldout' (the box
@@ -154,7 +162,13 @@
 
   // The campus venues walk a crowd past Lower Queen Anne; these three are a
   // bus ride away and listed for their size (a venue missing here is campus).
-  var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town', 'Starfire Stadium': 'town', 'Husky Stadium': 'town' };
+  var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town', 'Starfire Stadium': 'town', 'Husky Stadium': 'town', 'Capitol Hill Block Party': 'town' };
+  // The festivals (2026-10-05): each its own venue, its rows together in the
+  // panel's Festivals group whatever its area — the area still says which
+  // presets turn it off (the Block Party is a bus ride away; Bumbershoot,
+  // Folklife and PrideFest are on the campus and show by default). A
+  // festival's days are one series, whatever their titles (the headliners).
+  var VENUE_FESTIVAL = { 'Capitol Hill Block Party': true, 'Bumbershoot': true, 'Northwest Folklife': true, 'PrideFest': true };
 
   function slugify(s) {
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -216,6 +230,8 @@
     ['venue', 'Seattle Rep'],
     ['venue', 'Starfire Stadium'], ['team', 'seawolves'],
     ['cap', 'stadium'], ['cap', 'arena'], ['cap', 'hall'], ['cap', 'room'],
+    ['venue', 'Capitol Hill Block Party'], // 2026-10-05, the Block Party (named 'Capitol Hill' for a few hours, never deployed)
+    ['venue', 'Bumbershoot'], ['venue', 'Northwest Folklife'], ['venue', 'PrideFest'], // 2026-10-05, the Festivals group
   ];
   var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode', cap: 'capMode' };
   function maskOf(mode, which) {
@@ -309,7 +325,7 @@
   // Day: Preview Performance", "…: Opening Night", "…: Open Captioning");
   // the run is one series, so the key is the show alone (Steve, 2026-09-16:
   // the previews, opening night and run were three lines in one lane)
-  function seriesBase(e) { var t = String(e.title || ''); return e.venue === 'Seattle Rep' ? t.split(':')[0] : t; }
+  function seriesBase(e) { var t = String(e.title || ''); return VENUE_FESTIVAL[e.venue] ? e.venue : e.venue === 'Seattle Rep' ? t.split(':')[0] : t; } // a festival's days are titled by their headliners; the festival is the series
   function seriesKey(e) { return e.venue + '|' + seriesBase(e).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
   function seriesLabel(s) {
     var f = function (d) { return parseYmd(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
@@ -574,6 +590,7 @@
     CAP_BANDS: CAP_BANDS,
     bandOf: bandOf,
     VENUE_AREA: VENUE_AREA,
+    VENUE_FESTIVAL: VENUE_FESTIVAL,
     slugify: slugify,
     eventType: eventType,
     matchesFilter: matchesFilter,

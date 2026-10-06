@@ -23,6 +23,8 @@
     'KEXP': '--v-kexp',
     'The Traveling Goat': '--v-goat',
     'Seattle Rep': '--v-rep',
+    'Capitol Hill Block Party': '--v-chbp',
+    'Bumbershoot': '--v-bumber', 'Northwest Folklife': '--v-folklife', 'PrideFest': '--v-pride', // the festivals (2026-10-05)
   };
   // Unexpected venues draw from the same cool, web-safe family as the
   // curated ones, hashed from the name so the pick is stable day to day.
@@ -58,6 +60,10 @@
     'The Traveling Goat': 'https://www.travelinggoatseattle.com/events',
     'Pacific Science Center': 'https://pacificsciencecenter.org/events/',
     'KEXP': 'https://www.kexp.org/events/kexp-events/',
+    'Capitol Hill Block Party': 'https://www.capitolhillblockparty.com/artists', // the festivals: each one's lineup or schedule page
+    'Bumbershoot': 'https://bumbershoot.com/schedule',
+    'Northwest Folklife': 'https://www.nwfolklife.org/festival/',
+    'PrideFest': 'https://www.seattlepridefest.org/schedule',
   };
 
   // Venue list order = how big a crowd the place can hold (LQAFilter.
@@ -246,7 +252,7 @@
     { key: 'sports', label: 'Sports', title: 'Pro and college games' },
     { key: 'arts', label: 'Arts & Theater', title: 'Opera, ballet, plays, comedy, dance' },
     { key: 'movie', label: 'Movies', title: 'Film screenings at SIFF Cinema Uptown — unchecked by default' },
-    { key: 'community', label: 'Festivals', title: 'Grounds events, festivals, walks, celebrations, classes, SIFF specials' },
+    // 'community' (grounds events, festivals, walks, classes, SIFF specials) has no row since 2026-10-05: the festivals got rows of their own and Steve dropped it ("festivals doesn't need to be in event type anymore"); the type still exists on events and in the share code's registry, it just can't be switched
     { key: 'expo', label: 'Conventions', title: 'Conventions, conferences, trade and consumer shows — the Convention Center, Exhibition Hall, Fisher Pavilion' },
     { key: 'bar', label: 'Neighborhood', title: 'Trivia, live music, watch parties and specials at neighborhood bars — The Traveling Goat so far' },
   ];
@@ -261,6 +267,7 @@
   // The baseline every visitor starts from (and "Reset filters" returns to):
   // SIFF's daily movie showings unchecked, everything else checked.
   function venueArea(v) { return LQAFilter.VENUE_AREA[v] || 'campus'; }
+  function venueGroup(v) { return LQAFilter.VENUE_FESTIVAL[v] ? 'fest' : venueArea(v); } // the panel's group: Lower Queen Anne | Around Town | Festivals
   // Presets: each names what's OFF in every group; `holidays` (when given)
   // sets the switch too, and the search box is left alone. Venue lists that
   // depend on the feed are functions of the venues present. `teamsOff`
@@ -275,7 +282,8 @@
   // view keeps showing them.
   var DEFAULT_VENUES_ON = ['Climate Pledge Arena', 'Seattle Center', 'McCaw Hall', 'Lumen Field', 'T-Mobile Park', 'Seattle Rep'];
   var DEFAULT_VENUES_OFF = ['MoPOP', "Children's Theatre", 'Cornish Playhouse', 'SIFF Cinema Uptown', 'Pacific Science Center',
-    'The Vera Project', 'On the Boards', 'KEXP', 'Convention Center', 'Starfire Stadium', 'Husky Stadium'];
+    'The Vera Project', 'On the Boards', 'KEXP', 'Convention Center', 'Starfire Stadium', 'Husky Stadium', 'Capitol Hill Block Party']; // the campus festivals (Bumbershoot, Folklife, PrideFest) show by default; the Block Party is a bus ride away
+  var VENUES_BEFORE_KNOWN = DEFAULT_VENUES_OFF.slice(0, -1); // the default-off venues every saved pref set already knew before prefs recorded `known` (2026-10-05)
   // Capacity bands: LQAFilter.CAP_BANDS, a filter option each (2026-09-22:
   // no longer a switch over the venue rows — nothing changes another box)
   var BAND_BY_KEY = {};
@@ -462,8 +470,8 @@
     // would govern, unaffected by the current filter so they stay stable.
     var today = todayStr();
     var upcoming = state.events.filter(function (e) { return e.date >= today; });
-    var pv = $('panelVenues'), pt = $('panelVenuesTown');
-    pv.innerHTML = ''; pt.innerHTML = '';
+    var pv = $('panelVenues'), pt = $('panelVenuesTown'), pf = $('panelFestivals');
+    pv.innerHTML = ''; pt.innerHTML = ''; pf.innerHTML = '';
     // a team's row
     function teamRow(t) {
       var name = document.createElement('span');
@@ -475,7 +483,7 @@
     state.venues.forEach(function (v) {
       var n = upcoming.filter(function (e) { return e.venue === v; }).length;
       var cap = VENUE_CAPACITY[v];
-      var list = venueArea(v) === 'town' ? pt : pv;
+      var list = venueGroup(v) === 'fest' ? pf : venueGroup(v) === 'town' ? pt : pv; // the festivals keep together, whatever their area
       list.appendChild(filterRow('venue', v, venueName(v), n, cap ? 'Holds about ' + cap.toLocaleString('en-US') : undefined));
     });
     // capacity bands keep their state, rule and share-code slots but no panel rows (Steve, 2026-09-22: "we do not need a specific capacity section")
@@ -511,7 +519,7 @@
   // Filter choices persist per-browser (no login — just localStorage).
   function saveFilters() {
     try {
-      localStorage.setItem('lqa-filters', JSON.stringify({ v: 4, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode, caps: state.capMode, hol: state.holidays, so: state.soldOnly }));
+      localStorage.setItem('lqa-filters', JSON.stringify({ v: 4, venues: state.venueMode, badges: state.badgeMode, teams: state.teamMode, caps: state.capMode, hol: state.holidays, so: state.soldOnly, known: state.venues }));
     } catch (e) { /* private mode etc. — filters just won't persist */ }
   }
   function loadFilters() {
@@ -525,6 +533,12 @@
         // tri-state) hold the same 'in' / 'ex' words, so all three load alike
         var ok = function (m) { return m === 'in' || m === 'ex' ? m : null; };
         Object.keys(s.venues || {}).forEach(function (v) { if (ok(s.venues[v])) state.venueMode[v] = s.venues[v]; });
+        // a default-off venue added after these prefs were saved starts off,
+        // as it would for a first visit (saved prefs can't tell "cleared" from
+        // "never seen", so `known` lists the venues the panel had at save time;
+        // prefs older than that list predate the Block Party, 2026-10-05)
+        var known = Array.isArray(s.known) ? s.known : VENUES_BEFORE_KNOWN;
+        DEFAULT_VENUES_OFF.forEach(function (v) { if (!(v in (s.venues || {})) && known.indexOf(v) < 0) state.venueMode[v] = 'ex'; });
         Object.keys(s.badges || {}).forEach(function (k) { if (TYPE_KEYS[k] && ok(s.badges[k])) state.badgeMode[k] = s.badges[k]; });
         Object.keys(s.teams || {}).forEach(function (k) { if (TEAM_BY_SLUG[k] && ok(s.teams[k])) state.teamMode[k] = s.teams[k]; });
         Object.keys(s.caps || {}).forEach(function (k) { if (BAND_BY_KEY[k] && ok(s.caps[k])) state.capMode[k] = s.caps[k]; });
@@ -665,7 +679,7 @@
     var ab = e.target.closest('.fp-set[data-scope]'); // a group's Show All / Hide All (Steve, 2026-09-14): every row in it set to Show, or every one to Hide
     if (ab) {
       var mode = ab.dataset.on === '1' ? 'in' : 'ex', scope = ab.dataset.scope;
-      if (scope === 'campus' || scope === 'town') state.venues.forEach(function (v) { if ((venueArea(v) === 'town') === (scope === 'town')) setMode(state.venueMode, v, mode); });
+      if (scope === 'campus' || scope === 'town' || scope === 'fest') state.venues.forEach(function (v) { if (venueGroup(v) === scope) setMode(state.venueMode, v, mode); });
       else if (scope === 'team') TEAMS.forEach(function (t) { setMode(state.teamMode, t.slug, mode); });
       else if (scope === 'cap') CAP_BANDS.forEach(function (b) { setMode(state.capMode, b.key, mode); });
       else TYPE_LIST.forEach(function (t) { setMode(state.badgeMode, t.key, mode); });
@@ -1519,7 +1533,7 @@
   // stats that fit the space): the streak, the last ten and the road record;
   // then the scoring rate for and against, and the season's margin. From
   // three results on.
-  function formLines(team, played) {
+  function formLines(team, played, done) { // `done`: the season is played out — the streak is how it closed, not where it stands
     var esc = function (x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
     var out = [];
     if (!played.length) return out;
@@ -1527,7 +1541,7 @@
       var last = resLetter(played[played.length - 1]), n = 0;
       for (var i = played.length - 1; i >= 0 && resLetter(played[i]) === last; i--) n++;
       var away = played.filter(function (g) { return !g.home; });
-      out.push({ cls: 'tf-form tf-streak', html: '<b>Form</b> ' + esc(last + n + ' streak · ' + recordFrom(played.slice(-10)) + ' last ' + Math.min(10, played.length) + (away.length ? ' · ' + recordFrom(away) + ' away' : '')) });
+      out.push({ cls: 'tf-form tf-streak', html: '<b>' + (done ? 'Finish' : 'Form') + '</b> ' + esc(last + n + (done ? ' to close · ' : ' streak · ') + recordFrom(played.slice(-10)) + ' last ' + Math.min(10, played.length) + (away.length ? ' · ' + recordFrom(away) + ' away' : '')) });
     }
     var us = 0, them = 0;
     played.forEach(function (g) { us += g.res.us; them += g.res.them; });
@@ -1535,6 +1549,114 @@
     var diff = us - them, per = function (v) { return (v / played.length).toFixed(1); };
     out.push({ cls: 'tf-form tf-scoring', html: '<b>' + esc(unit.charAt(0).toUpperCase() + unit.slice(1)) + '</b> ' + esc(per(us) + ' for · ' + per(them) + ' against · ' + (diff > 0 ? '+' : diff < 0 ? '\u2212' : '') + Math.abs(diff)) }); // per game, and the season's margin — kept short so it never wraps (Steve's review, 2026-09-16) // short enough for the column at three figures (the Storm's −206)
     return out;
+  }
+  // The season's wrap, in the block once the last game is played (Steve,
+  // 2026-10-05: with no game ahead the watch strip and the next opponent's
+  // crest go, and the block says more about the season — drawn, not listed:
+  // "the season stats can be more graphical"). All from the results the
+  // schedule holds — nothing fetched, nothing to go stale. seasonStats
+  // works the numbers out; buildSeasonWrap draws them under the crest and
+  // the bug, the block's width (Steve, 2026-10-05, second round: "move this
+  // to this section … and improve the graphics"): the season game by game
+  // as a tick chart with the months and their records along it and the
+  // longest runs bracketed, then a row of bar tiles — the record split
+  // (home, away, the one-score games, the playoffs), the scoring, the best
+  // win and worst loss by margin, this season's wins against last season's.
+  function seasonStats(team, played, form) {
+    var reg = played.filter(function (g) { return !g.playoff; }), po = played.filter(function (g) { return g.playoff; });
+    var base = reg.length >= 3 ? reg : played; // the season proper; the playoffs get their own bar
+    var st = { base: base, po: po, months: [], close: [], unit: { baseball: 'runs', hockey: 'goals', soccer: 'goals' }[team.sport] || 'points' };
+    var best = null, worst = null, cur = null; // the longest winning and losing runs (a draw ends either)
+    base.forEach(function (g) {
+      var r = resLetter(g);
+      if (r === 'D') { cur = null; return; }
+      if (cur && cur.r === r) { cur.n++; cur.to = g; } else cur = { r: r, n: 1, from: g, to: g };
+      if (r === 'W' && (!best || cur.n > best.n)) best = cur;
+      if (r === 'L' && (!worst || cur.n > worst.n)) worst = cur;
+    });
+    st.runs = [best, worst].filter(function (x) { return x && x.n >= 2; });
+    base.forEach(function (g) { var m = g.res.us - g.res.them; if (m > 0 && (!st.bw || m > st.bw.res.us - st.bw.res.them)) st.bw = g; if (m < 0 && (!st.wl || m < st.wl.res.us - st.wl.res.them)) st.wl = g; }); // by margin
+    var months = {};
+    base.forEach(function (g) { var k = g.date.slice(0, 7); (months[k] = months[k] || []).push(g); });
+    Object.keys(months).sort().forEach(function (k) { var w = 0, l = 0, d = 0; months[k].forEach(function (g) { var r = resLetter(g); if (r === 'W') w++; else if (r === 'D') d++; else l++; }); st.months.push({ key: k, games: months[k], w: w, l: l, d: d, pct: months[k].length ? w / months[k].length : 0 }); });
+    var full = st.months.filter(function (m) { return m.games.length >= 5; }); // the best and the worst, from months of five games or more
+    if (full.length >= 2) { var byPct = full.slice().sort(function (a, b) { return b.pct - a.pct; }); st.bestMonth = byPct[0]; st.worstMonth = byPct[byPct.length - 1]; }
+    st.one = { baseball: 1, hockey: 1, soccer: 1, basketball: 3, football: 3, rugby: 7 }[team.sport] || 1; // one score's margin
+    st.close = base.filter(function (g) { var m = Math.abs(g.res.us - g.res.them); return m > 0 && m <= st.one; });
+    st.home = base.filter(function (g) { return g.home; }); st.away = base.filter(function (g) { return !g.home; });
+    st.ot = base.filter(function (g) { return g.res.ot; }); // hockey: the games that went past regulation (overtime or the shootout)
+    // against the division (ESPN's record for the NHL and NFL, the results for the Mariners), else the conference (college football); the
+    // group named as the standing line names it ("2nd in Pacific Division" → Pacific)
+    var grp = String(form.standing || '').replace(/^\d+(st|nd|rd|th) in (the )?/i, '').replace(/ (Division|Conference)$/i, '');
+    if (form.vsDiv) st.group = { label: grp || 'Division', record: form.vsDiv }; else if (form.vsConf) st.group = { label: grp || 'Conference', record: form.vsConf };
+    var us = 0, them = 0; base.forEach(function (g) { us += g.res.us; them += g.res.them; });
+    st.us = us; st.them = them; st.diff = us - them;
+    st.wins = 0; reg.forEach(function (g) { if (g.res.won) st.wins++; });
+    var pw = form.prev && form.prev.record && /^(\d+)-/.exec(form.prev.record);
+    if (pw && reg.length >= 3) { st.prevWins = Number(pw[1]); st.prevSeason = form.prev.season; }
+    return st;
+  }
+  function buildSeasonWrap(team, played, form) {
+    var esc = function (x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+    var st = seasonStats(team, played, form);
+    var wrap = document.createElement('div'); wrap.className = 'tf-wrap';
+    var short = function (g) { return parseDate(g.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+    var opp = function (g) { return (g.home ? 'vs ' : 'at ') + (g.opp.short || g.opp.name); };
+    var score = function (g) { return g.res.us + '–' + g.res.them; };
+    var pctOf = function (games) { var w = 0; games.forEach(function (g) { if (g.res.won) w++; }); return games.length ? w / games.length : 0; };
+    function tile(cls, label, html) { var t = document.createElement('div'); t.className = 'tw ' + cls; t.innerHTML = '<b class="tw-l">' + esc(label) + '</b>' + html; wrap.appendChild(t); return t; }
+    // a bar: the label, the fill, the figure at the end — the fill is a share (a win share, with a tick at .500, or a rate against the larger of two)
+    function bar(label, share, figure, cls, title, mid) { return '<div class="tw-bar' + (cls ? ' ' + cls : '') + '"' + (title ? ' title="' + esc(title) + '"' : '') + '><span>' + esc(label) + '</span><i>' + (mid ? '<s></s>' : '') + '<b style="width:' + (Math.max(0, Math.min(1, share)) * 100).toFixed(1) + '%"></b></i><span class="tw-n">' + esc(figure) + '</span></div>'; }
+    // 1. the months: a stacked column each, wins up from the floor in the club's colour, losses (and draws) on top in grey;
+    // the best month's name in the colour, the worst's dimmed, both spelled out under the chart (a game-by-game tick strip
+    // the block's width came first and went the same hour — Steve: "this long bar chart is too much")
+    if (st.months.length >= 2) {
+      var most = Math.max.apply(null, st.months.map(function (m) { return m.games.length; }));
+      var mn = function (m) { return parseDate(m.key + '-01').toLocaleDateString('en-US', { month: 'short' }); };
+      tile('tw-months-tile', 'By month', '<div class="tw-months">' + st.months.map(function (m) {
+        var h = function (k) { return (k / most * 100).toFixed(1) + '%'; };
+        return '<span class="tw-col' + (m === st.bestMonth ? ' is-best' : m === st.worstMonth ? ' is-worst' : '') + '" title="' + esc(mn(m) + ' ' + recordFrom(m.games)) + '"><span class="tw-stack"><i class="tw-x" style="height:' + h(m.l + m.d) + '"></i><i class="tw-w" style="height:' + h(m.w) + '"></i></span><em>' + esc(mn(m)) + '</em></span>';
+      }).join('') + '</div>' + (st.bestMonth ? '<p class="tw-foot">' + esc('best ' + mn(st.bestMonth) + ' ' + recordFrom(st.bestMonth.games) + ' · worst ' + mn(st.worstMonth) + ' ' + recordFrom(st.worstMonth.games)) + '</p>' : ''));
+    }
+    // 2. the record split: home, away, the one-score games, the playoffs — each a win share, a tick at .500
+    var split = '';
+    if (st.home.length) split += bar('Home', pctOf(st.home), recordFrom(st.home), '', st.home.length + ' at home', true);
+    if (st.away.length) split += bar('Away', pctOf(st.away), recordFrom(st.away), '', st.away.length + ' on the road', true);
+    if (st.close.length >= 3) split += bar(st.one === 1 ? 'One-' + st.unit.replace(/s$/, '') : 'Close', pctOf(st.close), recordFrom(st.close), '', st.close.length + ' games decided by ' + (st.one === 1 ? 'one' : st.one + ' or less'), true);
+    if (st.group) { var gp = /^(\d+)-(\d+)(?:-(\d+))?/.exec(st.group.record); if (gp) split += bar(st.group.label, Number(gp[1]) / (Number(gp[1]) + Number(gp[2]) + Number(gp[3] || 0)), st.group.record, '', 'against the ' + st.group.label, true); } // the division (or conference) record, as a win share like the rest
+    if (st.ot.length >= 2) split += bar('Overtime', pctOf(st.ot), recordFrom(st.ot), '', st.ot.length + ' games past regulation, the shootout included', true);
+    if (st.po.length) split += bar('Playoffs', pctOf(st.po), recordFrom(st.po), '', gameLine(st.po[st.po.length - 1]) + ' ' + resLetter(st.po[st.po.length - 1]) + ' ' + score(st.po[st.po.length - 1]), true);
+    if (split) tile('tw-split', 'Record', split);
+    // 3. the scoring: for and against per game, against the larger; the season's margin at the foot
+    if (st.base.length) {
+      var per = function (v) { return (v / st.base.length).toFixed(1); }, top = Math.max(st.us, st.them, 1);
+      tile('tw-runs', st.unit.charAt(0).toUpperCase() + st.unit.slice(1) + ' a game', bar('For', st.us / top, per(st.us), '', st.us + ' ' + st.unit) + bar('Against', st.them / top, per(st.them), 'is-them', st.them + ' ' + st.unit) + '<p class="tw-foot">' + esc((st.diff > 0 ? '+' : st.diff < 0 ? '−' : '') + Math.abs(st.diff) + ' on the season') + '</p>');
+    }
+    // 4. the longest runs: a square a game (ten at most — the figure says the length), the dates after
+    if (st.runs.length) tile('tw-streaks', 'Streaks', st.runs.map(function (x) {
+      var dates = short(x.from) + (x.n > 1 ? '\u2013' + (x.from.date.slice(0, 7) === x.to.date.slice(0, 7) ? x.to.date.slice(8).replace(/^0/, '') : short(x.to)) : '');
+      var sq = ''; for (var i = 0; i < Math.min(x.n, 10); i++) sq += '<i></i>';
+      return '<p title="' + esc(gameLine(x.from) + ' to ' + gameLine(x.to)) + '"><b>' + x.r + x.n + '</b><span class="tw-sq is-' + x.r + '">' + sq + '</span>' + esc(dates) + '</p>';
+    }).join(''));
+    // 5. the best win and the worst loss, by margin — a line each (a margin bar beside them left no room for the opponent in a tile this wide)
+    if (st.bw || st.wl) {
+      var gl = function (g, cls) { return '<p class="' + cls + '" title="' + esc(gameLine(g)) + '"><b>' + esc(score(g)) + '</b> ' + esc(opp(g) + ', ' + short(g)) + '</p>'; };
+      tile('tw-games', 'Best win, worst loss', (st.bw ? gl(st.bw, '') : '') + (st.wl ? gl(st.wl, 'is-them') : ''));
+    }
+    // 6. the wins against last season's (ESPN's record for the season before)
+    if (st.prevWins != null) {
+      var mx = Math.max(st.wins, st.prevWins, 1), d = st.wins - st.prevWins;
+      tile('tw-prev', 'Wins on ' + st.prevSeason, bar(seasonLabel(team, played), st.wins / mx, String(st.wins), '', 'this season') + bar(st.prevSeason, st.prevWins / mx, String(st.prevWins), 'is-them', form.prev.record) + '<p class="tw-foot">' + esc(d === 0 ? 'the same wins' : (d > 0 ? '+' : '−') + Math.abs(d) + ' wins') + '</p>');
+    }
+    // 7. the season's leaders (the build, from ESPN's leaders feed: a stat and the player who led the club in it) — a tall tile at
+    // the right of the wrap, the stat, the name and the figure on a line each (Steve, 2026-10-05: "#1, yes")
+    if (form.leaders && form.leaders.length) {
+      tile('tw-leaders', 'Season leaders', form.leaders.map(function (l) {
+        return '<div class="tw-lead"' + (l.pos ? ' title="' + esc(l.name + ', ' + l.pos) + '"' : '') + '><span>' + esc(l.stat) + '</span><span class="tw-who">' + esc(l.name) + '</span><b class="tw-n">' + esc(l.value) + '</b></div>';
+      }).join(''));
+      wrap.classList.add('has-leaders');
+    }
+    return wrap;
   }
   function renderTeamForm(team, games, today) {
     function esc(x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
@@ -1593,9 +1715,9 @@
       line('tf-season', '<b>' + esc(record) + '</b> ' + esc((standing ? standing + ' · ' : '') + (homeRec ? homeRec + ' at home' : '')) + runHtml);
     }
     else if (last && last.res) line('tf-next', '<b>Last game</b> ' + esc(gameLine(last)) + ', ' + (last.res.won ? 'won ' : last.res.us === last.res.them ? 'drew ' : 'lost ') + last.res.us + '–' + last.res.them);
-    if (stage === 'in' || stage === 'over') formLines(team, played).forEach(function (f) { line(f.cls, f.html); }); // the streak, the last ten, the road record; the scoring
+    if (next && stage === 'in') formLines(team, played, false).forEach(function (f) { line(f.cls, f.html); }); // the streak, the last ten, the road record; the scoring (with the season played out the wrap's tiles say it instead)
     if (od && next && od.date === next.date) leaderLines(od.leaders && od.leaders.us, od.injured && od.injured.us).forEach(function (f) { line(f.cls, f.html); }); // the leaders and the injured, once the matchup page is in
-    if (form.prev && form.prev.record) { // last season, from ESPN's record for the season before (its "playoff seed" runs past the bracket for the clubs that missed it)
+    if (next && form.prev && form.prev.record) { // last season, from ESPN's record for the season before (its "playoff seed" runs past the bracket for the clubs that missed it); with the season over it is on the bug's top line and in the wrap
       var pv = form.prev, tail = pv.seed ? (pv.seed <= 8 ? ' · playoff seed ' + pv.seed : ' · missed the playoffs') : pv.rank ? ' · ' + ordinal(pv.rank) + ' in the table' : '';
       line('tf-series tf-prev', '<b>' + esc(pv.season) + '</b> ' + esc(pv.record) + esc(tail));
     }
@@ -1603,33 +1725,36 @@
       var blurb = document.createElement('p'); blurb.className = 'tf-blurb'; lead.appendChild(blurb);
       loadOutlook().then(function (d) { if (d[team.slug]) blurb.textContent = d[team.slug]; else blurb.remove(); foldNews(); });
     }
-    var oppG = next || (played.length ? played[played.length - 1] : null); // the crest at the other end: the next opponent's (the last one's, after the season)
-    if (oppG && oppG.opp) { row.appendChild(vsLine(team.label, oppG.home, oppG.opp.short || oppG.opp.name)); row.appendChild(oppCrest(oppG.opp.logo, oppG.opp.name, oppG.opp.abbrev || oppG.opp.short || oppG.opp.name, (next ? 'Next: ' : 'Last: ') + (oppG.opp.name || ''), oppG.opp.site)); } // the compact bar's "at"/"vs" and the opponent's crest
-    var side = buildFormSide(form, lead.childNodes.length ? lead : null);
+    var oppG = next; // the crest at the other end: the next opponent's; with the season played out, none (Steve, 2026-10-05: "the last game crest … isn't needed") — the wrap takes that room
+    if (oppG && oppG.opp) { row.appendChild(vsLine(team.label, oppG.home, oppG.opp.short || oppG.opp.name)); row.appendChild(oppCrest(oppG.opp.logo, oppG.opp.name, oppG.opp.abbrev || oppG.opp.short || oppG.opp.name, 'Next: ' + (oppG.opp.name || ''), oppG.opp.site)); } // the compact bar's "at"/"vs" and the opponent's crest
+    if (!next && played.length >= 3) { main.appendChild(buildSeasonWrap(team, played, form)); box.classList.add('has-wrap'); } // the season played out: its wrap, drawn under the crest and the bug where the watch strip was, the block growing to hold it; the news column goes (the lead's last-game line still feeds the pinned bar)
+    var side = next ? buildFormSide(form, lead.childNodes.length ? lead : null) : null;
     if (side) box.appendChild(side);
-    var strip = buildWatchStrip(next && next.watch ? next.watch.tv || [] : [], next && next.watch ? next.watch.radio : null, '', team); // the strip, as in every state
-    box.appendChild(strip);
+    var strip = next ? buildWatchStrip(next.watch ? next.watch.tv || [] : [], next.watch ? next.watch.radio : null, '', team) : null; // the strip while a game is ahead; with the season played out it goes, and its room goes to the column's wrap (Steve, 2026-10-05: "removing the how to watch/listen section")
+    if (strip) box.appendChild(strip); else box.classList.add('no-watch');
     inner.appendChild(buildBrief(lead, strip)); // the pinned bar's run
     return box;
   }
   // The season in the scorebug's frame: the standing along the top (last
-  // season's line at the right); a row for the club — the record, the last
-  // five — and a row for home — the home record, the last game played;
-  // before a season, the opener and the home opener instead.
+  // season's record at the right, while the season runs); a SEASON row —
+  // the record, the last five — and a HOME row — the home record, the last
+  // game played — each cell labelled in words; before a season, the opener
+  // and the home opener instead.
   function buildSeasonBug(team, stage, record, standing, homeRec, five, played, upcoming, form) {
     function esc(x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
     var col = '#' + String((team.colors || [])[0] || '555').replace(/^#/, '');
-    var top = stage === 'pre' ? 'Season ahead' : stage === 'off' ? 'Off-season' : stage === 'over' ? 'Season over' + (standing ? ' · ' + standing : '') : (standing || 'This season');
-    var right = form.prev && form.prev.record ? form.prev.season + ' ' + form.prev.record : '';
+    var top = stage === 'pre' ? 'Season ahead' : stage === 'off' ? 'Off-season' : stage === 'over' ? seasonLabel(team, played) + ' season over' + (standing ? ' · ' + standing : '') : (standing || 'This season'); // the season named by its year(s) once it is done (Steve, 2026-10-05)
+    var right = form.prev && form.prev.record && stage !== 'over' ? 'Last season ' + form.prev.record : ''; // said in words; with the season over the wrap's tile beneath says it, and the top line is long already
     var r1 = '', r2 = '', s1 = record || '–', s2 = homeRec || '–';
-    if (five.length) r1 = '<span class="tf-run">' + five.map(function (g) { return '<i class="r-' + resLetter(g) + '" title="' + esc(gameLine(g) + ' ' + g.res.us + '–' + g.res.them) + '">' + resLetter(g) + '</i>'; }).join('') + '</span>';
+    // every cell says what it is (Steve, 2026-10-05: "don't know what all this means" of SEA 76-86 / HOME 43-38 / W L L W W / a bare game line)
+    if (five.length) r1 = '<b class="bug-lbl">Last 5</b><span class="tf-run">' + five.map(function (g) { return '<i class="r-' + resLetter(g) + '" title="' + esc(gameLine(g) + ' ' + g.res.us + '–' + g.res.them) + '">' + resLetter(g) + '</i>'; }).join('') + '</span>';
     var last = played[played.length - 1];
-    if (last) r2 = esc(gameLine(last) + ' ' + (last.res.won ? 'W' : last.res.us === last.res.them ? 'D' : 'L') + ' ' + last.res.us + '–' + last.res.them);
+    if (last) r2 = '<b class="bug-lbl">Last game</b>' + esc(gameLine(last) + ' ' + (last.res.won ? 'W' : last.res.us === last.res.them ? 'D' : 'L') + ' ' + last.res.us + '–' + last.res.them);
     if (stage === 'pre' && upcoming.length) { var reg = upcoming.filter(function (g) { return !g.pre; }), ho = reg.filter(function (g) { return g.home; })[0]; r1 = 'Opens ' + esc(gameLine(reg[0] || upcoming[0])); r2 = ho ? 'Home opener ' + esc(gameLine(ho)) : ''; } // the season proper opens after any preseason
     var b = document.createElement('div'); b.className = 'tf-bug is-generic is-season-bug';
     b.innerHTML = '<div class="bug-top"><span class="bug-pitcher">' + esc(top) + '</span>' + (right ? '<span class="bug-pc">' + esc(right) + '</span>' : '') + '</div>' +
       '<div class="bug-grid bug-grid-2">' +
-      '<span class="bug-team" style="background:' + col + '">SEA</span><span class="bug-score">' + esc(s1) + '</span><span class="bug-ev">' + r1 + '</span>' +
+      '<span class="bug-team" style="background:' + col + '">SEASON</span><span class="bug-score">' + esc(s1) + '</span><span class="bug-ev">' + r1 + '</span>' +
       '<span class="bug-team bug-team-soft">HOME</span><span class="bug-score">' + esc(s2) + '</span><span class="bug-ev">' + r2 + '</span></div>';
     return b;
   }
@@ -1759,7 +1884,7 @@
       for (var i = 0; i < LEAD_DROP.length && over(); i++) { var p = lead.querySelector(LEAD_DROP[i]); if (p) p.hidden = true; }
     });
   }
-  function settleBlock() { fitBug(); foldNews(); alignCrests(); foldWatch(); fitLead(); }
+  function settleBlock() { fitBug(); foldNews(); alignCrests(); foldWatch(); fitLead(); foldNews(); } // foldNews again once fitLead has trimmed the lead: the column may no longer scroll, and its fade would otherwise stay over the last line (seen 2026-10-05 on the Mariners' season wrap)
   var foldPending = false;
   window.addEventListener('resize', function () { if (!foldPending) { foldPending = true; requestAnimationFrame(function () { foldPending = false; settleBlock(); }); } });
   // ---- where to watch: the networks ESPN names, looked up in channels.json ----
@@ -3151,6 +3276,33 @@
     row.title = ts === 'soldout' ? 'The box office has no tickets left' + (e.tickets && e.tickets.resale ? ' — resale only' : '')
       : 'Five percent of the house or less is left at the box office';
   }
+  // A festival day's set times (feed `sets`: a stage, its acts in order with
+  // their times). Short, on the card: a line per stage, "Main 3:15 Avery
+  // Cochrane · 4:15 …"; full, in the sheet: the stage over its sets, each
+  // with its start and end (Steve, 2026-10-05: "switching to the detailed line up").
+  function shortClock(t) { if (!/^\d\d?:\d\d$/.test(t || '')) return t || ''; var hm = t.split(':'); return (Number(hm[0]) % 12 || 12) + ':' + hm[1]; }
+  function setTimesBlock(sets, short) {
+    var box = document.createElement('div'); box.className = short ? 'ev-sets' : 'sheet-sets';
+    sets.forEach(function (s) {
+      if (short) {
+        var p = document.createElement('p');
+        var b = document.createElement('b'); b.textContent = s.stage.replace(/ Stage$/i, ''); p.appendChild(b);
+        p.appendChild(document.createTextNode(' ' + s.acts.map(function (a) { return shortClock(a.start) + ' ' + a.act; }).join(' \u00b7 ')));
+        box.appendChild(p);
+      } else {
+        var h = document.createElement('p'); h.className = 'ss-stage'; h.textContent = s.stage; box.appendChild(h);
+        var ul = document.createElement('ul');
+        s.acts.forEach(function (a) {
+          var li = document.createElement('li');
+          var t = document.createElement('span'); t.className = 'ss-time'; t.textContent = shortClock(a.start) + '\u2013' + shortClock(a.end); li.appendChild(t);
+          li.appendChild(document.createTextNode(a.act));
+          ul.appendChild(li);
+        });
+        box.appendChild(ul);
+      }
+    });
+    return box;
+  }
   function ticketsLine(e) {
     var t = e.tickets;
     var n = function (x) { return Number(x).toLocaleString('en-US'); };
@@ -3186,6 +3338,8 @@
       w.appendChild(b); w.appendChild(document.createTextNode(watch[k[0]].join(', ')));
     });
     w.hidden = !w.childNodes.length;
+    var ss = $('sheetSets'); ss.innerHTML = ''; ss.hidden = !(Array.isArray(e.sets) && e.sets.length); // a festival day: the whole set-times grid, stage by stage
+    if (!ss.hidden) ss.appendChild(setTimesBlock(e.sets, false));
     // Tickets — only where there are tickets to buy. A bar night's link is the
     // bar's events page (the venue chip below already goes there), so no chip;
     // a free event's link is its details page, so the chip says so (Steve, 2026-09-21)
@@ -3679,6 +3833,7 @@
         titleLine.appendChild(a);
         if (sn) row.appendChild(sn); // lower right of the card (CSS)
         body.appendChild(venue); body.appendChild(titleLine);
+        if (Array.isArray(e.sets) && e.sets.length) body.appendChild(setTimesBlock(e.sets, true)); // a festival day: each stage's bill with its set times (the Block Party, from the build's set-times table)
         // a show that's off: struck through, with a third line saying so
         // (and when we noticed, if the feed knows)
         if (e.status) {

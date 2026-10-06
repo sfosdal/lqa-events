@@ -239,14 +239,16 @@
       <div id="panelVenues" class="fp-list"><!-- campus venue rows injected by app.js --></div>
     </div>
     <div class="fp-group">
-      <h3>Downtown &amp; SoDo<span class="fp-allnone"><button type="button" class="fp-set" data-scope="town" data-on="1">Show All</button><i>·</i><button type="button" class="fp-set" data-scope="town" data-on="0">Hide All</button></span></h3>
+      <h3>Around Town<span class="fp-allnone"><button type="button" class="fp-set" data-scope="town" data-on="1">Show All</button><i>·</i><button type="button" class="fp-set" data-scope="town" data-on="0">Hide All</button></span></h3>
       <div id="panelVenuesTown" class="fp-list"><!-- the stadiums, the Convention Center, injected by app.js --></div>
       <h3>Event Type<span class="fp-allnone"><button type="button" class="fp-set" data-scope="type" data-on="1">Show All</button><i>·</i><button type="button" class="fp-set" data-scope="type" data-on="0">Hide All</button></span></h3>
-      <div id="panelBadges" class="fp-list"><!-- the seven kinds, injected by app.js; stacked under Downtown & SoDo since 2026-09-22 --></div>
+      <div id="panelBadges" class="fp-list"><!-- the six kinds (Festivals left the list 2026-10-05, when the festivals got rows of their own), injected by app.js; stacked under Around Town (named Downtown & SoDo until 2026-10-05, when Capitol Hill joined it) since 2026-09-22 --></div>
     </div>
     <div class="fp-group">
-      <h3>Teams<span class="fp-allnone"><button type="button" class="fp-set" data-scope="team" data-on="1">Show All</button><i>·</i><button type="button" class="fp-set" data-scope="team" data-on="0">Hide All</button></span></h3>
-      <div id="panelTeams" class="fp-list"><!-- team rows injected by app.js --></div>
+      <h3>Home Teams<span class="fp-allnone"><button type="button" class="fp-set" data-scope="team" data-on="1">Show All</button><i>·</i><button type="button" class="fp-set" data-scope="team" data-on="0">Hide All</button></span></h3>
+      <div id="panelTeams" class="fp-list"><!-- team rows injected by app.js; "Home Teams", as the chip says (Steve, 2026-10-05) --></div>
+      <h3>Festivals<span class="fp-allnone"><button type="button" class="fp-set" data-scope="fest" data-on="1">Show All</button><i>·</i><button type="button" class="fp-set" data-scope="fest" data-on="0">Hide All</button></span></h3>
+      <div id="panelFestivals" class="fp-list"><!-- the festivals (2026-10-05): each its own venue, a row apiece — Bumbershoot, Folklife and PrideFest on the campus (on by default), the Block Party a bus ride away (off); injected by app.js; under Home Teams so the three columns run about as long (Steve, 2026-10-05: "balance it with the rest of the filter columns") --></div>
     </div>
   </div>
 </div>
@@ -347,10 +349,10 @@
     </button>
   </div>
   <div class="foot-inner">
-  <div class="gw">
+  <a class="gw" href="https://ghostwoodlabs.com/" target="_blank" rel="noopener" title="Ghostwood Labs"> <!-- the mark and the name are one link, opening a new tab (Steve, 2026-10-05: "any click on the gwl branding should open a new tab"); linked to the company site 2026-10-04, the day ghostwoodlabs.com went live -->
   <svg class="gw-logo" aria-hidden="true"><use href="#gw-mark"/></svg>
-  <p class="gw-credit"><a href="https://ghostwoodlabs.com/" rel="noopener" title="Ghostwood Labs"><strong>Ghostwood Sites</strong></a></p> <!-- linked to the company site 2026-10-04, the day ghostwoodlabs.com went live -->
-  </div>
+  <p class="gw-credit"><strong>Ghostwood Sites</strong></p>
+  </a>
   <div class="foot-links"> <!-- Advertise, Embed, Sources as one thing at the row's right end, the credit at its left (the "Updated" stamp between them was removed 2026-10-05, Steve) -->
   <!-- advertising: a megaphone, to the placeholder sales page (Steve, 2026-09-15) -->
   <a class="foot-link" id="advertise" href="advertise.html" title="Advertise on this calendar">
@@ -440,6 +442,7 @@
     <p class="sheet-when" id="sheetWhen"></p>
     <p class="sheet-tix" id="sheetTix" hidden><!-- Ticketmaster inventory: "272 of 18,100 tickets left · 614 resale · from $25 · checked Sep 15" (app.js) --></p>
     <p class="sheet-watch" id="sheetWatch" hidden><!-- a home game's TV / radio, from the league (app.js) --></p>
+    <div class="sheet-sets-wrap" id="sheetSets" hidden><!-- a festival day's set times, stage by stage (app.js setTimesBlock) --></div>
     <div class="sheet-actions">
       <!-- order: the short chips first so they share a line, the long venue link after (Steve, 2026-09-15) -->
       <a id="sheetTickets" class="btn-cal" href="#" target="_blank" rel="noopener">Tickets</a>

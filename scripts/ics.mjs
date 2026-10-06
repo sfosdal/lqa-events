@@ -8,6 +8,7 @@
  * accumulating duplicates when the feed refreshes.
  */
 import { createHash } from 'node:crypto';
+import { setTimesText } from './settimes.mjs';
 
 const TZID = 'America/Los_Angeles';
 const DEFAULT_DURATION_H = 3;
@@ -112,6 +113,8 @@ function eventLines(e, dtstamp) {
     lines.push(`DESCRIPTION:${escapeText(`This event has been ${e.status}${since}. Check the ticket page for refunds or a new date.`)}`);
   }
   else if (e.dateTbd) lines.push(`DESCRIPTION:${escapeText('Date not final — the league may still move this game. The feed updates within a few hours of a change.')}`);
+  else if (Array.isArray(e.sets) && e.sets.length) lines.push(`DESCRIPTION:${escapeText('Set times\n' + setTimesText(e.sets))}`); // a festival day with its grid: a line per stage (Capitol Hill Block Party)
+  else if (Array.isArray(e.lineup) && e.lineup.length) lines.push(`DESCRIPTION:${escapeText('Lineup: ' + e.lineup.join(', '))}`); // a festival day: the whole bill
   if (e.url) lines.push(`URL:${escapeText(e.url)}`);
   lines.push('END:VEVENT');
   return lines;

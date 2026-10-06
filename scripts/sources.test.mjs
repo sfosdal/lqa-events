@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, parseGoatEvents } from './sources.mjs';
+import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates } from './sources.mjs';
 
 // --- Seattle Center calendar HTML (event cards; dates live on detail pages) ---
 
@@ -404,4 +404,106 @@ test('Traveling Goat: 12 noon / midnight and a.m. times, items without a date sk
   assert.deepEqual(parseGoatEvents(html).map((e) => [e.date, e.time, e.title]), [
     ['2026-12-31', '00:00:00', 'NYE Party'], ['2027-01-01', '11:30:00', 'Brunch'],
   ]);
+});
+
+// --- Capitol Hill Block Party: marquee day headings, acts in image filenames ---
+
+const marquee = (text) => `<div class="Marquee" data-marquee-items="[{&quot;text&quot;:&quot;${text}&quot;}]" data-link-to=""></div>`;
+const artistCard = (file) => `<img data-src="https://images.squarespace-cdn.com/content/v1/abc/1778/${file}" alt="A band on a stage">`;
+
+test('Block Party: one all-day entry per festival day, the first three acts as the title (the festival is the venue), the whole bill as lineup', () => {
+  const html = '<main><img src="/s/Asset+8%402x.png" alt="Text reading \'2026 ARTISTS\' in bold, purple letters.">'
+    + marquee('FRIDAY AUG 7') + artistCard('CHBP_Artist+Square_MUNA.png') + artistCard('CHBP_Artist+Square_Magdalena+Bay.png') + artistCard('CHBP_Artist+Square_DJ+Trixie+Mattel.png') + artistCard('CHBP_Artist+Square_Aliyah%27s+Interlude.png')
+    + marquee('SATURDAY AUG 8') + artistCard('CHBP_Artist+Square_Disco+Lines.png') + artistCard('CHBP_Artist+Square_Disco+Lines.png?format=500w') + artistCard('CHBP_Artist+Square_DJ_Dave.png')
+    + marquee('SUNDAY AUG 9') + artistCard('Artist+Square_CSFS.png') + artistCard('CHBP_Artist+Square_Wet+Leg.png')
+    + '</main><footer>' + artistCard('CHBP_Artist+Square_Footer+Noise.png') + '</footer>';
+  assert.deepEqual(parseBlockPartyArtists(html, '2026-10-05'), [
+    { title: 'MUNA, Magdalena Bay, DJ Trixie Mattel', date: '2026-08-07', time: '', lineup: ['MUNA', 'Magdalena Bay', 'DJ Trixie Mattel', "Aliyah's Interlude"] },
+    { title: 'Disco Lines, DJ Dave', date: '2026-08-08', time: '', lineup: ['Disco Lines', 'DJ Dave'] },
+    { title: 'CSFS, Wet Leg', date: '2026-08-09', time: '', lineup: ['CSFS', 'Wet Leg'] },
+  ]);
+});
+
+test('Block Party: without the banner the year is the nearest one whose weekday fits', () => {
+  const html = marquee('FRIDAY AUG 7') + artistCard('CHBP_Artist+Square_MUNA.png');
+  assert.equal(parseBlockPartyArtists(html, '2026-10-05')[0].date, '2026-08-07'); // Aug 7 was a Friday this year
+  assert.equal(parseBlockPartyArtists(html, '2026-03-01')[0].date, '2026-08-07'); // and the coming one
+  const next = marquee('FRIDAY JULY 23') + artistCard('CHBP_Artist+Square_MUNA.png');
+  assert.equal(parseBlockPartyArtists(next, '2026-10-05')[0].date, '2027-07-23'); // 2027's Friday, not 2021's
+});
+
+test('Block Party: no day headings, or headings with no cards, yield nothing', () => {
+  assert.deepEqual(parseBlockPartyArtists('<main><p>Lineup coming soon</p></main>', '2026-10-05'), []);
+  assert.deepEqual(parseBlockPartyArtists(marquee('FRIDAY AUG 7') + marquee('SATURDAY AUG 8'), '2026-10-05'), []);
+  assert.deepEqual(parseBlockPartyArtists(marquee('TICKETS ON SALE NOW') + artistCard('CHBP_Artist+Square_MUNA.png'), '2026-10-05'), []);
+});
+
+
+// --- Bumbershoot: the schedule page's day sections and the lineup page's billing order ---
+
+const bbSlot = (start, end, act, stage, kind) => `<article class="_x"><div class="_y"><button type="button" aria-expanded="false"><div class="_z" aria-label="${start} - ${end}"><span class="_r">${start}</span><span class="_s"><span>to</span><span>${end}</span></span></div><div class="_t"><p class="_w">${act}</p><div class="_u"><p class="_v">${stage}</p><span class="_n">${kind}</span></div></div></button></div></article>`;
+const bbGrid = (start, end, act, kind) => `<article class="_g"><button type="button" aria-expanded="false"><div class="_v" aria-label="${start} - ${end}"><span class="_x">${start}</span><span class="_y"><span>to</span><span>${end}</span></span></div><div class="_z"><p class="_n ">${act}</p><span class="_o">${kind}</span></div></button></article>`;
+const bbDay = (head, date, slots) => `<div class="_d"><div class="_h"><h2 class="_17">${head}</h2><div class="_a">DOORS OPEN AT 12:30</div></div><div class="_l">${slots.join('')}</div><div class="_s" data-schedule-grid-scroller="true" data-schedule-day="${date}"><div role="presentation" aria-label="${head} schedule">${bbGrid('10:15 PM', '11:30 PM', 'Turnstile', 'Music')}</div></div></div>`;
+const bbArtist = (name, day) => `<article class="_p"><div><img alt="${name}"><h3 class="_t">${name}</h3><p>${name} bio…</p><span class="_d">${day}</span><a href="/artist/x">More</a></div></article>`;
+
+test('Bumbershoot: a day per section, music sets by stage in time order, headliners from the lineup page, the arts counted', () => {
+  const sched = '<title>Bumbershoot - September 5th-6th, 2026 @ Seattle Center</title>'
+    + bbDay('Saturday, Sep 5', '2026-09-05', [
+      bbSlot('12:30 PM', '7:30 PM', 'Motley Zoo Animal Rescue', 'Cat Circus', 'Arts'),
+      bbSlot('1:20 PM', '1:50 PM', 'Hard Maybe', 'Fisher Stage', 'Music'),
+      bbSlot('2:00 PM', '2:30 PM', 'XCOMM', 'Mural Stage', 'Music'),
+      bbSlot('1:00 PM', '1:50 PM', 'LAFF-A-BALL', 'Comedy Coop', 'Arts'),
+      bbSlot('10:15 PM', '11:30 PM', 'Turnstile', 'Fisher Stage', 'Music'),
+      bbSlot('10:15 PM', '11:30 PM', 'Turnstile', 'Fisher Stage', 'Music'), // a repeat (the page lists a slot twice) counts once
+    ])
+    + bbDay('Sunday, Sep 6', '2026-09-06', [
+      bbSlot('1:00 PM', '1:30 PM', 'Suzzallo &amp; Friends', 'Upper NW Courtyard', 'Music'),
+      bbSlot('10:15 PM', '11:30 PM', 'Death Cab for Cutie', 'Fisher Stage', 'Music'),
+    ]);
+  const lineup = '<h1>2026 Music Lineup</h1>' + bbArtist('Death Cab for Cutie', 'Sunday') + bbArtist('Turnstile', 'Saturday') + bbArtist('Blood Orange', 'Saturday') + bbArtist('Hard Maybe', 'Saturday') + bbArtist('XCOMM', 'Saturday');
+  assert.deepEqual(parseBumbershootSchedule(sched, lineup), [
+    { title: 'Turnstile, Blood Orange, Hard Maybe', date: '2026-09-05', time: '13:20', lineup: ['Turnstile', 'Blood Orange', 'Hard Maybe', 'XCOMM'], arts: 2,
+      sets: [{ stage: 'Fisher Stage', acts: [{ act: 'Hard Maybe', start: '13:20', end: '13:50' }, { act: 'Turnstile', start: '22:15', end: '23:30' }] }, { stage: 'Mural Stage', acts: [{ act: 'XCOMM', start: '14:00', end: '14:30' }] }] },
+    { title: 'Death Cab for Cutie', date: '2026-09-06', time: '13:00', lineup: ['Death Cab for Cutie'], arts: 0,
+      sets: [{ stage: 'Upper NW Courtyard', acts: [{ act: 'Suzzallo & Friends', start: '13:00', end: '13:30' }] }, { stage: 'Fisher Stage', acts: [{ act: 'Death Cab for Cutie', start: '22:15', end: '23:30' }] }] },
+  ]);
+});
+
+test('Bumbershoot: without the lineup page the first stage\'s closers stand in as the title; the date falls back to the title\'s year', () => {
+  const sched = '<title>Music · Bumbershoot 2026</title><div><h2 class="_17">Saturday, Sep 5</h2>' + bbSlot('1:20 PM', '1:50 PM', 'Hard Maybe', 'Fisher Stage', 'Music') + bbSlot('10:15 PM', '11:30 PM', 'Turnstile', 'Fisher Stage', 'Music') + '</div>';
+  const [d] = parseBumbershootSchedule(sched);
+  assert.equal(d.date, '2026-09-05');
+  assert.equal(d.title, 'Turnstile, Hard Maybe');
+  assert.deepEqual(parseBumbershootSchedule('<title>Bumbershoot</title><p>See ya in 2027!</p>'), []);
+});
+
+// --- Seattle PrideFest: the Squarespace events JSON ---
+
+test('PrideFest: the festival days only, Seattle dates and times from the epoch, free, newest-first input sorted by date', () => {
+  const json = { upcoming: [], past: [
+    { title: 'PrideFest Seattle Center', startDate: 1782673200748, endDate: 1782702000748, fullUrl: '/schedule/2026/6/28/pridefest-seattle-center' },
+    { title: 'PrideFest Capitol Hill', startDate: 1782586800684, endDate: 1782615600684, fullUrl: '/schedule/2026/6/27/pridefest-capitol-hill' },
+    { title: 'Taking Pride in Capitol Hill', startDate: 1780761600582, endDate: 1780776000582, fullUrl: '/schedule/2026/6/6/taking-pride' },
+    { title: 'PrideFest Capitol Hill', startDate: 1782586800684, endDate: 1782615600684, fullUrl: '/schedule/2026/6/27/pridefest-capitol-hill' },
+    { title: 'PrideFest Seattle Center', startDate: 1740866400000, endDate: 1740870000000, fullUrl: '/schedule/2025/3/1/placeholder' }, // one hour: a placeholder, dropped
+    { title: 'PrideFest Seattle Center 2023', startDate: 1687719600000, endDate: 1687748400000, fullUrl: '/schedule/2023/6/25/pridefest-seattle-center-2023' },
+    { title: 'PrideFest Capitol Hill is September 4-5, 2021', startDate: 1630778400000, endDate: 1630807200000, fullUrl: '/schedule/2021/9/4/x' },
+  ] };
+  assert.deepEqual(mapPrideFestEvents(json), [
+    { title: 'PrideFest Capitol Hill', date: '2021-09-04', time: '11:00', end: '19:00', url: 'https://www.seattlepridefest.org/schedule/2021/9/4/x', free: true }, // the "is …" tail dropped
+    { title: 'PrideFest Seattle Center', date: '2023-06-25', time: '12:00', end: '20:00', url: 'https://www.seattlepridefest.org/schedule/2023/6/25/pridefest-seattle-center-2023', free: true }, // the year dropped
+    { title: 'PrideFest Capitol Hill', date: '2026-06-27', time: '12:00', end: '20:00', url: 'https://www.seattlepridefest.org/schedule/2026/6/27/pridefest-capitol-hill', free: true },
+    { title: 'PrideFest Seattle Center', date: '2026-06-28', time: '12:00', end: '20:00', url: 'https://www.seattlepridefest.org/schedule/2026/6/28/pridefest-seattle-center', free: true },
+  ]);
+  assert.deepEqual(mapPrideFestEvents({}), []);
+});
+
+// --- Northwest Folklife: the festival page's one date line ---
+
+test('Folklife: the heading\'s date range becomes one all-day free entry per day', () => {
+  const html = '<div class="content"><h2 class="heading h_align_center">May 28-31, 2027</h2><p>As the final…</p></div>';
+  assert.deepEqual(parseFolklifeDates(html).map((e) => e.date), ['2027-05-28', '2027-05-29', '2027-05-30', '2027-05-31']);
+  assert.deepEqual(parseFolklifeDates(html)[0], { title: 'Northwest Folklife Festival', date: '2027-05-28', time: '', free: true });
+  assert.deepEqual(parseFolklifeDates('<h2>May 30–June 1, 2026</h2>').map((e) => e.date), ['2026-05-30', '2026-05-31', '2026-06-01']); // a range across the month's end
+  assert.deepEqual(parseFolklifeDates('<h2>Festival</h2><p>Dates to be announced</p>'), []);
 });

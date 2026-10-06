@@ -469,3 +469,175 @@ export function parseGoatEvents(html) {
   }
   return out;
 }
+
+// ---- Capitol Hill Block Party: the festival's artists page ----------------
+// capitolhillblockparty.com/artists is Squarespace; its ?format=json view is
+// empty (fluid-engine sections), so the HTML. The day headings are marquee
+// components ("FRIDAY AUG 7" — no year), and the acts are nowhere in the
+// text: only in the artist-card image filenames, CHBP_Artist+Square_<Name>.png,
+// which sit in DOM order under their day's heading. Returns one all-day
+// entry per festival day — title "Capitol Hill Block Party: <first three
+// acts>", the whole bill as `lineup`. The year comes from the "<YYYY>
+// ARTISTS" banner's alt text when it is there, else from the weekday (Aug 7
+// is a Friday in 2026 and not again until 2037): the candidate year nearest
+// today whose weekday matches. A page with no day headings yields nothing.
+export function parseBlockPartyArtists(html, todayISO) {
+  const src = String(html);
+  const main = src.includes('<main') ? src.slice(src.indexOf('<main'), src.indexOf('</main>') > 0 ? src.indexOf('</main>') : undefined) : src;
+  const banner = src.match(/alt="[^"]*\b(20\d\d) ARTISTS\b/i);
+  const bannerYear = banner ? Number(banner[1]) : 0;
+  const today = new Date(`${todayISO || new Date().toISOString().slice(0, 10)}T12:00:00Z`);
+  const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const dateFor = (weekday, mon, day) => {
+    if (bannerYear) return `${bannerYear}-${pad(mon)}-${pad(day)}`;
+    const wd = WEEKDAYS.indexOf(weekday.toLowerCase());
+    const y0 = today.getUTCFullYear();
+    const fits = [];
+    for (let y = y0 - 1; y <= y0 + 2; y++) {
+      const d = new Date(Date.UTC(y, mon - 1, day, 12));
+      if (d.getUTCMonth() !== mon - 1) continue; // Feb 30
+      if (wd >= 0 && d.getUTCDay() !== wd) continue;
+      fits.push([Math.abs(d - today), y]);
+    }
+    if (!fits.length) return '';
+    fits.sort((a, b) => a[0] - b[0]);
+    return `${fits[0][1]}-${pad(mon)}-${pad(day)}`;
+  };
+  const days = [];
+  const re = /data-marquee-items="([^"]*)"|(?:CHBP_)?Artist\+?Square_([^"?/\s]+?)\.(?:png|jpe?g|webp)\b/g;
+  let m;
+  while ((m = re.exec(main))) {
+    if (m[1] !== undefined) {
+      let text = '';
+      try { text = (JSON.parse(decodeEntities(m[1])) || []).map((x) => x && x.text).filter(Boolean).join(' '); } catch { text = decodeEntities(m[1]); }
+      const dm = text.match(/\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday),?\s+([a-z]{3,9})\.?\s+(\d{1,2})\b/i);
+      if (!dm) continue;
+      const mon = MONTHS[Object.keys(MONTHS).find((k) => k.startsWith(dm[2].slice(0, 3).toLowerCase()))];
+      if (!mon) continue;
+      const date = dateFor(dm[1], mon, Number(dm[3]));
+      if (!date) continue;
+      let day = days.find((d) => d.date === date);
+      if (!day) { day = { date, lineup: [] }; days.push(day); }
+      days.current = day;
+      continue;
+    }
+    if (!days.current) continue; // a card above the first heading (none today) belongs to no day
+    let name = m[2].replace(/\+/g, ' ');
+    try { name = decodeURIComponent(name); } catch { /* a stray % stays */ }
+    name = name.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+    if (name && !days.current.lineup.includes(name)) days.current.lineup.push(name);
+  }
+  delete days.current;
+  return days.filter((d) => d.lineup.length).map((d) => ({
+    title: d.lineup.slice(0, 3).join(', '), // the headliners; the festival is the venue (the Festivals group, 2026-10-05)
+    date: d.date, time: '', lineup: d.lineup,
+  }));
+}
+
+
+// ---- Bumbershoot: the festival's schedule and music-lineup pages ---------
+// bumbershoot.com/schedule is server-rendered: each day under an <h2>
+// "Saturday, Sep 5", its date in the grid's data-schedule-day, every slot an
+// <article> whose button carries aria-label "1:20 PM - 1:50 PM", the act, the
+// stage and a kind (Music | Arts). The class names are build hashes, so the
+// parser holds to those anchors. bumbershoot.com/music-lineup lists the
+// music acts in billing order with their day — the day's first three are the
+// headliners (the title), the rest the day's `lineup`; without it the Fisher
+// Stage's closers stand in. Music sets are grouped by stage as `sets`; the
+// Arts programme (comedy, wrestling, puppets, films) is counted, not listed.
+// Returns [{ title, date, time, lineup, sets, arts }], one per festival day.
+export function parseBumbershootSchedule(scheduleHtml, lineupHtml = '') {
+  const s = String(scheduleHtml);
+  const WD = /^(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day$/;
+  const heads = [];
+  for (const m of s.matchAll(/<h2[^>]*>\s*((?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day), ([A-Z][a-z]{2,8})\.? (\d{1,2})\s*<\/h2>/g)) heads.push({ at: m.index, weekday: m[1], month: m[2].toLowerCase(), day: Number(m[3]) });
+  const dates = [];
+  for (const m of s.matchAll(/data-schedule-day="(\d{4}-\d\d-\d\d)"/g)) dates.push({ at: m.index, date: m[1] });
+  const year = (s.match(/Bumbershoot[^<]{0,60}?(20\d\d)/) || [])[1];
+  const monthNo = (name) => MONTHS[name] || MONTHS[Object.keys(MONTHS).find((k) => k.startsWith(name)) || ''];
+  const to24 = (t) => parseClockTime(t).slice(0, 5);
+  const rowRe = /aria-label="(\d{1,2}:\d\d [AP]M) - (\d{1,2}:\d\d [AP]M)"><span[^>]*>[^<]*<\/span><span[^>]*><span>to<\/span><span>[^<]*<\/span><\/span><\/div><div[^>]*><p[^>]*>([^<]+)<\/p><div[^>]*><p[^>]*>([^<]+)<\/p><span[^>]*>(Music|Arts)<\/span>/g;
+  // the lineup page: billing order with the day
+  const billing = {};
+  for (const m of String(lineupHtml).matchAll(/<article[^>]*>([\s\S]*?)<\/article>/g)) {
+    const name = (m[1].match(/<h3[^>]*>([^<]+)<\/h3>/) || [])[1];
+    const day = (m[1].match(/>((?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day)</) || [])[1];
+    if (name && day) (billing[day] = billing[day] || []).push(decodeEntities(name));
+  }
+  const out = [];
+  heads.forEach((h, k) => {
+    const end = k + 1 < heads.length ? heads[k + 1].at : s.length;
+    const seg = s.slice(h.at, end);
+    const dm = dates.find((d) => d.at > h.at && d.at < end);
+    const mo = monthNo(h.month);
+    const date = dm ? dm.date : year && mo ? `${year}-${pad(mo)}-${pad(h.day)}` : null;
+    if (!date || !WD.test(h.weekday)) return;
+    const seen = new Set(); const music = []; let arts = 0;
+    for (const m of seg.matchAll(rowRe)) {
+      const key = `${m[3]}|${m[4]}|${m[1]}`;
+      if (seen.has(key)) continue; seen.add(key);
+      if (m[5] === 'Arts') { arts++; continue; }
+      music.push({ act: decodeEntities(m[3]), stage: decodeEntities(m[4]), start: to24(m[1]), end: to24(m[2]) });
+    }
+    if (!music.length && !arts) return;
+    const stages = [];
+    music.sort((a, b) => a.start.localeCompare(b.start)).forEach((r) => {
+      let st = stages.find((x) => x.stage === r.stage);
+      if (!st) { st = { stage: r.stage, acts: [] }; stages.push(st); }
+      st.acts.push({ act: r.act, start: r.start, end: r.end });
+    });
+    const bill = billing[h.weekday] || [];
+    const lineup = bill.length ? bill : (stages[0] ? stages[0].acts.map((a) => a.act).reverse() : []);
+    out.push({
+      title: lineup.slice(0, 3).join(', ') || 'Bumbershoot',
+      date, time: music.length ? music[0].start : '',
+      lineup, sets: stages, arts,
+    });
+  });
+  return out;
+}
+
+// ---- Seattle PrideFest: the Squarespace events collection ----------------
+// seattlepridefest.org/schedule?format=json lists the organisation's events
+// (`upcoming` and `past`), each with a title and start/end epoch ms. The
+// festival days are the ones titled "PrideFest …" (Capitol Hill on the
+// Saturday, Seattle Center on the Sunday); the volunteer clean-up and the
+// rest are left out. Free. Returns [{ title, date, time, end, url, free }].
+export function mapPrideFestEvents(json, base = 'https://www.seattlepridefest.org') {
+  const items = [...((json && json.upcoming) || []), ...((json && json.past) || [])];
+  const fmt = (ms) => new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  }).format(new Date(ms));
+  const seen = new Set();
+  return items
+    // the festival days only: a PrideFest title, at least four hours long (a
+    // one-hour "PrideFest Seattle Center" in March 2025 was a placeholder);
+    // a year or an "is June 27-28" tail on the title is dropped
+    .filter((it) => /^pridefest\b/i.test(String(it.title || '').trim()) && Number(it.startDate) > 0 && Number(it.endDate) - Number(it.startDate) >= 4 * 3600 * 1000)
+    .map((it) => {
+      const start = fmt(Number(it.startDate)), end = fmt(Number(it.endDate));
+      const title = String(it.title).trim().replace(/\s+(?:is\s.*|20\d\d)$/i, '');
+      return { title, date: start.slice(0, 10), time: start.slice(11, 16), end: end.slice(11, 16), url: base + (it.fullUrl || '/schedule'), free: true };
+    })
+    .filter((e) => { const k = e.date + '|' + e.title; if (seen.has(k)) return false; seen.add(k); return true; })
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+// ---- Northwest Folklife: the festival page's date line -------------------
+// nwfolklife.org/festival/ carries one heading with the next festival's
+// dates, "May 28-31, 2027" (Memorial Day weekend, on the Seattle Center
+// campus, free). One all-day event per day. Returns [{ title, date, time, free }].
+export function parseFolklifeDates(html) {
+  const m = String(html).match(/<h2[^>]*>\s*([A-Z][a-z]+)\.? (\d{1,2})\s*[-–]\s*(?:([A-Z][a-z]+)\.? )?(\d{1,2}),? (20\d\d)\s*<\/h2>/);
+  if (!m) return [];
+  const m1 = MONTHS[m[1].toLowerCase()], m2 = m[3] ? MONTHS[m[3].toLowerCase()] : m1;
+  if (!m1 || !m2) return [];
+  const out = [];
+  const d = new Date(Date.UTC(Number(m[5]), m1 - 1, Number(m[2])));
+  const last = Date.UTC(Number(m[5]), m2 - 1, Number(m[4]));
+  for (let i = 0; i < 10 && d.getTime() <= last; i++, d.setUTCDate(d.getUTCDate() + 1)) {
+    out.push({ title: 'Northwest Folklife Festival', date: d.toISOString().slice(0, 10), time: '', free: true });
+  }
+  return out;
+}

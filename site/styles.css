@@ -31,6 +31,8 @@
   --v-sct: #2c8c9e; --v-mopop: #b34a9a; --v-pacsci: #2a7fb8; --v-kexp: #6d4fc4; /* the campus neighbours */
   --v-goat: #2f8f7c;     /* local bars: a muted sea-green (The Traveling Goat) */
   --v-rep: #c0392b;      /* Seattle Rep: a stage-curtain red, the one warm hue */
+  --v-chbp: #7a8c2e;     /* the festivals (2026-10-05): the Block Party an olive green-gold, */
+  --v-bumber: #c47a2b; --v-folklife: #5a8f3c; --v-pride: #c04a8a; /* Bumbershoot amber, Folklife leaf green, PrideFest pink */
   --venue-text: 72%;     /* how much of the venue hue the card's venue label keeps (light mode) */
   --tint: 26%;           /* the venue wash behind each card (light mode; 13% in the dark palette) */
   /* event-type hues (calendar ticks, agenda right edge): concerts salmon and
@@ -410,7 +412,7 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 /* three groups — the two venue lists (Lower Queen Anne the wider), Teams
    (Steve, 2026-09-20; Capacity rows dropped 2026-09-22) */
 @media (min-width: 641px) and (max-width: 899px) { .fp-tree .fp-cols { grid-template-columns: 1.1fr 1fr; } .fp-tree .fp-group:nth-child(3) { grid-column: 1; border-left: 0; padding-left: 0; padding-right: 1.25rem; border-top: 1px solid var(--line); padding-top: 1rem; margin-top: -.25rem; } } /* tablets: two columns, Teams under Lower Queen Anne (three squeezed the headings into wraps) */
-@media (min-width: 900px) { .fp-tree .fp-cols { grid-template-columns: 1.2fr 1.1fr .85fr; } }
+@media (min-width: 900px) { .fp-tree .fp-cols { grid-template-columns: 1.15fr 1fr 1fr; } .fp-tree { right: auto; width: min(100%, 58rem); } } /* three columns of about twelve rows each (Festivals under Home Teams, 2026-10-05); the panel no wider than they need — it used to run the toolbar's width and stretch the rows across it (Steve: "feel free to shrink the width of the filter pop up") */
 .fp-note { font-family: var(--mono); font-size: .66rem; color: var(--ink-soft); letter-spacing: .04em; margin-left: .35rem; } /* a band's seat range after its name */
 .chip {
   font: 500 .85rem/1 var(--body); cursor: pointer; border-radius: 999px;
@@ -802,6 +804,19 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
   box-shadow: 0 3px 8px rgba(0, 0, 0, .25); pointer-events: none;
 }
 .sheet-tix { font-family: var(--mono); font-size: .76rem; color: var(--ink-soft); margin: -.4rem 0 .6rem; }
+/* a festival day's set times (the Block Party): on the card a mono line per
+   stage, the stage's name in ink, the acts in order with their starts; in
+   the sheet the stage over its sets with start and end, the grid scrolling
+   inside the sheet past a screen's worth */
+.ev-sets { display: flex; flex-direction: column; gap: .12rem; margin-top: .15rem; }
+.ev-sets p { margin: 0; font-family: var(--mono); font-size: .72rem; line-height: 1.35; letter-spacing: .02em; color: var(--ink-soft); }
+.ev-sets b { color: var(--ink); font-weight: 700; }
+.sheet-sets-wrap { max-height: 40vh; max-height: 40dvh; overflow: auto; margin: -.4rem 0 .9rem; padding-right: .3rem; }
+.sheet-sets .ss-stage { margin: .55rem 0 .15rem; font: 700 .72rem/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink); }
+.sheet-sets .ss-stage:first-child { margin-top: 0; }
+.sheet-sets ul { list-style: none; margin: 0; padding: 0; }
+.sheet-sets li { display: flex; gap: .6rem; font-size: .86rem; line-height: 1.45; color: var(--ink); }
+.sheet-sets .ss-time { flex: none; width: 6.2em; font-family: var(--mono); font-size: .74rem; line-height: inherit; color: var(--ink-soft); white-space: nowrap; }
 /* notes in the masthead's stamp type (see .updated), small */
 .pop-note {
   font-family: var(--display); font-weight: 700; font-size: .76rem; line-height: 1.35;
@@ -942,8 +957,8 @@ footer .share summary { font-size: .9rem; white-space: nowrap; }
   letter-spacing: .1em; color: var(--ink); white-space: nowrap; margin: 0;
 }
 .gw-credit strong { font-weight: 500; color: var(--gold); }
-.gw-credit a { text-decoration: none; } /* the credit links to ghostwoodlabs.com (2026-10-04); bare like the other footer links */
-.gw-credit a:hover strong { color: var(--ink-bright); }
+a.gw { text-decoration: none; color: inherit; } /* the mark and the credit are one link to ghostwoodlabs.com, in a new tab (2026-10-05); bare like the other footer links */
+a.gw:hover .gw-credit strong { color: var(--ink-bright); }
 
 /* ---- the Teams view: the home teams' seasons, home and away ---- */
 .teams { width: 100%; margin: 1.6rem auto 0; } /* width: as a body flex item, auto margins would shrink it to its content and it would shift per team */
@@ -1107,6 +1122,8 @@ html { overflow-anchor: none; }
   .team-form { min-height: var(--crest); }
   #teamHead.is-compact .team-form { min-height: 0; }
   .team-form > .tf-body, .team-form > .tf-main, .team-form > .tf-wiki { max-height: calc(var(--crest) + 1rem); }
+  .team-form.no-watch > .tf-body, .team-form.no-watch > .tf-main, .team-form.no-watch > .tf-wiki { max-height: calc(var(--crest) + 3.9rem); } /* the season played out: the strip's two lines go to the column's wrap instead, the block as tall as before */
+  .team-form.has-wrap > .tf-main { max-height: none; } /* the season's wrap under the bug: the block grows to hold it (Steve, 2026-10-05) */
   .team-form > .tf-body { overflow: hidden; }
 }
 
@@ -1135,6 +1152,7 @@ html { overflow-anchor: none; }
 #teamHead.is-compact .bug-team .bug-abbr { display: none; }
 #teamHead.is-compact .bug-team .bug-nick { display: inline; padding: 0 .45rem; white-space: nowrap; } /* the compact bar has the room for the name: Seahawks, not SEA */
 .bug-ev .tf-run { vertical-align: middle; }
+.bug-ev .bug-lbl { font-weight: 700; font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: #f4f4f4; margin-right: .55rem; vertical-align: middle; } /* the cell's name in small caps before its figure: LAST 5, LAST GAME */
 .bug-score.bug-odds { font-size: 1.05rem; letter-spacing: .02em; }
 .bug-grid.bug-grid-2.has-ring { grid-template-columns: 6.6rem minmax(3.6rem, max-content) auto; }
 .is-pregame .bug-grid.no-ev > :nth-child(3) { grid-area: 2 / 1; } .is-pregame .bug-grid.no-ev > :nth-child(4) { grid-area: 2 / 2; } /* no odds yet, no ring: four cells, two rows */
@@ -1147,6 +1165,54 @@ html { overflow-anchor: none; }
 #teamHead.is-compact .bug-ring, #teamHead.is-compact .is-season-bug .bug-ev { display: none; }
 #teamHead.is-compact .bug-grid.bug-grid-2.has-ring { grid-template-columns: minmax(2.7rem, max-content) 2rem; }
 .is-live .tf-wiki { max-height: calc(var(--crest) + 1rem); } /* the news column no taller than the row */
+/* the season's wrap (Steve, 2026-10-05): with the last game played the
+   block drops the watch strip, the next opponent's crest and the news
+   column, and draws the season under the crest and the bug, the block's
+   width, growing to hold it (app.js buildSeasonWrap): one row of six
+   tiles — the months, the record, the scoring, the streaks, the best and
+   worst, the wins on last season */
+.team-form.is-live.has-wrap > .tf-main, .team-form.is-live.has-wrap > .tf-main:not(:has(+ .tf-wiki)) { flex: 1 1 100%; width: 100%; margin-inline: 0; } /* the block's width, not centred at its content's (the rule below centres a main with no column beside it) */
+.team-form.has-wrap .tf-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%; max-width: 100%; height: auto; padding: .5rem 0 .9rem; } /* the crest at the block's left edge, the bug at the block's exact centre (the two 1fr columns match whatever the crest's width), both centred on the row — not the crest dropped level with the bug under its venue line, which left all the air above it (Steve, 2026-10-05: "vert centering here is bad"; then "center this … crest should be left justified") */
+.team-form.has-wrap .tf-row > img { grid-column: 1; justify-self: start; margin-top: 0; }
+.team-form.has-wrap .tf-row > .tf-body { grid-column: 2; min-width: 0; max-width: 100%; }
+.tf-wrap { width: 100%; min-width: 0; margin-top: .2rem; padding-top: 1rem; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem 2.2rem; font-family: var(--mono); font-size: .86rem; color: var(--ink-soft); } /* six tiles, three across in two rows: room for text that can be read (Steve, 2026-10-05: "text here is too small … take more vert space") */
+.tw { min-width: 0; }
+.tw-l { display: block; font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); margin-bottom: .4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tw p { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.6; }
+.tw .tw-foot { font-size: .78rem; margin-top: .2rem; }
+.tw-bar { display: grid; grid-template-columns: 4.6rem minmax(0, 1fr) auto; align-items: center; gap: .6rem; line-height: 1.75; white-space: nowrap; max-width: 24rem; }
+.tw-bar > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.tw-bar i { position: relative; display: block; height: .7rem; border-radius: 2px; background: var(--line); overflow: hidden; }
+.tw-bar i b { display: block; height: 100%; border-radius: inherit; background: var(--team-2); }
+.tw-bar i s { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--mist); opacity: .9; z-index: 1; } /* the .500 tick */
+.tw-bar.is-them i b { background: color-mix(in srgb, var(--ink-soft) 55%, var(--mist)); }
+.tw-bar .tw-n { color: var(--ink); font-weight: 700; }
+.tw-bar.is-them .tw-n { color: var(--ink-soft); }
+.tw p.is-them b { color: var(--ink-soft); }
+/* the months: a stacked column each in a short chart; the streaks: a square a game */
+.tw-months { display: flex; align-items: stretch; gap: .35rem; height: 4.2rem; max-width: 24rem; }
+.tw-col { flex: 1 1 0; min-width: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; text-align: center; }
+.tw-stack { display: flex; flex-direction: column; justify-content: flex-end; min-height: 0; }
+.tw-stack i { display: block; width: 100%; flex: none; }
+.tw-stack .tw-w { background: var(--team-2); border-radius: 0 0 2px 2px; }
+.tw-stack .tw-x { background: color-mix(in srgb, var(--ink-soft) 25%, var(--mist)); border-radius: 2px 2px 0 0; }
+.tw-col em { font-style: normal; font-size: .68rem; line-height: 1.7; letter-spacing: .04em; overflow: hidden; text-overflow: ellipsis; }
+.tw-col.is-best em { color: var(--team-2); font-weight: 700; }
+.tw-col.is-worst em { opacity: .55; }
+.tw-sq { display: inline-flex; gap: .14rem; vertical-align: middle; margin: 0 .45rem 0 .4rem; }
+.tw-sq i { width: .56rem; height: .56rem; border-radius: 2px; background: var(--team-2); }
+.tw-sq.is-L i { background: color-mix(in srgb, var(--ink-soft) 40%, var(--mist)); }
+.tw p b { color: var(--ink); font-weight: 700; }
+/* the leaders: a fourth column the height of both rows, a line a stat — the stat, the player, the figure */
+.tf-wrap.has-leaders { grid-template-columns: 1.15fr 1fr 1fr 1.15fr; }
+.tf-wrap.has-leaders .tw-leaders { grid-column: 4; grid-row: 1 / span 2; }
+.tw-lead { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; gap: .6rem; line-height: 1.75; white-space: nowrap; }
+.tw-lead > span:first-child { color: var(--ink-soft); }
+.tw-lead .tw-who { color: var(--ink); overflow: hidden; text-overflow: ellipsis; }
+.tw-lead .tw-n { color: var(--ink); font-weight: 700; }
+@media (max-width: 1100px) { .tf-wrap.has-leaders { grid-template-columns: repeat(3, minmax(0, 1fr)); } .tf-wrap.has-leaders .tw-leaders { grid-column: auto; grid-row: auto; } }
+#teamHead.is-compact .tf-wrap { display: none; }
+@media (max-width: 640px) { .tf-wrap, .tf-wrap.has-leaders { grid-template-columns: 1fr 1fr; gap: .8rem 1.2rem; font-size: .78rem; } .tf-wrap.has-leaders .tw-leaders { grid-column: 1 / -1; } }
 .is-live img.tf-opp { margin-left: .2rem; }
 .tf-refresh { display: inline-grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0; border: 1px solid var(--ink-soft); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; } /* the block's own colour inside */
 .tf-refresh:hover { border-color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
@@ -1257,6 +1323,7 @@ html { overflow-anchor: none; }
 .team-form.is-live { flex-wrap: wrap; }
 .tf-watch { flex: 1 1 100%; display: flex; align-items: center; gap: .5rem 1rem; margin-top: .3rem; padding: 0; height: 2.9rem; overflow: hidden; box-sizing: border-box; } /* two lines' room, its contents centred in it (the refresh control in its right end), so every block is the same height; the block's own bottom padding is folded into it so the centring is true */
 .team-form.is-live { padding-bottom: 0; } /* the strip's height carries the bottom padding (above) */
+.team-form.is-live.no-watch { padding-bottom: .85rem; } /* no strip once the season is played out (app.js renderTeamForm): the padding is the block's own again */
 .tf-watch-label { font-family: var(--mono); font-size: .74rem; color: var(--ink); }
 .tf-watch-none { font-family: var(--mono); font-size: .74rem; color: var(--ink-soft); }
 .tf-channels a { color: inherit; text-decoration: none; border-bottom: 1px dotted color-mix(in srgb, var(--ink-soft) 60%, transparent); }

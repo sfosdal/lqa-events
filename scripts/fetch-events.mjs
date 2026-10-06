@@ -10,10 +10,11 @@
  */
 import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
-import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents } from './sources.mjs';
+import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates } from './sources.mjs';
 import { mergeWithArchive, unionArchives } from './merge.mjs';
 import { calmTitle, isNotice } from './titles.mjs';
 import { applySchedules } from './schedules.mjs';
+import { applySetTimes } from './settimes.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
 
 const JSON_OUT = new URL('../site/events.json', import.meta.url);
@@ -323,6 +324,63 @@ async function travelingGoat() {
   return evs;
 }
 
+// ---- Festivals (the panel's Festivals group, 2026-10-05) -----------------
+// A festival is its own venue, named for itself, with one event per
+// festival day; the day's headliners are the title, the whole bill `lineup`
+// (the calendar feed's description) and, where the festival publishes them,
+// the set times `sets` — a stage, its acts in order (the site draws a line
+// per stage on the card and the grid in the sheet). The campus festivals
+// (Bumbershoot, Folklife, PrideFest) show by default; the Block Party is a
+// bus ride away and starts off. Each page carries one year at a time —
+// this year's until the next is announced.
+// Capitol Hill Block Party: the festival's artists page (Squarespace; its
+// JSON view is empty, so the HTML — parseBlockPartyArtists); the set times
+// are posters on its Instagram, transcribed once a year into
+// scripts/data/chbp-settimes.json (Steve, 2026-10-05: "build ig").
+const CHBP_URL = 'https://www.capitolhillblockparty.com/artists';
+async function capitolHillBlockParty() {
+  const days = parseBlockPartyArtists(await pageText(CHBP_URL), new Date().toISOString().slice(0, 10))
+    .map((e) => ({ venue: 'Capitol Hill Block Party', type: 'concert', url: CHBP_URL, ...e }));
+  // the set-times grid (scripts/data/chbp-settimes.json, read off the festival's Instagram posters once a year):
+  // each day it covers gets `sets`, the first set's start as its time and the plain festival title
+  let table = {};
+  try { table = JSON.parse(readFileSync(new URL('./data/chbp-settimes.json', import.meta.url), 'utf8')); } catch (err) { console.error('chbp-settimes.json:', err.message); }
+  const evs = applySetTimes(days, table);
+  console.log(`Block Party: ${evs.length} days, ${evs.filter((e) => e.sets).length} with set times`);
+  return evs;
+}
+// Bumbershoot (Labor Day weekend on the campus): the schedule page, with
+// every slot's stage and set time, and the music-lineup page for the
+// billing order — parseBumbershootSchedule.
+const BUMBERSHOOT_URL = 'https://bumbershoot.com/schedule';
+async function bumbershoot() {
+  const lineup = await pageText('https://bumbershoot.com/music-lineup').catch((err) => { console.error('Bumbershoot lineup:', err.message); return ''; });
+  const evs = parseBumbershootSchedule(await pageText(BUMBERSHOOT_URL), lineup)
+    .map((e) => ({ venue: 'Bumbershoot', type: 'concert', url: BUMBERSHOOT_URL, ...e }));
+  console.log(`Bumbershoot: ${evs.length} days`);
+  return evs;
+}
+// Seattle PrideFest (the last weekend of June: Capitol Hill on the Saturday,
+// the campus on the Sunday; free): the Squarespace events collection's JSON
+// — mapPrideFestEvents. The collection goes back years; last year on is kept.
+const PRIDEFEST_URL = 'https://www.seattlepridefest.org/schedule';
+async function prideFest() {
+  const since = `${new Date().getFullYear() - 1}-01-01`;
+  const evs = mapPrideFestEvents(JSON.parse(await pageText(PRIDEFEST_URL + '?format=json')))
+    .filter((e) => e.date >= since)
+    .map((e) => ({ venue: 'PrideFest', type: 'community', ...e }));
+  console.log(`PrideFest: ${evs.length} days`);
+  return evs;
+}
+// Northwest Folklife (Memorial Day weekend on the campus; free): the
+// festival page's one date line — parseFolklifeDates.
+const FOLKLIFE_URL = 'https://www.nwfolklife.org/festival/';
+async function folklife() {
+  const evs = parseFolklifeDates(await pageText(FOLKLIFE_URL)).map((e) => ({ venue: 'Northwest Folklife', type: 'concert', url: FOLKLIFE_URL, ...e }));
+  console.log(`Folklife: ${evs.length} days`);
+  return evs;
+}
+
 // Dedicated per-venue sources run first (better times and ticket links)...
 const sources = [
   () => ticketmasterVenue({ venueId: 'KovZ917Ahkk', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/', exclude: /arena tours?|all access pass/i }),
@@ -341,6 +399,7 @@ const sources = [
   pacificScienceCenter,
   kexp,
   travelingGoat,
+  capitolHillBlockParty, bumbershoot, prideFest, folklife,
 ];
 
 let all = [];
@@ -362,7 +421,7 @@ const CANONICAL_VENUES = new Set([
   'Starfire Stadium', 'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
   'SIFF Cinema Uptown', 'On the Boards', 'Convention Center',
   "Children's Theatre", 'MoPOP', 'Pacific Science Center', 'KEXP',
-  'The Traveling Goat', 'Seattle Rep',
+  'The Traveling Goat', 'Seattle Rep', 'Capitol Hill Block Party', 'Bumbershoot', 'PrideFest', 'Northwest Folklife',
 ]);
 const normalizeVenue = (e) => (CANONICAL_VENUES.has(e.venue) ? e : { ...e, venue: 'Seattle Center' });
 all = all.map(normalizeVenue);

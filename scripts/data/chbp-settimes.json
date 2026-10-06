@@ -1,0 +1,115 @@
+{
+  "_about": "Capitol Hill Block Party set times, transcribed by eye from the festival's Instagram set-times posters (the website lists acts only). One entry per festival day; each stage lists its sets in order as [start, end, act], 24-hour clock, \"close\" where the poster says so. Re-read the posters and rewrite this file when the next year's go up (2026: read 2026-10-05).",
+  "source": "https://www.instagram.com/p/DblebWTm_RT/",
+  "days": {
+    "2026-08-07": {
+      "Main Stage": [
+        ["15:15", "15:45", "Avery Cochrane"],
+        ["16:15", "16:45", "Aliyah's Interlude"],
+        ["17:15", "18:00", "nimino"],
+        ["18:30", "19:15", "Between Friends"],
+        ["19:30", "20:30", "DJ Trixie Mattel"],
+        ["21:00", "22:00", "Magdalena Bay"],
+        ["22:40", "close", "MUNA"]
+      ],
+      "Daydream Stage": [
+        ["14:35", "15:05", "Girl Parallel"],
+        ["15:35", "16:05", "Zailee Haze"],
+        ["16:35", "17:20", "Otha"],
+        ["17:50", "18:35", "Gelli Haha"],
+        ["19:05", "19:50", "After"],
+        ["20:20", "21:20", "Ninajirachi"],
+        ["22:00", "23:00", "Frost Children"]
+      ],
+      "Neumos Stage": [
+        ["17:45", "18:30", "Camille Cano"],
+        ["19:00", "19:45", "Fleetwood Snack"],
+        ["20:15", "21:00", "Lovely Colours"],
+        ["21:30", "22:15", "Casi"],
+        ["22:45", "23:30", "Dark Chisme"],
+        ["23:30", "close", "Afters: Frost Children (DJ set) + DJ Thank You"]
+      ],
+      "Barboza Stage": [
+        ["17:15", "18:00", "Give Me The Money"],
+        ["18:30", "19:15", "Emi Pop"],
+        ["19:45", "20:30", "Clover"],
+        ["21:00", "21:45", "Drew Martin"],
+        ["22:15", "23:00", "Glass Egg"],
+        ["23:30", "close", "Afters: Double Sunrise Club"]
+      ]
+    },
+    "2026-08-08": {
+      "Main Stage": [
+        ["14:45", "15:15", "Sloane Motion"],
+        ["15:45", "16:30", "MGNA CRRRTA"],
+        ["17:00", "17:45", "Momma"],
+        ["18:15", "19:00", "Jigitz"],
+        ["19:30", "20:30", "Amber Mark"],
+        ["21:00", "22:00", "Tinashe (DJ set)"],
+        ["22:40", "close", "Disco Lines"]
+      ],
+      "Daydream Stage": [
+        ["14:20", "14:50", "Makenna DeCaro"],
+        ["15:20", "16:05", "Oxis"],
+        ["16:35", "17:20", "Nickcheo"],
+        ["17:50", "18:35", "Whatmore"],
+        ["19:05", "19:50", "Night Tapes"],
+        ["20:20", "21:20", "Mallrat"],
+        ["22:00", "23:00", "Rochelle Jordan"]
+      ],
+      "Neumos Stage": [
+        ["16:00", "16:45", "Tiny Monsters"],
+        ["17:15", "18:00", "Samara Lennoxx"],
+        ["18:30", "19:15", "Kenshi Killzzz"],
+        ["19:45", "20:30", "The Requisite"],
+        ["21:00", "21:45", "Vika & The Velvets"],
+        ["22:15", "23:00", "RUB"],
+        ["23:15", "close", "Afters: Nickcheo"]
+      ],
+      "Barboza Stage": [
+        ["16:15", "16:45", "Rose Peak"],
+        ["17:15", "17:45", "The Floor Is Not Lava"],
+        ["18:15", "18:45", "slone"],
+        ["19:15", "19:45", "poached"],
+        ["20:15", "20:45", "Pink Steam"],
+        ["21:15", "21:45", "J.Henry"],
+        ["22:15", "22:45", "Bazaar"],
+        ["23:00", "close", "Afters: DJ_Dave + MGNA CRRRTA (DJ sets)"]
+      ]
+    },
+    "2026-08-09": {
+      "Main Stage": [
+        ["13:45", "14:15", "Instant Crush"],
+        ["14:45", "15:15", "DJ_Dave"],
+        ["15:55", "16:40", "Haute & Freddy"],
+        ["17:20", "18:20", "Zack Fox"],
+        ["19:00", "20:00", "Parcels"],
+        ["20:40", "close", "Wet Leg"]
+      ],
+      "Daydream Stage": [
+        ["14:30", "15:00", "Cal State Football Stadium"],
+        ["15:30", "16:00", "Rainbow Jackson"],
+        ["16:30", "17:15", "Babymorocco"],
+        ["17:55", "18:40", "Avalon Emerson & The Charm"],
+        ["19:20", "20:20", "Lucy Bedroque"],
+        ["21:00", "close", "MPH"]
+      ],
+      "Neumos Stage": [
+        ["16:15", "16:45", "Beach Vacation"],
+        ["17:30", "18:00", "John-Robert"],
+        ["18:30", "19:15", "Plugged In!"],
+        ["19:45", "20:30", "Work Wife"],
+        ["21:00", "21:45", "Clouds of the West"],
+        ["22:00", "close", "Afters: DJ100PROOF + The Last Skeptik"]
+      ],
+      "Barboza Stage": [
+        ["16:30", "17:00", "Scott Yoder"],
+        ["17:30", "18:00", "DSRT FLWR"],
+        ["18:30", "19:00", "Rodney Tristan"],
+        ["19:30", "20:00", "Middle Names"],
+        ["20:30", "21:00", "Henry Mansfield"],
+        ["21:30", "22:00", "Fatal Femmes"]
+      ]
+    }
+  }
+}
