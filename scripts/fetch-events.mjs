@@ -342,11 +342,11 @@ async function capitolHillBlockParty() {
   const days = parseBlockPartyArtists(await pageText(CHBP_URL), new Date().toISOString().slice(0, 10))
     .map((e) => ({ venue: 'Capitol Hill Block Party', type: 'concert', url: CHBP_URL, ...e }));
   // the set-times grid (scripts/data/chbp-settimes.json, read off the festival's Instagram posters once a year):
-  // each day it covers gets `sets`, the first set's start as its time and the plain festival title
+  // each day it covers gets `sets` and the first set's start as its time, and an event per set after it (the act, its stage and times)
   let table = {};
   try { table = JSON.parse(readFileSync(new URL('./data/chbp-settimes.json', import.meta.url), 'utf8')); } catch (err) { console.error('chbp-settimes.json:', err.message); }
   const evs = applySetTimes(days, table);
-  console.log(`Block Party: ${evs.length} days, ${evs.filter((e) => e.sets).length} with set times`);
+  console.log(`Block Party: ${evs.filter((e) => !e.set).length} days, ${evs.filter((e) => e.sets).length} with set times, ${evs.filter((e) => e.set).length} sets`);
   return evs;
 }
 // Bumbershoot (Labor Day weekend on the campus): the schedule page, with

@@ -4,7 +4,12 @@
 // scripts/data/chbp-settimes.json (Steve, 2026-10-05: "switching to the
 // detailed line up"). With the table a day's event gets `sets` — one entry
 // per stage, the acts in order with their times — its time becomes the
-// first set's start; the title (the day's headliners) stays. A day the
+// first set's start; the title (the day's headliners) stays. And every set
+// becomes an event of its own on the day, after it: the act as the title,
+// its start as the time, its end (`end`, unless the poster says "close"),
+// the stage (`stage`) and `set: true` — the listing shows the day as a row
+// per act, not one row with the whole grid (Steve, 2026-10-05: "I thought
+// we would create, once line up is avail, events for each"). A day the
 // table doesn't know keeps what the website gave it.
 
 // "14:35" → "2:35", "close" → "close": the short clock used in text
@@ -24,12 +29,16 @@ export function stagesFrom(day) {
 
 export function applySetTimes(events, table, festivalVenue = 'Capitol Hill Block Party') {
   const days = (table && table.days) || {};
-  return events.map((e) => {
-    if (e.venue !== festivalVenue || !days[e.date]) return e;
+  return events.flatMap((e) => {
+    if (e.venue !== festivalVenue || !days[e.date]) return [e];
     const sets = stagesFrom(days[e.date]);
-    if (!sets.length) return e;
+    if (!sets.length) return [e];
     const starts = sets.flatMap((s) => s.acts.map((a) => a.start)).filter((t) => /^\d\d:\d\d$/.test(t)).sort();
-    return { ...e, time: starts[0] || e.time, sets };
+    const acts = sets.flatMap((s) => s.acts.map((a) => ({
+      venue: e.venue, type: e.type, ...(e.url ? { url: e.url } : {}), date: e.date,
+      title: a.act, time: a.start, ...(/^\d\d:\d\d$/.test(a.end) ? { end: a.end } : {}), stage: s.stage, set: true,
+    }))).sort((a, b) => a.time.localeCompare(b.time) || a.stage.localeCompare(b.stage));
+    return [{ ...e, time: starts[0] || e.time, sets }, ...acts];
   });
 }
 

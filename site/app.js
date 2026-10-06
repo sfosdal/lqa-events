@@ -306,7 +306,7 @@
     p.typesOff.forEach(function (t) { state.badgeMode[t] = 'ex'; });
     if (p.teamsOff) groupInfo('team').keys.forEach(function (t) { state.teamMode[t] = 'ex'; });
     if (p.holidays !== undefined) state.holidays = p.holidays;
-    state.soldOnly = false; // a preset is a whole state: the Only Sold switch goes off with it (Steve, 2026-09-15)
+    state.soldOnly = false; // a preset is a whole state: the Only Sold Out switch goes off with it (Steve, 2026-09-15)
   }
   // Does the panel's current state equal this preset? Compares what's off in
   // each group against the preset's lists (only keys the panel shows count,
@@ -1658,6 +1658,28 @@
     }
     return wrap;
   }
+  // The club's big moves, beside the bug once the season is played out — a
+  // manager fired, a trade, an extension, a line apiece (teams.json
+  // form.moves: the league's transactions feed, sifted and shortened at build;
+  // the full list was "too ugly/detailed to read", Steve, 2026-10-05). The opener and the preseason's date were
+  // here first and went the same evening (Steve, 2026-10-05: "the next
+  // season start date is of low value"; a "not published yet" line "the most
+  // useless thing"); the hand-written outlook sits in the panel below. With
+  // no moves, no block.
+  function buildMoves(form) {
+    var moves = (form.moves || []).slice(0, 3);
+    if (!moves.length) return null;
+    var box = document.createElement('div'); box.className = 'tf-ahead'; // no heading: the lines say what they are (Steve, 2026-10-05)
+    moves.forEach(function (m) {
+      var p = document.createElement('p'); p.className = 'tf-move';
+      var a = document.createElement(m.url ? 'a' : 'span'); a.textContent = m.text;
+      if (m.url) { a.href = m.url; a.target = '_blank'; a.rel = 'noopener'; a.title = 'The club’s transactions on ESPN'; }
+      var d = document.createElement('span'); d.className = 'tf-move-day'; d.textContent = parseDate(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' '; p.appendChild(d); // the day first, so a long line wraps in its words, never leaving the day alone on a line
+      p.appendChild(a);
+      box.appendChild(p);
+    });
+    return box;
+  }
   function renderTeamForm(team, games, today) {
     function esc(x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
     var form = (teamsData && teamsData.form && teamsData.form[team.slug]) || {};
@@ -1727,7 +1749,8 @@
     }
     var oppG = next; // the crest at the other end: the next opponent's; with the season played out, none (Steve, 2026-10-05: "the last game crest … isn't needed") — the wrap takes that room
     if (oppG && oppG.opp) { row.appendChild(vsLine(team.label, oppG.home, oppG.opp.short || oppG.opp.name)); row.appendChild(oppCrest(oppG.opp.logo, oppG.opp.name, oppG.opp.abbrev || oppG.opp.short || oppG.opp.name, 'Next: ' + (oppG.opp.name || ''), oppG.opp.site)); } // the compact bar's "at"/"vs" and the opponent's crest
-    if (!next && played.length >= 3) { main.appendChild(buildSeasonWrap(team, played, form)); box.classList.add('has-wrap'); } // the season played out: its wrap, drawn under the crest and the bug where the watch strip was, the block growing to hold it; the news column goes (the lead's last-game line still feeds the pinned bar)
+    if (!next && played.length >= 3) { main.appendChild(buildSeasonWrap(team, played, form)); box.classList.add('has-wrap'); }
+    if (!next) { var mv = buildMoves(form); if (mv) row.appendChild(mv); } // the season played out: the latest moves at the row's right end (Steve, 2026-10-05: "this space is under utilized when the season is over") // the season played out: its wrap, drawn under the crest and the bug where the watch strip was, the block growing to hold it; the news column goes (the lead's last-game line still feeds the pinned bar)
     var side = next ? buildFormSide(form, lead.childNodes.length ? lead : null) : null;
     if (side) box.appendChild(side);
     var strip = next ? buildWatchStrip(next.watch ? next.watch.tv || [] : [], next.watch ? next.watch.radio : null, '', team) : null; // the strip while a game is ahead; with the season played out it goes, and its room goes to the column's wrap (Steve, 2026-10-05: "removing the how to watch/listen section")
@@ -1743,19 +1766,20 @@
   function buildSeasonBug(team, stage, record, standing, homeRec, five, played, upcoming, form) {
     function esc(x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
     var col = '#' + String((team.colors || [])[0] || '555').replace(/^#/, '');
-    var top = stage === 'pre' ? 'Season ahead' : stage === 'off' ? 'Off-season' : stage === 'over' ? seasonLabel(team, played) + ' season over' + (standing ? ' · ' + standing : '') : (standing || 'This season'); // the season named by its year(s) once it is done (Steve, 2026-10-05)
-    var right = form.prev && form.prev.record && stage !== 'over' ? 'Last season ' + form.prev.record : ''; // said in words; with the season over the wrap's tile beneath says it, and the top line is long already
+    var top = stage === 'pre' ? 'Season ahead' : stage === 'off' ? 'Off-season' : stage === 'over' ? seasonLabel(team, played) + ' season over' : (standing || 'This season'); // the season named by its year(s) once it is done (Steve, 2026-10-05)
+    var right = stage === 'over' ? (standing || '') : form.prev && form.prev.record ? 'Last season ' + form.prev.record : ''; // said in words; with the season over the standing sits at the right end of the line (Steve, 2026-10-05: "3rd in AL West should still be right justified") and the wrap's tile beneath has last season
     var r1 = '', r2 = '', s1 = record || '–', s2 = homeRec || '–';
     // every cell says what it is (Steve, 2026-10-05: "don't know what all this means" of SEA 76-86 / HOME 43-38 / W L L W W / a bare game line)
-    if (five.length) r1 = '<b class="bug-lbl">Last 5</b><span class="tf-run">' + five.map(function (g) { return '<i class="r-' + resLetter(g) + '" title="' + esc(gameLine(g) + ' ' + g.res.us + '–' + g.res.them) + '">' + resLetter(g) + '</i>'; }).join('') + '</span>';
+    var done = stage === 'over' || stage === 'off'; // the season played out: the record and the home record alone — the last five and the last game are trivia then (Steve, 2026-10-05: "when the season is over, it should not care about the last five or last game")
+    if (five.length && !done) r1 = '<b class="bug-lbl">Last 5</b><span class="tf-run">' + five.map(function (g) { return '<i class="r-' + resLetter(g) + '" title="' + esc(gameLine(g) + ' ' + g.res.us + '–' + g.res.them) + '">' + resLetter(g) + '</i>'; }).join('') + '</span>';
     var last = played[played.length - 1];
-    if (last) r2 = '<b class="bug-lbl">Last game</b>' + esc(gameLine(last) + ' ' + (last.res.won ? 'W' : last.res.us === last.res.them ? 'D' : 'L') + ' ' + last.res.us + '–' + last.res.them);
+    if (last && !done) r2 = '<b class="bug-lbl">Last game</b>' + esc(gameLine(last) + ' ' + (last.res.won ? 'W' : last.res.us === last.res.them ? 'D' : 'L') + ' ' + last.res.us + '–' + last.res.them);
     if (stage === 'pre' && upcoming.length) { var reg = upcoming.filter(function (g) { return !g.pre; }), ho = reg.filter(function (g) { return g.home; })[0]; r1 = 'Opens ' + esc(gameLine(reg[0] || upcoming[0])); r2 = ho ? 'Home opener ' + esc(gameLine(ho)) : ''; } // the season proper opens after any preseason
-    var b = document.createElement('div'); b.className = 'tf-bug is-generic is-season-bug';
+    var b = document.createElement('div'); b.className = 'tf-bug is-generic is-season-bug' + (done ? ' is-final' : '');
     b.innerHTML = '<div class="bug-top"><span class="bug-pitcher">' + esc(top) + '</span>' + (right ? '<span class="bug-pc">' + esc(right) + '</span>' : '') + '</div>' +
-      '<div class="bug-grid bug-grid-2">' +
-      '<span class="bug-team" style="background:' + col + '">SEASON</span><span class="bug-score">' + esc(s1) + '</span><span class="bug-ev">' + r1 + '</span>' +
-      '<span class="bug-team bug-team-soft">HOME</span><span class="bug-score">' + esc(s2) + '</span><span class="bug-ev">' + r2 + '</span></div>';
+      '<div class="bug-grid bug-grid-2' + (done ? ' no-ev' : '') + '">' +
+      '<span class="bug-team" style="background:' + col + '">SEASON<small>every game</small></span><span class="bug-score">' + esc(s1) + '</span><span class="bug-ev">' + r1 + '</span>' + // each row says what it counts (Steve, 2026-10-05: "define season v. home")
+      '<span class="bug-team bug-team-soft">HOME<small>' + esc(team.venue && team.venue.length <= 22 ? 'at ' + team.venue : 'at home') + '</small></span><span class="bug-score">' + esc(s2) + '</span><span class="bug-ev">' + r2 + '</span></div>';
     return b;
   }
   // The block's right column: the latest written pieces from ESPN's team
@@ -3281,25 +3305,18 @@
   // Cochrane · 4:15 …"; full, in the sheet: the stage over its sets, each
   // with its start and end (Steve, 2026-10-05: "switching to the detailed line up").
   function shortClock(t) { if (!/^\d\d?:\d\d$/.test(t || '')) return t || ''; var hm = t.split(':'); return (Number(hm[0]) % 12 || 12) + ':' + hm[1]; }
-  function setTimesBlock(sets, short) {
-    var box = document.createElement('div'); box.className = short ? 'ev-sets' : 'sheet-sets';
+  function setTimesBlock(sets) { // the day card's grid: a stage, then its sets with their times
+    var box = document.createElement('div'); box.className = 'sheet-sets';
     sets.forEach(function (s) {
-      if (short) {
-        var p = document.createElement('p');
-        var b = document.createElement('b'); b.textContent = s.stage.replace(/ Stage$/i, ''); p.appendChild(b);
-        p.appendChild(document.createTextNode(' ' + s.acts.map(function (a) { return shortClock(a.start) + ' ' + a.act; }).join(' \u00b7 ')));
-        box.appendChild(p);
-      } else {
-        var h = document.createElement('p'); h.className = 'ss-stage'; h.textContent = s.stage; box.appendChild(h);
-        var ul = document.createElement('ul');
-        s.acts.forEach(function (a) {
-          var li = document.createElement('li');
-          var t = document.createElement('span'); t.className = 'ss-time'; t.textContent = shortClock(a.start) + '\u2013' + shortClock(a.end); li.appendChild(t);
-          li.appendChild(document.createTextNode(a.act));
-          ul.appendChild(li);
-        });
-        box.appendChild(ul);
-      }
+      var h = document.createElement('p'); h.className = 'ss-stage'; h.textContent = s.stage; box.appendChild(h);
+      var ul = document.createElement('ul');
+      s.acts.forEach(function (a) {
+        var li = document.createElement('li');
+        var t = document.createElement('span'); t.className = 'ss-time'; t.textContent = shortClock(a.start) + '\u2013' + shortClock(a.end); li.appendChild(t);
+        li.appendChild(document.createTextNode(a.act));
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
     });
     return box;
   }
@@ -3324,7 +3341,7 @@
     if (e.series) when += ' · ' + e.series.n + ' of ' + e.series.total;
     if (e.status) when += ' · ' + e.status.toUpperCase() + (e.statusSince ? ' (noticed ' + fmtSince(e.statusSince) + ')' : '');
     if (e.dateTbd) when += ' · date TBD';
-    $('sheetWhen').textContent = when;
+    $('sheetWhen').textContent = when + (e.stage ? ' \u00b7 ' + e.stage + (e.end ? ', until ' + fmtTime(e.end) : ', to close') : ''); // one set of a festival day: its stage and end
     var tix = ticketsLine(e);
     var st = $('sheetTix'); st.hidden = !tix;
     st.textContent = tix ? tix + (e.tickets && e.tickets.checked ? ' \u00b7 checked ' + fmtSince(e.tickets.checked) : '') : '';
@@ -3339,7 +3356,7 @@
     });
     w.hidden = !w.childNodes.length;
     var ss = $('sheetSets'); ss.innerHTML = ''; ss.hidden = !(Array.isArray(e.sets) && e.sets.length); // a festival day: the whole set-times grid, stage by stage
-    if (!ss.hidden) ss.appendChild(setTimesBlock(e.sets, false));
+    if (!ss.hidden) ss.appendChild(setTimesBlock(e.sets));
     // Tickets — only where there are tickets to buy. A bar night's link is the
     // bar's events page (the venue chip below already goes there), so no chip;
     // a free event's link is its details page, so the chip says so (Steve, 2026-09-21)
@@ -3833,7 +3850,10 @@
         titleLine.appendChild(a);
         if (sn) row.appendChild(sn); // lower right of the card (CSS)
         body.appendChild(venue); body.appendChild(titleLine);
-        if (Array.isArray(e.sets) && e.sets.length) body.appendChild(setTimesBlock(e.sets, true)); // a festival day: each stage's bill with its set times (the Block Party, from the build's set-times table)
+        // a festival day with its set times: a line saying how much is on (the sets follow as rows of their own; the day card has
+        // the grid); one of its sets: the stage and when it ends (Steve, 2026-10-05: the grid on the day's row "look[ed] bad")
+        if (Array.isArray(e.sets) && e.sets.length) { var ns = 0; e.sets.forEach(function (st) { ns += st.acts.length; }); var sl = document.createElement('span'); sl.className = 'ev-stage'; sl.textContent = e.sets.length + ' stages \u00b7 ' + ns + ' sets, each listed below'; body.appendChild(sl); }
+        else if (e.stage) { var sg = document.createElement('span'); sg.className = 'ev-stage'; sg.textContent = e.stage + (e.end ? ' \u00b7 until ' + fmtTime(e.end) : ' \u00b7 to close'); body.appendChild(sg); }
         // a show that's off: struck through, with a third line saying so
         // (and when we noticed, if the feed knows)
         if (e.status) {

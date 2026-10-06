@@ -14,8 +14,8 @@ const table = {
 };
 const day = { venue: 'Capitol Hill Block Party', type: 'concert', title: 'MUNA, Avery Cochrane', date: '2026-08-07', time: '', lineup: ['MUNA', 'Avery Cochrane'] };
 
-test('a festival day with set times gets the grid and the first start as its time; the title stays', () => {
-  const [out] = applySetTimes([day], table);
+test('a festival day with set times gets the grid and the first start as its time; the title stays; then an event per set', () => {
+  const [out, ...sets] = applySetTimes([day], table);
   assert.equal(out.title, 'MUNA, Avery Cochrane');
   assert.equal(out.time, '14:35');
   assert.deepEqual(out.lineup, ['MUNA', 'Avery Cochrane']); // the website's bill stays
@@ -23,6 +23,11 @@ test('a festival day with set times gets the grid and the first start as its tim
     { stage: 'Main Stage', acts: [{ act: 'Avery Cochrane', start: '15:15', end: '15:45' }, { act: 'MUNA', start: '22:40', end: 'close' }] },
     { stage: 'Daydream Stage', acts: [{ act: 'Girl Parallel', start: '14:35', end: '15:05' }] },
   ]); // an empty stage is dropped
+  assert.deepEqual(sets, [ // in order of the day, the act as the title, its stage, its end unless the poster says close
+    { venue: 'Capitol Hill Block Party', type: 'concert', date: '2026-08-07', title: 'Girl Parallel', time: '14:35', end: '15:05', stage: 'Daydream Stage', set: true },
+    { venue: 'Capitol Hill Block Party', type: 'concert', date: '2026-08-07', title: 'Avery Cochrane', time: '15:15', end: '15:45', stage: 'Main Stage', set: true },
+    { venue: 'Capitol Hill Block Party', type: 'concert', date: '2026-08-07', title: 'MUNA', time: '22:40', stage: 'Main Stage', set: true },
+  ]);
 });
 
 test('a day the table does not know, and other venues, pass through untouched', () => {
@@ -33,7 +38,7 @@ test('a day the table does not know, and other venues, pass through untouched', 
 });
 
 test('the feed text lists each stage on its own line with short clocks', () => {
-  const [out] = applySetTimes([day], table);
+  const out = applySetTimes([day], table)[0];
   assert.equal(setTimesText(out.sets), 'Main Stage: 3:15 Avery Cochrane, 10:40 MUNA\nDaydream Stage: 2:35 Girl Parallel');
   assert.equal(shortClock('close'), 'close');
   assert.equal(shortClock('00:05'), '12:05');

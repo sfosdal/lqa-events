@@ -131,26 +131,29 @@ h1 {
 /* the picture (Steve, 2026-09-21: line art, the Needle's crown the focus):
    the top of the Space Needle from the Highsmith aerial, traced to single
    smooth lines at build (a gradient-magnitude pass over the photo, see the
-   memory note), a 4.4:1 window with the crown at 55% of the width. The
+   memory note), a 4.5:1 window from the spire tip to the Queen Anne treeline
+   with the Needle centred and the Cascades ridge behind
+   (design/lqa-masthead-lines-gen.py). The
    drawing is a luminance mask (masthead-lines.png, white = line) over a box
    of ink, so the lines are the palette's own ink in either theme. A band
    behind the masthead, the Needle toward the right, dissolving into the page
    on every side — no hard edge where the art stops (Steve, 2026-09-21) */
 .masthead { min-height: 11rem; overflow: hidden; isolation: isolate; } /* a slim band (Steve, 2026-09-20: minimal) */
-.masthead-photo { /* the right half, pinned to the top of the band so the Needle's crown always shows with sky over it */
-  position: absolute; top: 0; right: 0; bottom: 0; z-index: -1; width: 52%; height: 100%;
-  background: var(--ink); pointer-events: none;
-  opacity: .6;
-  -webkit-mask-image: url(masthead-lines.png), linear-gradient(to right, transparent 0%, #000 35%, #000 78%, transparent 100%), linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
-  mask-image: url(masthead-lines.png), linear-gradient(to right, transparent 0%, #000 35%, #000 78%, transparent 100%), linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
-  -webkit-mask-size: cover, 100% 100%, 100% 100%; mask-size: cover, 100% 100%, 100% 100%;
-  -webkit-mask-position: 50% 0%, 0 0, 0 0; mask-position: 50% 0%, 0 0, 0 0;
+.masthead-photo { /* the drawing fills the gap between the name and the theme pill (Steve, 2026-10-05: "in all the modes try to make it fill this space"): a flex item between them, as tall as the band (the negative margins reach over the band's padding) */
+  order: 1; flex: 1 1 0; align-self: stretch; min-width: 0; z-index: -1;
+  margin: -2.5rem 0 -1rem; pointer-events: none;
+  background: #fff; opacity: .9; /* white lines on the dark palette, black on the light one (Steve: "white and black with antialiasing") */
+  -webkit-mask-image: url(masthead-lines.png), linear-gradient(to right, transparent 0%, #000 10%, #000 92%, transparent 100%), linear-gradient(to bottom, #000 0%, #000 58%, transparent 100%);
+  mask-image: url(masthead-lines.png), linear-gradient(to right, transparent 0%, #000 10%, #000 92%, transparent 100%), linear-gradient(to bottom, #000 0%, #000 58%, transparent 100%);
+  -webkit-mask-size: auto 100%, 100% 100%, 100% 100%; mask-size: auto 100%, 100% 100%, 100% 100%; /* the drawing at the band's height, however wide the gap: the Needle stays whole, the ridge beside it shows as far as the gap allows */
+  -webkit-mask-position: 50% 0%, 0 0, 0 0; mask-position: 50% 0%, 0 0, 0 0; /* the Needle is at the drawing's centre, so its spire is the centre of the gap at every width (Steve, 2026-10-05: "make the center the top of the needle") */
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   mask-mode: luminance, alpha, alpha;
   -webkit-mask-composite: source-in; mask-composite: intersect;
 }
-:root[data-theme="light"] .masthead-photo { opacity: .5; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .masthead-photo { opacity: .5; } }
+.masthead-tools { order: 2; }
+:root[data-theme="light"] .masthead-photo { background: #000; opacity: .7; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .masthead-photo { background: #000; opacity: .7; } }
 .masthead-text { position: relative; }
 .masthead .eyebrow { font-size: calc(var(--mast-title) * .5); font-weight: 500; letter-spacing: .14em; margin-bottom: .1rem; line-height: 1; } /* "Seattle": half the title's size (Steve, 2026-09-16: twice the quarter it was), a shade bolder */
 /* the masthead's tools (Steve, 2026-09-14): the poster chip (Teams view
@@ -808,9 +811,7 @@ button.cal-day:hover { background: color-mix(in srgb, var(--ink) 10%, var(--mist
    stage, the stage's name in ink, the acts in order with their starts; in
    the sheet the stage over its sets with start and end, the grid scrolling
    inside the sheet past a screen's worth */
-.ev-sets { display: flex; flex-direction: column; gap: .12rem; margin-top: .15rem; }
-.ev-sets p { margin: 0; font-family: var(--mono); font-size: .72rem; line-height: 1.35; letter-spacing: .02em; color: var(--ink-soft); }
-.ev-sets b { color: var(--ink); font-weight: 700; }
+.ev-stage { font-family: var(--mono); font-size: .74rem; letter-spacing: .03em; color: var(--ink-soft); } /* a festival set's stage, or the day's count of them */
 .sheet-sets-wrap { max-height: 40vh; max-height: 40dvh; overflow: auto; margin: -.4rem 0 .9rem; padding-right: .3rem; }
 .sheet-sets .ss-stage { margin: .55rem 0 .15rem; font: 700 .72rem/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink); }
 .sheet-sets .ss-stage:first-child { margin-top: 0; }
@@ -1175,6 +1176,14 @@ html { overflow-anchor: none; }
 .team-form.has-wrap .tf-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%; max-width: 100%; height: auto; padding: .5rem 0 .9rem; } /* the crest at the block's left edge, the bug at the block's exact centre (the two 1fr columns match whatever the crest's width), both centred on the row — not the crest dropped level with the bug under its venue line, which left all the air above it (Steve, 2026-10-05: "vert centering here is bad"; then "center this … crest should be left justified") */
 .team-form.has-wrap .tf-row > img { grid-column: 1; justify-self: start; margin-top: 0; }
 .team-form.has-wrap .tf-row > .tf-body { grid-column: 2; min-width: 0; max-width: 100%; }
+/* the big moves, at the row's right end, right-justified (Steve, 2026-10-05: "2026 season over is fine. the rest should be right justified"): a line per move in the column's mono */
+.team-form.has-wrap .tf-row > .tf-ahead { grid-column: 3; justify-self: stretch; text-align: right; min-width: 0; padding-left: .75rem; }
+.tf-ahead .tf-move { margin: .4rem 0 0; font-family: var(--mono); font-size: .84rem; line-height: 1.3; color: var(--ink); text-wrap: balance; } /* a short line each, sized to fill the column; a long one wraps in two even halves, never a word alone on the second line */
+.tf-ahead .tf-move:first-child { margin-top: 0; }
+.tf-ahead .tf-move a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--line); } /* linked to the source: ESPN's transactions page for the club */
+.tf-ahead .tf-move a:hover { color: var(--gold); border-color: var(--gold); }
+.tf-ahead .tf-move-day { font-size: .76rem; color: var(--ink-soft); }
+@media (max-width: 900px) { .team-form.has-wrap .tf-row > .tf-ahead { grid-column: 1 / -1; justify-self: stretch; text-align: left; max-width: none; margin-top: .6rem; } } /* under the row once the three columns can't share the width */
 .tf-wrap { width: 100%; min-width: 0; margin-top: .2rem; padding-top: 1rem; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem 2.2rem; font-family: var(--mono); font-size: .86rem; color: var(--ink-soft); } /* six tiles, three across in two rows: room for text that can be read (Steve, 2026-10-05: "text here is too small … take more vert space") */
 .tw { min-width: 0; }
 .tw-l { display: block; font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); margin-bottom: .4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1272,7 +1281,13 @@ html { overflow-anchor: none; }
 .bug-ball { display: inline-block; vertical-align: middle; margin-right: .4rem; }
 .bug-grid.bug-grid-2.no-ev { grid-template-columns: 8rem minmax(4.4rem, max-content); } .bug-grid-2.no-ev .bug-ev { display: none; } /* a final with nothing beside the scores */
 .bug-ball { width: .55rem; height: .55rem; border-radius: 50%; background: var(--bug-on); flex: none; }
-.bug-team { position: relative; } .bug-poss { position: absolute; left: .3rem; top: 50%; width: 1rem; height: .7rem; transform: translateY(-50%); } /* the football at the left edge of the name cell: who has the ball */
+.bug-team { position: relative; }
+/* the season bug's rows say what they count: SEASON over "every game", HOME over "at T-Mobile Park" (Steve, 2026-10-05: "define season v. home"); taller rows for the second line */
+.is-season-bug .bug-grid { grid-template-rows: 2.5rem 2.5rem; }
+.is-season-bug.is-final .bug-grid.bug-grid-2.no-ev { grid-template-columns: 1fr minmax(4.4rem, max-content); } /* the season played out: two rows of label and record, no last five, no last game; the label cell takes the width the top line needs */
+.is-season-bug .bug-ev { line-height: 2.5rem; }
+.is-season-bug .bug-team { grid-template-rows: auto auto; align-content: center; line-height: 1; }
+.is-season-bug .bug-team small { font-family: var(--mono); font-size: .5rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; text-shadow: none; opacity: .9; margin-top: .2rem; white-space: nowrap; } .bug-poss { position: absolute; left: .3rem; top: 50%; width: 1rem; height: .7rem; transform: translateY(-50%); } /* the football at the left edge of the name cell: who has the ball */
 #teamHead.is-compact .bug-poss { width: .8rem; height: .55rem; left: .15rem; }
 .bug-abbr:has(.bug-xtra) { display: grid; grid-template-columns: 3.1rem max-content; justify-items: start; align-items: center; gap: .3rem; width: 100%; box-sizing: border-box; padding: 0 .4rem; } /* the name in a fixed column, what rides with it (the record, SH, the ball) after: both rows' names start on one line and both records on another, whatever their lengths (Steve, 2026-10-01: SKC 6-3-17 over SEA 9-8-9 sat staggered when the pair was centred); the cell widens for a long extra (bug-grid-2 below) */
 .bug-ab { font-weight: inherit; }
@@ -1692,7 +1707,7 @@ body.sheet-open { overflow: hidden; }
   .masthead { padding: 1.6rem 0 .8rem; gap: 1.1rem; }
   h1 { font-size: clamp(2.4rem, 11vw, 3.2rem); }
   .masthead { min-height: 9rem; }
-  .masthead-photo { width: 52%; opacity: .35; -webkit-mask-position: 50% 0%, 0 0, 0 0; mask-position: 50% 0%, 0 0, 0 0; } /* the right edge only, clear of the title (Steve, 2026-09-22) */ /* the whole width on a phone, the Needle a little right of centre; the same fades */
+  .masthead-photo { position: absolute; top: 0; right: 0; bottom: 0; width: 62%; height: 100%; margin: 0; flex: none; opacity: .35; } /* on a phone the band wraps, so the drawing goes back to a box pinned at the right edge, clear of the title (Steve, 2026-09-22); the same mask centres the Needle in it */
   .pop { left: 0; right: 0; width: auto; }
 
   /* day groups: date reads across the top instead of down a rail */

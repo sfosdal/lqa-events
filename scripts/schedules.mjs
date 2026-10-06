@@ -275,19 +275,20 @@ async function espnHomeCity(sport, league, teamId) {
   return Object.keys(n).sort((a, b) => n[b] - n[a])[0] || null;
 }
 async function espnForm(sport, league, teamId, name, slug) {
-  const [t, news, prev, city, splits, leaders] = await Promise.all([
+  const [t, news, prev, city, splits, leaders, moves] = await Promise.all([
     getJson(`https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/teams/${teamId}`, true).then((d) => d.team || {}),
     clubNews(slug, name, espnNews(sport, league, teamId, name).catch((e) => { console.error(`news: ${league}/${teamId} skipped — ${e.message}`); return []; })),
     espnPrev(sport, league, teamId).catch((e) => { console.error(`prev: ${league}/${teamId} skipped — ${e.message}`); return null; }),
     espnHomeCity(sport, league, teamId).catch((e) => { console.error(`city: ${league}/${teamId} skipped — ${e.message}`); return null; }),
     espnSplits(sport, league, teamId).catch((e) => { console.error(`splits: ${league}/${teamId} skipped — ${e.message}`); return {}; }),
     espnLeaders(sport, league, teamId).catch((e) => { console.error(`leaders: ${league}/${teamId} skipped — ${e.message}`); return []; }),
+    espnMoves(sport, league, teamId).catch((e) => { console.error(`moves: ${league}/${teamId} skipped — ${e.message}`); return []; }),
   ]);
   const items = t.record?.items || [];
   const total = items.find((i) => i.type === 'total') || items[0];
   const home = items.find((i) => i.type === 'home');
   const club = { ...(t.displayName ? { name: t.displayName } : {}), ...(t.abbreviation ? { abbr: t.abbreviation } : {}), ...(city ? { city } : {}) }; // as the league lists them: "Washington Huskies", WASH, Seattle, WA
-  return { record: total?.summary, standing: t.standingSummary, ...(home?.summary ? { home: home.summary } : {}), ...splits, ...(leaders.length ? { leaders } : {}), ...(news.length ? { news } : {}), ...(prev ? { prev } : {}), ...(Object.keys(club).length ? { club } : {}) };
+  return { record: total?.summary, standing: t.standingSummary, ...(home?.summary ? { home: home.summary } : {}), ...splits, ...(leaders.length ? { leaders } : {}), ...(moves.length ? { moves } : {}), ...(news.length ? { news } : {}), ...(prev ? { prev } : {}), ...(Object.keys(club).length ? { club } : {}) };
 }
 // ESPN names a season by the year it starts in; hockey and football seasons
 // start in the autumn, so from January to June the season in progress is
@@ -386,6 +387,44 @@ async function espnPrev(sport, league, teamId) {
   const stat = (n) => (e.stats || []).find((x) => x.name === n)?.value;
   const rank = stat('rank');
   return { season, record: [stat('wins'), stat('losses'), stat('ties')].map((v) => (v == null ? 0 : v)).join('-'), ...(rank ? { rank: Number(rank) } : {}) };
+}
+// The club's big moves from the league's transactions feed (ESPN's site
+// API lists the whole league, newest first, each tagged with the team):
+// only the ones a fan would call news — a manager or coach fired or hired,
+// a front-office change, a trade, a free agent signed to the big club, an
+// extension, a retirement. The daily traffic (IL, recalls, options, waivers,
+// DFA, activations, minor-league deals) is left out, and each kept move is
+// cut to its first sentence, a line of four or so words (Steve, 2026-10-05:
+// "only huge changes (coaches, records broken????)" — the routine list was
+// "too ugly/detailed to read"). [{ date, text }]
+const ROUTINE = /\b(injured list|\bIL\b|recalled|optioned|outrighted|waivers|designated .* for assignment|activated|reinstated|hardship|two-way|minor[- ]league|player development|practice squad|reserve\/|exempt list|assigned|loaned|transferred|sent .* to|selected the contract|purchased the contract)\b/i;
+const BIG = /\b(fired|dismissed|hired|named|appointed|promoted|trad(ed|es)|acquired|extension|extended|retire[ds]?|free agent|signed .* to a (one|two|three|four|five|six|seven|\d)-year|released (manager|head coach))\b/i;
+const STAFF = /\b(manager|head coach|coach|general manager|president|coordinator|director)\b/i;
+export function bigMove(text) {
+  const t = String(text || '');
+  if (!BIG.test(t)) return false;
+  if (/\b(fired|dismissed|hired|named|appointed|promoted)\b/i.test(t) && !STAFF.test(t)) return false; // "named to the roster" is not a hiring
+  return !ROUTINE.test(t) || /\b(fired|hired|trad(ed|es)|extension|retire)/i.test(t);
+}
+export function shortMove(text) {
+  let t = String(text || '').trim().split(/(?<=[a-z\)])\.\s+(?=[A-Z])/)[0].replace(/\.+$/, ''); // the first sentence
+  const coaches = (t.match(/\bcoach\b/gi) || []).length;
+  if (coaches >= 2 && /^(Fired|Hired|Named|Promoted)\b/i.test(t)) t = t.replace(/^(\w+)\b.*/s, `$1 ${coaches} coaches`); // "Fired bench coach A, infield coach B, …" → "Fired 4 coaches"
+  t = t.replace(/\b(RHP|LHP|SS|1B|2B|3B|OF|RF|LF|CF|DH|C|INF|UTL|G|F|QB|RB|WR|TE|OL|DL|LB|CB|S|K|P|D|LW|RW|RW\/C|C\/RW)\s+(?=[A-Z])/g, ''); // positions out: the name is the news
+  return t.length > 60 ? t.slice(0, 57).replace(/[\s,;:]+\S*$/, '') + '…' : t;
+}
+export function pickMoves(transactions, teamId, n = 3) {
+  return (transactions || []).filter((t) => t && t.description && String(t.team?.id) === String(teamId) && bigMove(t.description))
+    .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+    .slice(0, n).map((t) => {
+      const club = (t.team?.links || []).find((l) => (l.rel || []).includes('clubhouse') && (l.rel || []).includes('desktop'))?.href || '';
+      const url = club.replace('/team/_/', '/team/transactions/_/'); // the feed has no link per move; ESPN's page of the club's transactions is the source
+      return { date: seattleDate(t.date), text: shortMove(t.description), ...(url ? { url } : {}) };
+    });
+}
+async function espnMoves(sport, league, teamId) {
+  const d = await getJson(`https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/transactions?limit=300`, true);
+  return pickMoves(d.transactions, teamId, 3);
 }
 // ESPN's news feed tagged with the team: the latest few written pieces
 // (stories, recaps, previews, headline news — video clips left out), the

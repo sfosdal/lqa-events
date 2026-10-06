@@ -115,6 +115,7 @@ function eventLines(e, dtstamp) {
   else if (e.dateTbd) lines.push(`DESCRIPTION:${escapeText('Date not final — the league may still move this game. The feed updates within a few hours of a change.')}`);
   else if (Array.isArray(e.sets) && e.sets.length) lines.push(`DESCRIPTION:${escapeText('Set times\n' + setTimesText(e.sets))}`); // a festival day with its grid: a line per stage (Capitol Hill Block Party)
   else if (Array.isArray(e.lineup) && e.lineup.length) lines.push(`DESCRIPTION:${escapeText('Lineup: ' + e.lineup.join(', '))}`); // a festival day: the whole bill
+  else if (e.stage) lines.push(`DESCRIPTION:${escapeText(e.stage + (e.end ? '' : ', to close'))}`); // one set of a festival day: its stage (the times are the event's own)
   if (e.url) lines.push(`URL:${escapeText(e.url)}`);
   lines.push('END:VEVENT');
   return lines;

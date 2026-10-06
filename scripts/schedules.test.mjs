@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseYoutube, matchYoutube, parseNflPage, titleDate } from './highlights.mjs';
-import { applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, pwhlOdds, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
+import { pickMoves, bigMove, shortMove, applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, pwhlOdds, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
 
 const feed = () => [
   { venue: 'Lumen Field', title: 'Seattle Seahawks vs. Dallas Cowboys', date: '2026-12-07', time: '17:15:00' },
@@ -346,4 +346,27 @@ test('divisionRecord: the results against the division, the preseason and playof
   const games = [g('HOU', 5, 3), g('HOU', 1, 2), g('TEX', 4, 4), g('NYY', 9, 0), g('LAA', 2, 1, { pre: true }), g('ATH', 0, 1, { playoff: true }), { opp: { abbrev: 'ATH' } }];
   assert.equal(divisionRecord(games, ['HOU', 'LAA', 'ATH', 'TEX']), '1-1-1');
   assert.equal(divisionRecord([g('NYY', 9, 0)], ['HOU']), null);
+});
+
+test('pickMoves: only the big moves, newest first, cut to a short line', () => {
+  const tr = (date, id, description) => ({ date, team: { id: String(id), links: [{ rel: ['clubhouse', 'desktop', 'team'], href: 'https://www.espn.com/mlb/team/_/name/sea/seattle-mariners' }] }, description });
+  const feed = [
+    tr('2026-10-02T07:00Z', 12, 'Claimed 1B Michael Toglia off waivers from Cincinnati.'),
+    tr('2026-09-28T07:00Z', 12, 'Fired bench coach Manny Acta, infield coach Perry Hill, hitting coach Kevin Seitzer and first base coach Eric Young Jr..'),
+    tr('2026-09-27T07:00Z', 12, 'Fired Head Coach Dan Wilson.'),
+    tr('2026-09-25T07:00Z', 12, 'Placed RHP Andrés Muñoz on the 15-day IL. Recalled RHP Troy Taylor from Tacoma (PCL).'),
+    tr('2026-09-24T07:00Z', 12, 'Placed SS Brock Rodden on the 10-day IL, retroactive to Sept. 23. Recalled 3B Leo Rivas from Tacoma (PCL).'),
+    tr('2026-09-20T07:00Z', 12, 'Signed RHP Luis Castillo to a three-year contract extension.'),
+    tr('2026-09-19T07:00Z', 12, 'Traded OF Dominic Canzone to Pittsburgh for cash considerations.'),
+    tr('2026-09-18T07:00Z', 12, 'Named OF Julio Rodríguez to the roster.'),
+    tr('2026-09-30T07:00Z', 25, 'Fired manager Someone Else.'),
+  ];
+  assert.deepEqual(pickMoves(feed, 12), [
+    { date: '2026-09-28', text: 'Fired 4 coaches', url: 'https://www.espn.com/mlb/team/transactions/_/name/sea/seattle-mariners' },
+    { date: '2026-09-27', text: 'Fired Head Coach Dan Wilson', url: 'https://www.espn.com/mlb/team/transactions/_/name/sea/seattle-mariners' },
+    { date: '2026-09-20', text: 'Signed Luis Castillo to a three-year contract extension', url: 'https://www.espn.com/mlb/team/transactions/_/name/sea/seattle-mariners' },
+  ]); // linked to ESPN's page of the club's moves
+  assert.deepEqual(pickMoves(feed, 12, 5).map((m) => m.text)[3], 'Traded Dominic Canzone to Pittsburgh for cash considerations');
+  assert.equal(pickMoves(feed, 12, 5).length, 4); // the roster naming, the IL moves and the waiver claim are not news
+  assert.deepEqual(pickMoves([], 12), []);
 });

@@ -174,30 +174,36 @@
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
 
-  // Three states per option (Steve, 2026-09-22): checked = 'in', X = 'ex',
-  // absent = no preference. An X always hides. Checks in the "where" groups
-  // (venues, capacity bands, teams) add up: once any is checked, only events
-  // matching one of them show. Checked event types then narrow that to those
-  // kinds. Nothing checked anywhere = everything but the X's. No option ever
-  // changes another.
+  // Three states per option (Steve, 2026-09-22): Show = 'in', Hide = 'ex',
+  // absent = no preference. The row that names the thing wins (Steve,
+  // 2026-10-05: "I want show to always show, and hide to always hide" — a
+  // Show on the Block Party with Concerts hidden showed nothing): a team row
+  // names a game exactly, a venue row names its place, and either one's
+  // Show or Hide is final for its events, the team's first. The general
+  // rows — event types, capacity bands — only decide the events no specific
+  // row has spoken for. Shows still narrow: once any venue or team is on
+  // Show, only the Shown ones' events show; once any type (or band) is, the
+  // undecided events narrow to those kinds. Nothing on Show anywhere =
+  // everything but the Hides. No option ever changes another.
   function matchesFilter(e, mode) {
     mode = mode || {};
     var venueMode = mode.venueMode || {}, badgeMode = mode.badgeMode || {}, teamMode = mode.teamMode || {}, capMode = mode.capMode || {};
     var band = bandOf(e.venue), type = eventType(e), title = e.title || '';
-    if (venueMode[e.venue] === 'ex') return false;
-    if (capMode[band] === 'ex') return false;
-    if (badgeMode[type] === 'ex') return false;
-    if (mode.soldOnly && !ticketState(e)) return false; // the "Only Sold" switch: only those
-    var k, anyWhere = false, hitWhere = false, anyType = false;
+    if (mode.soldOnly && !ticketState(e)) return false; // the "Only Sold Out" switch: only those
+    var k, anySpecific = false, anyType = false, anyBand = false;
+    // the specific rows: the team that plays, then the venue — a Hide or a Show on one is the answer
     for (k in teamMode) {
-      if (teamMode[k] === 'ex' && TEAM_BY_SLUG[k] && TEAM_BY_SLUG[k].re.test(title)) return false;
-      if (teamMode[k] === 'in') { anyWhere = true; if (TEAM_BY_SLUG[k] && TEAM_BY_SLUG[k].re.test(title)) hitWhere = true; }
+      if (teamMode[k] === 'in') anySpecific = true;
+      if (teamMode[k] && TEAM_BY_SLUG[k] && TEAM_BY_SLUG[k].re.test(title)) return teamMode[k] === 'in';
     }
-    for (k in venueMode) if (venueMode[k] === 'in') { anyWhere = true; if (k === e.venue) hitWhere = true; }
-    for (k in capMode) if (capMode[k] === 'in') { anyWhere = true; if (k === band) hitWhere = true; }
-    if (anyWhere && !hitWhere) return false;
-    for (k in badgeMode) if (badgeMode[k] === 'in') { anyType = true; if (k === type) return true; }
-    return !anyType;
+    for (k in venueMode) if (venueMode[k] === 'in') anySpecific = true;
+    if (venueMode[e.venue]) return venueMode[e.venue] === 'in';
+    if (anySpecific) return false; // a Show on a venue or a team: only theirs
+    // the general rows, for an event no specific row spoke for: the kind and the band
+    if (badgeMode[type] === 'ex' || capMode[band] === 'ex') return false;
+    for (k in badgeMode) if (badgeMode[k] === 'in') anyType = true;
+    for (k in capMode) if (capMode[k] === 'in') anyBand = true;
+    return (!anyType || badgeMode[type] === 'in') && (!anyBand || capMode[band] === 'in');
   }
 
   // Compact filter code <-> filter state, for share links (?f=CODE).
@@ -335,7 +341,7 @@
     var groups = {};
     list.forEach(function (e) {
       delete e.series;
-      if (e.movie) return;
+      if (e.movie || e.set) return; // a festival's sets are the day's, not a series of their own (the day rows are the festival's "n of N")
       var k = seriesKey(e);
       (groups[k] = groups[k] || []).push(e);
     });
