@@ -4752,6 +4752,127 @@
    "date": "2026-10-05",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1350846/the-living-tombstone-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Slalom R4 2026",
+   "date": "2026-10-06",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=36315",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Hockey Happy Hour",
+   "date": "2026-10-06",
+   "time": ""
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Leonardo! A Wonderful Show about a Terrible Monster",
+   "date": "2026-10-06",
+   "time": "12:30:00",
+   "url": "https://www.sct.org/onstage/productions/leonardo-field-trips-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Screen Printing Open Session",
+   "date": "2026-10-06",
+   "time": "16:00:00",
+   "url": "https://link.dice.fm/d6399be89e9c",
+   "type": "community",
+   "end": "20:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Filipiñana",
+   "date": "2026-10-06",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/filipinana",
+   "movie": true,
+   "end": "17:55:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-10-06",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "18:17:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Unzipped",
+   "date": "2026-10-06",
+   "time": "16:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/unzipped",
+   "movie": true,
+   "end": "17:58:00"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Dying Fetus & Sanguisugabogg with Crowbar, Left to Suffer, Deterioration",
+   "date": "2026-10-06",
+   "time": "18:30:00",
+   "url": "https://www.axs.com/events/1423213/dying-fetus-sanguisugabogg-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Kraken vs. Vegas Golden Knights",
+   "date": "2026-10-06",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-kraken-vs-vegas-golden-knights-seattle-washington-10-06-2026/event/0F0064C4A03AA22C",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Prime Video",
+     "KING",
+     "KONG"
+    ]
+   },
+   "tickets": {
+    "box": 175,
+    "resale": 1244,
+    "checked": "2026-10-05T22:07:15.421Z",
+    "from": 55.79
+   }
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The History of Concrete",
+   "date": "2026-10-06",
+   "time": "19:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/the-history-of-concrete",
+   "movie": true,
+   "end": "20:56:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Water for Elephants (Touring)",
+   "date": "2026-10-06",
+   "time": "19:30:00",
+   "url": "https://www.ticketmaster.com/water-for-elephants-touring-seattle-washington-10-06-2026/event/0F0064C9BE92B0DA",
+   "type": "arts"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "Devon Gilfillian - Time Will Tell Tour",
+   "date": "2026-10-06",
+   "time": "20:00:00",
+   "url": "https://www.ticketweb.com/event/devon-gilfillian-time-the-crocodile-tickets/14911113",
+   "type": "concert"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Dead Kennedys with Flipper & Dish Pit",
+   "date": "2026-10-06",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1542155/dead-kennedys-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
