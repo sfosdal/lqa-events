@@ -4873,6 +4873,107 @@
    "date": "2026-10-06",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1542155/dead-kennedys-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "IAPP Privacy. Security. Risk. 2026",
+   "date": "2026-10-07",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=34848",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Slalom R4 2026",
+   "date": "2026-10-07",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=36315",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Filipiñana",
+   "date": "2026-10-07",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/filipinana",
+   "movie": true,
+   "end": "17:55:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-10-07",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "18:17:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Unzipped",
+   "date": "2026-10-07",
+   "time": "16:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/unzipped",
+   "movie": true,
+   "end": "17:58:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "SP 101: Intro to VERA's Screen Print Studio",
+   "date": "2026-10-07",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/Ve0d531ef8b8",
+   "type": "community",
+   "end": "20:00:00"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Movements with Balance and Composure, Midrift, and Niis",
+   "date": "2026-10-07",
+   "time": "19:00:00",
+   "url": "https://www.axs.com/events/1438100/movements-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The History of Concrete",
+   "date": "2026-10-07",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/the-history-of-concrete",
+   "movie": true,
+   "end": "20:41:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Water for Elephants (Touring)",
+   "date": "2026-10-07",
+   "time": "19:30:00",
+   "url": "https://www.ticketmaster.com/water-for-elephants-touring-seattle-washington-10-07-2026/event/0F0064C9BE97B0E1",
+   "type": "arts"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Castle Rat with Unto Others, Wraith Knight",
+   "date": "2026-10-07",
+   "time": "19:30:00",
+   "url": "https://www.axs.com/events/1471702/castle-rat-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Contempt",
+   "date": "2026-10-07",
+   "time": "19:30:00",
+   "url": "https://www.siff.net/programs-and-events/nouvelles-femmes/contempt",
+   "end": "21:12:00"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-10-07",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
   }
  ]
 }
