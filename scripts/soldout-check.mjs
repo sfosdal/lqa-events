@@ -148,16 +148,22 @@ async function connect() {
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
   let id = 0; const pending = new Map(); const listeners = [];
+  // a socket that dies mid-run (the Mac slept, 2026-10-06; the container went
+  // away) used to leave every send waiting for ever — the Oct 8 run hung two
+  // days on one — so a close answers them all with an error and is remembered
+  let closed = false;
+  const fail = (why) => { closed = true; for (const res of pending.values()) res({ error: { message: why } }); pending.clear(); };
+  ws.onclose = () => fail('socket closed'); ws.onerror = () => fail('socket error');
   ws.onmessage = (m) => {
     const d = JSON.parse(m.data);
     if (d.id && pending.has(d.id)) { pending.get(d.id)(d.result || { error: d.error }); pending.delete(d.id); return; }
     listeners.forEach((fn) => fn(d));
   };
-  const send = (method, params = {}) => new Promise((res) => { const n = ++id; pending.set(n, res); ws.send(JSON.stringify({ id: n, method, params })); });
+  const send = (method, params = {}) => closed ? Promise.resolve({ error: { message: 'socket closed' } }) : new Promise((res) => { const n = ++id; pending.set(n, res); ws.send(JSON.stringify({ id: n, method, params })); });
   await send('Network.enable'); await send('Page.enable');
   // the page's own facets response is read as it arrives (Fetch domain, response stage) — surer than asking again from inside the page
   await send('Fetch.enable', { patterns: [{ urlPattern: '*.ticketmaster.com/api/ismds/event/*/facets*', requestStage: 'Response' }, { urlPattern: '*.ticketmaster.ca/api/ismds/event/*/facets*', requestStage: 'Response' }] }); // the same call comes from offeradapter.ticketmaster.com on some pages and services.ticketmaster.com on others
-  return { send, on: (fn) => listeners.push(fn), off: (fn) => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }, close: () => ws.close() };
+  return { send, on: (fn) => listeners.push(fn), off: (fn) => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }, close: () => ws.close(), closed: () => closed };
 }
 
 // ---- one event: its page, then its facets, asked from inside the page ----
@@ -264,21 +270,27 @@ for (const ev of todoTw) { // the fetch-only rooms first: no browser to keep wai
   record(ev, res, t0);
   await sleep(400);
 }
+const EVENT_TIMEOUT_MS = 90000; // the slowest honest page answers in ~20 s; one silent for this long is given up, not waited on
+const giveUp = (ms) => new Promise((r) => setTimeout(r, ms).unref()); // unref: the losing timer must not keep the process alive after the run
 const chrome = todo.length && !CDP_URL ? launchChrome() : null;
+let aborted = false; // the browser stopped answering: the rest of the list keeps the last run's answers
 try {
   const cdp = todo.length ? await connect() : null;
+  let stalls = 0;
   for (const ev of todo) {
     const t0 = Date.now();
     let res;
-    try { res = await checkEvent(cdp, ev); } catch (e) { res = { status: 'unknown', note: String(e).slice(0, 80) }; }
+    try { res = await Promise.race([checkEvent(cdp, ev), giveUp(EVENT_TIMEOUT_MS).then(() => ({ status: 'unknown', note: `no answer in ${EVENT_TIMEOUT_MS / 1000} s`, stalled: true }))]); } catch (e) { res = { status: 'unknown', note: String(e).slice(0, 80) }; }
+    stalls = res.stalled ? stalls + 1 : 0; delete res.stalled;
     record(ev, res, t0);
+    if (cdp.closed() || stalls >= 3) { aborted = true; console.log(`browser ${cdp.closed() ? 'connection lost' : 'not answering'} after ${ev.date} ${ev.name.slice(0, 40)} — giving up the rest of this run; the last run's answers stand for it`); break; }
   }
   if (cdp) cdp.close();
 } finally {
   if (chrome) chrome.kill();
 }
 for (const ev of events) if (!ev.onsale) results[ev.id] = { status: 'presale', name: ev.name, date: ev.date, venue: ev.venue, ...(ev.away ? { club: ev.club, away: true } : {}), checked: new Date().toISOString() }; // not yet on public sale: nothing to be sold out of
-if (limit || onlyAway || onlyTw) for (const k of Object.keys(prev)) if (!results[k]) results[k] = prev[k]; // a partial run keeps the rest of the last one
+if (limit || onlyAway || onlyTw || aborted) for (const k of Object.keys(prev)) if (!results[k]) results[k] = prev[k]; // a partial run keeps the rest of the last one
 fs.writeFileSync(OUT, JSON.stringify({ generated: new Date().toISOString(), _: 'scripts/soldout-check.mjs (a local run — Ticketmaster inventory as a real Chrome sees it, TicketWeb pages (TW… keys, the Crocodile) by plain fetch; committed by scripts/soldout-run.sh). status: available = box-office tickets on sale; soldout = only resale left; none = the inventory call and the page both showed nothing (not treated as sold out); presale = public sale not started; unknown = the page gave no answer; a none/unknown run keeps the last real answer, its own checked time, note says so.', events: results }, null, 1) + '\n');
 const tally = {}; for (const r of Object.values(results)) tally[r.status] = (tally[r.status] || 0) + 1;
 console.log('wrote', path.relative(ROOT, OUT), JSON.stringify(tally));

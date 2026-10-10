@@ -24,7 +24,19 @@ fi
 "${DOCKER[@]}" rm -f "$NAME" >/dev/null 2>&1
 "${DOCKER[@]}" run -d --name "$NAME" -p 127.0.0.1:9222:9222 "$NAME" >/dev/null || { echo "container start failed (is OrbStack running?)"; exit 1; }
 for i in {1..30}; do curl -sf -m 2 http://127.0.0.1:9222/json/version >/dev/null && break; sleep 1; done
-CDP_URL=http://127.0.0.1:9222 node scripts/soldout-check.mjs "$@" || { echo "checker failed"; exit 1; }
+# The checker in the background, with two guards (2026-10-10, after a run that
+# slept with the Mac on Oct 8 and hung for two days — launchd never starts a
+# second instance while one lives, so every later fire was skipped):
+#   caffeinate -i   no idle sleep while it runs (a closed lid still sleeps)
+#   watchdog        a checker still running after WATCHDOG_SECS (a run takes
+#                   ~15 min) is killed, so the next fire is not blocked
+WATCHDOG_SECS=${WATCHDOG_SECS:-2400}
+CDP_URL=http://127.0.0.1:9222 node scripts/soldout-check.mjs "$@" & CHECK=$!
+caffeinate -i -w $CHECK &
+( for ((s = 0; s < WATCHDOG_SECS; s += 30)); do sleep 30; kill -0 $CHECK 2>/dev/null || exit 0; done
+  kill $CHECK 2>/dev/null && echo "watchdog: checker still running after ${WATCHDOG_SECS}s — killed" ) &
+wait $CHECK; RC=$?
+(( RC == 0 )) || { echo "checker failed (exit $RC)"; exit 1; }
 "${DOCKER[@]}" rm -f "$NAME" >/dev/null 2>&1
 if [[ -n "${NO_PUSH:-}" ]]; then echo "NO_PUSH set — not committing"; exit 0; fi
 git add scripts/data/soldout.json
