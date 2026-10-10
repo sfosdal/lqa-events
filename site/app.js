@@ -3904,10 +3904,13 @@
     // with every venue cleared
     var yearOut = new Date(); yearOut.setFullYear(yearOut.getFullYear() + 1);
     holidaysThrough(ymd(yearOut));
-    if (!shown && !pastCount && !ol.children.length) {
+    // nothing listed at all (a venue whose dates have all passed, say — the
+    // Block Party in October): say so, instead of a bare column; past events
+    // put away don't count as something to look at (2026-10-10)
+    if (!shown) {
       var li = document.createElement('li');
       li.className = 'empty';
-      li.textContent = 'No upcoming events for this filter yet — check back after the next refresh.';
+      li.textContent = (pastCount ? 'Nothing coming up in this view — only past events, which are put away. ' : 'Nothing coming up in this view. ') + 'Open Filter to show more, or go back to the usual view.';
       ol.appendChild(li);
     }
     drawSeriesGraph();
