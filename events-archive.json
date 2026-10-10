@@ -5101,6 +5101,140 @@
    "date": "2026-10-08",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1559145/jigitz-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Iapp Privacy. Security. Risk. + AI Governance Global 2026",
+   "date": "2026-10-09",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=34848",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Screen Printing Open Session",
+   "date": "2026-10-09",
+   "time": "14:00:00",
+   "url": "https://link.dice.fm/g4918cd2faf1",
+   "type": "community",
+   "end": "18:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-10-09",
+   "time": "16:20:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "18:07:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "NAZA",
+   "date": "2026-10-09",
+   "time": "16:40:00",
+   "url": "https://www.siff.net/cinema/in-theaters/naza",
+   "movie": true,
+   "end": "18:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Lady",
+   "date": "2026-10-09",
+   "time": "17:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/lady",
+   "movie": true,
+   "end": "18:35:00"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Leonardo! A Wonderful Show about a Terrible Monster",
+   "date": "2026-10-09",
+   "time": "17:00:00",
+   "url": "https://www.sct.org/onstage/productions/leonardo-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Donor Benefits: Behind-the-Scenes Shops Tours",
+   "date": "2026-10-09",
+   "time": "17:00:00",
+   "url": "https://www.sct.org/onstage/productions/donor-benefits-behind-the-scenes-shops-tours/",
+   "type": "community"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "French Police, Social Order",
+   "date": "2026-10-09",
+   "time": "18:00:00",
+   "url": "https://www.ticketweb.com/event/french-police-social-order-the-crocodile-tickets/14957633",
+   "type": "concert"
+  },
+  {
+   "venue": "Husky Stadium",
+   "title": "Washington Huskies vs Iowa Hawkeyes",
+   "date": "2026-10-09",
+   "time": "18:00:00",
+   "url": "https://gohuskies.com/sports/football/tickets",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Fox"
+    ]
+   }
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-10-09",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eulogy",
+   "date": "2026-10-09",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/events/special-events/eulogy",
+   "type": "arts"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "aespa Live Tour - Synk : COMPLæXITY - in Seattle",
+   "date": "2026-10-09",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/aespa-live-tour-synk-complxity-in-seattle-washington-10-09-2026/event/0F006495AC598426",
+   "type": "concert",
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-10-05T22:07:55.562Z",
+    "from": 59.5
+   }
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Water for Elephants (Touring)",
+   "date": "2026-10-09",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/water-for-elephants-touring-seattle-washington-10-09-2026/event/0F0064C9BEA1B0ED",
+   "type": "arts"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Fruit Bats with Matthew Logan Vasquez",
+   "date": "2026-10-09",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1382157/fruit-bats-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Jessica Audiffred with Nostalgix, Megatron",
+   "date": "2026-10-09",
+   "time": "21:00:00",
+   "url": "https://www.axs.com/events/1496213/jessica-audiffred-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
