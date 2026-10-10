@@ -1356,7 +1356,7 @@
       var hasWatch = g.watch && ((g.watch.tv || []).length || (g.watch.radio || []).length);
       if (tix || hasWatch) {
         var foot = document.createElement('span'); foot.className = 'ev-foot';
-        if (tix) { var tl = document.createElement('span'); tl.className = 'ev-tix'; tl.textContent = tix; tl.title = 'Ticketmaster inventory' + (tk.tickets && tk.tickets.checked ? ', checked ' + fmtSince(tk.tickets.checked) : ''); foot.appendChild(tl); }
+        if (tix) { var tl = document.createElement('span'); tl.className = 'ev-tix'; tl.textContent = tix; tl.title = inventoryName(tk) + ' inventory' + (tk.tickets && tk.tickets.checked ? ', checked ' + fmtSince(tk.tickets.checked) : ''); foot.appendChild(tl); }
         if (hasWatch) {
           // the strip's marks, small: streaming (cast), TV, radio — the names after each (Steve, 2026-09-15)
           var w = document.createElement('span'); w.className = 'ev-watch';
@@ -3325,6 +3325,7 @@
     });
     return box;
   }
+  function inventoryName(e) { return /ticketweb\.com\//.test(e.url || '') ? 'TicketWeb' : 'Ticketmaster'; } // whose box office the checker read (the Crocodile's is TicketWeb)
   function ticketsLine(e) {
     var t = e.tickets;
     var n = function (x) { return Number(x).toLocaleString('en-US'); };
@@ -3881,7 +3882,7 @@
           var tl = document.createElement('span');
           tl.className = 'ev-tix';
           tl.textContent = tix;
-          tl.title = e.tickets ? 'Ticketmaster inventory' + (e.tickets.checked ? ', checked ' + fmtSince(e.tickets.checked) : '') : 'Sold out, per the venue\u2019s own listing';
+          tl.title = e.tickets ? inventoryName(e) + ' inventory' + (e.tickets.checked ? ', checked ' + fmtSince(e.tickets.checked) : '') : 'Sold out, per the venue\u2019s own listing';
           body.appendChild(tl);
         }
         // a game the league may still move

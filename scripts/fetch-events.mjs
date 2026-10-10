@@ -16,6 +16,7 @@ import { calmTitle, isNotice } from './titles.mjs';
 import { applySchedules } from './schedules.mjs';
 import { applySetTimes } from './settimes.mjs';
 import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
+import { ticketWebId } from './ticketweb.mjs';
 
 const JSON_OUT = new URL('../site/events.json', import.meta.url);
 const ICS_OUT = new URL('../site/events.ics', import.meta.url);
@@ -548,8 +549,8 @@ try {
   const so = JSON.parse(readFileSync(new URL('./data/soldout.json', import.meta.url), 'utf8'));
   let n = 0, s = 0;
   for (const e of merged) {
-    const m = (e.url || '').match(/\/event\/([0-9A-F]{16})/i);
-    const r = m && (so.events || {})[m[1].toUpperCase()];
+    const m = (e.url || '').match(/\/event\/([0-9A-F]{16})/i), tw = ticketWebId(e.url); // Ticketmaster's 16-hex id, or TW<id> for a TicketWeb page (the Crocodile)
+    const r = (m || tw) && (so.events || {})[m ? m[1].toUpperCase() : 'TW' + tw];
     if (!r || !/^(available|soldout)$/.test(r.status)) continue; // 'none' (nothing seen either way) and 'unknown' say nothing
     const out = r.status === 'soldout';
     e.tickets = { box: out ? 0 : (r.primary == null ? null : r.primary), resale: r.resale || 0, checked: r.checked }; // box null: on sale, count unknown (an older page layout)

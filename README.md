@@ -133,8 +133,12 @@ in the address bar, but reversible; `LQAFilter.encodeSearch`/`decodeSearch`),
   (`.venue-mark`), unlike the team crests.
 - `scripts/soldout-check.mjs` + `scripts/soldout-run.sh` + `docker/soldout-browser/`
   — sold-out status for the Ticketmaster venues (the arena, the two stadiums
-  and, since 2026-10-05, the Paramount; the Showboxes sell through AXS and the
-  Crocodile through TicketWeb, other page layouts the checker doesn't read), a
+  and, since 2026-10-05, the Paramount) and, since 2026-10-06, the Crocodile's
+  TicketWeb pages (`scripts/ticketweb.mjs`: a plain fetch reads the page's
+  status — On Sale / Sold Out / Off Sale — and its ticket types, which carry
+  availability letters rather than counts; keyed `TW<id>` in soldout.json;
+  `--ticketweb` runs just that pass; the Showboxes sell through AXS, which has
+  no key and no readable page, so they carry nothing), a
   **local** job: Ticketmaster's
   public APIs carry no availability and its ticket pages are bot-walled for
   anything but a real windowed browser, so a launchd agent
