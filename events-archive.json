@@ -5198,7 +5198,8 @@
    "date": "2026-10-09",
    "time": "19:30:00",
    "url": "https://www.seattlerep.org/events/special-events/eulogy",
-   "type": "arts"
+   "type": "arts",
+   "soldOut": true
   },
   {
    "venue": "Climate Pledge Arena",
