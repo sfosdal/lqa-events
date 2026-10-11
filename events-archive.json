@@ -5249,6 +5249,167 @@
    "date": "2026-10-09",
    "time": "21:00:00",
    "url": "https://www.axs.com/events/1496213/jessica-audiffred-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Puget Sound Heart and Stroke Walk",
+   "date": "2026-10-10",
+   "time": "07:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/puget-sound-heart-and-stroke-walk",
+   "type": "community"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Page & Play: Story Time",
+   "date": "2026-10-10",
+   "time": "10:00:00",
+   "url": "https://www.sct.org/onstage/productions/page-play-story-time/",
+   "type": "community"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Leonardo! A Wonderful Show about a Terrible Monster",
+   "date": "2026-10-10",
+   "time": "11:00:00",
+   "url": "https://www.sct.org/onstage/productions/leonardo-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Renegade Craft",
+   "date": "2026-10-10",
+   "time": "11:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/renegade-craft",
+   "type": "expo"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Turkfest",
+   "date": "2026-10-10",
+   "time": "12:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/turkfest-x50556",
+   "free": true,
+   "type": "community"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "NAZA",
+   "date": "2026-10-10",
+   "time": "12:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/naza",
+   "movie": true,
+   "end": "13:50:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Lady",
+   "date": "2026-10-10",
+   "time": "13:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/lady",
+   "movie": true,
+   "end": "15:05:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Water for Elephants (Touring)",
+   "date": "2026-10-10",
+   "time": "14:00:00",
+   "url": "https://www.ticketmaster.com/water-for-elephants-touring-seattle-washington-10-10-2026/event/0F0064C9BEA6B0F1",
+   "type": "arts"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Salome's Last Dance",
+   "date": "2026-10-10",
+   "time": "14:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/salomes-last-dance",
+   "movie": true,
+   "end": "15:29:00"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eulogy",
+   "date": "2026-10-10",
+   "time": "14:00:00",
+   "url": "https://www.seattlerep.org/events/special-events/eulogy",
+   "type": "arts",
+   "soldOut": true
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-10-10",
+   "time": "16:35:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "18:22:00"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "Kishi Bashi: Sonderlust 10th Anniversary Tour w/ Geographer",
+   "date": "2026-10-10",
+   "time": "18:00:00",
+   "url": "https://www.ticketweb.com/event/kishi-bashi-sonderlust-10th-anniversary-the-crocodile-tickets/14788903",
+   "type": "concert",
+   "tickets": {
+    "box": 0,
+    "resale": 0,
+    "checked": "2026-10-10T22:41:52.208Z"
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "There Blue Rose: Part II",
+   "date": "2026-10-10",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/the-blue-rose-part-ii",
+   "movie": true,
+   "end": "20:00:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "RUSH: Fifty Something",
+   "date": "2026-10-10",
+   "time": "19:30:00",
+   "url": "https://www.ticketmaster.com/rush-fifty-something-seattle-washington-10-10-2026/event/0F00634F0E7368B0",
+   "type": "concert",
+   "tickets": {
+    "box": 66,
+    "resale": 222,
+    "checked": "2026-10-10T22:42:15.980Z",
+    "from": 255
+   }
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-10-10",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eulogy: Best Availability",
+   "date": "2026-10-10",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/events/special-events/eulogy",
+   "type": "arts"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Sammy Rae & The Friends - the Get Down! with special guest Melt",
+   "date": "2026-10-10",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1378788/sammy-rae-the-friends-the-get-down-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "MICO with Will Linley",
+   "date": "2026-10-10",
+   "time": "20:30:00",
+   "url": "https://www.axs.com/events/1449333/mico-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
