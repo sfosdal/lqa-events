@@ -5336,6 +5336,22 @@
    "soldOut": true
   },
   {
+   "venue": "Seattle Rep",
+   "title": "Eulogy: Selling Fast!",
+   "date": "2026-10-10",
+   "time": "14:00:00",
+   "url": "https://www.seattlerep.org/events/special-events/eulogy",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day: Sensory-Friendly",
+   "date": "2026-10-10",
+   "time": "14:00:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
    "venue": "SIFF Cinema Uptown",
    "title": "Primetime",
    "date": "2026-10-10",
@@ -5392,14 +5408,6 @@
   {
    "venue": "Seattle Rep",
    "title": "Eulogy: Best Availability",
-   "date": "2026-10-10",
-   "time": "19:30:00",
-   "url": "https://www.seattlerep.org/events/special-events/eulogy",
-   "type": "arts"
-  },
-  {
-   "venue": "Seattle Rep",
-   "title": "Eulogy: Selling Fast!",
    "date": "2026-10-10",
    "time": "19:30:00",
    "url": "https://www.seattlerep.org/events/special-events/eulogy",
