@@ -80,7 +80,7 @@
        LoC item 2010646305), faded into the page from the left by CSS -->
   <div class="masthead-photo" aria-hidden="true"></div><!-- the line drawing: masthead-lines.png is a luminance mask over ink (styles.css), so it takes the palette's own colour -->
   <div class="masthead-text">
-    <p class="eyebrow" data-teams="Seattle, WA">Seattle</p> <!-- the Teams view reads "Seattle, WA" over "Hometown Teams" (Steve, 2026-10-11); app.js swaps it -->
+    <p class="eyebrow" data-teams="Seattle">Seattle</p> <!-- the Teams view reads "Seattle" over "Hometown Teams" (Steve, 2026-10-11, no ", WA"); app.js swaps it -->
     <h1>Lower Queen Anne</h1> <!-- just the name: one line on any screen -->
   </div>
   <!-- the masthead's tools: the theme pill alone (Steve, 2026-09-16 — the
@@ -111,7 +111,7 @@
 <!-- one slim line standing in for the masthead once it has scrolled off
      (app.js shows it, with the Top button, and raises --barh to match) -->
 <!-- the masthead, folded into one line once it has scrolled off: eyebrow, title, stamp -->
-<div class="bar-title" hidden><span class="bar-eyebrow" data-teams="Seattle, WA">Seattle</span><span class="bar-name">Lower Queen Anne</span><span class="bar-eyebrow" id="barUpdated"></span></div>
+<div class="bar-title" hidden><span class="bar-eyebrow" data-teams="Seattle">Seattle</span><span class="bar-name">Lower Queen Anne</span><span class="bar-eyebrow" id="barUpdated"></span></div>
 <nav class="filterbar" aria-label="Filters">
   <button id="filterToggle" class="chip" type="button" aria-expanded="false" aria-controls="filterPanel" title="Filters">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>
