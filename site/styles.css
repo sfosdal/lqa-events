@@ -317,6 +317,7 @@ html.teams-open #calToday { display: none; }
   text-transform: uppercase; letter-spacing: .02em; margin: 0 0 .5rem;
 }
 .bar-title[hidden] { display: none; } /* an author display beats the UA [hidden] rule */
+.eyebrow[hidden], .bar-eyebrow[hidden] { display: none; } /* an empty eyebrow (a city with no neighbourhood) takes no room */
 .bar-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; } /* the title gives way first */
 .bar-eyebrow { /* "Seattle" and "Updated …" in the masthead's eyebrow face */
   flex: none; font-family: var(--mono); font-weight: 400; letter-spacing: .08em; color: var(--gold);

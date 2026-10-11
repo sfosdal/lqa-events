@@ -1072,6 +1072,12 @@
     var bn = document.querySelector('.bar-name'), h1 = document.querySelector('.masthead h1'); // the masthead and the pinned bar's title name the view: the events, or the clubs
     if (bn) { if (!bn.dataset.events) bn.dataset.events = bn.textContent; bn.textContent = open ? 'Hometown Teams' : bn.dataset.events; }
     if (h1) { if (!h1.dataset.events) h1.dataset.events = h1.innerHTML; h1.innerHTML = open ? 'Hometown Teams' : h1.dataset.events; }
+    // the eyebrow over it: the city alone over the neighbourhood, "City, WA" (data-teams) over Hometown Teams (Steve, 2026-10-11); a city with no neighbourhood keeps it empty and hidden on the list
+    document.querySelectorAll('.masthead .eyebrow, .bar-title .bar-eyebrow[data-teams]').forEach(function (el) {
+      if (!('events' in el.dataset)) el.dataset.events = el.textContent;
+      var t = open ? (el.dataset.teams || el.dataset.events) : el.dataset.events;
+      el.textContent = t; el.hidden = !t;
+    });
     if (open) fitTeamStrip(); else fitFilterBar(); // back to the list: the bar measured its own way (a fold left from the Teams view would stick)
     $('teamsView').hidden = !open;
     document.querySelector('.agenda').hidden = open;
