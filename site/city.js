@@ -417,6 +417,7 @@
     name: 'Lower Queen Anne',
     site: 'https://lqa.here.events/',
     userAgent: 'Mozilla/5.0 (compatible; lqa-events/1.0; +https://lqa.here.events/)',
+    tz: 'America/Los_Angeles', tzName: 'Pacific', // the city's time zone: the ICS feed's TZID, the game clocks, the poster's footer
     // the calendar feed's header; the UID domain and PRODID never change
     // (changing them re-creates every event in subscribers' calendars)
     ics: { name: 'Lower Queen Anne Events', short: 'LQA Events', teams: 'Seattle home teams — every season', prodid: '-//fosdal.net//lqa-events//EN', uidDomain: 'fosdal.net',

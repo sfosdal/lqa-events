@@ -2,6 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildIcs, eventUid, foldLine } from './ics.mjs';
 
+const TZ = globalThis.LQACity.tz || 'America/Los_Angeles'; // the city's zone, as ics.mjs names it
+
 const NOW = new Date(Date.UTC(2026, 7, 24, 12, 0, 0)); // fixed DTSTAMP for tests
 
 const timed = {
@@ -27,13 +29,13 @@ test('calendar skeleton and metadata', () => {
   assert.match(ics, /X-WR-CALNAME:/);
   assert.match(ics, /X-PUBLISHED-TTL:PT6H/);
   assert.match(ics, /BEGIN:VTIMEZONE/);
-  assert.match(ics, /TZID:America\/Los_Angeles/);
+  assert.ok(ics.includes(`TZID:${TZ}`), 'VTIMEZONE in the city zone');
 });
 
 test('timed event gets local DTSTART and a 3h DTEND', () => {
   const ics = buildIcs([timed], NOW);
-  assert.match(ics, /DTSTART;TZID=America\/Los_Angeles:20260828T190000/);
-  assert.match(ics, /DTEND;TZID=America\/Los_Angeles:20260828T220000/);
+  assert.ok(ics.includes(`DTSTART;TZID=${TZ}:20260828T190000`), 'DTSTART 20260828T190000');
+  assert.ok(ics.includes(`DTEND;TZID=${TZ}:20260828T220000`), 'DTEND 20260828T220000');
 });
 
 test('a cancelled event is marked in its summary and STATUS', () => {
@@ -59,14 +61,14 @@ test('a dateTbd event flags its summary and carries a description', () => {
 
 test('a real same-day end time overrides the default 3h duration', () => {
   const ics = buildIcs([{ ...timed, end: '22:30:00' }], NOW);
-  assert.match(ics, /DTEND;TZID=America\/Los_Angeles:20260828T223000/);
+  assert.ok(ics.includes(`DTEND;TZID=${TZ}:20260828T223000`), 'DTEND 20260828T223000');
 });
 
 test('DTEND rolls over midnight correctly', () => {
   const late = { ...timed, time: '22:30:00' };
   const ics = buildIcs([late], NOW);
-  assert.match(ics, /DTSTART;TZID=America\/Los_Angeles:20260828T223000/);
-  assert.match(ics, /DTEND;TZID=America\/Los_Angeles:20260829T013000/);
+  assert.ok(ics.includes(`DTSTART;TZID=${TZ}:20260828T223000`), 'DTSTART 20260828T223000');
+  assert.ok(ics.includes(`DTEND;TZID=${TZ}:20260829T013000`), 'DTEND 20260829T013000');
 });
 
 test('time-less event becomes all-day (DATE value, exclusive DTEND next day)', () => {

@@ -21,7 +21,7 @@ import { CITY } from './badges.mjs';
 export const CHANNELS = Object.fromEntries(CITY.teams.filter((t) => t.youtube).map((t) => [t.slug, t.youtube])); // YouTube channel ids: the club's, then the league's
 const LABEL = Object.fromEntries(CITY.teams.map((t) => [t.slug, t.label]));
 const unesc = (s) => String(s || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&#(\d+);/g, (m, n) => String.fromCharCode(n));
-const seattleDay = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+const seattleDay = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: CITY.tz || 'America/Los_Angeles' }); // the city's day
 const addDays = (ymd, n) => { const d = new Date(ymd + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 
 async function getText(url, headers = { 'user-agent': UA }) {

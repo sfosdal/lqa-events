@@ -2278,7 +2278,7 @@
       live.timer = setTimeout(pollLive, anyIn ? POLL_MS : 10 * POLL_MS);
     });
   }
-  function seattleDay(iso) { return new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }); }
+  function seattleDay(iso) { return new Date(iso).toLocaleDateString('en-CA', { timeZone: CITY.tz || 'America/Los_Angeles' }); } // the city's day (city.js tz)
   // a league's scoreboard for a day or a span (college football's lists every FBS game only when asked for the group, and enough of them)
   function scoreboardUrl(k, dates) { return 'https://site.api.espn.com/apis/site/v2/sports/' + k + '/scoreboard?dates=' + dates + (/college/.test(k) ? '&groups=80&limit=300' : ''); }
   function swapFormBlock(team, quiet) {
@@ -3102,7 +3102,7 @@
     var rounds = teamPostseason(team.slug), fin = rounds.filter(function (r) { return r.final; })[0];
     var pf = $('printFoot'); pf.innerHTML = '<span class="pf-home">Home</span><span class="pf-away">Away</span>' +
       (rounds.length ? '<span class="pf-post">Playoffs</span>' : '') + (fin ? '<span class="pf-final">' + esc(fin.name) + (fin.site ? ' · ' + esc(fin.site) : '') + '</span>' : '') +
-      '<span>Start times Pacific, subject to change</span><span>' + esc(CITY.site.replace(/^https?:\/\//, '').replace(/\/$/, '')) + '</span>';
+      '<span>Start times ' + esc(CITY.tzName || 'Pacific') + ', subject to change</span><span>' + esc(CITY.site.replace(/^https?:\/\//, '').replace(/\/$/, '')) + '</span>';
     // the sheet: square months on one portrait page (like the wall posters),
     // two, three or four across — whichever leaves them biggest. Letter
     // less 8mm margins is 200 × 263mm; the banner and legend take ~36mm.

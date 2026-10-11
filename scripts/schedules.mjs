@@ -20,8 +20,9 @@ import { addClips } from './highlights.mjs';
 import { readFileSync } from 'node:fs';
 
 const UA = CITY.userAgent;
-const seattleDate = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
-const seattleTime = (iso) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: 'America/Los_Angeles', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+const TZ = CITY.tz || 'America/Los_Angeles'; // the city's zone — game clocks are the home city's wall time (named for Seattle; chicago-events made it the city's, 2026-10-11)
+const seattleDate = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: TZ });
+const seattleTime = (iso) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: TZ, hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 // MLB's team-logos/<id>.svg files are the caps' on-dark variants; all keep
 // their colours but the Rockies' (115), whose purple is drawn as black (no
 // fill), so it reads grey on the cards — ESPN's mark stands in for it.
@@ -182,13 +183,29 @@ export function normalizeEspn(d, teamId, keepWeek, forcePre) { // forcePre: the 
 }
 async function espn(sport, league, teamId) {
   const base = `https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/teams/${teamId}/schedule`;
-  const games = normalizeEspn(await getJson(base, true), teamId, sport === 'football');
+  const first = await getJson(base, true);
+  // the plain call answers with the season type in progress, named only at the
+  // top (first.season.type; its events carry none): a 1 is the preseason, so
+  // every game in it is flagged pre (the Bulls in October, 2026-10-11)
+  const games = normalizeEspn(first, teamId, sport === 'football', first.season?.type === 1);
   if (sport === 'football') { // the NFL's preseason is a season type of its own (the plain call is the regular season): fetched apart, flagged pre
     try {
       const seen = new Set(games.map((g) => g.date));
       for (const g of normalizeEspn(await getJson(base + '?seasontype=1', true), teamId, true, true)) if (!seen.has(g.date)) games.push(g);
       games.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
     } catch (e) { console.error(`schedules: ${league} preseason skipped — ${e.message}`); }
+  }
+  // the NBA's plain call answers with the season type in progress — in
+  // October the preseason (five Bulls games on 2026-10-11, the regular season
+  // nowhere): the regular season is asked for by name and merged, de-duped
+  // by day; the plain call's preseason games stay, flagged pre above
+  // (chicago-events, 2026-10-11)
+  if (league === 'nba') {
+    try {
+      const seen = new Set(games.map((g) => g.date));
+      for (const g of normalizeEspn(await getJson(base + '?seasontype=2', true), teamId)) if (!seen.has(g.date)) games.push(g);
+      games.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+    } catch (e) { console.error(`schedules: ${league} regular season skipped — ${e.message}`); }
   }
   // soccer schedules come in two halves: the plain call is results only,
   // ?fixture=true the matches still to play — take both, de-duped by day

@@ -3,6 +3,18 @@ import assert from 'node:assert/strict';
 import { parseYoutube, matchYoutube, parseNflPage, titleDate } from './highlights.mjs';
 import { pickMoves, bigMove, shortMove, applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, pwhlOdds, hockeytechForm, normalizeDigitalshift, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
 const LQA = globalThis.LQACity.key === 'lqa' ? false : 'Lower Queen Anne data — skipped for another city'; // the city-dependent cases below
+// The fixtures' expected clocks are written in Seattle wall time; a sister
+// city in another zone (city.js `tz`) reads the same instant on its own clock.
+const TZ = globalThis.LQACity.tz || 'America/Los_Angeles';
+function clock(date, time) {
+  if (TZ === 'America/Los_Angeles') return { date, time };
+  const [y, m, d] = date.split('-').map(Number), [h, mi, sec] = time.split(':').map(Number);
+  let t = Date.UTC(y, m - 1, d, h, mi, sec);
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }).formatToParts(new Date(t)).map((x) => [x.type, x.value]));
+  t -= Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second) - t; // Pacific wall → instant
+  const dt = new Date(t);
+  return { date: dt.toLocaleDateString('en-CA', { timeZone: TZ }), time: dt.toLocaleTimeString('en-GB', { timeZone: TZ, hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' }) };
+}
 
 const feed = () => [
   { venue: 'Lumen Field', title: 'Seattle Seahawks vs. Dallas Cowboys', date: '2026-12-07', time: '17:15:00' },
@@ -82,7 +94,7 @@ test('MLB: home and away games, Seattle times, the opponent\'s crest and club si
   assert.equal(games.filter((g) => g.pre).length, 1, 'spring training flagged pre'); assert.equal(games.find((g) => g.pre).date, '2026-03-01');
   assert.equal(games[3].playoff, true, 'a wild-card game is a playoff'); assert.equal(games[2].playoff, undefined, 'spring training is not one');
   assert.equal(games[0].playoff, undefined);
-  assert.deepEqual(games[0], { date: '2026-09-01', time: '15:45:00', tbd: false, home: false, venue: 'Fenway Park',
+  assert.deepEqual(games[0], { ...clock('2026-09-01', '15:45:00'), tbd: false, home: false, venue: 'Fenway Park',
     opp: { name: 'Boston Red Sox', short: 'Red Sox', abbrev: 'BOS', logo: 'https://www.mlbstatic.com/team-logos/111.svg', site: 'https://www.mlb.com/redsox' } });
   assert.equal(games[1].home, true);
   assert.equal(games[1].date, '2026-09-11', 'the official (local) date, not the UTC one');
@@ -104,7 +116,7 @@ test('NHL: home and away, opponent from place + nickname, nhl.com/<nickname>', (
   assert.equal(games.length, 4, 'preseason kept');
   assert.equal(games[2].pre, true, 'flagged pre'); assert.equal(games[2].playoff, undefined);
   assert.equal(games[3].playoff, true);
-  assert.deepEqual(games[0], { date: '2026-10-08', time: '19:00:00', tbd: false, home: false, venue: 'Rogers Arena',
+  assert.deepEqual(games[0], { ...clock('2026-10-08', '19:00:00'), tbd: false, home: false, venue: 'Rogers Arena',
     opp: { name: 'Vancouver Canucks', short: 'Canucks', abbrev: 'VAN', logo: 'https://assets.nhle.com/logos/nhl/svg/VAN_light.svg', site: 'https://www.nhl.com/canucks' } });
   assert.equal(games[1].home, true);
   assert.equal(games[1].tbd, true);
@@ -129,7 +141,7 @@ test('ESPN: home and away from homeAway, opponent crest + clubhouse link, flexed
   assert.equal(games.length, 4, 'preseason kept');
   assert.equal(games[2].pre, true, 'flagged pre'); assert.equal(games[2].playoff, undefined);
   assert.equal(games[3].playoff, true);
-  assert.deepEqual(games[0], { date: '2026-09-09', time: '17:20:00', tbd: false, home: true, venue: 'Lumen Field',
+  assert.deepEqual(games[0], { ...clock('2026-09-09', '17:20:00'), tbd: false, home: true, venue: 'Lumen Field',
     opp: { name: 'New England Patriots', short: 'Patriots', abbrev: 'NE', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/ne.png', site: 'https://www.espn.com/nfl/team/_/name/ne/new-england-patriots' } });
   assert.equal(games[1].home, false);
   assert.equal(games[1].tbd, true);
@@ -149,7 +161,7 @@ test('PWHL: home and away from the team ids, venue-zone time to Seattle, league 
   ];
   const out = normalizePwhl(games, 8, true);
   assert.equal(out.length, 2);
-  assert.deepEqual(out[0], { date: '2025-11-21', time: '19:00:00', tbd: false, home: false, playoff: true,
+  assert.deepEqual(out[0], { ...clock('2025-11-21', '19:00:00'), tbd: false, home: false, playoff: true,
     opp: { name: 'Vancouver Goldeneyes', short: 'Goldeneyes', abbrev: 'VAN', logo: 'https://assets.leaguestat.com/pwhl/logos/9.png', site: 'https://www.thepwhl.com/en/teams/vancouver-goldeneyes' },
     venue: 'Pacific Coliseum' });
   assert.equal(out[1].home, true);
@@ -197,7 +209,7 @@ test('normalizePwhl with WHL options: league crest, no club page, venue cut befo
   const whl = { logo: (id) => `https://assets.leaguestat.com/whl/logos/${id}.png` };
   const out = normalizePwhl([{ home_team: '226', visiting_team: '218', home_team_name: 'Everett Silvertips', visiting_team_name: 'Seattle Thunderbirds', visiting_team_nickname: 'Thunderbirds', visiting_team_code: 'SEA',
     date_played: '2026-10-11', GameDateISO8601: '2026-10-11T18:05:00-07:00', venue_name: 'Angel of the Winds Arena - Everett, WA', venue_location: 'Everett, WA', date_tbd: '0', time_tbd: '0', final: '0' }], 226, false, false, whl);
-  assert.deepEqual(out[0], { date: '2026-10-11', time: '18:05:00', tbd: false, home: true,
+  assert.deepEqual(out[0], { ...clock('2026-10-11', '18:05:00'), tbd: false, home: true,
     opp: { name: 'Seattle Thunderbirds', short: 'Thunderbirds', abbrev: 'SEA', logo: 'https://assets.leaguestat.com/whl/logos/218.png' }, venue: 'Angel of the Winds Arena', city: 'Everett, WA' });
   const odds = pwhlOdds(out, [{ team_id: '226', games_played: '10', points: '14' }, { team_id: '218', games_played: '10', points: '6' }], 226, 'WHL');
   assert.ok(odds[0].odds.us > 60 && odds[0].odds.est && /no line for the WHL/.test(odds[0].odds.source));
@@ -221,7 +233,7 @@ test('normalizeDigitalshift: games only, Seattle wall clock from started_at_tz, 
   ];
   const out = normalizeDigitalshift(ev, 'Angel of the Winds Arena', now);
   assert.deepEqual(out.map((g) => g.date), ['2026-04-12', '2026-04-19', '2026-07-11']);
-  assert.deepEqual(out[0], { date: '2026-04-12', time: '15:00:00', tbd: false, home: true, opp: { name: 'Oregon Lightning', short: 'Lightning', abbrev: 'LIG', logo: 'https://x/or.png' }, venue: 'Angel of the Winds Arena', res: { us: 16, them: 33, won: false } });
+  assert.deepEqual(out[0], { ...clock('2026-04-12', '15:00:00'), tbd: false, home: true, opp: { name: 'Oregon Lightning', short: 'Lightning', abbrev: 'LIG', logo: 'https://x/or.png' }, venue: 'Angel of the Winds Arena', res: { us: 16, them: 33, won: false } });
   assert.deepEqual(out[1].res, { us: 41, them: 27, won: true });
   assert.equal(out[1].venue, undefined);
   assert.equal(out[2].res, undefined);

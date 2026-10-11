@@ -2,8 +2,8 @@
  * iCalendar (RFC 5545) generation for the LQA events feed.
  *
  * Events are { venue, title, date: 'YYYY-MM-DD', time: 'HH:MM[:SS]'|'', url }.
- * Timed events are emitted in America/Los_Angeles with a 3-hour default
- * duration; time-less events become all-day entries. UIDs hash
+ * Timed events are emitted in the city's zone (city.js `tz`) with a 3-hour
+ * default duration; time-less events become all-day entries. UIDs hash
  * venue|title|date so subscribers' calendars update in place instead of
  * accumulating duplicates when the feed refreshes.
  */
@@ -12,24 +12,33 @@ import '../site/city.js'; // the calendar's name, PRODID and UID domain are the 
 const CITY = globalThis.LQACity;
 import { setTimesText } from './settimes.mjs';
 
-const TZID = 'America/Los_Angeles';
+const TZID = CITY.tz || 'America/Los_Angeles'; // the city's zone (chicago-events brought the field, 2026-10-11)
 const DEFAULT_DURATION_H = 3;
 
-// Rolling tz definition so clients that ignore IANA names still get PST/PDT.
+// Rolling tz definition so clients that ignore IANA names still get the
+// zone's standard/daylight names: the US zones, which all change on the
+// second Sunday of March and the first of November.
+const US_ZONES = {
+  'America/Los_Angeles': ['-0800', '-0700', 'PST', 'PDT'],
+  'America/Denver': ['-0700', '-0600', 'MST', 'MDT'],
+  'America/Chicago': ['-0600', '-0500', 'CST', 'CDT'],
+  'America/New_York': ['-0500', '-0400', 'EST', 'EDT'],
+};
+const [STD_OFF, DST_OFF, STD_NAME, DST_NAME] = US_ZONES[TZID] || US_ZONES['America/Los_Angeles'];
 const VTIMEZONE = [
   'BEGIN:VTIMEZONE',
   `TZID:${TZID}`,
   'BEGIN:DAYLIGHT',
-  'TZOFFSETFROM:-0800',
-  'TZOFFSETTO:-0700',
-  'TZNAME:PDT',
+  `TZOFFSETFROM:${STD_OFF}`,
+  `TZOFFSETTO:${DST_OFF}`,
+  `TZNAME:${DST_NAME}`,
   'DTSTART:19700308T020000',
   'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU',
   'END:DAYLIGHT',
   'BEGIN:STANDARD',
-  'TZOFFSETFROM:-0700',
-  'TZOFFSETTO:-0800',
-  'TZNAME:PST',
+  `TZOFFSETFROM:${DST_OFF}`,
+  `TZOFFSETTO:${STD_OFF}`,
+  `TZNAME:${STD_NAME}`,
   'DTSTART:19701101T020000',
   'RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU',
   'END:STANDARD',
