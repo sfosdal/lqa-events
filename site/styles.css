@@ -395,6 +395,7 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 .fp-set:hover { color: var(--ink); text-decoration-color: currentColor; }
 .fp-list { display: flex; flex-direction: column; }
 .fp-list + h3 { margin-top: 1rem; } /* a second group stacked in the same column */
+.fp-list[hidden] + h3 { margin-top: 0; } /* a group folded away leaves the next heading level with the other columns' */
 .fp-row { display: flex; align-items: center; gap: .5rem; padding: .3rem .35rem; border-radius: 6px; }
 .fp-row:hover { background: var(--sky); }
 .fp-check { position: relative; display: flex; align-items: center; gap: .6rem; cursor: pointer; min-width: 0; }
@@ -432,6 +433,7 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 /* the view note: one plain line above the list while the view is not the
    usual one, the way back at its right (app.js renderViewNote) */
 .view-note { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin: 0 0 1.1rem; padding: .55rem .9rem; border: 1px solid var(--line); border-radius: 10px; background: var(--mist); font-size: .88rem; }
+.fp-group h3[hidden], .fp-list[hidden] { display: none; } /* a group with no rows in this city folds away with its heading (the flex displays above would otherwise beat [hidden]; Steve, 2026-10-11) */
 .view-note[hidden] { display: none; }
 .view-note .chip { margin-left: auto; font-size: .78rem; padding: .3em .75em; min-height: 1.9rem; }
 /* the toast: a word above the footer after hiding something from the sheet, with Undo */
