@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseYoutube, matchYoutube, parseNflPage, titleDate } from './highlights.mjs';
-import { pickMoves, bigMove, shortMove, applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, pwhlOdds, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
+import { pickMoves, bigMove, shortMove, applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, pwhlOdds, hockeytechForm, normalizeDigitalshift, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
+const LQA = globalThis.LQACity.key === 'lqa' ? false : 'Lower Queen Anne data — skipped for another city'; // the city-dependent cases below
 
 const feed = () => [
   { venue: 'Lumen Field', title: 'Seattle Seahawks vs. Dallas Cowboys', date: '2026-12-07', time: '17:15:00' },
@@ -10,7 +11,7 @@ const feed = () => [
   { venue: 'Climate Pledge Arena', title: 'Tame Impala - The Deadbeat Tour', date: '2026-12-07', time: '19:00:00' },
 ];
 
-test('a league TBD on the matching home date flags that game only', () => {
+test('a league TBD on the matching home date flags that game only', { skip: LQA }, () => {
   const events = feed();
   const n = applyScheduleFlags(events, { seahawks: [{ date: '2026-12-07', tbd: true }, { date: '2026-12-25', tbd: false }] });
   assert.equal(n, 1);
@@ -55,7 +56,7 @@ test('broadcasts: nothing usable means no watch at all, and a missing kind is le
   assert.deepEqual(pickBroadcasts([{ kind: 'tv', name: 'KING 5', home: true, national: false }]), { tv: ['KING 5'] });
 });
 
-test('a game\'s broadcasts land on the matching feed event only', () => {
+test('a game\'s broadcasts land on the matching feed event only', { skip: LQA }, () => {
   const events = feed();
   applyScheduleFlags(events, { mariners: [{ date: '2026-12-07', tbd: false, watch: { tv: ['Mariners.TV'], radio: ['Seattle Sports (710 AM)'] } }] });
   assert.deepEqual(events[2].watch, { tv: ['Mariners.TV'], radio: ['Seattle Sports (710 AM)'] });
@@ -179,7 +180,54 @@ test('results: MLB final → us/them/won; NHL OT and PWHL SO marked; ESPN draw i
   assert.deepEqual(pwhl[0].res, { us: 1, them: 2, won: false, ot: 'SO' });
 });
 
-test('wikiTitle: one year for a summer season, en-dash span for one that straddles the new year, null with nothing', () => {
+// ---- the other cities' leagues: MiLB (the same API as MLB), the WHL (the same feed as the PWHL), DigitalShift (Arena Football One) ----
+test('normalizeMlb: sportId 13 → milb.com club pages by city, the clubs own INET streams dropped from the broadcasts', () => {
+  const out = normalizeMlb({ dates: [{ date: '2026-07-04', games: [
+    { gamePk: 7, gameType: 'R', officialDate: '2026-07-04', gameDate: '2026-07-05T02:05:00Z', status: {},
+      teams: { home: { team: { id: 403, name: 'Everett AquaSox' } }, away: { team: { id: 461, name: 'Tri-City Dust Devils', teamName: 'Dust Devils', locationName: 'Tri-City', shortName: 'Tri-City', abbreviation: 'TRI' } } },
+      venue: { name: 'Everett Memorial Stadium' },
+      broadcasts: [{ type: 'TV', name: 'MiLB.TV', homeAway: 'home', language: 'en' }, { type: 'INET', name: 'Audio', homeAway: 'home', language: 'en' }] },
+  ] }] }, 403, 13);
+  assert.equal(out[0].opp.site, 'https://www.milb.com/tri-city');
+  assert.equal(out[0].opp.logo, 'https://www.mlbstatic.com/team-logos/461.svg');
+  assert.deepEqual(out[0].watch, { tv: ['MiLB.TV'] }); // the Audio (INET) entry gone
+});
+
+test('normalizePwhl with WHL options: league crest, no club page, venue cut before " - City, ST"; pwhlOdds reads the id from a .png or .jpg crest', () => {
+  const whl = { logo: (id) => `https://assets.leaguestat.com/whl/logos/${id}.png` };
+  const out = normalizePwhl([{ home_team: '226', visiting_team: '218', home_team_name: 'Everett Silvertips', visiting_team_name: 'Seattle Thunderbirds', visiting_team_nickname: 'Thunderbirds', visiting_team_code: 'SEA',
+    date_played: '2026-10-11', GameDateISO8601: '2026-10-11T18:05:00-07:00', venue_name: 'Angel of the Winds Arena - Everett, WA', venue_location: 'Everett, WA', date_tbd: '0', time_tbd: '0', final: '0' }], 226, false, false, whl);
+  assert.deepEqual(out[0], { date: '2026-10-11', time: '18:05:00', tbd: false, home: true,
+    opp: { name: 'Seattle Thunderbirds', short: 'Thunderbirds', abbrev: 'SEA', logo: 'https://assets.leaguestat.com/whl/logos/218.png' }, venue: 'Angel of the Winds Arena', city: 'Everett, WA' });
+  const odds = pwhlOdds(out, [{ team_id: '226', games_played: '10', points: '14' }, { team_id: '218', games_played: '10', points: '6' }], 226, 'WHL');
+  assert.ok(odds[0].odds.us > 60 && odds[0].odds.est && /no line for the WHL/.test(odds[0].odds.source));
+});
+
+test('hockeytechForm: WHL rows read W-L-OTL-SOL and rank in the conference with a home split; PWHL rows RW-OTW-OTL-L in the league', () => {
+  assert.deepEqual(hockeytechForm({ name: 'x - Everett Silvertips', team_code: 'EVT', wins: '40', losses: '20', ot_losses: '5', shootout_losses: '3', rank: '2', overall_rank: '4', conference_name: 'Western Conference', home_record: '22-9-2-1' }, 'whl'),
+    { record: '40-20-5-3', standing: '2nd in the Western Conference', home: '22-9-2-1', club: { name: 'Everett Silvertips', abbr: 'EVT' } });
+  assert.deepEqual(hockeytechForm({ name: 'Seattle Torrent', team_code: 'SEA', regulation_wins: '10', non_reg_wins: '2', non_reg_losses: '3', losses: '5', rank: '3' }, 'pwhl'),
+    { record: '10-2-3-5', standing: '3rd in the PWHL', club: { name: 'Seattle Torrent', abbr: 'SEA' } });
+});
+
+test('normalizeDigitalshift: games only, Seattle wall clock from started_at_tz, home from day_class, the result from "W 33-16" / "L 33-16", the home ground supplied', () => {
+  const now = Date.parse('2026-06-01T00:00:00Z');
+  const ev = [
+    { $type: 'game', id: 'g-1', name: 'Washington Wolfpack vs Oregon Lightning', started_at: '2026-04-12T15:00:00.000+00:00', started_at_tz: '2026-04-12T22:00:00.000Z', day_class: 'game-home', opp_team_name: 'Oregon Lightning', opp_team_logo_url: { medium: 'https://x/or.png' }, status: 'L 33-16 ' },
+    { $type: 'game', id: 'g-2', name: 'Nashville Kats vs Washington Wolfpack', started_at_tz: '2026-04-19T23:00:00.000Z', day_class: 'game-away', opp_team_name: 'Nashville Kats', status: 'W 41-27' },
+    { $type: 'game', id: 'g-3', name: 'Washington Wolfpack vs Billings Outlaws', started_at_tz: '2026-07-11T22:00:00.000Z', day_class: 'game-home', opp_team_name: 'Billings Outlaws', status: '' },
+    { $type: 'practice', id: 'p-1', started_at_tz: '2026-04-10T22:00:00.000Z' },
+    { $type: 'game', id: 'g-0', name: 'old', started_at_tz: '2024-04-10T22:00:00.000Z', day_class: 'game-home', opp_team_name: 'Old Team', status: 'W 1-0' },
+  ];
+  const out = normalizeDigitalshift(ev, 'Angel of the Winds Arena', now);
+  assert.deepEqual(out.map((g) => g.date), ['2026-04-12', '2026-04-19', '2026-07-11']);
+  assert.deepEqual(out[0], { date: '2026-04-12', time: '15:00:00', tbd: false, home: true, opp: { name: 'Oregon Lightning', short: 'Lightning', abbrev: 'LIG', logo: 'https://x/or.png' }, venue: 'Angel of the Winds Arena', res: { us: 16, them: 33, won: false } });
+  assert.deepEqual(out[1].res, { us: 41, them: 27, won: true });
+  assert.equal(out[1].venue, undefined);
+  assert.equal(out[2].res, undefined);
+});
+
+test('wikiTitle: one year for a summer season, en-dash span for one that straddles the new year, null with nothing', { skip: LQA }, () => {
   assert.equal(wikiTitle('mariners', [{ date: '2026-03-26' }, { date: '2026-09-27' }]), '2026 Seattle Mariners season');
   assert.equal(wikiTitle('kraken', [{ date: '2026-10-01' }, { date: '2027-04-10' }]), '2026–27 Seattle Kraken season');
   assert.equal(wikiTitle('torrent', [{ date: '2025-11-21' }, { date: '2026-04-25' }]), '2025–26 Seattle Torrent season');
@@ -211,7 +259,7 @@ test('seasonStartYear: summer leagues take the calendar year; hockey and footbal
 });
 
 
-test('Seawolves: fixtures from Upcoming, results from Previous by date, home = Seawolves first, preseason round 0 kept and flagged', () => {
+test('Seawolves: fixtures from Upcoming, results from Previous by date, home = Seawolves first, preseason round 0 kept and flagged', { skip: LQA }, () => {
   const card = (round, a, b, ground, date, time, extra = '') => `<div class=" relative mb-4 p-4 shadow-sm rounded-md bg-blue-50 "><span>Round <!-- -->${round}</span><img title="${a}" src="/images/teams/${a[0]}.png" alt="${a}" class="w-16"/><p class="mr-2">VS.</p><img title="${b}" src="/images/teams/${b[0]}.png" alt="${b}"/><span class="font-semibold">${ground}</span><span class="font-semibold">${date}</span><span>${time}<!-- --> PT</span>${extra}</div>`;
   const html = '<h1 class="text-3xl font-bold">2026<!-- --> <!-- -->Seawolves<!-- --> Schedule</h1><h2>Upcoming Matches</h2>' +
     card(0, 'Seattle Seawolves', 'Hartford Harpooners', 'Starfire Stadium', 'Sat, Mar 28', '4:00 PM') +

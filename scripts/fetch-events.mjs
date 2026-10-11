@@ -15,7 +15,7 @@ import { mergeWithArchive, unionArchives } from './merge.mjs';
 import { calmTitle, isNotice } from './titles.mjs';
 import { applySchedules } from './schedules.mjs';
 import { applySetTimes } from './settimes.mjs';
-import { slugify, BADGE_FEEDS, TEAMS } from './badges.mjs';
+import { slugify, BADGE_FEEDS, TEAMS, CITY } from './badges.mjs';
 import { ticketWebId } from './ticketweb.mjs';
 
 const JSON_OUT = new URL('../site/events.json', import.meta.url);
@@ -409,20 +409,17 @@ async function showbox() {
 }
 
 // Dedicated per-venue sources run first (better times and ticket links)...
+// The Ticketmaster rooms (city.js `tm`), in the city's order: the arena,
+// the SoDo stadiums (not Seattle Center, but big enough to move the whole
+// city), then Around Town's — the Paramount (STG's downtown theatre) and
+// the Crocodile in Belltown, whose box office is TicketWeb (Discovery
+// carries those listings under the same venue id; Madame Lou's and
+// Here-After, the smaller rooms in its building, list under it too). The
+// two Showboxes sell through AXS, so they come from their own listing.
+const ticketmasterRooms = Object.entries(CITY.venues).filter(([, v]) => v.tm)
+  .map(([label, v]) => () => ticketmasterVenue({ venueId: v.tm.id, venueMatch: v.tm.match, label, fallbackUrl: v.tm.fallbackUrl, exclude: v.tm.exclude }));
 const sources = [
-  () => ticketmasterVenue({ venueId: 'KovZ917Ahkk', venueMatch: 'climate pledge', label: 'Climate Pledge Arena', fallbackUrl: 'https://climatepledgearena.com/events/', exclude: /arena tours?|all access pass/i }),
-  // The SoDo stadiums: not Seattle Center, but big enough to move the whole city.
-  () => ticketmasterVenue({ venueId: 'KovZpZAEevAA', venueMatch: 't-mobile park', label: 'T-Mobile Park', fallbackUrl: 'https://www.mlb.com/mariners', exclude: /ballpark tour|flex membership/i }),
-  () => ticketmasterVenue({ venueId: 'KovZpZAEknnA', venueMatch: 'lumen field', label: 'Lumen Field', fallbackUrl: 'https://www.lumenfield.com/events', exclude: /stadium tour|notification list/i }),
-  // Around Town's music rooms (Steve, 2026-10-05): the Paramount (STG's
-  // downtown theatre — Broadway runs, concerts, comedy) and the Crocodile in
-  // Belltown, whose box office is TicketWeb — the Discovery API carries those
-  // listings under the same venue id (Madame Lou's and Here-After, the
-  // smaller rooms in its building, list under it too). The two Showboxes
-  // sell through AXS, so they come from their own listing (showbox below);
-  // Ticketmaster has them only as resale offers.
-  () => ticketmasterVenue({ venueId: 'KovZpZAFkvEA', venueMatch: 'paramount', label: 'Paramount Theatre', fallbackUrl: 'https://www.stgpresents.org/stg-venues/paramount-theatre/', exclude: /theatre tours?/i }),
-  () => ticketmasterVenue({ venueId: 'KovZpZA1vFtA', venueMatch: 'crocodile', label: 'The Crocodile', fallbackUrl: 'https://calendar.thecrocodile.com/' }),
+  ...ticketmasterRooms,
   showbox,
   // McCaw Hall comes from the Seattle Center sweep below (every performance,
   // with times); its RSS only supplies the venue's own detail-page links.
@@ -450,18 +447,19 @@ try { all = all.concat(await seattleCenterSweep(all, await mccawUrls())); }
 catch (err) { console.error('Seattle Center sweep failed:', err.message); }
 
 // Collapse the campus's micro-locations (courtyards, lawns, festival stages —
-// whatever sub-spots the sweep discovers) into one "Seattle Center" venue.
-// A dozen filter chips for the same lawn helps nobody; only venues with an
-// identity of their own keep their name.
-const CANONICAL_VENUES = new Set([
-  'Climate Pledge Arena', 'T-Mobile Park', 'Lumen Field', 'Husky Stadium',
-  'Starfire Stadium', 'McCaw Hall', 'The Vera Project', 'Cornish Playhouse', 'Seattle Center',
-  'SIFF Cinema Uptown', 'On the Boards', 'Convention Center',
-  "Children's Theatre", 'MoPOP', 'Pacific Science Center', 'KEXP',
-  'The Traveling Goat', 'Seattle Rep', 'Capitol Hill Block Party', 'Bumbershoot', 'PrideFest', 'Northwest Folklife',
-  'Paramount Theatre', 'Showbox at the Market', 'Showbox SoDo', 'The Crocodile', // Around Town's music rooms (2026-10-05)
-]);
-const normalizeVenue = (e) => (CANONICAL_VENUES.has(e.venue) ? e : { ...e, venue: 'Seattle Center' });
+// whatever sub-spots the sweep discovers) into the one grounds venue. A
+// dozen filter chips for the same lawn helps nobody; only the venues with
+// an identity of their own (city.js) keep their name.
+const CANONICAL_VENUES = new Set(Object.keys(CITY.venues));
+// a venue listed under other spellings (city.js `alias`, a regex: "Everett
+// Memorial Stadium" is Funko Field) folds to its one name first
+const ALIASES = Object.entries(CITY.venues).filter(([, v]) => v.alias).map(([label, v]) => [label, v.alias]);
+const aliasVenue = (name) => { const hit = ALIASES.find(([, re]) => re.test(name || '')); return hit ? hit[0] : name; };
+const normalizeVenue = (e) => {
+  const venue = aliasVenue(e.venue);
+  if (CITY.groundsVenue && !CANONICAL_VENUES.has(venue)) return { ...e, venue: CITY.groundsVenue }; // a city with no grounds venue keeps every name
+  return venue === e.venue ? e : { ...e, venue };
+};
 all = all.map(normalizeVenue);
 
 // window, de-dupe, sort
@@ -527,19 +525,17 @@ const merged = mergeWithArchive(fresh, archived, today, cutoff).slice(-MAX_EVENT
 // the full seasons (home and away) feed the site's Teams view
 let seasons = {}, form = {};
 try { ({ teams: seasons, form } = await applySchedules(merged)); } catch (err) { console.error('Schedules step failed:', err.message); }
-// The Seawolves' home matches have no ticket feed here: they enter the
-// listing from the club's own schedule (Starfire Stadium, typed sports,
-// the club's ticket page as the link) unless the feed already has that day
-// at that ground
-for (const g of (seasons.seawolves || []).filter((x) => x.home && x.date >= cutoff)) {
-  if (merged.some((e) => e.date === g.date && e.venue === g.venue)) continue;
-  merged.push({ venue: g.venue, title: `Seattle Seawolves vs ${g.opp.name}`, date: g.date, time: g.time, url: 'https://tickets.seawolves.rugby/events', type: 'sports' });
-}
-// The Huskies' home games likewise: no ticket feed for Husky Stadium, so
-// ESPN's schedule supplies them, with the athletic department's ticket page
-for (const g of (seasons.huskies || []).filter((x) => x.home && x.date >= cutoff)) {
-  if (merged.some((e) => e.date === g.date && e.venue === g.venue)) continue;
-  merged.push({ venue: g.venue, title: `Washington Huskies vs ${g.opp.name}`, date: g.date, time: g.time, url: 'https://gohuskies.com/sports/football/tickets', type: 'sports', ...(g.tbd ? { dateTbd: true } : {}), ...(g.watch ? { watch: g.watch } : {}) });
+// The clubs whose home games have no ticket feed here (city.js `inject`:
+// the Seawolves at Starfire, the Huskies at Husky Stadium, Everett's
+// AquaSox at Funko Field) enter the listing from the league's schedule —
+// typed sports, the club's ticket page as the link — unless the feed
+// already has that day at that ground
+for (const t of TEAMS.filter((x) => x.inject)) {
+  for (const g of (seasons[t.slug] || []).filter((x) => x.home && x.date >= cutoff)) {
+    const listed = merged.find((e) => e.date === g.date && e.venue === g.venue);
+    if (listed) { if (!listed.time && g.time && !g.tbd) listed.time = g.time; continue; } // the feed's listing stands; the league's first pitch fills a time it lacks
+    merged.push({ venue: g.venue, title: `${t.inject.name || t.name || t.label} vs ${g.opp.name}`, date: g.date, time: g.time, url: t.inject.url, type: 'sports', ...(g.tbd ? { dateTbd: true } : {}), ...(g.watch ? { watch: g.watch } : {}) });
+  }
 }
 // Ticket availability for the Ticketmaster venues, from the local checker
 // (scripts/soldout-check.mjs → scripts/data/soldout.json, committed every six
@@ -596,23 +592,23 @@ let nFeeds = 0;
 for (const venue of new Set(merged.map((e) => e.venue))) {
   const evs = merged.filter((e) => e.venue === venue);
   writeFileSync(new URL(`events-venue-${slugify(venue)}.ics`, siteDir),
-    buildIcs(evs, new Date(), { calname: `LQA Events — ${venue}` }));
+    buildIcs(evs, new Date(), { calname: `${CITY.ics.short} — ${venue}` }));
   nFeeds++;
 }
 for (const [slug, [label, pred]] of Object.entries(BADGE_FEEDS)) {
   writeFileSync(new URL(`events-${slug}.ics`, siteDir),
-    buildIcs(merged.filter(pred), new Date(), { calname: `LQA Events — ${label}` }));
+    buildIcs(merged.filter(pred), new Date(), { calname: `${CITY.ics.short} — ${label}` }));
   nFeeds++;
 }
 // The site hides SIFF's daily movie showings by default — publish the
 // matching exclusion feed so a default-view subscription lines up.
 writeFileSync(new URL('events-no-movies.ics', siteDir),
-  buildIcs(merged.filter((e) => !e.movie), new Date(), { calname: 'LQA Events — no movies' }));
+  buildIcs(merged.filter((e) => !e.movie), new Date(), { calname: `${CITY.ics.short} — no movies` }));
 nFeeds++;
 // Exclusion feeds, one per local team: everything except that team's games.
 for (const t of TEAMS) {
   writeFileSync(new URL(`events-no-${t.slug}.ics`, siteDir),
-    buildIcs(merged.filter((e) => !t.re.test(e.title || '')), new Date(), { calname: `LQA Events — no ${t.label}` }));
+    buildIcs(merged.filter((e) => !t.re.test(e.title || '')), new Date(), { calname: `${CITY.ics.short} — no ${t.label}` }));
   nFeeds++;
 }
 // Season feeds for the Teams view: each club's whole season, home and away
@@ -621,7 +617,7 @@ for (const t of TEAMS) {
 const seasonEvents = (slug, label, games) => games.map((g) => ({
   title: `${label} ${g.home ? 'vs' : 'at'} ${g.opp.name}${g.pre ? ' (preseason)' : g.playoff ? ' (playoff)' : ''}`,
   venue: g.venue || (g.home ? '' : g.opp.name), date: g.date, time: g.tbd ? null : g.time, ...(g.tbd ? { dateTbd: true } : {}),
-  url: `https://lqa.here.events/?team=${slug}`,
+  url: `${CITY.site}?team=${slug}`,
 }));
 const allSeasons = [];
 for (const t of TEAMS) {
@@ -632,7 +628,7 @@ for (const t of TEAMS) {
   nFeeds++;
 }
 allSeasons.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
-writeFileSync(new URL('teams.ics', siteDir), buildIcs(allSeasons, new Date(), { calname: 'Seattle home teams — every season' }));
+writeFileSync(new URL('teams.ics', siteDir), buildIcs(allSeasons, new Date(), { calname: CITY.ics.teams }));
 nFeeds++;
 
 const nPast = merged.filter((e) => e.date < today).length;

@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { slugify, endEstimate, isDay, BADGE_FEEDS, TEAMS } from './badges.mjs';
+const LQA = globalThis.LQACity.key === 'lqa' ? false : 'Lower Queen Anne data — skipped for another city'; // the city-dependent cases below
 
 test('slugify matches the browser-side rule', () => {
   assert.equal(slugify('The Vera Project'), 'the-vera-project');
@@ -22,7 +23,7 @@ test('isDay means done by 4pm', () => {
   assert.equal(isDay({ time: '' }), false);                 // all-day: unknown
 });
 
-test('team matchers hit real game titles, not concerts', () => {
+test('team matchers hit real game titles, not concerts', { skip: LQA }, () => {
   const match = (title) => TEAMS.filter((t) => t.re.test(title)).map((t) => t.slug);
   assert.deepEqual(match('Seattle Kraken vs. Vancouver Canucks'), ['kraken']);
   assert.deepEqual(match('Seattle Mariners vs. Houston Astros'), ['mariners']);

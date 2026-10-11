@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { applySetTimes, setTimesText, shortClock, stagesFrom } from './settimes.mjs';
 
 const table = {
@@ -44,7 +44,7 @@ test('the feed text lists each stage on its own line with short clocks', () => {
   assert.equal(shortClock('00:05'), '12:05');
 });
 
-test('the committed table is well formed: every row a start, an end and an act, starts in order per stage', () => {
+test('the committed table is well formed: every row a start, an end and an act, starts in order per stage', { skip: !existsSync(new URL('./data/chbp-settimes.json', import.meta.url)) && 'no festival table in this city' }, () => {
   const real = JSON.parse(readFileSync(new URL('./data/chbp-settimes.json', import.meta.url), 'utf8'));
   const dates = Object.keys(real.days);
   assert.ok(dates.length >= 1);

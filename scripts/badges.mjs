@@ -21,20 +21,11 @@ export function isDay(e) {
   return !!end && end <= '16:00:00';
 }
 
-// Local pro teams, matched on the event title no matter what the venue.
-// Storm and Reign need the fuller name — bare "storm"/"reign" shows up in
-// concert titles.
-export const TEAMS = [
-  { slug: 'mariners', label: 'Mariners', re: /mariners/i },
-  { slug: 'storm', label: 'Storm', re: /seattle storm/i },
-  { slug: 'seahawks', label: 'Seahawks', re: /seahawks/i },
-  { slug: 'reign', label: 'Reign', re: /reign fc|seattle reign/i },
-  { slug: 'sounders', label: 'Sounders', re: /sounders/i },
-  { slug: 'kraken', label: 'Kraken', re: /kraken/i },
-  { slug: 'torrent', label: 'Torrent', re: /seattle torrent/i },
-  { slug: 'seawolves', label: 'Seawolves', re: /seawolves/i }, // MLR; its Starfire home matches enter the feed from its schedule
-  { slug: 'huskies', label: 'Huskies', re: /huskies/i }, // UW football; its Husky Stadium games enter the feed from ESPN's schedule
-];
+// The home teams, matched on the event title no matter what the venue —
+// the city's (site/city.js), the three fields the build needs.
+import '../site/city.js';
+export const CITY = globalThis.LQACity;
+export const TEAMS = CITY.teams.map(({ slug, label, re }) => ({ slug, label, re }));
 
 // key → [label for the calendar name, predicate]
 export const BADGE_FEEDS = {

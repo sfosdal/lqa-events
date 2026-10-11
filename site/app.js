@@ -2,31 +2,18 @@
 (function () {
   'use strict';
 
-  // Venue hue assignment: marquee venues keep curated colors; every other
-  // venue gets a hue hashed from its name, so colors stay stable no matter
-  // which venues the feed contains on a given day.
-  var VENUE_VARS = {
-    'Climate Pledge Arena': '--v-cpa',
-    'McCaw Hall': '--v-mccaw',
-    'Seattle Center': '--v-seactr',
-    'Cornish Playhouse': '--v-cornish',
-    'The Vera Project': '--v-vera',
-    'SIFF Cinema Uptown': '--v-siff',
-    'On the Boards': '--v-otb',
-    'T-Mobile Park': '--v-tmobile',
-    'Lumen Field': '--v-lumen',
-    'Husky Stadium': '--v-husky',
-    'Convention Center': '--v-scc',
-    "Children's Theatre": '--v-sct',
-    'MoPOP': '--v-mopop',
-    'Pacific Science Center': '--v-pacsci',
-    'KEXP': '--v-kexp',
-    'The Traveling Goat': '--v-goat',
-    'Seattle Rep': '--v-rep',
-    'Capitol Hill Block Party': '--v-chbp',
-    'Bumbershoot': '--v-bumber', 'Northwest Folklife': '--v-folklife', 'PrideFest': '--v-pride', // the festivals (2026-10-05)
-    'Paramount Theatre': '--v-paramount', 'Showbox at the Market': '--v-showbox', 'Showbox SoDo': '--v-sodo', 'The Crocodile': '--v-croc', // Around Town's music rooms (2026-10-05)
-  };
+  // The city (city.js, loaded first): the teams, the venues and the words
+  // for the place. One table per venue field, as the code always read them.
+  var CITY = LQACity;
+  function venueTable(field) {
+    var out = {};
+    Object.keys(CITY.venues).forEach(function (v) { if (CITY.venues[v][field] !== undefined) out[v] = CITY.venues[v][field]; });
+    return out;
+  }
+  // Venue hue assignment: marquee venues keep curated colors (styles.css
+  // --v-* variables); every other venue gets a hue hashed from its name, so
+  // colors stay stable no matter which venues the feed contains.
+  var VENUE_VARS = venueTable('cssVar');
   // Unexpected venues draw from the same cool, web-safe family as the
   // curated ones, hashed from the name so the pick is stable day to day.
   var VENUE_FALLBACK = ['#66ccff', '#9999ff', '#66ffff', '#cc66cc', '#3399ff', '#ff99ff', '#00cccc', '#6666ff'];
@@ -39,36 +26,8 @@
   // Each venue's own events listing — not a ticket vendor. An event's own
   // link (the agenda row's title) still goes to wherever tickets are
   // sold; this is for the venue name in the panel and the agenda. A venue
-  // with no entry here stays plain text.
-  var VENUE_URL = {
-    'Climate Pledge Arena': 'https://climatepledgearena.com/events/',
-    'McCaw Hall': 'https://www.mccawhall.com/events',
-    'Seattle Center': 'https://www.seattlecenter.com/events/event-calendar',
-    'On the Boards': 'https://ontheboards.org/events',
-    'Seattle Rep': 'https://www.seattlerep.org/plays/calendar',
-    'The Vera Project': 'https://theveraproject.org/events/',
-    // Seattle Center's calendar filtered to the Playhouse (the same venue
-    // category the feed's sweep reads); Cornish's own calendar mixes in the
-    // college's other campuses and can't be filtered by venue.
-    'Cornish Playhouse': 'https://www.seattlecenter.com/events/event-calendar?cats=173',
-    'T-Mobile Park': 'https://www.mlb.com/mariners/ballpark/events', // the ballpark's own list — concerts too, not just Mariners games
-    'Lumen Field': 'https://www.lumenfield.com/events',
-    'Husky Stadium': 'https://gohuskies.com/sports/football/schedule', // the stadium's bookings are the football schedule
-    'SIFF Cinema Uptown': 'https://www.siff.net/calendar',
-    'Convention Center': 'https://seattlecc.com/upcoming-events/',
-    "Children's Theatre": 'https://www.sct.org/tickets-shows/calendar/',
-    'MoPOP': 'https://www.mopop.org/events',
-    'The Traveling Goat': 'https://www.travelinggoatseattle.com/events',
-    'Pacific Science Center': 'https://pacificsciencecenter.org/events/',
-    'KEXP': 'https://www.kexp.org/events/kexp-events/',
-    'Capitol Hill Block Party': 'https://www.capitolhillblockparty.com/artists', // the festivals: each one's lineup or schedule page
-    'Bumbershoot': 'https://bumbershoot.com/schedule',
-    'Northwest Folklife': 'https://www.nwfolklife.org/festival/',
-    'PrideFest': 'https://www.seattlepridefest.org/schedule',
-    'Paramount Theatre': 'https://www.stgpresents.org/stg-venues/paramount-theatre/', // the music rooms around town: STG's page for the Paramount, one Showbox page for both rooms, the Crocodile's calendar
-    'Showbox at the Market': 'https://www.showboxpresents.com/events', 'Showbox SoDo': 'https://www.showboxpresents.com/events',
-    'The Crocodile': 'https://calendar.thecrocodile.com/',
-  };
+  // with no entry stays plain text.
+  var VENUE_URL = venueTable('url');
 
   // Venue list order = how big a crowd the place can hold (LQAFilter.
   // VENUE_CAPACITY), biggest first; a venue the table doesn't know sorts
@@ -248,18 +207,9 @@
   }
 
   // Event type is inferred, not sourced: every event lands in exactly one
-  // bucket, from its flags, title, then venue. The 'movie' key survives from
-  // the badge era so the saved movies-hidden default and the no-movies feed
-  // carry over unchanged.
-  var TYPE_LIST = [
-    { key: 'concert', label: 'Concerts', title: 'Live music — arena tours to Vera Project shows' },
-    { key: 'sports', label: 'Sports', title: 'Pro and college games' },
-    { key: 'arts', label: 'Arts & Theater', title: 'Opera, ballet, plays, comedy, dance' },
-    { key: 'movie', label: 'Movies', title: 'Film screenings at SIFF Cinema Uptown — unchecked by default' },
-    // 'community' (grounds events, festivals, walks, classes, SIFF specials) has no row since 2026-10-05: the festivals got rows of their own and Steve dropped it ("festivals doesn't need to be in event type anymore"); the type still exists on events and in the share code's registry, it just can't be switched
-    { key: 'expo', label: 'Conventions', title: 'Conventions, conferences, trade and consumer shows — the Convention Center, Exhibition Hall, Fisher Pavilion' },
-    { key: 'bar', label: 'Neighborhood', title: 'Trivia, live music, watch parties and specials at neighborhood bars — The Traveling Goat so far' },
-  ];
+  // bucket, from its flags, title, then venue. The rows, in order, are the
+  // city's (city.js TYPES).
+  var TYPE_LIST = CITY.types;
   // Type hues mirror the venue hues: a dot on the filter rows.
   var TYPE_VARS = {
     concert: '--t-concert', sports: '--t-sports', arts: '--t-arts',
@@ -276,33 +226,26 @@
   // sets the switch too, and the search box is left alone. Venue lists that
   // depend on the feed are functions of the venues present. `teamsOff`
   // unchecks every team (only Nothing does; the rest leave teams checked).
-  // The default view (Steve's pick, 2026-09-10): the big rooms — the arena,
-  // the Seattle Center grounds, McCaw Hall and the two stadiums — with
-  // Movies off; every other venue starts unchecked (the Convention Center
-  // included, for all its size). Bars aren't venues here, so they're
-  // untouched. The Teams view is never filtered — every game shows there.
-  // Seattle Rep is on too: its shows were part of the grounds' calendar
-  // until the Rep's own feed took them over (2026-09-15), so the default
-  // view keeps showing them.
-  var DEFAULT_VENUES_ON = ['Climate Pledge Arena', 'Seattle Center', 'McCaw Hall', 'Lumen Field', 'T-Mobile Park', 'Seattle Rep'];
-  var DEFAULT_VENUES_OFF = ['MoPOP', "Children's Theatre", 'Cornish Playhouse', 'SIFF Cinema Uptown', 'Pacific Science Center',
-    'The Vera Project', 'On the Boards', 'KEXP', 'Convention Center', 'Starfire Stadium', 'Husky Stadium', 'Capitol Hill Block Party', // the campus festivals (Bumbershoot, Folklife, PrideFest) show by default; the Block Party is a bus ride away
-    'Paramount Theatre', 'Showbox at the Market', 'Showbox SoDo', 'The Crocodile']; // the music rooms around town (2026-10-05) start off like the other bus rides
-  var VENUES_BEFORE_KNOWN = DEFAULT_VENUES_OFF.slice(0, DEFAULT_VENUES_OFF.indexOf('Capitol Hill Block Party')); // the default-off venues every saved pref set already knew before prefs recorded `known` (2026-10-05, with the Block Party)
+  // The default view (Steve's pick, 2026-09-10) is the city's: what's on
+  // and what starts unchecked (city.js). Bars aren't venues here, so
+  // they're untouched. The Teams view is never filtered — every game shows.
+  var DEFAULT_VENUES_ON = CITY.defaultOn.slice();
+  var DEFAULT_VENUES_OFF = CITY.defaultOff.slice();
+  var VENUES_BEFORE_KNOWN = DEFAULT_VENUES_OFF.slice(0, DEFAULT_VENUES_OFF.indexOf(CITY.prefsKnownFrom)); // the default-off venues every saved pref set already knew before prefs recorded `known` (2026-10-05, with the Block Party)
   // Capacity bands: LQAFilter.CAP_BANDS, a filter option each (2026-09-22:
   // no longer a switch over the venue rows — nothing changes another box)
   var BAND_BY_KEY = {};
   CAP_BANDS.forEach(function (b) { BAND_BY_KEY[b.key] = b; });
   var BIG_NIGHT_SEATS = 2000; // the Capacity preset's floor; McCaw Hall (2,900) is the smallest venue in
   var PRESETS = [
-    { key: 'default', label: 'Default', title: 'The big rooms — ' + DEFAULT_VENUES_ON.join(', ') + ' — every team and type except Movies',
+    { key: 'default', label: 'Default', title: CITY.words.presetDefault,
       venuesOff: function () { return DEFAULT_VENUES_OFF.slice(); }, typesOff: ['movie'], holidays: false },
     { key: 'all', label: 'Everything', title: 'Every venue, type and team, holidays too', venuesOff: function () { return []; }, typesOff: [], holidays: true },
     { key: 'none', label: 'Nothing', title: 'Everything off — build your own view from scratch',
       venuesOff: function () { return state.venues.slice(); }, typesOff: TYPE_LIST.map(function (t) { return t.key; }), teamsOff: true, holidays: false },
-    { key: 'neighborhood', label: 'Neighborhood', title: 'Just Lower Queen Anne — no stadiums or Convention Center',
+    { key: 'neighborhood', label: 'Neighborhood', title: CITY.words.presetNeighborhood,
       venuesOff: function () { return DEFAULT_VENUES_OFF.concat(state.venues.filter(function (v) { return venueArea(v) === 'town' && DEFAULT_VENUES_OFF.indexOf(v) < 0; })); }, typesOff: ['movie'] },
-    { key: 'big', label: 'Capacity > 2K', title: 'Only the places that hold ' + BIG_NIGHT_SEATS.toLocaleString('en-US') + ' or more — the stadiums, the arena, McCaw Hall',
+    { key: 'big', label: 'Capacity > 2K', title: CITY.words.presetBig,
       venuesOff: function () { return state.venues.filter(function (v) { return (VENUE_CAPACITY[v] || 0) < BIG_NIGHT_SEATS; }); }, typesOff: ['bar'] },
   ];
   function applyPreset(p) { // a preset is X's only — nothing checked
@@ -332,7 +275,8 @@
   function renderPresets() {
     var box = $('fpPresets');
     box.innerHTML = '';
-    PRESETS.forEach(function (p) {
+    var hasTown = Object.keys(CITY.venues).some(function (v) { return CITY.venues[v].area === 'town'; }); // a city with nothing a bus ride away has no Neighborhood preset (it would equal Default)
+    PRESETS.filter(function (p) { return p.key !== 'neighborhood' || hasTown; }).forEach(function (p) {
       var b = document.createElement('button');
       b.type = 'button'; b.className = 'chip fp-preset'; b.textContent = p.label; b.title = p.title; b.dataset.preset = p.key;
       b.addEventListener('click', function () { applyPreset(p); applyFilters(); });
@@ -501,6 +445,12 @@
       var n = upcoming.filter(function (e) { return eventType(e) === t.key; }).length;
       pb.appendChild(filterRow('badge', t.key, plainName(t.label), n, t.title));
     });
+    // a group with no rows in this city (no Around Town, no festivals) folds away with its heading
+    document.querySelectorAll('#filterPanel .fp-list').forEach(function (l) {
+      var empty = !l.children.length, h = l.previousElementSibling;
+      l.hidden = empty;
+      if (h && h.tagName === 'H3') h.hidden = empty;
+    });
     syncFilters();
     syncPresets(); // the chips are new; light the one that matches
   }
@@ -583,7 +533,7 @@
   // with the usual view ("Also hiding Kraken games and McCaw Hall · Also
   // showing MoPOP"), the search and the sold-out switch named too. A button
   // takes the view back. Nothing shows in the usual view.
-  var PRESET_PHRASE = { all: 'Showing everything.', none: 'Showing nothing yet — open Filter and pick some venues.', neighborhood: 'Showing the neighborhood only, no stadiums.', big: 'Showing the big rooms only — the arena, the stadiums, McCaw Hall.' };
+  var PRESET_PHRASE = CITY.words.phrases;
   function listWords(items) { // "a", "a and b", "a, b and c", "a, b and 3 more"
     if (items.length <= 3) return items.length < 2 ? items.join('') : items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
     return items.slice(0, 2).join(', ') + ' and ' + (items.length - 2) + ' more';
@@ -871,7 +821,9 @@
     return b;
   }
   // the home teams by their short names in this view (Steve, 2026-09-15: "just use Kraken instead of Seattle Kraken")
-  function boardTitle(t) { return t.replace(/\bSeattle (Kraken|Mariners|Seahawks|Storm|Reign|Sounders|Torrent|Seawolves)\b/g, '$1'); }
+  // the board drops the home city from a club's name ("Seattle Kraken" → Kraken): the city is city.js's words.teamCity, the clubs the team labels
+  var BOARD_CITY_RE = CITY.words.teamCity ? new RegExp('\\b' + CITY.words.teamCity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ' (' + TEAMS.map(function (t) { return t.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|') + ')\\b', 'g') : null;
+  function boardTitle(t) { return BOARD_CITY_RE ? t.replace(BOARD_CITY_RE, '$1') : t; }
   // the club's statistical leaders and its injured, from ESPN's matchup page
   // (digestMatchup): a line each for the block's column (Steve, 2026-09-16:
   // "why limited stats here" — the Seahawks' block after one game)
@@ -1215,7 +1167,7 @@
   }
   function renderTeams(slug) {
     // every home team from the filter gets a tab, schedule loaded or not
-    var teams = LQAFilter.TEAMS.slice();
+    var teams = LQAFilter.TEAMS.filter(function (t) { return t.strip !== false; }); // a club with no season feed (strip: false in city.js) has a filter row but no tab
     var strip = $('teamStrip');
     var list = $('teamSched'); list.innerHTML = '';
     var allMode = !slug || slug === 'all'; // every club's games in one list: no chip pressed, no form block, no calendar
@@ -1477,7 +1429,8 @@
   // record, the last five, when it ran — and what the next one holds: the
   // hand-written outlook (outlook.json) and when it opens, from the league's
   // usual calendar until the schedule itself arrives.
-  var OPENS = { mariners: 'late March', kraken: 'early October', seahawks: 'September', storm: 'May', sounders: 'late February', reign: 'March', torrent: 'late November', seawolves: 'March' };
+  var OPENS = {};
+  TEAMS.forEach(function (t) { if (t.opens) OPENS[t.slug] = t.opens; });
   function renderSeasonNext(team, all) {
     function esc(x) { return String(x).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
     var form = (teamsData && teamsData.form && teamsData.form[team.slug]) || {};
@@ -2812,11 +2765,11 @@
   // (Seahawks, Kraken), else the display name without its city (Wave FC,
   // Courage) — and the whole name where nothing but a suffix would be left
   // (Toronto FC, Atlanta United FC, Angel City FC)
-  var CITY = /^(San Diego|San Jose|San Francisco|Los Angeles|LA|Las Vegas|New York City|New York|New England|New Jersey|North Carolina|Kansas City|Salt Lake|St\. Louis|Tampa Bay|Green Bay|Golden State|Portland|Orlando|Houston|Chicago|Washington|Seattle|Utah|Louisville|Denver|Boston|Colorado|Columbus|Nashville|Atlanta|Austin|Charlotte|Cincinnati|Dallas|Minnesota|Montr[ée]al|Philadelphia|Vancouver|Toronto|Miami|Calgary|Edmonton|Anaheim|Winnipeg|Ottawa|Detroit|Pittsburgh|Buffalo|Carolina|Florida|Arizona|Phoenix|Indiana|Connecticut|Oakland|Sacramento|Cleveland|Baltimore|Milwaukee|Texas|Kansas|Oklahoma City|Memphis|Brooklyn|Bay Area)\s+/i;
+  var CLUB_CITY_RE = /^(San Diego|San Jose|San Francisco|Los Angeles|LA|Las Vegas|New York City|New York|New England|New Jersey|North Carolina|Kansas City|Salt Lake|St\. Louis|Tampa Bay|Green Bay|Golden State|Portland|Orlando|Houston|Chicago|Washington|Seattle|Utah|Louisville|Denver|Boston|Colorado|Columbus|Nashville|Atlanta|Austin|Charlotte|Cincinnati|Dallas|Minnesota|Montr[ée]al|Philadelphia|Vancouver|Toronto|Miami|Calgary|Edmonton|Anaheim|Winnipeg|Ottawa|Detroit|Pittsburgh|Buffalo|Carolina|Florida|Arizona|Phoenix|Indiana|Connecticut|Oakland|Sacramento|Cleveland|Baltimore|Milwaukee|Texas|Kansas|Oklahoma City|Memphis|Brooklyn|Bay Area)\s+/i;
   function nickname(t) {
     if (!t) return '';
     if (t.name && t.name !== t.displayName && !/^[A-Z]{2,4}$/.test(t.name)) return t.name;
-    var full = t.displayName || t.shortDisplayName || t.name || '', rest = full.replace(CITY, '');
+    var full = t.displayName || t.shortDisplayName || t.name || '', rest = full.replace(CLUB_CITY_RE, '');
     return rest && rest !== full && !/^(FC|SC|CF|United|City|United FC|City FC|City SC)$/i.test(rest) ? rest : full;
   }
   // a row's colour in the bug: the club's primary — ours from filter.js, theirs from ESPN — unless that is near black
@@ -3143,7 +3096,7 @@
     var rounds = teamPostseason(team.slug), fin = rounds.filter(function (r) { return r.final; })[0];
     var pf = $('printFoot'); pf.innerHTML = '<span class="pf-home">Home</span><span class="pf-away">Away</span>' +
       (rounds.length ? '<span class="pf-post">Playoffs</span>' : '') + (fin ? '<span class="pf-final">' + esc(fin.name) + (fin.site ? ' · ' + esc(fin.site) : '') + '</span>' : '') +
-      '<span>Start times Pacific, subject to change</span><span>lqa.here.events</span>';
+      '<span>Start times Pacific, subject to change</span><span>' + esc(CITY.site.replace(/^https?:\/\//, '').replace(/\/$/, '')) + '</span>';
     // the sheet: square months on one portrait page (like the wall posters),
     // two, three or four across — whichever leaves them biggest. Letter
     // less 8mm margins is 200 × 263mm; the banner and legend take ~36mm.
@@ -3370,7 +3323,7 @@
     t.textContent = e.free ? 'Details \u00b7 Free' : 'Tickets';
     var v = $('sheetVenueLink'); v.href = VENUE_URL[e.venue] || '#'; v.hidden = !VENUE_URL[e.venue]; v.textContent = 'Venue Site \u2197'; v.title = 'What\u2019s on at ' + e.venue; // the venue's own calendar (short: the name is the sheet's eyebrow — Steve, 2026-09-21)
     var ov = $('sheetOnlyVenue'); ov.textContent = 'Only Venue'; ov.title = 'Only ' + e.venue; ov.hidden = state.venues.indexOf(e.venue) < 0 || eventType(e) === 'bar'; ov.dataset.venue = e.venue; // the filter, narrowed to this venue (bars are a type, not a venue)
-    var team = TEAMS.filter(function (t) { return t.re.test(e.title || '') && t.venue === e.venue; })[0]; // a home game: the club's season, in the Teams view
+    var team = TEAMS.filter(function (t) { return t.re.test(e.title || '') && t.venue === e.venue && t.strip !== false; })[0]; // a home game: the club's season, in the Teams view (a club with no tab there has no Season button)
     var tb = $('sheetTeam'); tb.hidden = !team; if (team) { tb.textContent = 'Season'; tb.title = team.label + ' season, in the Teams view'; tb.dataset.slug = team.slug; }
     var hv = $('sheetHideVenue'); hv.textContent = 'Hide Venue'; hv.title = 'Hide ' + e.venue; hv.hidden = ov.hidden; hv.dataset.venue = e.venue;
     var ht = $('sheetHideTeam'); ht.hidden = !team; if (team) { ht.textContent = 'Hide ' + team.label; ht.title = 'Hide ' + team.label + ' home games'; ht.dataset.slug = team.slug; }
@@ -4089,7 +4042,7 @@
     } else if (!vEx.length && !bEx.length && tEx.length === 1) {
       filteredFile = 'events-no-' + tEx[0] + '.ics';
     } else if (vOn.length === 1 && !tEx.length &&
-        (!bEx.length || (movieOnly && vOn[0] !== 'SIFF Cinema Uptown'))) {
+        (!bEx.length || (movieOnly && vOn[0] !== CITY.movieVenue))) {
       // a lone remaining venue is "only that venue"; the baseline movie
       // exclusion changes nothing unless that venue is the cinema itself
       filteredFile = 'events-venue-' + slugify(vOn[0]) + '.ics';
@@ -4103,7 +4056,7 @@
     $('webcalLink').href = webcal;
     $('gcalLink').href = 'https://calendar.google.com/calendar/r?cid=' + encodeURIComponent(webcal);
     $('outlookLink').href = 'https://outlook.live.com/calendar/0/addfromweb?url=' +
-      encodeURIComponent(icsHref) + '&name=' + encodeURIComponent('LQA Events');
+      encodeURIComponent(icsHref) + '&name=' + encodeURIComponent(CITY.ics.short);
     if (!$('qrPanel').hidden) renderQr();
   }
   // QR of the webcal link (scanning it on iOS subscribes directly), rendered

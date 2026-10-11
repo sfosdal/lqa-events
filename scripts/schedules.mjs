@@ -14,12 +14,12 @@
 // Teams view. `watch` is where to catch the game from Seattle — the
 // home-market and national broadcasts the league lists, nothing hardcoded
 // — and rides along onto the matching feed event for the pop-up.
-import { TEAMS } from './badges.mjs';
+import { TEAMS, CITY } from './badges.mjs';
 import { cleanMarks } from './marks.mjs';
 import { addClips } from './highlights.mjs';
 import { readFileSync } from 'node:fs';
 
-const UA = 'Mozilla/5.0 (compatible; lqa-events/1.0; +https://lqa.here.events/)';
+const UA = CITY.userAgent;
 const seattleDate = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
 const seattleTime = (iso) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: 'America/Los_Angeles', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 // MLB's team-logos/<id>.svg files are the caps' on-dark variants; all keep
@@ -65,7 +65,12 @@ const withResult = (game, res) => (res ? { ...game, res } : game);
 // gameType: S spring training (kept, flagged pre); E exhibition and A
 // all-star left out; R regular; the rest (F wild card, D division, L
 // league, W world series) are playoffs.
-export function normalizeMlb(d, teamId) {
+// The same API serves the minors (sportId 13 is High-A, the Everett
+// AquaSox's league): the crests sit at the same address, the club pages at
+// milb.com/<city> (tri-city, not tricity), and the feed's "Audio" entries
+// (type INET, the club's own stream) are not broadcasts a listing names.
+const slugCity = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+export function normalizeMlb(d, teamId, sportId = 1) {
   return (d.dates || []).flatMap((day) => (day.games || [])
     .filter((g) => g.teams?.home?.team?.id === teamId || g.teams?.away?.team?.id === teamId)
     .filter((g) => !/^[EA]$/.test(g.gameType || 'R'))
@@ -81,18 +86,33 @@ export function normalizeMlb(d, teamId) {
         ...(g.gameType === 'S' ? { pre: true } : g.gameType && g.gameType !== 'R' ? { playoff: true } : {}),
         opp: { name: o.name, short: o.teamName || o.clubName || o.name, abbrev: o.abbreviation,
           logo: o.id ? (MLB_LOGO_FIX[o.id] || `https://www.mlbstatic.com/team-logos/${o.id}.svg`) : undefined,
-          site: o.teamName ? `https://www.mlb.com/${slugName(o.teamName)}` : undefined },
+          site: o.teamName ? (sportId === 1 ? `https://www.mlb.com/${slugName(o.teamName)}` : `https://www.milb.com/${slugCity(o.locationName || o.shortName || o.teamName)}`) : undefined },
         venue: g.venue?.name,
-      }, (g.broadcasts || []).filter((b) => !b.language || b.language === 'en').map((b) => ({
+      }, (g.broadcasts || []).filter((b) => (!b.language || b.language === 'en') && b.type !== 'INET').map((b) => ({
         kind: b.type === 'TV' ? 'tv' : 'radio', name: b.name, home: b.homeAway === 'home', national: !!b.isNational,
       }))), final ? { us: us.score, them: them.score, won: !!us.isWinner } : null);
     }));
 }
-async function mlb(teamId) {
+async function mlb(teamId, sportId = 1) {
   const start = new Date(Date.now() - 240 * 86400e3).toISOString().slice(0, 10);
   const end = new Date(Date.now() + 240 * 86400e3).toISOString().slice(0, 10);
-  const d = await getJson(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=${teamId}&startDate=${start}&endDate=${end}&hydrate=broadcasts(all),team`);
-  return normalizeMlb(d, teamId);
+  const d = await getJson(`https://statsapi.mlb.com/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&startDate=${start}&endDate=${end}&hydrate=broadcasts(all),team`);
+  return normalizeMlb(d, teamId, sportId);
+}
+// A minor-league club's record and standing: the same API's standings by
+// league (the AquaSox's Northwest League is 126) — no ESPN coverage to draw
+// on, so W-L and the league's own rank, plus the outlets' feeds.
+async function milbForm(leagueId, teamId, leagueName, slug, label) {
+  const season = new Date().getFullYear();
+  const d = await getJson(`https://statsapi.mlb.com/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason&hydrate=team`);
+  const rows = (d.records || []).flatMap((r) => r.teamRecords || []);
+  const r = rows.find((x) => Number(x.team?.id) === Number(teamId));
+  if (!r) throw new Error('team not in standings');
+  const n = Number(r.leagueRank || r.divisionRank);
+  const news = await clubNews(slug, label, Promise.resolve([]));
+  const home = (r.records?.splitRecords || []).find((x) => x.type === 'home');
+  return { record: `${r.wins}-${r.losses}`, standing: n ? `${ordinal(n)} in the ${leagueName || 'league'}` : undefined,
+    ...(home ? { home: `${home.wins}-${home.losses}` } : {}), ...(news.length ? { news } : {}), ...(r.team?.name ? { club: { name: r.team.name } } : {}) };
 }
 
 // NHL api-web — official; gameScheduleState is OK / TBD / PPD / SUSP / CNCL.
@@ -189,9 +209,15 @@ async function espn(sport, league, teamId) {
 // new season is picked up the run it appears. Times come with the venue's
 // timezone in GameDateISO8601; crests are the league's own at
 // assets.leaguestat.com. No broadcast data in the feed.
-const PWHL = 'https://lscluster.hockeytech.com/feed/index.php?feed=modulekit&key=446521baf8c38984&fmt=json&client_code=pwhl&lang=en';
+// The same feed serves the junior leagues (the WHL's Everett Silvertips are
+// client_code whl, key 41b145a848f4bd67, the one chl.ca's pages carry), so
+// the league and key are parameters; only the crest address and the club
+// page differ by league (opts.logo / opts.site).
+const HT = (league, key) => `https://lscluster.hockeytech.com/feed/index.php?feed=modulekit&key=${key}&fmt=json&client_code=${league}&lang=en`;
+const PWHL = HT('pwhl', '446521baf8c38984');
 const pwhlSlug = (name) => String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-export function normalizePwhl(games, teamId, playoff, pre) {
+const PWHL_OPTS = { logo: (oid) => `https://assets.leaguestat.com/pwhl/logos/${oid}.png`, site: (oname) => `https://www.thepwhl.com/en/teams/${pwhlSlug(oname)}` };
+export function normalizePwhl(games, teamId, playoff, pre, opts = PWHL_OPTS) {
   return (games || []).filter((g) => g.home_team === String(teamId) || g.visiting_team === String(teamId)).map((g) => {
     const home = g.home_team === String(teamId);
     const oid = home ? g.visiting_team : g.home_team;
@@ -201,12 +227,13 @@ export function normalizePwhl(games, teamId, playoff, pre) {
     const usG = Number(home ? g.home_goal_count : g.visiting_goal_count), themG = Number(home ? g.visiting_goal_count : g.home_goal_count);
     const final = g.final === '1' && Number.isFinite(usG) && Number.isFinite(themG);
     const ot = /\bSO\b/.test(g.game_status || '') ? 'SO' : /\bOT\b/.test(g.game_status || '') ? 'OT' : null;
+    const site = opts.site ? opts.site(oname, oid) : undefined;
     return withResult({
       date: g.date_played, time: tbd || !g.GameDateISO8601 ? null : seattleTime(g.GameDateISO8601), tbd, home,
       ...(playoff ? { playoff: true } : pre ? { pre: true } : {}),
       opp: { name: oname, short: onick || oname, abbrev: home ? g.visiting_team_code : g.home_team_code,
-        logo: `https://assets.leaguestat.com/pwhl/logos/${oid}.png`, site: `https://www.thepwhl.com/en/teams/${pwhlSlug(oname)}` },
-      venue: String(g.venue_name || '').split('|')[0].trim(),
+        logo: opts.logo(oid), ...(site ? { site } : {}) },
+      venue: String(g.venue_name || '').split(/\s*[|]\s*|\s+-\s+/)[0].trim(), // "Climate Pledge Arena|Seattle" (PWHL) or "Angel of the Winds Arena - Everett, WA" (WHL)
       ...(home && g.venue_location ? { city: String(g.venue_location).trim() } : {}),
     }, final ? { us: usG, them: themG, won: usG > themG, ...(ot ? { ot } : {}) } : null);
   });
@@ -218,42 +245,60 @@ export function normalizePwhl(games, teamId, playoff, pre) {
 // standings row yet (an expansion side) counts as a .500 club. app.js shows
 // it as it shows ESPN's, with a tilde. games: normalizePwhl's; rows: the standings
 // (team_id, games_played, points); returns the games, odds attached.
-export function pwhlOdds(games, rows, teamId) {
+export function pwhlOdds(games, rows, teamId, leagueName = 'PWHL') {
   const share = {};
   for (const r of rows || []) { const gp = Number(r.games_played); if (gp) share[String(r.team_id)] = Number(r.points) / (2 * gp); }
   const us = share[String(teamId)];
   return (games || []).map((g) => {
-    const oid = (String(g.opp?.logo || '').match(/logos\/(\d+)\.png/) || [])[1], them = share[oid] ?? 0.5; // a club with no row (an expansion side) is taken as league-average
+    const oid = (String(g.opp?.logo || '').match(/logos\/(\d+)\.\w+/) || [])[1], them = share[oid] ?? 0.5; // a club with no row (an expansion side) is taken as league-average
     if (g.res || us == null) return g;
     const edge = 0.03, a = Math.min(0.97, Math.max(0.03, us + (g.home ? edge : -edge))), b = Math.min(0.97, Math.max(0.03, them + (g.home ? -edge : edge)));
     const p = Math.round((a - a * b) / (a + b - 2 * a * b) * 100);
-    return { ...g, odds: { us: p, them: 100 - p, draw: 0, est: true, source: "an estimate from the two clubs' records — no line for the PWHL" } };
+    return { ...g, odds: { us: p, them: 100 - p, draw: 0, est: true, source: `an estimate from the two clubs' records — no line for the ${leagueName}` } };
   });
 }
-async function pwhlStandings(seasons, teamId) { // the newest regular season with six of the club's games in it, else the one before
+async function hockeytechSeasons(base) {
+  return (await getJson(`${base}&view=seasons`)).SiteKit.Seasons.map((x) => ({ id: Number(x.season_id), name: x.season_name })).sort((a, b) => b.id - a.id);
+}
+async function hockeytechStandings(base, seasons, teamId) { // the newest regular season with six of the club's games in it, else the one before
   for (const s of seasons.filter((x) => /regular season/i.test(x.name))) {
-    const rows = (await getJson(`${PWHL}&view=statviewtype&type=standings&stat=conference&season_id=${s.id}`)).SiteKit?.Statviewtype || [];
+    const rows = (await getJson(`${base}&view=statviewtype&type=standings&stat=conference&season_id=${s.id}`)).SiteKit?.Statviewtype || [];
     const mine = rows.find((x) => String(x.team_id) === String(teamId));
     if (mine && Number(mine.games_played) >= 6) return rows;
   }
   return [];
 }
-async function pwhl(teamId) {
-  const seasons = (await getJson(`${PWHL}&view=seasons`)).SiteKit.Seasons.map((x) => ({ id: Number(x.season_id), name: x.season_name }))
-    .sort((a, b) => b.id - a.id);
+// A club's season from a HockeyTech feed: the newest regular season, the
+// playoffs after it and that season's (or the next one's) preseason.
+async function hockeytech(league, key, teamId, opts, leagueName) {
+  const base = HT(league, key);
+  const seasons = await hockeytechSeasons(base);
   const reg = seasons.find((x) => /regular season/i.test(x.name));
   if (!reg) throw new Error('no regular season listed');
   // the playoffs after it, and the preseason of that season or of the next (the same year in the name, or a newer id)
   const runs = [reg, ...seasons.filter((x) => (/playoffs/i.test(x.name) && x.id > reg.id) || (/pre-?season/i.test(x.name) && (x.id > reg.id || x.name.slice(0, 4) === reg.name.slice(0, 4))))];
   const out = [];
   for (const r of runs) {
-    const d = await getJson(`${PWHL}&view=schedule&season_id=${r.id}&team_id=${teamId}`);
-    out.push(...normalizePwhl(d.SiteKit?.Schedule, teamId, /playoffs/i.test(r.name), /pre-?season/i.test(r.name)));
+    const d = await getJson(`${base}&view=schedule&season_id=${r.id}&team_id=${teamId}`);
+    out.push(...normalizePwhl(d.SiteKit?.Schedule, teamId, /playoffs/i.test(r.name), /pre-?season/i.test(r.name), opts));
+  }
+  // the crest host answers 404 for a few WHL clubs' .png (Saskatoon, Brandon,
+  // Kelowna, Penticton) but serves the same crest as .jpg
+  const crest = new Map();
+  for (const g of out) {
+    const u = g.opp?.logo;
+    if (!u || !/\.png$/.test(u)) continue;
+    if (!crest.has(u)) crest.set(u, fetch(u, { method: 'HEAD' }).then((r) => r.ok ? u : fetch(u.replace(/\.png$/, '.jpg'), { method: 'HEAD' }).then((j) => j.ok ? u.replace(/\.png$/, '.jpg') : u)).catch(() => u));
+    g.opp.logo = await crest.get(u);
   }
   let rows = [];
-  try { rows = await pwhlStandings(seasons, teamId); } catch (e) { console.error(`schedules: pwhl standings skipped — ${e.message}`); }
-  return pwhlOdds(out, rows, teamId).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+  try { rows = await hockeytechStandings(base, seasons, teamId); } catch (e) { console.error(`schedules: ${league} standings skipped — ${e.message}`); }
+  return pwhlOdds(out, rows, teamId, leagueName).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
 }
+const pwhl = (teamId) => hockeytech('pwhl', '446521baf8c38984', teamId, PWHL_OPTS, 'PWHL');
+// The junior leagues' crests are at the same host under the league's code; no
+// club page is linked (chl.ca turns scripts away, and the clubs' own sites vary).
+const WHL_OPTS = (league) => ({ logo: (oid) => `https://assets.leaguestat.com/${league}/logos/${oid}.png` });
 
 // Where each club stands: { record: 'W-L', standing: '3rd in AL West',
 // home?: 'W-L' }. ESPN's team endpoint carries a record summary and a
@@ -357,7 +402,7 @@ async function espnLeaders(sport, league, teamId) {
 // The record against a set of opponents, from the season's results — the
 // Mariners' AL West, which ESPN's record leaves out: 'W-L' (with a third
 // figure for the draws where a sport has them), or null with no such game.
-export const DIVISION = { mariners: ['HOU', 'LAA', 'ATH', 'TEX'] }; // AL West, by the abbreviations the schedule carries (ATH since the Athletics left Oakland)
+export const DIVISION = Object.fromEntries(CITY.teams.filter((t) => t.division).map((t) => [t.slug, t.division])); // the Mariners' AL West, by the abbreviations the schedule carries
 export function divisionRecord(games, opps) {
   let w = 0, l = 0, d = 0;
   for (const g of games || []) {
@@ -472,16 +517,7 @@ async function feedNews(url, source) {
 }
 // the outlets per club, beside ESPN (seattlesports.com refuses scripts — 403)
 const ST = (path) => [`https://www.seattletimes.com/sports/${path}/feed/`, 'Seattle Times'];
-const FEEDS = {
-  mariners: [ST('mariners'), ['https://www.mlb.com/mariners/feeds/news/rss.xml', 'MLB.com'], ['https://www.lookoutlanding.com/rss/current.xml', 'Lookout Landing']],
-  kraken: [ST('kraken'), ['https://soundofhockey.com/feed/', 'Sound Of Hockey'], ['https://www.davyjoneslockerroom.com/rss/current.xml', "Davy Jones' Locker Room"]],
-  seahawks: [ST('seahawks'), ['https://www.seahawks.com/rss/news', 'Seahawks.com'], ['https://www.fieldgulls.com/rss/current.xml', 'Field Gulls']],
-  storm: [ST('storm')],
-  sounders: [ST('sounders'), ['https://www.sounderatheart.com/feed', 'Sounder at Heart']],
-  reign: [ST('reign')],
-  huskies: [ST('uw-husky-football'), ['https://www.uwdawgpound.com/rss/current.xml', 'UW Dawg Pound']],
-  torrent: [ST('torrent')],
-};
+const FEEDS = Object.fromEntries(CITY.teams.filter((t) => t.news).map((t) => [t.slug, t.news]));
 // Every source's pieces in one list, newest first by the time of posting
 // (`at`, dropped from the output; a tie keeps the order given), each URL
 // once, and only the significant ones: a piece has to name the club (the
@@ -505,17 +541,73 @@ async function clubNews(slug, name, espn) {
   return mergeNews(lists, name);
 }
 const ordinal = (n) => n + (['th', 'st', 'nd', 'rd'][(n % 100 - 20) % 10] || ['th', 'st', 'nd', 'rd'][n % 100] || 'th');
-async function pwhlForm(teamId) {
-  const seasons = (await getJson(`${PWHL}&view=seasons`)).SiteKit.Seasons.map((x) => ({ id: Number(x.season_id), name: x.season_name })).sort((a, b) => b.id - a.id);
+// A HockeyTech standings row → the form block. The PWHL reads its record
+// RW-OTW-OTL-L and ranks the whole league; the WHL reads W-L-OTL-SOL and
+// ranks within the conference (the row names it: "Western Conference").
+export function hockeytechForm(r, league) {
+  const whl = league !== 'pwhl';
+  const n = Number(r.rank || r.overall_rank);
+  const where = whl ? (r.conference_name || 'the league').replace(/^(?!the )/i, 'the ') : 'the PWHL';
+  const club = { ...(r.name ? { name: String(r.name).replace(/^[a-z]+ - /i, '') } : {}), ...(r.team_code ? { abbr: r.team_code } : {}) }; // the standings row's name carries a clinch prefix ("x - ") in season
+  const record = whl ? [r.wins, r.losses, r.ot_losses, r.shootout_losses].join('-') : [r.regulation_wins, r.non_reg_wins, r.non_reg_losses, r.losses].join('-');
+  return { record, standing: n ? `${ordinal(n)} in ${where}` : undefined, ...(whl && r.home_record ? { home: String(r.home_record).replace(/\s+/g, '') } : {}), club };
+}
+async function hockeytechFormFetch(league, key, teamId, slug, label) {
+  const base = HT(league, key);
+  const seasons = await hockeytechSeasons(base);
   const reg = seasons.find((x) => /regular season/i.test(x.name));
   if (!reg) throw new Error('no regular season listed');
-  const rows = (await getJson(`${PWHL}&view=statviewtype&type=standings&stat=conference&season_id=${reg.id}`)).SiteKit?.Statviewtype || [];
+  const rows = (await getJson(`${base}&view=statviewtype&type=standings&stat=conference&season_id=${reg.id}`)).SiteKit?.Statviewtype || [];
   const r = rows.find((x) => String(x.team_id) === String(teamId));
   if (!r) throw new Error('team not in standings');
-  const n = Number(r.rank || r.overall_rank);
-  const news = await clubNews('torrent', 'Torrent', Promise.resolve([]));
-  const club = { ...(r.name ? { name: String(r.name).replace(/^[a-z]+ - /i, '') } : {}), ...(r.team_code ? { abbr: r.team_code } : {}) }; // the standings row's name carries a clinch prefix ("x - ") in season
-  return { record: [r.regulation_wins, r.non_reg_wins, r.non_reg_losses, r.losses].join('-'), standing: n ? `${ordinal(n)} in the PWHL` : undefined, ...(news.length ? { news } : {}), club };
+  const news = await clubNews(slug, label, Promise.resolve([]));
+  return { ...hockeytechForm(r, league), ...(news.length ? { news } : {}) };
+}
+const pwhlForm = (teamId, slug, label) => hockeytechFormFetch('pwhl', '446521baf8c38984', teamId, slug, label);
+
+// DigitalShift (the Washington Wolfpack's league, Arena Football One, runs
+// its stats there): a login with the site's public client_service_id returns
+// a ticket, and /events?team_id= lists the season's games — started_at_tz is
+// the true instant (started_at is the local wall clock mislabelled UTC),
+// day_class says home or away, name reads "Home vs Away", status "W 33-16"
+// (winner's score first). No venue in the feed: the club's own ground stands
+// in for home games.
+export function normalizeDigitalshift(events, homeVenue, now = Date.now()) {
+  return (events || []).filter((g) => g.$type === 'game' && g.started_at_tz).map((g) => {
+    const when = new Date(g.started_at_tz);
+    const home = g.day_class === 'game-home';
+    const oname = String(g.opp_team_name || '').trim();
+    const m = String(g.status || '').match(/^([WLT])\s+(\d+)\s*-\s*(\d+)/);
+    const res = m ? { us: Number(m[1] === 'L' ? m[3] : m[2]), them: Number(m[1] === 'L' ? m[2] : m[3]), won: m[1] === 'W' } : null;
+    const short = oname.split(/\s+/).slice(1).join(' ') || oname;
+    return withResult({
+      date: seattleDate(when), time: seattleTime(when), tbd: false, home,
+      ...(g.playoff || /playoff|championship|semi-?final/i.test(g.name || '') ? { playoff: true } : {}),
+      opp: { name: oname, short, abbrev: short.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase(),
+        ...(g.opp_team_logo_url?.medium || g.opp_team_logo_url?.full ? { logo: g.opp_team_logo_url.medium || g.opp_team_logo_url.full } : {}) },
+      ...(home && homeVenue ? { venue: homeVenue } : {}),
+    }, res);
+  }).filter((g) => Math.abs(new Date(g.date) - now) < 300 * 86400e3).sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+}
+async function digitalshiftEvents(service, teamId) {
+  const login = await fetch('https://web.api.digitalshift.ca/login', { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', 'user-agent': UA }, body: JSON.stringify({ client_service_id: service }) });
+  if (!login.ok) throw new Error(`login HTTP ${login.status}`);
+  const hash = (await login.json()).ticket?.hash;
+  if (!hash) throw new Error('no ticket');
+  const r = await fetch(`https://web.api.digitalshift.ca/events?team_id=${teamId}`, { headers: { authorization: `ticket="${hash}"`, accept: 'application/json', 'user-agent': UA } });
+  if (!r.ok) throw new Error(`events HTTP ${r.status}`);
+  return (await r.json()).events || [];
+}
+async function digitalshift(service, teamId, homeVenue) {
+  const games = normalizeDigitalshift(await digitalshiftEvents(service, teamId), homeVenue);
+  if (!games.length) throw new Error('no games listed');
+  return games;
+}
+async function digitalshiftForm(service, teamId, slug, label) {
+  const games = normalizeDigitalshift(await digitalshiftEvents(service, teamId)).filter((g) => g.res && !g.playoff);
+  const w = games.filter((g) => g.res.won).length, l = games.length - w;
+  const news = await clubNews(slug, label, Promise.resolve([]));
+  return { ...(games.length ? { record: `${w}-${l}` } : {}), ...(news.length ? { news } : {}) };
 }
 // The season's Wikipedia page, whose lead paragraph is the form block's
 // summary (CC BY-SA — the site links the page). One page per season:
@@ -523,11 +615,10 @@ async function pwhlForm(teamId) {
 // season that straddles the year end — the years come from the schedule.
 // (NFL seasons are titled by the year they start in, though they run into
 // January.)
-const WIKI = { mariners: 'Seattle Mariners', kraken: 'Seattle Kraken', seahawks: 'Seattle Seahawks', storm: 'Seattle Storm',
-  reign: 'Seattle Reign FC', sounders: 'Seattle Sounders FC', torrent: 'Seattle Torrent', seawolves: 'Seattle Seawolves', huskies: 'Washington Huskies football' };
-const WIKI_START_YEAR = { seahawks: true };
-const WIKI_CLUB = {}; // clubs with no season pages: their own article instead
-const WIKI_TEAM_PAGE = { huskies: true }; // college seasons are titled "2026 Washington Huskies football team", not "… season"
+const WIKI = Object.fromEntries(CITY.teams.filter((t) => t.wiki).map((t) => [t.slug, t.wiki.title]));
+const WIKI_START_YEAR = Object.fromEntries(CITY.teams.filter((t) => t.wiki && t.wiki.startYear).map((t) => [t.slug, true]));
+const WIKI_CLUB = Object.fromEntries(CITY.teams.filter((t) => t.wiki && t.wiki.club).map((t) => [t.slug, t.wiki.title])); // clubs with no season pages: their own article instead
+const WIKI_TEAM_PAGE = Object.fromEntries(CITY.teams.filter((t) => t.wiki && t.wiki.teamPage).map((t) => [t.slug, true])); // college seasons are titled "2026 Washington Huskies football team", not "… season"
 export function wikiTitle(slug, games) {
   if (WIKI_CLUB[slug]) return WIKI_CLUB[slug];
   if (WIKI_TEAM_PAGE[slug]) return games?.length ? `${games[0].date.slice(0, 4)} ${WIKI[slug]} team` : null;
@@ -570,17 +661,16 @@ async function seawolvesForm() {
   return { ...(news.length ? { news } : {}), ...(name ? { club: { name } } : {}) };
 }
 
-export const FORM = [
-  { slug: 'mariners', fetch: () => espnForm('baseball', 'mlb', 12, 'Mariners', 'mariners') },
-  { slug: 'kraken', fetch: () => espnForm('hockey', 'nhl', 124292, 'Kraken', 'kraken') },
-  { slug: 'seahawks', fetch: () => espnForm('football', 'nfl', 26, 'Seahawks', 'seahawks') },
-  { slug: 'storm', fetch: () => espnForm('basketball', 'wnba', 14, 'Storm', 'storm') },
-  { slug: 'sounders', fetch: () => espnForm('soccer', 'usa.1', 9726, 'Sounders', 'sounders') },
-  { slug: 'reign', fetch: () => espnForm('soccer', 'usa.nwsl', 15363, 'Reign', 'reign') },
-  { slug: 'huskies', fetch: () => espnForm('football', 'college-football', 264, 'Huskies', 'huskies') },
-  { slug: 'torrent', fetch: () => pwhlForm(8) },
-  { slug: 'seawolves', fetch: () => seawolvesForm() },
-];
+// Each team's record/standing fetcher, by the kind city.js names
+const FORM_KINDS = {
+  espn: (t) => espnForm(t.espn.sport, t.espn.league, Number(t.espn.id), t.label, t.slug),
+  pwhl: (t) => pwhlForm(t.form.id, t.slug, t.label),
+  hockeytech: (t) => hockeytechFormFetch(t.form.league, t.form.key, t.form.id, t.slug, t.label),
+  milb: (t) => milbForm(t.form.league, t.form.id, t.form.leagueName, t.slug, t.label),
+  digitalshift: (t) => digitalshiftForm(t.form.service, t.form.id, t.slug, t.label),
+  seawolves: () => seawolvesForm(),
+};
+export const FORM = CITY.teams.filter((t) => t.form && FORM_KINDS[t.form.kind]).map((t) => ({ slug: t.slug, fetch: () => FORM_KINDS[t.form.kind](t) }));
 
 // Seattle Seawolves (Major League Rugby, seawolves.rugby): the schedule
 // page is server-rendered — an "Upcoming Matches" list of the season's
@@ -666,17 +756,17 @@ async function seawolves() {
   return games;
 }
 
-export const SOURCES = [
-  { slug: 'mariners', fetch: () => mlb(136) },
-  { slug: 'kraken', fetch: () => nhl('SEA') },
-  { slug: 'seahawks', fetch: () => espn('football', 'nfl', 26) },
-  { slug: 'storm', fetch: () => espn('basketball', 'wnba', 14) },
-  { slug: 'sounders', fetch: () => espn('soccer', 'usa.1', 9726) },
-  { slug: 'reign', fetch: () => espn('soccer', 'usa.nwsl', 15363) },
-  { slug: 'huskies', fetch: () => espn('football', 'college-football', 264) },
-  { slug: 'torrent', fetch: () => pwhl(8) },
-  { slug: 'seawolves', fetch: () => seawolves() },
-];
+// Each team's season schedule fetcher, by the kind city.js names
+const SEASON_KINDS = {
+  mlb: (t) => mlb(t.season.id, t.season.sportId || 1),
+  nhl: (t) => nhl(t.season.abbrev),
+  espn: (t) => espn(t.espn.sport, t.espn.league, Number(t.espn.id)),
+  pwhl: (t) => pwhl(t.season.id),
+  hockeytech: (t) => hockeytech(t.season.league, t.season.key, t.season.id, WHL_OPTS(t.season.league), t.season.leagueName || t.season.league.toUpperCase()),
+  digitalshift: (t) => digitalshift(t.season.service, t.season.id, t.venue),
+  seawolves: () => seawolves(),
+};
+export const SOURCES = CITY.teams.filter((t) => t.season && SEASON_KINDS[t.season.kind]).map((t) => ({ slug: t.slug, fetch: () => SEASON_KINDS[t.season.kind](t) }));
 
 // Marks feed events whose team's league lists that home date as TBD, and
 // copies the game's broadcasts onto them. bySlug: { mariners: [{date, tbd,

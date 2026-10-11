@@ -8,13 +8,14 @@
 // ESPN kind) loses every tiny connected blob of pixels there. Anything else
 // is served as it came.
 import fs from 'node:fs';
+import { CITY } from './badges.mjs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DIR = path.join(HERE, '..', 'site', 'marks', 'opp');
-const UA = 'Mozilla/5.0 (compatible; lqa-events/1.0; +https://lqa.here.events/)';
+const UA = CITY.userAgent;
 const KEEP_MS = 7 * 864e5;
 // a shape this small (both ways, as a share of the image) at the bottom or
 // the right edge is a ™ / ®, not the mark

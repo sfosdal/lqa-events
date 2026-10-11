@@ -14,48 +14,21 @@
 (function (global) {
   'use strict';
 
-  // Local pro teams — matched on the title no matter what the venue.
-  // Mirrors TEAMS in scripts/badges.mjs. venue = the team's home building;
-  // schedule = the team's own schedule page (a game's link still goes to
-  // wherever its tickets are sold).
-  // Order = the Teams strip, left to right (Steve, 2026-09-10); Sounders
-  // were not on his list and sit last rather than being dropped. sport keys
-  // the little icon after the name in the strip (app.js SPORT_ICONS); colors =
-  // name / abbr: the club's full name and scoreboard abbreviation as its
-  // league lists them, for a first paint before teams.json arrives — the
-  // feed's own values (form[slug].club, from the build) take precedence.
-  // Nothing here assumes a club is Seattle's: the Huskies are Washington
-  // (WASH), the Seawolves play in Tukwila.
-  // [primary, accent] — the season calendar's home cells and card frames;
-  // espn = the club on ESPN's scoreboard, for the live game block (the PWHL
-  // feed refuses browser requests, so the Torrent have none).
-  var TEAMS = [
-    { slug: 'seahawks', espn: { sport: 'football', league: 'nfl', id: '26' }, colors: ['#002244', '#69be28'], sport: 'football', label: 'Seahawks', re: /seahawks/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/sea.png', schedule: 'https://www.seahawks.com/schedule/' },
-    { slug: 'mariners', espn: { sport: 'baseball', league: 'mlb', id: '12' }, colors: ['#0c2c56', '#005c5c'], sport: 'baseball', label: 'Mariners', re: /mariners/i, venue: 'T-Mobile Park', logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/sea.png', schedule: 'https://www.mlb.com/mariners/schedule' },
-    { slug: 'kraken', espn: { sport: 'hockey', league: 'nhl', id: '124292' }, colors: ['#001628', '#99d9d9'], sport: 'hockey', label: 'Kraken', re: /kraken/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/sea.png', schedule: 'https://www.nhl.com/kraken/schedule' },
-    { slug: 'storm', espn: { sport: 'basketball', league: 'wnba', id: '14' }, colors: ['#2c5234', '#fee11a'], sport: 'basketball', label: 'Storm', re: /seattle storm/i, venue: 'Climate Pledge Arena', logo: 'https://a.espncdn.com/i/teamlogos/wnba/500/sea.png', schedule: 'https://storm.wnba.com/schedule/' },
-    { slug: 'reign', espn: { sport: 'soccer', league: 'usa.nwsl', id: '15363' }, colors: ['#0a2240', '#c5a05a'], sport: 'soccer', label: 'Reign', re: /reign fc|seattle reign/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/15363.png', schedule: 'https://www.reignfc.com/schedule' },
-    // PWHL, first season 2025-26. The crest is the league's stat-feed copy;
-    // the league site has no per-team schedule URL — the team page holds it.
-    { slug: 'torrent', colors: ['#0b2340', '#3fb6c4'], sport: 'hockey', label: 'Torrent', re: /seattle torrent/i, venue: 'Climate Pledge Arena', logo: 'https://assets.leaguestat.com/pwhl/logos/8.png', schedule: 'https://www.thepwhl.com/en/teams/seattle-torrent' },
-    // Seattle Seawolves: Major League Rugby (since 2018), Starfire Stadium in Tukwila; no ESPN coverage
-    { slug: 'seawolves', colors: ['#003057', '#6cbe45'], sport: 'rugby', label: 'Seawolves', re: /seawolves/i, venue: 'Starfire Stadium', logo: 'https://www.seawolves.rugby/images/seawolves-logo.png', schedule: 'https://www.seawolves.rugby/schedule' },
-    // Washington Huskies football (Big Ten), Husky Stadium on Montlake; ESPN's college-football feeds cover them like a pro club
-    { slug: 'huskies', espn: { sport: 'football', league: 'college-football', id: '264' }, colors: ['#4b2e83', '#b7a57a'], sport: 'football', label: 'Huskies', name: 'Washington Huskies', abbr: 'WASH', re: /huskies/i, venue: 'Husky Stadium', logo: 'https://a.espncdn.com/i/teamlogos/ncaa/500/264.png', schedule: 'https://gohuskies.com/sports/football/schedule' },
-    { slug: 'sounders', espn: { sport: 'soccer', league: 'usa.1', id: '9726' }, colors: ['#236192', '#5d9741'], sport: 'soccer', label: 'Sounders', re: /sounders/i, venue: 'Lumen Field', logo: 'https://a.espncdn.com/i/teamlogos/soccer/500/9726.png', schedule: 'https://www.soundersfc.com/schedule/' },
-  ];
+  // The home teams and the venues are the city's (city.js, loaded first):
+  // every field is described there. One table per venue field here, so the
+  // rules below read as they always did.
+  var CITY = global.LQACity;
+  if (!CITY) throw new Error('city.js must load before filter.js');
+  var TEAMS = CITY.teams;
   var TEAM_BY_SLUG = {};
   TEAMS.forEach(function (t) { TEAM_BY_SLUG[t.slug] = t; });
+  function venueTable(field) {
+    var out = {};
+    Object.keys(CITY.venues).forEach(function (v) { if (CITY.venues[v][field] !== undefined) out[v] = CITY.venues[v][field]; });
+    return out;
+  }
 
-  var TYPE_VENUE_DEFAULT = {
-    'Climate Pledge Arena': 'concert', 'The Vera Project': 'concert',
-    'T-Mobile Park': 'concert', 'Lumen Field': 'concert', 'Husky Stadium': 'concert', // non-game stadium bookings are shows
-    'McCaw Hall': 'arts', 'Cornish Playhouse': 'arts', 'On the Boards': 'arts', 'Seattle Rep': 'arts',
-    'Seattle Center': 'community', 'SIFF Cinema Uptown': 'community', // SIFF specials = festival programming
-    'Convention Center': 'expo',
-    "Children's Theatre": 'arts', 'MoPOP': 'community', 'Pacific Science Center': 'community', 'KEXP': 'concert',
-    'Paramount Theatre': 'concert', 'Showbox at the Market': 'concert', 'Showbox SoDo': 'concert', 'The Crocodile': 'concert', // the music rooms around town; Ticketmaster's own segment (a Broadway run is Arts & Theatre) comes first
-  };
+  var TYPE_VENUE_DEFAULT = venueTable('type'); // the type when the title decides nothing
   var TYPE_KEYS_OK = { concert: 1, sports: 1, arts: 1, movie: 1, community: 1, expo: 1, bar: 1 };
   // Order: the movie flag and a home team / "vs" are certain. Then the
   // source's own classification (feed `type`: Ticketmaster segment, DICE
@@ -80,64 +53,10 @@
     return TYPE_VENUE_DEFAULT[e.venue] || 'community';
   }
 
-  // Venue marks for listings without a team crest: the venue's site icon,
-  // via Google's favicon service where it serves a 100px+ version and the
-  // site's own file where that's sharper. McCaw Hall only publishes 16px,
-  // so it has none.
-  function favicon(domain) { return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=128'; }
-  var VENUE_ICON = {
-    'Climate Pledge Arena': favicon('climatepledgearena.com'),
-    'Seattle Center': 'https://www.seattlecenter.com/Dev/Logos/logobug.png',
-    'Cornish Playhouse': favicon('www.cornish.edu'),
-    'The Vera Project': favicon('theveraproject.org'),
-    'SIFF Cinema Uptown': 'https://www.siff.net/images/SIFF_favicon_03.png',
-    'On the Boards': favicon('ontheboards.org'),
-    'Seattle Rep': favicon('www.seattlerep.org'),
-    'T-Mobile Park': favicon('www.mlb.com'),
-    'Lumen Field': favicon('www.lumenfield.com'),
-    'Husky Stadium': favicon('gohuskies.com'),
-    'Capitol Hill Block Party': favicon('www.capitolhillblockparty.com'), // the festivals (2026-10-05): each its own venue, named for itself
-    'Bumbershoot': favicon('bumbershoot.com'),
-    'Northwest Folklife': favicon('nwfolklife.org'),
-    'PrideFest': favicon('www.seattlepridefest.org'),
-    'Paramount Theatre': favicon('www.stgpresents.org'), // Around Town's music rooms (2026-10-05): the Paramount is STG's, the Showboxes share a site
-    'Showbox at the Market': favicon('www.showboxpresents.com'), 'Showbox SoDo': favicon('www.showboxpresents.com'),
-    'The Crocodile': favicon('www.thecrocodile.com'),
-    // local bars: the bar's logo reduced to line art (scripts/make-mark.py),
-    // shown on its agenda rows like a team crest — a path under site/
-    'The Traveling Goat': 'marks/traveling-goat.png',
-  };
-  // Venue hues for dark backgrounds — the same values the calendar's
-  // styles.css dark block sets as --v-* variables; keep the two in step.
-  var VENUE_COLOR = {
-    'Cornish Playhouse': '#3ecf97', 'Climate Pledge Arena': '#4da3f0', 'T-Mobile Park': '#8ad8e0',
-    'Seattle Center': '#6a72e6', 'Lumen Field': '#8b8fe8', 'SIFF Cinema Uptown': '#b596e0',
-    'The Vera Project': '#a26be6', 'On the Boards': '#e07ae0', 'McCaw Hall': '#d158a7',
-    'Convention Center': '#7fa7cc', 'Husky Stadium': '#c4a0f0',
-    "Children's Theatre": '#6cc9db', 'MoPOP': '#e88ad8', 'Pacific Science Center': '#62b8f7', 'KEXP': '#b48cf5',
-    'Seattle Rep': '#f0827a',
-    'The Traveling Goat': '#5fb3a1', // bars: a muted sea-green, off the fallback hash's neon
-    'Capitol Hill Block Party': '#a6b85a', // the festivals (2026-10-05): the Block Party an olive green-gold,
-    'Bumbershoot': '#e8a35a', 'Northwest Folklife': '#8fc26a', 'PrideFest': '#e07bb5', // Bumbershoot amber, Folklife leaf green, PrideFest pink
-    'Paramount Theatre': '#e39a6e', 'Showbox at the Market': '#e8c45a', 'Showbox SoDo': '#aab8d6', 'The Crocodile': '#7ed67f', // the music rooms (2026-10-05): the Paramount's brick sienna, the Market's neon gold, SoDo slate, crocodile green
-  };
+  var VENUE_ICON = venueTable('icon'); // marks for listings without a team crest
+  var VENUE_COLOR = venueTable('color'); // hues for dark backgrounds — the same values styles.css sets as --v-*; keep the two in step
 
-  // How many people each place holds — the one measure of an event's size
-  // the sources agree on (none of them report attendance or sell-outs
-  // except DICE). Round figures: the arena's concert configuration, the
-  // ballpark and stadium's seating, a theatre's house, the Convention
-  // Center's two buildings as a big show fills them, Seattle Center as its
-  // biggest grounds festival.
-  var VENUE_CAPACITY = {
-    'Husky Stadium': 70000, 'Lumen Field': 68700, 'T-Mobile Park': 47900, 'Convention Center': 20000,
-    'Climate Pledge Arena': 18100, 'Seattle Center': 10000, 'McCaw Hall': 2900, 'Seattle Rep': 850,
-    'MoPOP': 800, "Children's Theatre": 480, 'Cornish Playhouse': 460, 'SIFF Cinema Uptown': 450,
-    'Pacific Science Center': 400, 'The Vera Project': 300, 'On the Boards': 300, 'KEXP': 200,
-    'Starfire Stadium': 4500, // the Seawolves' ground in Tukwila
-    'Capitol Hill Block Party': 30000, // the festivals: a day's crowd, not a room
-    'Bumbershoot': 25000, 'Northwest Folklife': 50000, 'PrideFest': 50000,
-    'Paramount Theatre': 2800, 'Showbox SoDo': 1800, 'Showbox at the Market': 1150, 'The Crocodile': 750, // the music rooms around town: seats at the Paramount, standing floors at the rest
-  };
+  var VENUE_CAPACITY = venueTable('capacity'); // how many people each place holds — the one measure of an event's size the sources agree on
 
   // Ticket state from the feed's `tickets` and `soldOut`: 'soldout' (the box
   // office has nothing left), 'nearly' (what's left is 5% of the house or
@@ -166,18 +85,12 @@
     return 'room';
   }
 
-  // The campus venues walk a crowd past Lower Queen Anne; these are a bus
-  // ride away — the stadiums and the Convention Center listed for their
-  // size, the music rooms downtown, in SoDo and Belltown for their nights
-  // out (2026-10-05). A venue missing here is campus.
-  var VENUE_AREA = { 'T-Mobile Park': 'town', 'Lumen Field': 'town', 'Convention Center': 'town', 'Starfire Stadium': 'town', 'Husky Stadium': 'town', 'Capitol Hill Block Party': 'town',
-    'Paramount Theatre': 'town', 'Showbox at the Market': 'town', 'Showbox SoDo': 'town', 'The Crocodile': 'town' };
-  // The festivals (2026-10-05): each its own venue, its rows together in the
-  // panel's Festivals group whatever its area — the area still says which
-  // presets turn it off (the Block Party is a bus ride away; Bumbershoot,
-  // Folklife and PrideFest are on the campus and show by default). A
-  // festival's days are one series, whatever their titles (the headliners).
-  var VENUE_FESTIVAL = { 'Capitol Hill Block Party': true, 'Bumbershoot': true, 'Northwest Folklife': true, 'PrideFest': true };
+  // 'town' = a bus ride away (the stadiums, the Convention Center, the
+  // music rooms downtown); a venue missing here is campus. A festival's
+  // rows sit together in the panel's Festivals group whatever its area,
+  // and its days are one series.
+  var VENUE_AREA = venueTable('area');
+  var VENUE_FESTIVAL = venueTable('festival');
 
   function slugify(s) {
     return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -216,40 +129,15 @@
   }
 
   // Compact filter code <-> filter state, for share links (?f=CODE).
-  // REGISTRY is every filterable key in a fixed order; the code is the set of
-  // EXCLUDED (X) entries as a bitmask written in upper-case base 36,
-  // zero-padded to CODE_LENGTH characters ("000000" means everything shown);
-  // parsing accepts either case. Since the three-state panel (2026-09-22) a
-  // view with checked entries writes a second mask after a dot — "EX.IN" —
-  // and a code without the dot is the old kind, X's only. Append-only:
-  // adding an entry adds a bit and every existing code keeps meaning what it
-  // meant. Nine base-36 digits hold 46 bits, so the registry can grow to 46
-  // entries before CODE_LENGTH needs a bump (old, shorter codes still parse —
-  // 6 → 7 on 2026-09-20 for Starfire and the Seawolves, 7 → 8 on 2026-09-22
-  // for the capacity bands, 8 → 9 on 2026-10-05 when the music rooms around
-  // town took the registry past 41).
-  // A venue the feed turns up that isn't listed here can't be encoded and
-  // drops out of the link.
-  var CODE_LENGTH = 9;
-  var REGISTRY = [
-    ['venue', 'Climate Pledge Arena'], ['venue', 'McCaw Hall'], ['venue', 'Seattle Center'],
-    ['venue', 'Cornish Playhouse'], ['venue', 'The Vera Project'], ['venue', 'SIFF Cinema Uptown'],
-    ['venue', 'On the Boards'], ['venue', 'T-Mobile Park'], ['venue', 'Lumen Field'],
-    ['badge', 'concert'], ['badge', 'sports'], ['badge', 'arts'], ['badge', 'movie'], ['badge', 'community'],
-    ['team', 'mariners'], ['team', 'storm'], ['team', 'seahawks'], ['team', 'reign'],
-    ['team', 'sounders'], ['team', 'kraken'], ['team', 'torrent'],
-    // appended later (the registry is append-only so old share links keep working)
-    ['badge', 'expo'], ['venue', 'Convention Center'],
-    ['venue', "Children's Theatre"], ['venue', 'MoPOP'], ['venue', 'Pacific Science Center'], ['venue', 'KEXP'],
-    ['badge', 'bar'],
-    ['venue', 'Husky Stadium'], ['team', 'huskies'],
-    ['venue', 'Seattle Rep'],
-    ['venue', 'Starfire Stadium'], ['team', 'seawolves'],
-    ['cap', 'stadium'], ['cap', 'arena'], ['cap', 'hall'], ['cap', 'room'],
-    ['venue', 'Capitol Hill Block Party'], // 2026-10-05, the Block Party (named 'Capitol Hill' for a few hours, never deployed)
-    ['venue', 'Bumbershoot'], ['venue', 'Northwest Folklife'], ['venue', 'PrideFest'], // 2026-10-05, the Festivals group
-    ['venue', 'Paramount Theatre'], ['venue', 'Showbox at the Market'], ['venue', 'Showbox SoDo'], ['venue', 'The Crocodile'], // 2026-10-05, Around Town's music rooms
-  ];
+  // REGISTRY (city.js) is every filterable key in a fixed, append-only
+  // order; the code is the set of EXCLUDED (X) entries as a bitmask
+  // written in upper-case base 36, zero-padded to CODE_LENGTH characters
+  // ("000000" means everything shown); parsing accepts either case. Since
+  // the three-state panel (2026-09-22) a view with checked entries writes
+  // a second mask after a dot — "EX.IN" — and a code without the dot is
+  // the old kind, X's only. Old, shorter codes still parse.
+  var CODE_LENGTH = CITY.codeLength;
+  var REGISTRY = CITY.registry;
   var GROUP_MAP = { venue: 'venueMode', badge: 'badgeMode', team: 'teamMode', cap: 'capMode' };
   function maskOf(mode, which) {
     var mask = 0;

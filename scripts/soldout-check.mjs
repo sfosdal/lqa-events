@@ -33,19 +33,19 @@ import os from 'node:os';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { readTicketWeb, ticketWebId } from './ticketweb.mjs';
+import { CITY } from './badges.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'scripts', 'data', 'soldout.json'); // committed — the build (fetch-events.mjs) stamps it onto the feed
-const VENUES = [ // Discovery venue ids, as in fetch-events.mjs
-  { id: 'KovZ917Ahkk', label: 'Climate Pledge Arena' },
-  { id: 'KovZpZAEevAA', label: 'T-Mobile Park' },
-  { id: 'KovZpZAEknnA', label: 'Lumen Field' },
-  { id: 'KovZpZAFkvEA', label: 'Paramount Theatre' }, // Around Town's one Ticketmaster room (Steve, 2026-10-05: "add paramount"); the Showboxes are AXS (no key, no readable page — left alone, Steve 2026-10-05)
-];
-const TICKETWEB = [ // Discovery lists these too, with ticketweb.com links; read with a plain fetch, keyed TW<id> (Steve, 2026-10-06: "for croc, yeah")
-  { id: 'KovZpZA1vFtA', match: 'crocodile', label: 'The Crocodile' }, // Madame Lou's and Here-After list under the same id — the venue name tells them apart
-];
-const UA = 'Mozilla/5.0 (compatible; lqa-events/1.0; +https://lqa.here.events/)';
+// The venues checked (city.js): soldOut 'tm' = Ticketmaster event pages
+// read in Chrome; 'ticketweb' = Discovery lists the room with
+// ticketweb.com links, read with a plain fetch, keyed TW<id> (the
+// Crocodile — Steve, 2026-10-06: "for croc, yeah"; the Showboxes are AXS,
+// no key and no readable page, left alone).
+const tmVenues = (kind) => Object.entries(CITY.venues).filter(([, v]) => v.tm && v.soldOut === kind).map(([label, v]) => ({ id: v.tm.id, match: v.tm.match, label }));
+const VENUES = tmVenues('tm');
+const TICKETWEB = tmVenues('ticketweb');
+const UA = CITY.userAgent;
 const SKIP = /parking|parkwhiz|arena tours?|all access pass|stadium tour|ballpark tour|theatre tours?|notification list|flex membership/i;
 // the home teams' AWAY games too (Steve, 2026-09-16): the host club's Ticketmaster
 // listing, found by the club's name within the window; only a primary listing
@@ -54,7 +54,7 @@ const SKIP = /parking|parkwhiz|arena tours?|all access pass|stadium tour|ballpar
 // show nothing rather than a false sold-out). Matched to teams.json by club,
 // date and opponent; the build stamps the counts onto the schedule.
 const AWAY_DAYS = 45;
-const CLUBS = { seahawks: 'Seattle Seahawks', mariners: 'Seattle Mariners', kraken: 'Seattle Kraken', storm: 'Seattle Storm', reign: 'Seattle Reign', sounders: 'Seattle Sounders', torrent: 'Seattle Torrent', seawolves: 'Seattle Seawolves', huskies: 'Washington Huskies' };
+const CLUBS = Object.fromEntries(CITY.teams.filter((t) => t.club).map((t) => [t.slug, t.club]));
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PROFILE = path.join(os.homedir(), 'Library', 'Application Support', 'lqa-events-soldout'); // its own profile: never the everyday one
 const PORT = 9333;

@@ -8,7 +8,8 @@
 // runs it as its own job every six hours: a red run and GitHub's mail
 // within six hours of the next change, without blocking the publish.
 //   node scripts/espn-canary.mjs
-import '../site/filter.js'; // attaches LQAFilter to globalThis outside a browser
+import '../site/city.js'; // the city, then the rules — both attach to globalThis outside a browser
+import '../site/filter.js';
 
 const TRIES = 2, PAUSE_MS = 30000;
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }).replace(/-/g, '');

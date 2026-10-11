@@ -8,6 +8,8 @@
  * accumulating duplicates when the feed refreshes.
  */
 import { createHash } from 'node:crypto';
+import '../site/city.js'; // the calendar's name, PRODID and UID domain are the city's
+const CITY = globalThis.LQACity;
 import { setTimesText } from './settimes.mjs';
 
 const TZID = 'America/Los_Angeles';
@@ -36,7 +38,7 @@ const VTIMEZONE = [
 
 export function eventUid(e) {
   const hash = createHash('sha1').update(`${e.venue}|${e.title}|${e.date}`).digest('hex');
-  return `${hash}@fosdal.net`;
+  return `${hash}@${CITY.ics.uidDomain}`;
 }
 
 export function escapeText(s) {
@@ -121,18 +123,18 @@ function eventLines(e, dtstamp) {
   return lines;
 }
 
-export function buildIcs(events, now = new Date(), { calname = 'Lower Queen Anne Events' } = {}) {
+export function buildIcs(events, now = new Date(), { calname = CITY.ics.name } = {}) {
   const dtstamp =
     `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}` +
     `T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//fosdal.net//lqa-events//EN',
+    `PRODID:${CITY.ics.prodid}`,
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     `X-WR-CALNAME:${escapeText(calname)}`,
-    'X-WR-CALDESC:Upcoming events around Seattle Center — Climate Pledge Arena\\, McCaw Hall\\, Seattle Center',
+    `X-WR-CALDESC:${CITY.ics.desc}`,
     `X-WR-TIMEZONE:${TZID}`,
     'REFRESH-INTERVAL;VALUE=DURATION:PT6H',
     'X-PUBLISHED-TTL:PT6H',

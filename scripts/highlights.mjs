@@ -17,17 +17,9 @@
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128 Safari/537.36';
 const DAYS = 4; // played games this many days back are looked up
 const MAX = 6; // clips kept per game
-export const CHANNELS = { // YouTube channel ids: the club's, then the league's
-  seahawks: ['UCzkFCRiMcOBeef8xcaqipmw', 'UCDVYQ4Zhbm3S2dlz7P1GBDg'], // @Seahawks, @NFL
-  mariners: ['UCWWLs-O8JGYYcNea7AgumAA'], // @mariners (MLB's clips come from statsapi)
-  kraken: ['UCxspiBq2xf5pLjz9_NMjoyw'], // @seattlekraken (the NHL's clips come from api-web)
-  storm: ['UCv4xLXLA_aElluuaTWXN1jA', 'UCO9a_ryN_l7DIDS-VIt-zmw'], // @SeattleStormOfficial, @WNBA
-  sounders: ['UCVhbRUhe_hfmgi-UN1gcQzw', 'UCSZbXT5TLLW_i-5W8FZpFsg'], // @SoundersFC, @MLS
-  reign: ['UCokzki4ovbASTy0MGok5DpQ', 'UCL4xu08EDu0ZFZsBJUB0chw'], // @reignfc, @nwslsoccer
-  torrent: ['UC3NYPPud40AIuTNrV9uU6Fw', 'UCuocIhnQvPAhk6eOopf0CfA'], // @PWHL__Seattle, @thepwhlofficial
-  seawolves: ['UCPcMc2KfvSO0YGfxzrbzy3w', 'UCIynwDVqRK7KTUy72_kSBhA'], // @seattleseawolvesrugby, @USMLR
-};
-const LABEL = { seahawks: 'Seahawks', mariners: 'Mariners', kraken: 'Kraken', storm: 'Storm', sounders: 'Sounders', reign: 'Reign', torrent: 'Torrent', seawolves: 'Seawolves', huskies: 'Huskies' }; // the Huskies have no channel on file yet: no clips
+import { CITY } from './badges.mjs';
+export const CHANNELS = Object.fromEntries(CITY.teams.filter((t) => t.youtube).map((t) => [t.slug, t.youtube])); // YouTube channel ids: the club's, then the league's
+const LABEL = Object.fromEntries(CITY.teams.map((t) => [t.slug, t.label]));
 const unesc = (s) => String(s || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&#(\d+);/g, (m, n) => String.fromCharCode(n));
 const seattleDay = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
 const addDays = (ymd, n) => { const d = new Date(ymd + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
