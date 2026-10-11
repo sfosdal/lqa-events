@@ -5,7 +5,7 @@ Climate Pledge Arena, McCaw Hall, and the Seattle Center grounds.
 
 Live at **https://lqa.here.events/** (its own domain since 2026-10-05; until then
 `fosdal.net/lqa-events/`, which GitHub Pages cannot redirect) — a GitHub Actions
-cron refreshes the data every ~6 hours and deploys straight to GitHub Pages (no
+cron refreshes the data once a day at noon Pacific and deploys straight to GitHub Pages (no
 data commits).
 
 ## What it publishes
@@ -198,7 +198,7 @@ appear — fine for previewing the UI.
 
 ## The ESPN canary
 
-The live game block talks to ESPN from the browser, and ESPN changes its API without notice (2026-09-18: the scoreboard stopped taking a date range, and every club's block sat on the pregame card through a game in progress). `scripts/espn-canary.mjs` asks ESPN for exactly what the site asks for — today's scoreboard for every league in `site/filter.js`, then one game's summary — and exits 1 when an answer is not the shape the site reads. The workflow runs it as its own `canary` job every six hours, so a change at ESPN turns the run red and mails within six hours without blocking the publish. Run it by hand with `node scripts/espn-canary.mjs`.
+The live game block talks to ESPN from the browser, and ESPN changes its API without notice (2026-09-18: the scoreboard stopped taking a date range, and every club's block sat on the pregame card through a game in progress). `scripts/espn-canary.mjs` asks ESPN for exactly what the site asks for — today's scoreboard for every league in `site/filter.js`, then one game's summary — and exits 1 when an answer is not the shape the site reads. The workflow runs it as its own `canary` job on the daily noon run, so a change at ESPN turns the run red and mails within a day without blocking the publish. Run it by hand with `node scripts/espn-canary.mjs`.
 
 ## Secrets
 

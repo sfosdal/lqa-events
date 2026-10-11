@@ -145,8 +145,8 @@ export function buildIcs(events, now = new Date(), { calname = CITY.ics.name } =
     `X-WR-CALNAME:${escapeText(calname)}`,
     `X-WR-CALDESC:${CITY.ics.desc}`,
     `X-WR-TIMEZONE:${TZID}`,
-    'REFRESH-INTERVAL;VALUE=DURATION:PT6H',
-    'X-PUBLISHED-TTL:PT6H',
+    'REFRESH-INTERVAL;VALUE=DURATION:P1D', // the feed is rebuilt once a day at noon (Steve, 2026-10-11)
+    'X-PUBLISHED-TTL:P1D',
     ...VTIMEZONE,
     ...events.flatMap((e) => eventLines(e, dtstamp)),
     'END:VCALENDAR',
