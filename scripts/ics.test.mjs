@@ -27,7 +27,7 @@ test('calendar skeleton and metadata', () => {
   assert.ok(ics.endsWith('END:VCALENDAR\r\n'));
   assert.match(ics, /VERSION:2\.0/);
   assert.match(ics, /X-WR-CALNAME:/);
-  assert.match(ics, /X-PUBLISHED-TTL:PT6H/);
+  assert.match(ics, /X-PUBLISHED-TTL:P1D/); // the feed is rebuilt daily
   assert.match(ics, /BEGIN:VTIMEZONE/);
   assert.ok(ics.includes(`TZID:${TZ}`), 'VTIMEZONE in the city zone');
 });
