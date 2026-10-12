@@ -22,7 +22,10 @@ import { readFileSync } from 'node:fs';
 const UA = CITY.userAgent;
 const TZ = CITY.tz || 'America/Los_Angeles'; // the city's zone — game clocks are the home city's wall time (named for Seattle; chicago-events made it the city's, 2026-10-11)
 const seattleDate = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: TZ });
+const easternTime = (iso) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: 'America/New_York', hourCycle: 'h23', hour: '2-digit', minute: '2-digit' }); // ESPN's other placeholder for a tip-off not yet set: 23:59 Eastern with timeValid still true (college basketball; Honolulu's 6:59 PM clocks, 2026-10-11)
+const easternDate = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // ESPN files a kickoff it doesn't know yet (timeValid:false) at midnight Eastern: the day is that one, not the city's, which lands the night before west of there (Pullman's Cougars on Nov 27 beside the listing's Nov 28, 2026-10-11)
 const seattleTime = (iso) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: TZ, hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+export const htRegular = (x) => /regular season/i.test(x.name) || /^\d{4}-\d{2}$/.test(String(x.name).trim()); // the USHL names its regular seasons by the years alone ("2026-27"; Green Bay's Gamblers, 2026-10-11)
 // MLB's team-logos/<id>.svg files are the caps' on-dark variants; all keep
 // their colours but the Rockies' (115), whose purple is drawn as black (no
 // fill), so it reads grey on the cards — ESPN's mark stands in for it.
@@ -161,13 +164,14 @@ export function normalizeEspn(d, teamId, keepWeek, forcePre) { // forcePre: the 
     const home = us.homeAway === 'home';
     const o = (c.competitors.find((t) => t !== us) || {}).team || {};
     const detail = c.status?.type?.detail || '';
-    const tbd = c.timeValid === false || /\bTB[AD]\b/i.test(detail);
+    const placeholder = c.timeValid === false || easternTime(e.date) === '23:59'; // ESPN's two ways of saying the clock is not set yet
+    const tbd = placeholder || /\bTB[AD]\b/i.test(detail);
     const them = c.competitors.find((t) => t !== us);
     const score = (t) => { const v = t?.score?.displayValue ?? t?.score?.value ?? t?.score; return v == null || v === '' ? null : Number(v); };
     const final = !!c.status?.type?.completed && score(us) != null && score(them) != null;
     // broadcasts: [{ type: { shortName: 'TV' }, market: { type: 'National' | 'Home' }, media: { shortName } }]
     out.push(withResult(withWatch({
-      date: seattleDate(e.date), time: tbd ? null : seattleTime(e.date), tbd, home,
+      date: placeholder ? easternDate(e.date) : seattleDate(e.date), time: tbd ? null : seattleTime(e.date), tbd, home,
       ...(e.season?.type === 3 ? { playoff: true } : forcePre || e.season?.type === 1 ? { pre: true } : {}),
       ...(keepWeek && e.week?.number != null && e.season?.year ? { week: e.week.number, season: e.season.year } : {}),
       opp: { name: o.displayName, short: o.shortDisplayName || o.displayName, abbrev: o.abbreviation,
@@ -200,7 +204,7 @@ async function espn(sport, league, teamId) {
   // nowhere): the regular season is asked for by name and merged, de-duped
   // by day; the plain call's preseason games stay, flagged pre above
   // (chicago-events, 2026-10-11)
-  if (league === 'nba') {
+  if (/^(nba|mens-college-basketball|womens-college-basketball)$/.test(league)) { // college basketball likewise (Gonzaga's and Marquette's plain calls were empty preseasons, 2026-10-11)
     try {
       const seen = new Set(games.map((g) => g.date));
       for (const g of normalizeEspn(await getJson(base + '?seasontype=2', true), teamId)) if (!seen.has(g.date)) games.push(g);
@@ -278,7 +282,7 @@ async function hockeytechSeasons(base) {
   return (await getJson(`${base}&view=seasons`)).SiteKit.Seasons.map((x) => ({ id: Number(x.season_id), name: x.season_name })).sort((a, b) => b.id - a.id);
 }
 async function hockeytechStandings(base, seasons, teamId) { // the newest regular season with six of the club's games in it, else the one before
-  for (const s of seasons.filter((x) => /regular season/i.test(x.name))) {
+  for (const s of seasons.filter(htRegular)) {
     const rows = (await getJson(`${base}&view=statviewtype&type=standings&stat=conference&season_id=${s.id}`)).SiteKit?.Statviewtype || [];
     const mine = rows.find((x) => String(x.team_id) === String(teamId));
     if (mine && Number(mine.games_played) >= 6) return rows;
@@ -290,7 +294,7 @@ async function hockeytechStandings(base, seasons, teamId) { // the newest regula
 async function hockeytech(league, key, teamId, opts, leagueName) {
   const base = HT(league, key);
   const seasons = await hockeytechSeasons(base);
-  const reg = seasons.find((x) => /regular season/i.test(x.name));
+  const reg = seasons.find(htRegular);
   if (!reg) throw new Error('no regular season listed');
   // the playoffs after it, and the preseason of that season or of the next (the same year in the name, or a newer id)
   const runs = [reg, ...seasons.filter((x) => (/playoffs/i.test(x.name) && x.id > reg.id) || (/pre-?season/i.test(x.name) && (x.id > reg.id || x.name.slice(0, 4) === reg.name.slice(0, 4))))];
@@ -481,7 +485,7 @@ export function pickMoves(transactions, teamId, n = 3) {
     .slice(0, n).map((t) => {
       const club = (t.team?.links || []).find((l) => (l.rel || []).includes('clubhouse') && (l.rel || []).includes('desktop'))?.href || '';
       const url = club.replace('/team/_/', '/team/transactions/_/'); // the feed has no link per move; ESPN's page of the club's transactions is the source
-      return { date: seattleDate(t.date), text: shortMove(t.description), ...(url ? { url } : {}) };
+      return { date: easternDate(t.date), text: shortMove(t.description), ...(url ? { url } : {}) }; // ESPN stamps a move at 07:00Z (the small hours Eastern): the Eastern day is the move's day, the city's would be the night before west of Pacific Daylight Time (Honolulu, 2026-10-11)
     });
 }
 async function espnMoves(sport, league, teamId) {
@@ -572,7 +576,7 @@ export function hockeytechForm(r, league) {
 async function hockeytechFormFetch(league, key, teamId, slug, label) {
   const base = HT(league, key);
   const seasons = await hockeytechSeasons(base);
-  const reg = seasons.find((x) => /regular season/i.test(x.name));
+  const reg = seasons.find(htRegular);
   if (!reg) throw new Error('no regular season listed');
   const rows = (await getJson(`${base}&view=statviewtype&type=standings&stat=conference&season_id=${reg.id}`)).SiteKit?.Statviewtype || [];
   const r = rows.find((x) => String(x.team_id) === String(teamId));

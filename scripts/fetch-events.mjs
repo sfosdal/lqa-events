@@ -24,12 +24,14 @@ const ICS_OUT = new URL('../site/events.ics', import.meta.url);
 // are kept for a year (carried forward from the previously published feed —
 // see mergeWithArchive).
 const WINDOW_DAYS = 365;
-// The live feed is read from the site's own domain (lqa.here.events since the
-// move, 2026-10-05) with the old fosdal.net address as a fallback: whichever
-// answers during the switch keeps the archive union going (a build that reads
-// neither copy of the archive refuses to publish — see mergeWithArchive).
-const FEED_URL = process.env.FEED_URL || 'https://lqa.here.events/events.json';
-const FEED_URL_OLD = 'https://fosdal.net/lqa-events/events.json';
+// The live feed is read from the site's own domain (lqa.seattle.here.events
+// since 2026-10-11 — neighbourhoods sit under their city; lqa.here.events
+// from 2026-10-05 until then, kept alive by the redirect stub) with the
+// previous address as a fallback: whichever answers during the switch keeps
+// the archive union going (a build that reads neither copy of the archive
+// refuses to publish — see mergeWithArchive).
+const FEED_URL = process.env.FEED_URL || 'https://lqa.seattle.here.events/events.json';
+const FEED_URL_OLD = 'https://lqa.here.events/events.json';
 // the second copy of the archive: every past event ever published, kept on
 // the orphan `archive` branch by the workflow after each successful build
 const ARCHIVE_URL = process.env.ARCHIVE_URL || 'https://raw.githubusercontent.com/sfosdal/lqa-events/archive/events-archive.json';
@@ -530,11 +532,15 @@ try { ({ teams: seasons, form } = await applySchedules(merged)); } catch (err) {
 // AquaSox at Funko Field) enter the listing from the league's schedule —
 // typed sports, the club's ticket page as the link — unless the feed
 // already has that day at that ground
-for (const t of TEAMS.filter((x) => x.inject)) {
+// (city.js teams, not badges' TEAMS, which carries only slug/label/re — the
+// loop was a no-op from the modularization until 2026-10-11; the game takes
+// the club's own ground name, the league's spelling rarely matching a venue)
+for (const t of CITY.teams.filter((x) => x.inject)) {
   for (const g of (seasons[t.slug] || []).filter((x) => x.home && x.date >= cutoff)) {
-    const listed = merged.find((e) => e.date === g.date && e.venue === g.venue);
+    const ground = t.inject.venue || t.venue || g.venue;
+    const listed = merged.find((e) => e.date === g.date && (e.venue === ground || e.venue === g.venue));
     if (listed) { if (!listed.time && g.time && !g.tbd) listed.time = g.time; continue; } // the feed's listing stands; the league's first pitch fills a time it lacks
-    merged.push({ venue: g.venue, title: `${t.inject.name || t.name || t.label} vs ${g.opp.name}`, date: g.date, time: g.time, url: t.inject.url, type: 'sports', ...(g.tbd ? { dateTbd: true } : {}), ...(g.watch ? { watch: g.watch } : {}) });
+    merged.push({ venue: ground, title: `${t.inject.name || t.name || t.label} vs ${g.opp.name}`, date: g.date, time: g.time, url: t.inject.url, type: 'sports', ...(g.tbd ? { dateTbd: true } : {}), ...(g.watch ? { watch: g.watch } : {}) });
   }
 }
 // Ticket availability for the Ticketmaster venues, from the local checker

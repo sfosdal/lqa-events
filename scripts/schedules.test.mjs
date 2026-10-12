@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseYoutube, matchYoutube, parseNflPage, titleDate } from './highlights.mjs';
-import { pickMoves, bigMove, shortMove, applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, pwhlOdds, hockeytechForm, normalizeDigitalshift, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
+import { pickMoves, bigMove, shortMove, applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, htRegular, pwhlOdds, hockeytechForm, normalizeDigitalshift, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
 const LQA = globalThis.LQACity.key === 'lqa' ? false : 'Lower Queen Anne data — skipped for another city'; // the city-dependent cases below
 // The fixtures' expected clocks are written in Seattle wall time; a sister
 // city in another zone (city.js `tz`) reads the same instant on its own clock.
@@ -429,4 +429,21 @@ test('pickMoves: only the big moves, newest first, cut to a short line', () => {
   assert.deepEqual(pickMoves(feed, 12, 5).map((m) => m.text)[3], 'Traded Dominic Canzone to Pittsburgh for cash considerations');
   assert.equal(pickMoves(feed, 12, 5).length, 4); // the roster naming, the IL moves and the waiver claim are not news
   assert.deepEqual(pickMoves([], 12), []);
+});
+
+test('ESPN: a kickoff not yet known (timeValid:false) keeps ESPN\'s Eastern day, not the night before in the city\'s zone', () => {
+  const [g] = normalizeEspn({ events: [{ date: '2026-11-28T05:00Z', competitions: [{ venue: { fullName: 'Martin Stadium' }, timeValid: false, status: { type: { detail: 'TBD' } },
+    competitors: [{ team: { id: '265' }, homeAway: 'home' }, { team: { id: '70', displayName: 'Washington Huskies' }, homeAway: 'away' }] }] }] }, '265');
+  assert.equal(g.date, '2026-11-28'); assert.equal(g.time, null); assert.equal(g.tbd, true);
+});
+
+test('htRegular: a HockeyTech season named "Regular Season" or by its years alone is the regular season; playoffs and preseason are not', () => {
+  assert.ok(htRegular({ name: '2026-27 Regular Season' })); assert.ok(htRegular({ name: '2026-27' }));
+  assert.ok(!htRegular({ name: '2026-27 Playoffs' })); assert.ok(!htRegular({ name: '2026 Preseason' }));
+});
+
+test('ESPN: a 23:59 Eastern clock with timeValid still true is a placeholder too — TBD, on ESPN\'s Eastern day', () => {
+  const [g] = normalizeEspn({ events: [{ date: '2026-11-03T04:59Z', competitions: [{ venue: { fullName: 'Stan Sheriff Center' }, timeValid: true, status: { type: { detail: 'Mon, November 2nd at 11:59 PM EST' } },
+    competitors: [{ team: { id: '62' }, homeAway: 'home' }, { team: { id: '2567', displayName: 'Seattle U Redhawks' }, homeAway: 'away' }] }] }] }, '62');
+  assert.equal(g.date, '2026-11-02'); assert.equal(g.time, null); assert.equal(g.tbd, true);
 });
