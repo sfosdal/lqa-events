@@ -87,8 +87,37 @@
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
   function todayStr() { return ymd(new Date()); }
-  function fmtTime(t) {
+  // Clocks are the city's wall time (city.js tz). A viewer whose own zone
+  // keeps a different clock on that day sees the time on theirs, with the
+  // zone's short name after the AM/PM ("5:00 PM PDT" for a 7:00 PM Chicago
+  // show read from Seattle; Steve, 2026-10-11: "times for all event listings
+  // should be in timezone of the viewer … if event tz is diff from viewer
+  // tz"). Zones are compared by their offset on the day, not by name, so a
+  // viewer in Vancouver reads Seattle's clocks untouched. Day shifts across
+  // midnight keep the city's day in the list; only the clock moves.
+  var CITY_TZ = CITY.tz || 'America/Los_Angeles';
+  var VIEWER_TZ = (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } })();
+  var zoneSame = {}; // by date: does the viewer's zone keep the city's clock that day
+  function wallOffset(zone, ms) { // minutes the zone's wall clock is ahead of UTC at that instant
+    var p = {};
+    new Intl.DateTimeFormat('en-US', { timeZone: zone, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' }).formatToParts(new Date(ms)).forEach(function (x) { p[x.type] = x.value; });
+    return Math.round((Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute) - ms) / 60000);
+  }
+  function viewerClock(date, t) { // the viewer's "5:00 PM PDT" for the city's date + time, or '' when their clock is the city's
+    if (!VIEWER_TZ || VIEWER_TZ === CITY_TZ || !date || !/^\d\d?:\d\d/.test(t)) return '';
+    try {
+      var ymd = date.split('-'), hm = t.split(':');
+      var guess = Date.UTC(+ymd[0], +ymd[1] - 1, +ymd[2], +hm[0], +hm[1]);
+      var ms = guess - wallOffset(CITY_TZ, guess) * 60000; // the city's wall time as an instant
+      if (zoneSame[date] === undefined) zoneSame[date] = wallOffset(VIEWER_TZ, ms) === wallOffset(CITY_TZ, ms);
+      if (zoneSame[date]) return '';
+      return new Date(ms).toLocaleTimeString('en-US', { timeZone: VIEWER_TZ, hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).replace(/\u202f/g, ' ');
+    } catch (e) { return ''; }
+  }
+  function fmtTime(t, date) { // date: the city's day the time belongs to, for the viewer's-zone clock
     if (!t) return 'all day';
+    var v = viewerClock(date, t);
+    if (v) return v;
     var hm = t.split(':');
     var h = Number(hm[0]), m = hm[1] || '00';
     var ap = h >= 12 ? 'PM' : 'AM';
@@ -815,8 +844,8 @@
     b.className = 'mb-ev' + (e.status ? ' is-off' : '');
     b.style.setProperty('--dot', venueColor(e.venue));
     b.textContent = boardTitle(e.title);
-    if (full) { var sub = document.createElement('span'); sub.className = 'mb-sub'; sub.textContent = fmtTime(e.time) + ' · ' + e.venue + (e.status ? ' · ' + e.status : ''); b.appendChild(sub); }
-    else b.title = fmtTime(e.time) + ' · ' + e.venue + (e.status ? ' (' + e.status + ')' : '');
+    if (full) { var sub = document.createElement('span'); sub.className = 'mb-sub'; sub.textContent = fmtTime(e.time, e.date) + ' · ' + e.venue + (e.status ? ' · ' + e.status : ''); b.appendChild(sub); }
+    else b.title = fmtTime(e.time, e.date) + ' · ' + e.venue + (e.status ? ' (' + e.status + ')' : '');
     b.addEventListener('click', cardTap(e), true);
     return b;
   }
@@ -1286,7 +1315,7 @@
       if (g.home) row.style.background = 'color-mix(in srgb, ' + venueColor(tm.venue) + ' var(--tint), transparent)';
       var time = document.createElement('span'); time.className = 'time';
       if (g.tbd || !g.time) time.textContent = 'TBD';
-      else clockCell(time, fmtTime(g.time));
+      else clockCell(time, fmtTime(g.time, g.date));
       row.appendChild(time);
       var body = document.createElement('div'); body.className = 'ev-body';
       var where = document.createElement('span'); where.className = 'venue' + (g.home ? '' : ' is-away');
@@ -1650,7 +1679,7 @@
     var played = games.filter(function (g) { return g.date < today && g.res && !g.pre; }); // the record and the last five: the season proper, not the preseason
     var upcoming = games.filter(function (g) { return g.date >= today; });
     var last = games[games.length - 1], next = upcoming[0] || null;
-    var daysOver = upcoming.length ? 0 : Math.round((parseDate(today) - parseDate(last.date)) / 864e5);
+    var daysOver = upcoming.length ? 0 : last ? Math.round((parseDate(today) - parseDate(last.date)) / 864e5) : 9999; // no games at all (a club whose feed is empty before its season): the off-season block
     var stage = !played.length && upcoming.length ? 'pre' : upcoming.length ? 'in' : daysOver <= 60 ? 'over' : 'off';
     var record = played.length ? (form.record && !/^0-0(-0)?$/.test(form.record) ? form.record : recordFrom(played)) : null;
     var standing = (form.standing || '').replace(/ Conference Division$/, ' Conference');
@@ -1691,7 +1720,7 @@
     var hl = document.createElement('a'); hl.textContent = team.venue; hl.target = '_blank'; hl.rel = 'noopener'; hl.title = 'On Google Maps';
     hl.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(team.venue + (clubCity(team) ? ', ' + clubCity(team) : '')); home.appendChild(hl); // the ground's own city, from the league (Tukwila for the Seawolves)
     function line(cls, html) { var p = document.createElement('p'); p.className = cls; p.innerHTML = html; lead.appendChild(p); return p; }
-    if (next) line('tf-next', '<b>' + (stage === 'pre' ? (next.pre ? 'Preseason' : 'Opens') : 'Next') + '</b> ' + esc(gameLine(next)) + (next.time && !next.tbd ? ', ' + esc(fmtTime(next.time)) : '')); // before the season: the next game, named for what it is (a preseason game, or the opener)
+    if (next) line('tf-next', '<b>' + (stage === 'pre' ? (next.pre ? 'Preseason' : 'Opens') : 'Next') + '</b> ' + esc(gameLine(next)) + (next.time && !next.tbd ? ', ' + esc(fmtTime(next.time, next.date)) : '')); // before the season: the next game, named for what it is (a preseason game, or the opener)
     if (next && team.espn) { // the series so far, under the next game's line, once it has come (fetchNextOdds redraws the block quietly when the odds and the series land)
       if (od && od.date === next.date && seriesText(od.series)) line('tf-series', '<b>Series</b> ' + esc(seriesText(od.series)));
       fetchNextOdds(team, next);
@@ -2889,7 +2918,7 @@
     var mu = live.matchup[team.slug]; mu = mu && mu.id === ev.id ? mu.data : null;
     if (final) { // the next game, after the final
       var upcoming = (teamGames(team.slug) || []).filter(function (g) { return g.date > gameDay; })[0];
-      if (upcoming) line('', 'tf-next').innerHTML = '<b>Next</b> ' + esc(gameLine(upcoming)) + (upcoming.time && !upcoming.tbd ? ', ' + esc(fmtTime(upcoming.time)) : '');
+      if (upcoming) line('', 'tf-next').innerHTML = '<b>Next</b> ' + esc(gameLine(upcoming)) + (upcoming.time && !upcoming.tbd ? ', ' + esc(fmtTime(upcoming.time, upcoming.date)) : '');
     }
     if (mu && seriesText(mu.series)) line('', 'tf-series').innerHTML = '<b>Series</b> ' + esc(seriesText(mu.series)); // the season series, and how the last meeting went
     if (pre) formLines(team, (teamGames(team.slug) || []).filter(function (g) { return g.date < todayStr() && g.res && !g.pre; })).forEach(function (f) { line('', f.cls).innerHTML = f.html; }); // before the game: the streak and the scoring, with the next game and the series
@@ -3056,7 +3085,7 @@
           var g = gs[0];
           cell.type = 'button'; cell.dataset.date = key;
           cell.className += (g.home ? ' is-home' : ' is-away') + (g.pre ? ' is-pre' : '');
-          cell.title = gs.map(function (x) { return (x.home ? 'vs ' : 'at ') + x.opp.name + ', ' + (x.tbd || !x.time ? 'time TBD' : fmtTime(x.time)); }).join(' · ');
+          cell.title = gs.map(function (x) { return (x.home ? 'vs ' : 'at ') + x.opp.name + ', ' + (x.tbd || !x.time ? 'time TBD' : fmtTime(x.time, x.date)); }).join(' · ');
           var ab = document.createElement('span'); ab.className = 'abbr'; ab.textContent = g.opp.abbrev || (g.opp.short || g.opp.name).slice(0, 3).toUpperCase(); cell.appendChild(ab);
           var tm = document.createElement('span'); tm.className = 'gtime'; var tt = gs.length > 1 ? '×' + gs.length : teamCalTime(g); tm.textContent = tt.replace(/a$/, ''); cell.appendChild(tm);
           if (/a$/.test(tt)) { var am = document.createElement('i'); am.textContent = 'a'; tm.appendChild(am); } // the morning marker: on screen only — the printed cell has no room beside the day number, and the posters print bare times
@@ -3249,10 +3278,10 @@
   // centred on the row — the events list and the Teams view alike. Fills the
   // given span; an all-day or TBD cell is left to the caller.
   function clockCell(time, clock) {
-    var parts = clock.split(' '); // "7:00 PM"
+    var parts = clock.split(' '); // "7:00 PM", or "5:00 PM PDT" on a viewer's clock
     time.classList.add('t-clock');
     var big = document.createElement('b'); big.className = 't-big'; big.textContent = parts[0];
-    var tf = document.createElement('span'); tf.className = 't-foot'; tf.textContent = parts[1] || '';
+    var tf = document.createElement('span'); tf.className = 't-foot'; tf.textContent = parts.slice(1).join(' '); if (parts[2]) tf.classList.add('t-zone');
     time.appendChild(big); time.appendChild(tf);
   }
   // a sold-out or nearly-sold-out card: the red frame, and a small tab out of
@@ -3302,11 +3331,11 @@
   function openSheet(e, anchor, point) {
     $('sheetVenue').textContent = e.venue;
     $('sheetTitle').textContent = e.title;
-    var when = parseDate(e.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' · ' + fmtTime(e.time);
+    var when = parseDate(e.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' · ' + fmtTime(e.time, e.date);
     if (e.series) when += ' · ' + e.series.n + ' of ' + e.series.total;
     if (e.status) when += ' · ' + e.status.toUpperCase() + (e.statusSince ? ' (noticed ' + fmtSince(e.statusSince) + ')' : '');
     if (e.dateTbd) when += ' · date TBD';
-    $('sheetWhen').textContent = when + (e.stage ? ' \u00b7 ' + e.stage + (e.end ? ', until ' + fmtTime(e.end) : ', to close') : ''); // one set of a festival day: its stage and end
+    $('sheetWhen').textContent = when + (e.stage ? ' \u00b7 ' + e.stage + (e.end ? ', until ' + fmtTime(e.end, e.date) : ', to close') : ''); // one set of a festival day: its stage and end
     var tix = ticketsLine(e);
     var st = $('sheetTix'); st.hidden = !tix;
     st.textContent = tix ? tix + (e.tickets && e.tickets.checked ? ' \u00b7 checked ' + fmtSince(e.tickets.checked) : '') : '';
@@ -3776,7 +3805,7 @@
         row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' var(--tint), transparent)';
         var time = document.createElement('span');
         time.className = 'time';
-        if (e.time) clockCell(time, fmtTime(e.time)); else time.textContent = fmtTime(e.time); // "all day" stays a word
+        if (e.time) clockCell(time, fmtTime(e.time, e.date)); else time.textContent = fmtTime(e.time); // "all day" stays a word
         var sn = null;
         if (e.series) {
           // "2 of 4" after the title (Steve, 2026-09-15 — it sat under the time); the gutter graph picks the row up by id
@@ -3818,7 +3847,7 @@
         // a festival day with its set times: a line saying how much is on (the sets follow as rows of their own; the day card has
         // the grid); one of its sets: the stage and when it ends (Steve, 2026-10-05: the grid on the day's row "look[ed] bad")
         if (Array.isArray(e.sets) && e.sets.length) { var ns = 0; e.sets.forEach(function (st) { ns += st.acts.length; }); var sl = document.createElement('span'); sl.className = 'ev-stage'; sl.textContent = e.sets.length + ' stages \u00b7 ' + ns + ' sets, each listed below'; body.appendChild(sl); }
-        else if (e.stage) { var sg = document.createElement('span'); sg.className = 'ev-stage'; sg.textContent = e.stage + (e.end ? ' \u00b7 until ' + fmtTime(e.end) : ' \u00b7 to close'); body.appendChild(sg); }
+        else if (e.stage) { var sg = document.createElement('span'); sg.className = 'ev-stage'; sg.textContent = e.stage + (e.end ? ' \u00b7 until ' + fmtTime(e.end, e.date) : ' \u00b7 to close'); body.appendChild(sg); }
         // a show that's off: struck through, with a third line saying so
         // (and when we noticed, if the feed knows)
         if (e.status) {

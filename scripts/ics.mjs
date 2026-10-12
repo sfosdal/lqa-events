@@ -17,15 +17,19 @@ const DEFAULT_DURATION_H = 3;
 
 // Rolling tz definition so clients that ignore IANA names still get the
 // zone's standard/daylight names: the US zones, which all change on the
-// second Sunday of March and the first of November.
+// second Sunday of March and the first of November — bar Hawaii (and
+// Arizona), which keep standard time all year (honolulu-events, 2026-10-11).
 const US_ZONES = {
   'America/Los_Angeles': ['-0800', '-0700', 'PST', 'PDT'],
   'America/Denver': ['-0700', '-0600', 'MST', 'MDT'],
+  'America/Phoenix': ['-0700', null, 'MST', null],
   'America/Chicago': ['-0600', '-0500', 'CST', 'CDT'],
   'America/New_York': ['-0500', '-0400', 'EST', 'EDT'],
+  'America/Anchorage': ['-0900', '-0800', 'AKST', 'AKDT'],
+  'Pacific/Honolulu': ['-1000', null, 'HST', null],
 };
 const [STD_OFF, DST_OFF, STD_NAME, DST_NAME] = US_ZONES[TZID] || US_ZONES['America/Los_Angeles'];
-const VTIMEZONE = [
+const VTIMEZONE = DST_OFF ? [
   'BEGIN:VTIMEZONE',
   `TZID:${TZID}`,
   'BEGIN:DAYLIGHT',
@@ -41,6 +45,16 @@ const VTIMEZONE = [
   `TZNAME:${STD_NAME}`,
   'DTSTART:19701101T020000',
   'RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU',
+  'END:STANDARD',
+  'END:VTIMEZONE',
+] : [ // a zone without daylight time: one standard block, no rule
+  'BEGIN:VTIMEZONE',
+  `TZID:${TZID}`,
+  'BEGIN:STANDARD',
+  `TZOFFSETFROM:${STD_OFF}`,
+  `TZOFFSETTO:${STD_OFF}`,
+  `TZNAME:${STD_NAME}`,
+  'DTSTART:19700101T000000',
   'END:STANDARD',
   'END:VTIMEZONE',
 ];
