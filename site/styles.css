@@ -1,12 +1,12 @@
 /* Lower Queen Anne Events — overcast-sky palette, marquee display type. */
 
 :root {
-  --sky: #edf1f4;        /* overcast paper */
-  --mist: #ffffff;       /* card surface */
+  --sky: #e4e9ed;        /* overcast paper (a step down from #edf1f4, Steve 2026-10-12: "a little less glaring") */
+  --mist: #f7f9fb;       /* card surface (was pure white) */
   --ink: #1b2733;        /* Puget ink */
   --ink-soft: #55636f;
   --ink-bright: #1b2733; /* the logo: pure white in the dark palette, ink here */
-  --line: #c9d2da;
+  --line: #c3ccd4;
   --gold: #e8791d;       /* Space Needle "Galaxy Gold" */
   --gold-soft: #fbe9d8;
   /* Color coding is muted (a step back from the pure primaries) and each
@@ -50,6 +50,10 @@
   --titleh: 1.7rem;      /* the bar's title line (1.2rem + .5rem gap), added while scrolled */
   --barh: var(--barh-base); /* what the sticky things below the bar offset by */
   --rule: color-mix(in srgb, var(--line), var(--ink-soft)); /* list dividers: a step brighter than --line */
+  /* the scorebug (the live game block, .tf-bug): a light panel in this theme, the broadcast's charcoal in the dark one (Steve, 2026-10-12: the charcoal panel on the light card looked bad) */
+  --bug-bg: #f9fafb; --bug-frame: #aab4be; --bug-ink: #1b2733; --bug-soft: #55636f; --bug-dim: #7c8894; --bug-rowline: #c9d2da; --bug-off: #b3bcc5; --bug-muted: #6b7784; --bug-score-bg: #ffffff; --bug-shadow: rgba(15, 25, 35, .14); --bug-redzone: #c8261f;
+  --tick-mix: var(--ink); --tick-pct: 65%; /* the refresh countdown ring: the club's colour mixed toward ink here, toward white on the dark ground (the mix itself is written in the .tf-refresh rule: a token holding var(--team-2) would resolve here on :root, where no club colour exists, and come out empty) */
+  --dot: color-mix(in srgb, var(--ink-soft) 40%, transparent); /* the dotted underline under the watch strip's links */
   --display: "Big Shoulders", "Arial Narrow", sans-serif;
   --body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -71,6 +75,9 @@
     --venue-text: 100%; --tint: 13%;
     --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
     --t-movie: #8b9db0; --t-community: #e660a8; --t-expo: #4fd1c5; --t-bar: #e3ad3c; --alert: #ff4b3e;
+    --bug-bg: #2b2d30; --bug-frame: #c9cdd2; --bug-ink: #f4f4f4; --bug-soft: #d5d8dc; --bug-dim: #b9bec4; --bug-rowline: #5c6167; --bug-off: #6a6d72; --bug-muted: #4a4f56; --bug-score-bg: #fafafa; --bug-shadow: rgba(0, 0, 0, .35); --bug-redzone: #ff7b7b;
+    --tick-mix: white; --tick-pct: 45%;
+    --dot: color-mix(in srgb, var(--ink-soft) 60%, transparent);
   }
 }
 :root[data-theme="dark"] {
@@ -84,6 +91,9 @@
   --venue-text: 100%; --tint: 13%;
   --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
   --t-movie: #8b9db0; --t-community: #e660a8; --t-expo: #4fd1c5; --t-bar: #e3ad3c; --alert: #ff4b3e;
+  --bug-bg: #2b2d30; --bug-frame: #c9cdd2; --bug-ink: #f4f4f4; --bug-soft: #d5d8dc; --bug-dim: #b9bec4; --bug-rowline: #5c6167; --bug-off: #6a6d72; --bug-muted: #4a4f56; --bug-score-bg: #fafafa; --bug-shadow: rgba(0, 0, 0, .35); --bug-redzone: #ff7b7b;
+  --tick-mix: white; --tick-pct: 45%;
+  --dot: color-mix(in srgb, var(--ink-soft) 60%, transparent);
 }
 :root[data-theme="light"] { color-scheme: light; }
 
@@ -1153,7 +1163,7 @@ html { overflow-anchor: none; }
 .is-season .tf-head { display: none; } /* the record is in the bug (or, with the odds up, on a line beside); the head serves the compact bar */
 .tf-lead .tf-season .tf-run { margin-left: .15rem; } .tf-lead .tf-season .tf-run i { font-size: .6rem; line-height: 1.25rem; width: 1.25rem; } /* the last five, small, at the end of the season line */
 #teamHead.is-compact .is-season .tf-head { display: flex; }
-.bug-team-soft { background: #4a4f56; font-size: .8rem; letter-spacing: .1em; }
+.bug-team-soft { background: var(--bug-muted); font-size: .8rem; letter-spacing: .1em; }
 .bug-team i { font-style: normal; }
 .bug-team .bug-nick { display: none; }
 #teamHead.is-compact .bug-team .bug-abbr { display: none; }
@@ -1165,7 +1175,7 @@ html { overflow-anchor: none; }
 .is-pregame .bug-grid.no-ev > :nth-child(3) { grid-area: 2 / 1; } .is-pregame .bug-grid.no-ev > :nth-child(4) { grid-area: 2 / 2; } /* no odds yet, no ring: four cells, two rows */
 .is-pregame .bug-grid.no-ev > :nth-child(3), .is-pregame .bug-grid.no-ev > :nth-child(4) { border-bottom: 0; }
 .bug-grid.bug-grid-2.has-ring > .bug-ring { grid-area: 1 / 3 / 3 / 4; } /* both rows (outranks the per-cell pinning below, which puts the third cell in row 1) */
-.bug-ring { display: flex; align-items: center; justify-content: center; gap: .55rem; padding: .15rem .8rem; border-left: 2px solid #c9cdd2; }
+.bug-ring { display: flex; align-items: center; justify-content: center; gap: .55rem; padding: .15rem .8rem; border-left: 2px solid var(--bug-frame); }
 .bug-ring svg { width: 3.1rem; height: 3.1rem; flex: none; }
 /* squeezed (app.js fitBug: the grid runs wider than the frame): the ring's label goes, then the desktop's zoom */
 .tf-bug.is-tight, .tf-bug.is-tight:not(.is-generic) { zoom: 1; }
@@ -1239,7 +1249,7 @@ html { overflow-anchor: none; }
 .tf-watch { position: relative; }
 @property --tick { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 .tf-refresh { position: relative; isolation: isolate; }
-.tf-refresh::before { content: ""; position: absolute; inset: -1.5px; border-radius: 50%; z-index: 1; pointer-events: none; background: conic-gradient(color-mix(in srgb, var(--team-2) 45%, white) var(--tick), transparent 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); } /* a bright 2.5px ring over the button's border, covering it as it goes round */
+.tf-refresh::before { content: ""; position: absolute; inset: -1.5px; border-radius: 50%; z-index: 1; pointer-events: none; background: conic-gradient(color-mix(in srgb, var(--team-2) var(--tick-pct, 45%), var(--tick-mix, white)) var(--tick), transparent 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); } /* a bright 2.5px ring over the button's border, covering it as it goes round */
 .tf-refresh-wrap.is-ticking .tf-refresh::before { animation: tf-tick 30s linear forwards; animation-delay: var(--tick-delay, 0ms); }
 @keyframes tf-tick { from { --tick: 0deg; } to { --tick: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .tf-refresh-wrap.is-ticking .tf-refresh::before { animation: none; --tick: 360deg; opacity: .35; } }
@@ -1283,7 +1293,7 @@ html { overflow-anchor: none; }
 .bug-grid.bug-grid-2 > :nth-child(3) { grid-area: 1 / 3; } .bug-grid.bug-grid-2 > :nth-child(6) { grid-area: 2 / 3; }
 .bug-grid.bug-grid-2 > :nth-child(4) { grid-area: 2 / 1; } .bug-grid.bug-grid-2 > :nth-child(5) { grid-area: 2 / 2; }
 .bug-grid.bug-grid-2 > :nth-child(4), .bug-grid.bug-grid-2 > :nth-child(5), .bug-grid.bug-grid-2 > :nth-child(6) { border-bottom: 0; }
-.bug-ev { display: block; min-width: 0; padding: 0 .7rem; line-height: 1.95rem; border-left: 2px solid #c9cdd2; border-bottom: 2px solid #5c6167; font-size: .72rem; color: #d5d8dc; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bug-ev { display: block; min-width: 0; padding: 0 .7rem; line-height: 1.95rem; border-left: 2px solid var(--bug-frame); border-bottom: 2px solid var(--bug-rowline); font-size: .72rem; color: var(--bug-soft); letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bug-ball { display: inline-block; vertical-align: middle; margin-right: .4rem; }
 .bug-grid.bug-grid-2.no-ev { grid-template-columns: 8rem minmax(4.4rem, max-content); } .bug-grid-2.no-ev .bug-ev { display: none; } /* a final with nothing beside the scores */
 .bug-ball { width: .55rem; height: .55rem; border-radius: 50%; background: var(--bug-on); flex: none; }
@@ -1301,16 +1311,16 @@ html { overflow-anchor: none; }
 .bug-grid:has(.bug-poss) .bug-abbr:has(.bug-xtra) { padding-left: 1.5rem; } /* room for the ball at the left edge — in both rows, so the names stay in line */
 .bug-rec { font-family: var(--mono); font-size: .6rem; font-weight: 600; letter-spacing: .02em; line-height: 1; opacity: .8; text-shadow: none; } /* the record beside the abbreviation (football), as the broadcast prints it — goes with the abbreviation on the compact bar */
 .bug-to { display: inline-flex; gap: .16rem; vertical-align: middle; margin-right: .5rem; } /* the timeouts left: three dashes, the spent ones dimmed (football) */
-.bug-to b { display: block; width: .55rem; height: .2rem; border-radius: 1px; background: #5c6167; }
+.bug-to b { display: block; width: .55rem; height: .2rem; border-radius: 1px; background: var(--bug-off); }
 .bug-to b.on { background: var(--bug-on); }
 .bug-sh { font-family: var(--mono); font-size: .55rem; font-weight: 700; letter-spacing: .08em; margin-right: .3rem; padding: .05rem .25rem; border-radius: 2px; background: var(--bug-on); color: #fff; text-shadow: none; } /* the side a skater down (hockey) */
 .bug-card { display: inline-block; width: .42rem; height: .58rem; border-radius: 1px; vertical-align: middle; margin-right: .22rem; } /* a booking (soccer) */
 .bug-card.is-y { background: #f3d23c; } .bug-card.is-r { background: var(--bug-on); }
-.bug-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 1.2rem; padding: .18rem .8rem .12rem; border-top: 2px solid #c9cdd2; font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; } /* football in play: the quarter, the clock, the down and distance on a tab under the rows, as the broadcast draws it */
+.bug-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 1.2rem; padding: .18rem .8rem .12rem; border-top: 2px solid var(--bug-frame); font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; } /* football in play: the quarter, the clock, the down and distance on a tab under the rows, as the broadcast draws it */
 .bug-foot > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .bug-foot .bug-clock { flex: 1 1 auto; text-align: center; }
 .bug-foot.is-pause { justify-content: center; } /* Halftime, End of 3rd */
-.bug-foot .bug-dd.is-redzone { color: #ff7b7b; } /* the down and distance, red inside the 20 */
+.bug-foot .bug-dd.is-redzone { color: var(--bug-redzone); } /* the down and distance, red inside the 20 */
 #teamHead.is-compact .bug-foot { display: none; }
 #teamHead.is-compact .bug-ev { display: none; }
 #teamHead.is-compact .bug-grid.bug-grid-2 { grid-template-columns: minmax(2.7rem, max-content) 1.6rem; }
@@ -1318,7 +1328,7 @@ html { overflow-anchor: none; }
 /* the odds bug wears a small tab out of its foot saying so (Steve, 2026-09-14) — room for it below, none on the compact bar */
 .tf-bugwrap { position: relative; }
 .tf-bugwrap:has(> .is-pregame) { margin-bottom: 1.5rem; }
-.tf-bugwrap:has(> .is-pregame)::after { content: "ODDS"; position: absolute; left: var(--tab-l, 0); width: var(--tab-w, max-content); box-sizing: border-box; text-align: center; top: 100%; zoom: 1.25; font: 700 .6rem/1 var(--mono); letter-spacing: .14em; color: #f4f4f4; background: #2b2d30; border: 2px solid #c9cdd2; border-top: 0; border-radius: 0 0 6px 6px; padding: .22rem .6rem .18rem; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); } /* hung from the frame's bottom edge (top: 100%), so the frame's own line runs on unbroken above it; the bug's zoom, border and face */
+.tf-bugwrap:has(> .is-pregame)::after { content: "ODDS"; position: absolute; left: var(--tab-l, 0); width: var(--tab-w, max-content); box-sizing: border-box; text-align: center; top: 100%; zoom: 1.25; font: 700 .6rem/1 var(--mono); letter-spacing: .14em; color: var(--bug-ink); background: var(--bug-bg); border: 2px solid var(--bug-frame); border-top: 0; border-radius: 0 0 6px 6px; padding: .22rem .6rem .18rem; box-shadow: 0 6px 20px var(--bug-shadow); } /* hung from the frame's bottom edge (top: 100%), so the frame's own line runs on unbroken above it; the bug's zoom, border and face */
 .tf-bugwrap:has(> .is-pregame.is-tight) { margin-bottom: 1.2rem; }
 .tf-bugwrap:has(> .is-pregame.is-tight)::after { zoom: 1; }
 #teamHead.is-compact .tf-bugwrap { margin: 0; }
@@ -1347,7 +1357,7 @@ html { overflow-anchor: none; }
 .team-form.is-live.no-watch { padding-bottom: .85rem; } /* no strip once the season is played out (app.js renderTeamForm): the padding is the block's own again */
 .tf-watch-label { font-family: var(--mono); font-size: .74rem; color: var(--ink); }
 .tf-watch-none { font-family: var(--mono); font-size: .74rem; color: var(--ink-soft); }
-.tf-channels a { color: inherit; text-decoration: none; border-bottom: 1px dotted color-mix(in srgb, var(--ink-soft) 60%, transparent); }
+.tf-channels a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--dot); }
 .tf-channels a:hover { color: var(--team-2); border-bottom-color: currentColor; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* the strip's three sections (app.js buildWatchStrip): streaming at the left, TV centred, radio at the right — a grid of three equal tracks so the middle stays centred whatever the ends hold; an empty section keeps its track */
@@ -1409,8 +1419,8 @@ html { overflow-anchor: none; }
 #teamHead.is-compact .team-form.is-live.is-season .tf-head { margin-left: auto; }
 #teamHead.is-compact .team-form.is-live.is-season .tf-brief .tf-series { margin-left: auto; order: 99; }
 #teamHead.is-compact .tf-bug { isolation: isolate; } /* the rounded frame clips its cells even inside the pinned block's own compositing layer */
-.tf-bug { --bug-ink: #f4f4f4; --bug-on: #e5342b; zoom: 1.25; margin: 0 auto; width: max-content; max-width: 100%; font-family: var(--mono); color: var(--bug-ink); border: 2px solid #c9cdd2; border-radius: 8px; overflow: hidden; background: #2b2d30; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
-.bug-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1.5rem; padding: .2rem .8rem .15rem; border-bottom: 2px solid #c9cdd2; font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.tf-bug { --bug-on: #e5342b; zoom: 1.25; margin: 0 auto; width: max-content; max-width: 100%; font-family: var(--mono); color: var(--bug-ink); border: 2px solid var(--bug-frame); border-radius: 8px; overflow: hidden; background: var(--bug-bg); box-shadow: 0 6px 20px var(--bug-shadow); }
+.bug-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1.5rem; padding: .2rem .8rem .15rem; border-bottom: 2px solid var(--bug-frame); font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .bug-top > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; } /* one line, trimmed, never wrapped */
 /* the pregame's and the season's top rows: the right-hand piece is a label (first pitch; last season's record) — when the frame is too narrow for both it goes, whole, rather than both trimming to nothing: the row wraps and the second line is clipped */
 .is-pregame .bug-top, .is-season-bug .bug-top { flex-wrap: wrap; max-height: calc(1.55em + .35rem); overflow: hidden; }
@@ -1418,31 +1428,31 @@ html { overflow-anchor: none; }
 .is-pregame .bug-top > span, .is-season-bug .bug-top > span { flex: 0 1 auto; }
 .is-pregame .bug-top .bug-pc, .is-season-bug .bug-top .bug-pc { flex: 0 0 auto; margin-left: auto; }
 .bug-pc { font-size: .85rem; }
-.bug-top.bug-bat { font-weight: 400; font-size: .8rem; padding-top: .15rem; color: #d5d8dc; } /* the batter's row under the pitcher's */
+.bug-top.bug-bat { font-weight: 400; font-size: .8rem; padding-top: .15rem; color: var(--bug-soft); } /* the batter's row under the pitcher's */
 .bug-top.bug-bat .bug-pc { font-size: .75rem; }
-.bug-top.bug-pitch { font-weight: 400; font-size: .72rem; padding: .1rem .7rem .2rem; color: #b9bec4; letter-spacing: .04em; } /* the last pitch: speed and type, then what came of it */
+.bug-top.bug-pitch { font-weight: 400; font-size: .72rem; padding: .1rem .7rem .2rem; color: var(--bug-dim); letter-spacing: .04em; } /* the last pitch: speed and type, then what came of it */
 .bug-top.bug-pitch .bug-pc { font-size: .72rem; }
 .bug-grid { display: grid; grid-template-columns: 6.6rem minmax(3.6rem, max-content) 2.4rem auto; grid-template-rows: 1.95rem 1.95rem; } /* wide and low; the score cell grows for a long record */
-.bug-team { display: grid; place-items: center; font-family: var(--display); font-size: 1.15rem; font-weight: 700; letter-spacing: .06em; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .5); border-bottom: 2px solid #5c6167; } /* the line between the two rows, darker than the frame */
-.bug-score { display: grid; place-items: center; padding: 0 .35rem; white-space: nowrap; background: #fafafa; color: #111; font-family: var(--display); font-size: 1.5rem; font-weight: 700; line-height: 1; border-bottom: 2px solid #5c6167; border-left: 2px solid #c9cdd2; }
+.bug-team { display: grid; place-items: center; font-family: var(--display); font-size: 1.15rem; font-weight: 700; letter-spacing: .06em; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .5); border-bottom: 2px solid var(--bug-rowline); } /* the line between the two rows, darker than the frame */
+.bug-score { display: grid; place-items: center; padding: 0 .35rem; white-space: nowrap; background: var(--bug-score-bg); color: #111; font-family: var(--display); font-size: 1.5rem; font-weight: 700; line-height: 1; border-bottom: 2px solid var(--bug-rowline); border-left: 2px solid var(--bug-frame); }
 .bug-grid > :nth-child(1) { grid-area: 1 / 1; } .bug-grid > :nth-child(2) { grid-area: 1 / 2; } /* every cell pinned: the grid would otherwise place the row-spanning cells first */
 .bug-grid > :nth-child(5) { grid-area: 2 / 1; } .bug-grid > :nth-child(6) { grid-area: 2 / 2; }
 .bug-grid > :nth-child(5), .bug-grid > :nth-child(6) { border-bottom: 0; } /* the bottom row */
-.bug-inn { grid-area: 1 / 3 / 3 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1rem; border-left: 2px solid #c9cdd2; border-right: 2px solid #c9cdd2; }
+.bug-inn { grid-area: 1 / 3 / 3 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1rem; border-left: 2px solid var(--bug-frame); border-right: 2px solid var(--bug-frame); }
 .bug-inn b { font-family: var(--display); font-size: 1.4rem; line-height: 1; }
 .bug-inn i { width: 0; height: 0; border-left: .38rem solid transparent; border-right: .38rem solid transparent; }
-.bug-inn .bug-up { border-bottom: .55rem solid #6a6d72; }
-.bug-inn .bug-dn { border-top: .55rem solid #6a6d72; }
+.bug-inn .bug-up { border-bottom: .55rem solid var(--bug-off); }
+.bug-inn .bug-dn { border-top: .55rem solid var(--bug-off); }
 .bug-inn .bug-up.is-on { border-bottom-color: var(--bug-on); }
 .bug-inn .bug-dn.is-on { border-top-color: var(--bug-on); }
-.bug-field { grid-area: 1 / 4 / 3 / 5; display: flex; align-items: center; justify-content: center; gap: 1.1rem; padding: .2rem 1rem .2rem .9rem; border-left: 2px solid #c9cdd2; } /* centred: a long top line (the pitch, its result) widens the bug and the extra width lands in this cell — left-aligned, the count and the bases sat off-centre (Steve, 2026-09-18) */
+.bug-field { grid-area: 1 / 4 / 3 / 5; display: flex; align-items: center; justify-content: center; gap: 1.1rem; padding: .2rem 1rem .2rem .9rem; border-left: 2px solid var(--bug-frame); } /* centred: a long top line (the pitch, its result) widens the bug and the extra width lands in this cell — left-aligned, the count and the bases sat off-centre (Steve, 2026-09-18) */
 .bug-bases { width: 3.1rem; height: 1.9rem; }
-.bug-bases polygon { fill: transparent; stroke: #d5d8dc; stroke-width: 2; stroke-linejoin: round; }
+.bug-bases polygon { fill: transparent; stroke: var(--bug-soft); stroke-width: 2; stroke-linejoin: round; }
 .bug-bases polygon.is-on { fill: var(--bug-on); stroke: #fff; }
 .bug-count { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; }
 .bug-count > b { font-family: var(--display); font-size: 1.35rem; line-height: 1; letter-spacing: .04em; }
 .bug-outs { display: flex; align-items: center; gap: .35rem; }
-.bug-outs i { width: .8rem; height: .8rem; border-radius: 50%; border: 2px solid #d5d8dc; }
+.bug-outs i { width: .8rem; height: .8rem; border-radius: 50%; border: 2px solid var(--bug-soft); }
 .bug-outs i.is-on { background: var(--bug-on); border-color: #fff; }
 
 /* the pregame: the predictor ring and its percentages, one line of starters, the leaders out */
