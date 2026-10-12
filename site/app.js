@@ -254,7 +254,7 @@
   // Presets: each names what's OFF in every group; `holidays` (when given)
   // sets the switch too, and the search box is left alone. Venue lists that
   // depend on the feed are functions of the venues present. `teamsOff`
-  // unchecks every team (only Nothing does; the rest leave teams checked).
+  // unchecks every team (only Hide All does; the rest leave teams checked).
   // The default view (Steve's pick, 2026-09-10) is the city's: what's on
   // and what starts unchecked (city.js). Bars aren't venues here, so
   // they're untouched. The Teams view is never filtered — every game shows.
@@ -269,8 +269,8 @@
   var PRESETS = [
     { key: 'default', label: 'Default', title: CITY.words.presetDefault,
       venuesOff: function () { return DEFAULT_VENUES_OFF.slice(); }, typesOff: ['movie'], holidays: false },
-    { key: 'all', label: 'Everything', title: 'Every venue, type and team, holidays too', venuesOff: function () { return []; }, typesOff: [], holidays: true },
-    { key: 'none', label: 'Nothing', title: 'Everything off — build your own view from scratch',
+    { key: 'all', label: 'Show All', title: 'Every venue, type and team, holidays too', venuesOff: function () { return []; }, typesOff: [], holidays: true }, // the same words as the groups' Show All · Hide All (Steve, 2026-10-12: "Everything and Nothing … is incongruous")
+    { key: 'none', label: 'Hide All', title: 'Everything off — build your own view from scratch',
       venuesOff: function () { return state.venues.slice(); }, typesOff: TYPE_LIST.map(function (t) { return t.key; }), teamsOff: true, holidays: false },
     { key: 'neighborhood', label: 'Neighborhood', title: CITY.words.presetNeighborhood,
       venuesOff: function () { return DEFAULT_VENUES_OFF.concat(state.venues.filter(function (v) { return venueArea(v) === 'town' && DEFAULT_VENUES_OFF.indexOf(v) < 0; })); }, typesOff: ['movie'] },
@@ -762,6 +762,28 @@
     if (!document.documentElement.dataset.theme) applyTheme();
   });
 
+  // ---- the way to the other cities (Steve, 2026-10-12) ----
+  // the state's outline after the eyebrow (city.js stateOutline, from
+  // scripts/state-outline.mjs), muted, and a "See All" pill before the
+  // theme pill: both go to the map of every city at here.events
+  var CITIES_URL = 'https://here.events/';
+  function mountCityLinks() {
+    var eyebrow = document.querySelector('.masthead .eyebrow');
+    if (eyebrow && CITY.stateOutline) {
+      var a = document.createElement('a'); a.className = 'eyebrow-state'; a.href = CITIES_URL;
+      a.title = 'Every city on here.events'; a.setAttribute('aria-label', 'See all cities on here.events');
+      a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + CITY.stateOutline + '"/></svg>';
+      eyebrow.stateLink = a; eyebrow.appendChild(a);
+    }
+    var tools = document.querySelector('.masthead-tools'), tt = $('themeToggle');
+    if (tools && tt) {
+      var pill = document.createElement('a'); pill.className = 'chip see-all'; pill.href = CITIES_URL; pill.title = 'Every city on here.events';
+      pill.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>See All</span>';
+      tools.insertBefore(pill, tt);
+    }
+  }
+  mountCityLinks();
+
   // ---- the mini calendar: docked or floating ----
   // Wide layout (the page at its full width): docked beside the list, always
   // shown, no toggle. Narrower: never docked — beside the list it would
@@ -1106,6 +1128,7 @@
       if (!('events' in el.dataset)) el.dataset.events = el.textContent;
       var t = open ? (el.dataset.teams || el.dataset.events) : el.dataset.events;
       el.textContent = t; el.hidden = !t;
+      if (el.stateLink) el.appendChild(el.stateLink); // the state after the eyebrow rides along (mountCityLinks)
     });
     if (open) fitTeamStrip(); else fitFilterBar(); // back to the list: the bar measured its own way (a fold left from the Teams view would stick)
     $('teamsView').hidden = !open;
@@ -1771,7 +1794,7 @@
     var b = document.createElement('div'); b.className = 'tf-bug is-generic is-season-bug' + (done ? ' is-final' : '');
     b.innerHTML = '<div class="bug-top"><span class="bug-pitcher">' + esc(top) + '</span>' + (right ? '<span class="bug-pc">' + esc(right) + '</span>' : '') + '</div>' +
       '<div class="bug-grid bug-grid-2' + (done ? ' no-ev' : '') + '">' +
-      '<span class="bug-team" style="background:' + col + '">SEASON<small>every game</small></span><span class="bug-score">' + esc(s1) + '</span><span class="bug-ev">' + r1 + '</span>' + // each row says what it counts (Steve, 2026-10-05: "define season v. home")
+      '<span class="bug-team" style="--cell:' + col + '">SEASON<small>every game</small></span><span class="bug-score">' + esc(s1) + '</span><span class="bug-ev">' + r1 + '</span>' + // each row says what it counts (Steve, 2026-10-05: "define season v. home")
       '<span class="bug-team bug-team-soft">HOME<small>' + esc(team.venue && team.venue.length <= 22 ? 'at ' + team.venue : 'at home') + '</small></span><span class="bug-score">' + esc(s2) + '</span><span class="bug-ev">' + r2 + '</span></div>';
     return b;
   }
@@ -2834,7 +2857,7 @@
   function teamCell(side, team, color, extra) { // the abbreviation on the block, the nickname on the compact bar (styles.css .bug-abbr / .bug-nick); extra: markup that rides with the abbreviation (the record) and goes with it on the compact bar
     function esc(x) { return String(x).replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; }); }
     var abbr = (side.isUs && clubAbbr(team)) || side.team.abbreviation || side.team.shortDisplayName, nick = side.isUs ? team.label : nickname(side.team); // our side as the league lists it
-    return '<span class="bug-team" style="background:' + color + '"><i class="bug-abbr">' + (extra ? '<b class="bug-ab">' + esc(abbr) + '</b><span class="bug-xtra">' + extra + '</span>' : esc(abbr)) + '</i><i class="bug-nick">' + esc(nick || abbr) + '</i></span>';
+    return '<span class="bug-team" style="--cell:' + color + '"><i class="bug-abbr">' + (extra ? '<b class="bug-ab">' + esc(abbr) + '</b><span class="bug-xtra">' + extra + '</span>' : esc(abbr)) + '</i><i class="bug-nick">' + esc(nick || abbr) + '</i></span>';
   }
   function renderTeamLive(team, ev) {
     function esc(s) { return String(s).replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; }); }

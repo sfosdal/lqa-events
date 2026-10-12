@@ -51,7 +51,9 @@
   --barh: var(--barh-base); /* what the sticky things below the bar offset by */
   --rule: color-mix(in srgb, var(--line), var(--ink-soft)); /* list dividers: a step brighter than --line */
   /* the scorebug (the live game block, .tf-bug): a light panel in this theme, the broadcast's charcoal in the dark one (Steve, 2026-10-12: the charcoal panel on the light card looked bad) */
-  --bug-bg: #f9fafb; --bug-frame: #aab4be; --bug-ink: #1b2733; --bug-soft: #55636f; --bug-dim: #7c8894; --bug-rowline: #c9d2da; --bug-off: #b3bcc5; --bug-muted: #6b7784; --bug-score-bg: #ffffff; --bug-shadow: rgba(15, 25, 35, .14); --bug-redzone: #c8261f;
+  --bug-bg: #f9fafb; --bug-frame: #c9d2da; --bug-ink: #1b2733; --bug-soft: #55636f; --bug-dim: #7c8894; --bug-rowline: #d5dce3; --bug-off: #b3bcc5; --bug-muted: #6b7784; --bug-score-bg: #ffffff; --bug-shadow: rgba(15, 25, 35, .10); --bug-redzone: #c8261f;
+  --bug-bw: 1px; --frame: var(--line); --frame-w: 1px; /* the game block's frame and the bug's rules: hairlines in the card's line colour here, the 2px broadcast frame in the dark theme (Steve, 2026-10-12: "soften … the borders in general") */
+  --cell-mix: 22%; --cell-ink: var(--ink); --cell-bar: 4px; --cell-shadow: none; /* the bug's team cells: a wash of the club colour with a bar of it at the left and ink type, instead of the solid cell ("soften the colors here") */
   --tick-mix: var(--ink); --tick-pct: 65%; /* the refresh countdown ring: the club's colour mixed toward ink here, toward white on the dark ground (the mix itself is written in the .tf-refresh rule: a token holding var(--team-2) would resolve here on :root, where no club colour exists, and come out empty) */
   --dot: color-mix(in srgb, var(--ink-soft) 40%, transparent); /* the dotted underline under the watch strip's links */
   --display: "Big Shoulders", "Arial Narrow", sans-serif;
@@ -76,6 +78,8 @@
     --t-concert: #f0806a; --t-sports: #f2d21b; --t-arts: #d63a4f;
     --t-movie: #8b9db0; --t-community: #e660a8; --t-expo: #4fd1c5; --t-bar: #e3ad3c; --alert: #ff4b3e;
     --bug-bg: #2b2d30; --bug-frame: #c9cdd2; --bug-ink: #f4f4f4; --bug-soft: #d5d8dc; --bug-dim: #b9bec4; --bug-rowline: #5c6167; --bug-off: #6a6d72; --bug-muted: #4a4f56; --bug-score-bg: #fafafa; --bug-shadow: rgba(0, 0, 0, .35); --bug-redzone: #ff7b7b;
+  --bug-bw: 2px; --frame: var(--ink-soft); --frame-w: 2px; --cell-mix: 100%; --cell-ink: #fff; --cell-bar: 0px; --cell-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+    --bug-bw: 2px; --frame: var(--ink-soft); --frame-w: 2px; --cell-mix: 100%; --cell-ink: #fff; --cell-bar: 0px; --cell-shadow: 0 1px 2px rgba(0, 0, 0, .5);
     --tick-mix: white; --tick-pct: 45%;
     --dot: color-mix(in srgb, var(--ink-soft) 60%, transparent);
   }
@@ -137,6 +141,15 @@ h1 {
   line-height: .92; text-transform: uppercase; letter-spacing: .01em; margin: 0;
 }
 .masthead-text { min-width: 0; max-width: 100%; } /* a flex item would grow to its widest line and push past a phone's edge */
+/* the state after the eyebrow (app.js mountCityLinks, the outline from city.js stateOutline): muted, the eyebrow's orange under the pointer, a link to the map of every city (Steve, 2026-10-12: "the state icon in grey is good") */
+.eyebrow-state { display: inline-block; vertical-align: -.1em; width: 1em; height: 1em; margin-left: .3em; color: var(--ink-soft); text-decoration: none; }
+.eyebrow-state svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
+.eyebrow-state:hover, .eyebrow-state:focus-visible { color: var(--gold); outline: none; }
+/* "See All": the pill before the theme pill, to the same map (Steve, 2026-10-12); in the pinned bar the chip's text folds away and the map glyph stays */
+.masthead-tools .see-all { order: 4; display: inline-flex; align-items: center; gap: .45rem; min-height: calc(1.7rem + 8px); padding: 0 .95em; text-decoration: none; }
+.masthead-tools .see-all svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.masthead-tools .see-all:hover { border-color: var(--ink-soft); }
+.bar-title .masthead-tools .see-all { min-height: 1.7rem; padding: 0 .5em; }
 /* the mark and the name as one thing: the mark stretches to the text's
    height (eyebrow + title) and keeps square, in the footer mark's white */
 .masthead { --mast-title: clamp(2.6rem, 7vw, 4.2rem); } /* the title's size; the eyebrow and the mark are cut from it */
@@ -1008,7 +1021,7 @@ html.teams-open #teamsView { margin-top: .5rem; }
 #teamHead:empty { display: none; }
 .team-form {
   display: flex; align-items: center; gap: 1.1rem;
-  padding: .85rem 1.1rem; border: 2px solid var(--ink-soft); border-radius: 10px; background: var(--mist);
+  padding: .85rem 1.1rem; border: var(--frame-w, 2px) solid var(--frame, var(--ink-soft)); border-radius: 10px; background: var(--mist);
 }
 .team-form { --crest: 9.5rem; } /* the crest sets the block's height: nothing beside it may run taller */
 /* pinned under the bar while the season scrolls by — and compact while it
@@ -1163,7 +1176,7 @@ html { overflow-anchor: none; }
 .is-season .tf-head { display: none; } /* the record is in the bug (or, with the odds up, on a line beside); the head serves the compact bar */
 .tf-lead .tf-season .tf-run { margin-left: .15rem; } .tf-lead .tf-season .tf-run i { font-size: .6rem; line-height: 1.25rem; width: 1.25rem; } /* the last five, small, at the end of the season line */
 #teamHead.is-compact .is-season .tf-head { display: flex; }
-.bug-team-soft { background: var(--bug-muted); font-size: .8rem; letter-spacing: .1em; }
+.bug-team-soft { --cell: var(--bug-muted); font-size: .8rem; letter-spacing: .1em; }
 .bug-team i { font-style: normal; }
 .bug-team .bug-nick { display: none; }
 #teamHead.is-compact .bug-team .bug-abbr { display: none; }
@@ -1175,7 +1188,7 @@ html { overflow-anchor: none; }
 .is-pregame .bug-grid.no-ev > :nth-child(3) { grid-area: 2 / 1; } .is-pregame .bug-grid.no-ev > :nth-child(4) { grid-area: 2 / 2; } /* no odds yet, no ring: four cells, two rows */
 .is-pregame .bug-grid.no-ev > :nth-child(3), .is-pregame .bug-grid.no-ev > :nth-child(4) { border-bottom: 0; }
 .bug-grid.bug-grid-2.has-ring > .bug-ring { grid-area: 1 / 3 / 3 / 4; } /* both rows (outranks the per-cell pinning below, which puts the third cell in row 1) */
-.bug-ring { display: flex; align-items: center; justify-content: center; gap: .55rem; padding: .15rem .8rem; border-left: 2px solid var(--bug-frame); }
+.bug-ring { display: flex; align-items: center; justify-content: center; gap: .55rem; padding: .15rem .8rem; border-left: var(--bug-bw, 2px) solid var(--bug-frame); }
 .bug-ring svg { width: 3.1rem; height: 3.1rem; flex: none; }
 /* squeezed (app.js fitBug: the grid runs wider than the frame): the ring's label goes, then the desktop's zoom */
 .tf-bug.is-tight, .tf-bug.is-tight:not(.is-generic) { zoom: 1; }
@@ -1293,7 +1306,7 @@ html { overflow-anchor: none; }
 .bug-grid.bug-grid-2 > :nth-child(3) { grid-area: 1 / 3; } .bug-grid.bug-grid-2 > :nth-child(6) { grid-area: 2 / 3; }
 .bug-grid.bug-grid-2 > :nth-child(4) { grid-area: 2 / 1; } .bug-grid.bug-grid-2 > :nth-child(5) { grid-area: 2 / 2; }
 .bug-grid.bug-grid-2 > :nth-child(4), .bug-grid.bug-grid-2 > :nth-child(5), .bug-grid.bug-grid-2 > :nth-child(6) { border-bottom: 0; }
-.bug-ev { display: block; min-width: 0; padding: 0 .7rem; line-height: 1.95rem; border-left: 2px solid var(--bug-frame); border-bottom: 2px solid var(--bug-rowline); font-size: .72rem; color: var(--bug-soft); letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bug-ev { display: block; min-width: 0; padding: 0 .7rem; line-height: 1.95rem; border-left: var(--bug-bw, 2px) solid var(--bug-frame); border-bottom: var(--bug-bw, 2px) solid var(--bug-rowline); font-size: .72rem; color: var(--bug-soft); letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bug-ball { display: inline-block; vertical-align: middle; margin-right: .4rem; }
 .bug-grid.bug-grid-2.no-ev { grid-template-columns: 8rem minmax(4.4rem, max-content); } .bug-grid-2.no-ev .bug-ev { display: none; } /* a final with nothing beside the scores */
 .bug-ball { width: .55rem; height: .55rem; border-radius: 50%; background: var(--bug-on); flex: none; }
@@ -1316,7 +1329,7 @@ html { overflow-anchor: none; }
 .bug-sh { font-family: var(--mono); font-size: .55rem; font-weight: 700; letter-spacing: .08em; margin-right: .3rem; padding: .05rem .25rem; border-radius: 2px; background: var(--bug-on); color: #fff; text-shadow: none; } /* the side a skater down (hockey) */
 .bug-card { display: inline-block; width: .42rem; height: .58rem; border-radius: 1px; vertical-align: middle; margin-right: .22rem; } /* a booking (soccer) */
 .bug-card.is-y { background: #f3d23c; } .bug-card.is-r { background: var(--bug-on); }
-.bug-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 1.2rem; padding: .18rem .8rem .12rem; border-top: 2px solid var(--bug-frame); font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; } /* football in play: the quarter, the clock, the down and distance on a tab under the rows, as the broadcast draws it */
+.bug-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 1.2rem; padding: .18rem .8rem .12rem; border-top: var(--bug-bw, 2px) solid var(--bug-frame); font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; } /* football in play: the quarter, the clock, the down and distance on a tab under the rows, as the broadcast draws it */
 .bug-foot > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .bug-foot .bug-clock { flex: 1 1 auto; text-align: center; }
 .bug-foot.is-pause { justify-content: center; } /* Halftime, End of 3rd */
@@ -1328,7 +1341,7 @@ html { overflow-anchor: none; }
 /* the odds bug wears a small tab out of its foot saying so (Steve, 2026-09-14) — room for it below, none on the compact bar */
 .tf-bugwrap { position: relative; }
 .tf-bugwrap:has(> .is-pregame) { margin-bottom: 1.5rem; }
-.tf-bugwrap:has(> .is-pregame)::after { content: "ODDS"; position: absolute; left: var(--tab-l, 0); width: var(--tab-w, max-content); box-sizing: border-box; text-align: center; top: 100%; zoom: 1.25; font: 700 .6rem/1 var(--mono); letter-spacing: .14em; color: var(--bug-ink); background: var(--bug-bg); border: 2px solid var(--bug-frame); border-top: 0; border-radius: 0 0 6px 6px; padding: .22rem .6rem .18rem; box-shadow: 0 6px 20px var(--bug-shadow); } /* hung from the frame's bottom edge (top: 100%), so the frame's own line runs on unbroken above it; the bug's zoom, border and face */
+.tf-bugwrap:has(> .is-pregame)::after { content: "ODDS"; position: absolute; left: var(--tab-l, 0); width: var(--tab-w, max-content); box-sizing: border-box; text-align: center; top: 100%; zoom: 1.25; font: 700 .6rem/1 var(--mono); letter-spacing: .14em; color: var(--bug-ink); background: var(--bug-bg); border: var(--bug-bw, 2px) solid var(--bug-frame); border-top: 0; border-radius: 0 0 6px 6px; padding: .22rem .6rem .18rem; box-shadow: 0 6px 20px var(--bug-shadow); } /* hung from the frame's bottom edge (top: 100%), so the frame's own line runs on unbroken above it; the bug's zoom, border and face */
 .tf-bugwrap:has(> .is-pregame.is-tight) { margin-bottom: 1.2rem; }
 .tf-bugwrap:has(> .is-pregame.is-tight)::after { zoom: 1; }
 #teamHead.is-compact .tf-bugwrap { margin: 0; }
@@ -1419,8 +1432,8 @@ html { overflow-anchor: none; }
 #teamHead.is-compact .team-form.is-live.is-season .tf-head { margin-left: auto; }
 #teamHead.is-compact .team-form.is-live.is-season .tf-brief .tf-series { margin-left: auto; order: 99; }
 #teamHead.is-compact .tf-bug { isolation: isolate; } /* the rounded frame clips its cells even inside the pinned block's own compositing layer */
-.tf-bug { --bug-on: #e5342b; zoom: 1.25; margin: 0 auto; width: max-content; max-width: 100%; font-family: var(--mono); color: var(--bug-ink); border: 2px solid var(--bug-frame); border-radius: 8px; overflow: hidden; background: var(--bug-bg); box-shadow: 0 6px 20px var(--bug-shadow); }
-.bug-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1.5rem; padding: .2rem .8rem .15rem; border-bottom: 2px solid var(--bug-frame); font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.tf-bug { --bug-on: #e5342b; zoom: 1.25; margin: 0 auto; width: max-content; max-width: 100%; font-family: var(--mono); color: var(--bug-ink); border: var(--bug-bw, 2px) solid var(--bug-frame); border-radius: 8px; overflow: hidden; background: var(--bug-bg); box-shadow: 0 6px 20px var(--bug-shadow); }
+.bug-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1.5rem; padding: .2rem .8rem .15rem; border-bottom: var(--bug-bw, 2px) solid var(--bug-frame); font-weight: 700; font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .bug-top > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; } /* one line, trimmed, never wrapped */
 /* the pregame's and the season's top rows: the right-hand piece is a label (first pitch; last season's record) — when the frame is too narrow for both it goes, whole, rather than both trimming to nothing: the row wraps and the second line is clipped */
 .is-pregame .bug-top, .is-season-bug .bug-top { flex-wrap: wrap; max-height: calc(1.55em + .35rem); overflow: hidden; }
@@ -1433,19 +1446,19 @@ html { overflow-anchor: none; }
 .bug-top.bug-pitch { font-weight: 400; font-size: .72rem; padding: .1rem .7rem .2rem; color: var(--bug-dim); letter-spacing: .04em; } /* the last pitch: speed and type, then what came of it */
 .bug-top.bug-pitch .bug-pc { font-size: .72rem; }
 .bug-grid { display: grid; grid-template-columns: 6.6rem minmax(3.6rem, max-content) 2.4rem auto; grid-template-rows: 1.95rem 1.95rem; } /* wide and low; the score cell grows for a long record */
-.bug-team { display: grid; place-items: center; font-family: var(--display); font-size: 1.15rem; font-weight: 700; letter-spacing: .06em; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .5); border-bottom: 2px solid var(--bug-rowline); } /* the line between the two rows, darker than the frame */
-.bug-score { display: grid; place-items: center; padding: 0 .35rem; white-space: nowrap; background: var(--bug-score-bg); color: #111; font-family: var(--display); font-size: 1.5rem; font-weight: 700; line-height: 1; border-bottom: 2px solid var(--bug-rowline); border-left: 2px solid var(--bug-frame); }
+.bug-team { display: grid; place-items: center; font-family: var(--display); font-size: 1.15rem; font-weight: 700; letter-spacing: .06em; color: var(--cell-ink, #fff); text-shadow: var(--cell-shadow, none); background: color-mix(in srgb, var(--cell) var(--cell-mix, 100%), var(--bug-bg)); box-shadow: inset var(--cell-bar, 0px) 0 0 var(--cell); border-bottom: var(--bug-bw, 2px) solid var(--bug-rowline); } /* app.js sets --cell to the club colour: the solid cell in the dark theme, a wash with a bar of it in the light one */ /* the line between the two rows, darker than the frame */
+.bug-score { display: grid; place-items: center; padding: 0 .35rem; white-space: nowrap; background: var(--bug-score-bg); color: #111; font-family: var(--display); font-size: 1.5rem; font-weight: 700; line-height: 1; border-bottom: var(--bug-bw, 2px) solid var(--bug-rowline); border-left: var(--bug-bw, 2px) solid var(--bug-frame); }
 .bug-grid > :nth-child(1) { grid-area: 1 / 1; } .bug-grid > :nth-child(2) { grid-area: 1 / 2; } /* every cell pinned: the grid would otherwise place the row-spanning cells first */
 .bug-grid > :nth-child(5) { grid-area: 2 / 1; } .bug-grid > :nth-child(6) { grid-area: 2 / 2; }
 .bug-grid > :nth-child(5), .bug-grid > :nth-child(6) { border-bottom: 0; } /* the bottom row */
-.bug-inn { grid-area: 1 / 3 / 3 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1rem; border-left: 2px solid var(--bug-frame); border-right: 2px solid var(--bug-frame); }
+.bug-inn { grid-area: 1 / 3 / 3 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1rem; border-left: var(--bug-bw, 2px) solid var(--bug-frame); border-right: var(--bug-bw, 2px) solid var(--bug-frame); }
 .bug-inn b { font-family: var(--display); font-size: 1.4rem; line-height: 1; }
 .bug-inn i { width: 0; height: 0; border-left: .38rem solid transparent; border-right: .38rem solid transparent; }
 .bug-inn .bug-up { border-bottom: .55rem solid var(--bug-off); }
 .bug-inn .bug-dn { border-top: .55rem solid var(--bug-off); }
 .bug-inn .bug-up.is-on { border-bottom-color: var(--bug-on); }
 .bug-inn .bug-dn.is-on { border-top-color: var(--bug-on); }
-.bug-field { grid-area: 1 / 4 / 3 / 5; display: flex; align-items: center; justify-content: center; gap: 1.1rem; padding: .2rem 1rem .2rem .9rem; border-left: 2px solid var(--bug-frame); } /* centred: a long top line (the pitch, its result) widens the bug and the extra width lands in this cell — left-aligned, the count and the bases sat off-centre (Steve, 2026-09-18) */
+.bug-field { grid-area: 1 / 4 / 3 / 5; display: flex; align-items: center; justify-content: center; gap: 1.1rem; padding: .2rem 1rem .2rem .9rem; border-left: var(--bug-bw, 2px) solid var(--bug-frame); } /* centred: a long top line (the pitch, its result) widens the bug and the extra width lands in this cell — left-aligned, the count and the bases sat off-centre (Steve, 2026-09-18) */
 .bug-bases { width: 3.1rem; height: 1.9rem; }
 .bug-bases polygon { fill: transparent; stroke: var(--bug-soft); stroke-width: 2; stroke-linejoin: round; }
 .bug-bases polygon.is-on { fill: var(--bug-on); stroke: #fff; }
@@ -1868,7 +1881,9 @@ body.sheet-open { overflow: hidden; }
   .filterbar #filterToggle, .filterbar #subscribeBtn { padding: .5em .7em; } /* phones: icons only (the chips moved into the bar 2026-09-16) */
   .filterbar #filterToggle svg, .filterbar #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
   /* the tools sit at the top right, on the eyebrow's line (short, so the room is there), clear of the title below; a flex row would cost the phone a line */
-  .masthead > .masthead-tools, .bar-title .masthead-tools { display: none; } /* no theme pill on a phone (Steve, 2026-09-16): the site follows the system setting there */
+  .bar-title .masthead-tools { display: none; }
+  .masthead > .masthead-tools { position: absolute; top: 2.5rem; right: 0; margin: 0; } /* the See All pill alone, at the top right on the eyebrow's line (short, so the room is there) */
+  .masthead-tools .theme-toggle { display: none; } /* no theme pill on a phone (Steve, 2026-09-16): the site follows the system setting there */
   .masthead-tools .chip { min-height: 1.9rem; padding: .3em .55em; }
   /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
   .filterbar { gap: .4rem; }

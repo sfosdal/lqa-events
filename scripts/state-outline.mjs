@@ -1,0 +1,76 @@
+#!/usr/bin/env node
+// The state's outline for the masthead: the small grey state after the
+// eyebrow that links to here.events (Steve, 2026-10-12: "I like the state
+// icon", "the state icon in grey is good"). One SVG path in a 24×24 box,
+// thinned to about eighty points, from Natural Earth 1:50m admin-1 (public
+// domain), written into site/city.js as `state` + `stateOutline` so the
+// browser draws it with no fetch and no library. Run once per city:
+//
+//   node scripts/state-outline.mjs Wisconsin            # prints the path
+//   node scripts/state-outline.mjs Wisconsin --write    # writes site/city.js
+//   node scripts/state-outline.mjs Wisconsin --write ../milwaukee-events/repo/site/city.js
+//
+// The GeoJSON is cached in ~/.cache/natural-earth/ (downloaded once).
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { homedir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+
+const NAME = 'ne_50m_admin_1_states_provinces';
+const SRC = `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/${NAME}.json`;
+const cacheDir = join(homedir(), '.cache', 'natural-earth');
+const here = fileURLToPath(new URL('.', import.meta.url));
+
+async function load() {
+  const f = join(cacheDir, NAME + '.geojson');
+  if (!existsSync(f)) {
+    mkdirSync(cacheDir, { recursive: true });
+    const r = await fetch(SRC);
+    if (!r.ok) throw new Error(`download failed: ${r.status}`);
+    writeFileSync(f, await r.text());
+  }
+  return JSON.parse(readFileSync(f, 'utf8'));
+}
+
+// every ring of the state (Hawaii is its islands), projected flat with the
+// longitude scaled by cos(latitude), fitted into the 24-box with a 2-unit margin
+export function outline(features, state) {
+  const f = features.find((x) => x.properties.name === state && (x.properties.adm0_a3 === 'USA' || x.properties.iso_a2 === 'US'));
+  if (!f) throw new Error(`no state named ${state}`);
+  const polys = f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates];
+  const rings = polys.map((p) => p[0]);
+  const area = (r) => { const xs = r.map((p) => p[0]), ys = r.map((p) => p[1]); return (Math.max(...xs) - Math.min(...xs)) * (Math.max(...ys) - Math.min(...ys)); };
+  const big = Math.max(...rings.map(area));
+  const keep = rings.filter((r) => area(r) >= big * 0.04); // the islands that show at icon size; the keys and specks go
+  const lat0 = keep.flat().reduce((s, p) => s + p[1], 0) / keep.flat().length;
+  const k = Math.cos(lat0 * Math.PI / 180);
+  const pts = keep.map((r) => r.map(([x, y]) => [x * k, -y]));
+  const all = pts.flat();
+  const x0 = Math.min(...all.map((p) => p[0])), x1 = Math.max(...all.map((p) => p[0]));
+  const y0 = Math.min(...all.map((p) => p[1])), y1 = Math.max(...all.map((p) => p[1]));
+  const sc = 20 / Math.max(x1 - x0, y1 - y0);
+  const ox = 2 + (20 - (x1 - x0) * sc) / 2, oy = 2 + (20 - (y1 - y0) * sc) / 2;
+  const budget = 90; // points for the whole state
+  const total = pts.reduce((s, r) => s + r.length, 0);
+  return pts.map((r) => {
+    const step = Math.max(1, Math.round(r.length / Math.max(8, budget * r.length / total)));
+    const th = r.filter((_, i) => i % step === 0);
+    return 'M' + th.map(([x, y]) => `${((x - x0) * sc + ox).toFixed(1)} ${((y - y0) * sc + oy).toFixed(1)}`).join('L') + 'Z';
+  }).join('');
+}
+
+const [state, flag, target] = process.argv.slice(2);
+if (!state) { console.error('usage: state-outline.mjs <State> [--write]'); process.exit(2); }
+const d = outline((await load()).features, state);
+if (flag !== '--write') { console.log(d); process.exit(0); }
+const cityFile = target || join(here, '..', 'site', 'city.js');
+let src = readFileSync(cityFile, 'utf8');
+const line = `    state: ${JSON.stringify(state)}, stateOutline: '${d}', // the masthead's small state, linking to here.events (scripts/state-outline.mjs, Natural Earth 1:50m)\n`;
+if (/^\s*state: /m.test(src)) src = src.replace(/^\s*state: .*\n/m, line);
+else {
+  const m = src.match(/^\s*tz: .*\n/m);
+  if (!m) throw new Error('no tz: line in site/city.js to anchor on');
+  src = src.replace(m[0], m[0] + line);
+}
+writeFileSync(cityFile, src);
+console.log(`${state}: ${d.length} chars written to site/city.js`);
