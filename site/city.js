@@ -415,8 +415,8 @@
   global.LQACity = {
     key: 'lqa',
     name: 'Lower Queen Anne',
-    site: 'https://lqa.here.events/',
-    userAgent: 'Mozilla/5.0 (compatible; lqa-events/1.0; +https://lqa.here.events/)',
+    site: 'https://lqa.seattle.here.events/',
+    userAgent: 'Mozilla/5.0 (compatible; lqa-events/1.0; +https://lqa.seattle.here.events/)',
     tz: 'America/Los_Angeles', tzName: 'Pacific', // the city's time zone: the ICS feed's TZID, the game clocks, the poster's footer
     // the calendar feed's header; the UID domain and PRODID never change
     // (changing them re-creates every event in subscribers' calendars)

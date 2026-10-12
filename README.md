@@ -3,7 +3,7 @@
 Event feed and calendar for Lower Queen Anne / the Seattle Center area:
 Climate Pledge Arena, McCaw Hall, and the Seattle Center grounds.
 
-Live at **https://lqa.here.events/** (its own domain since 2026-10-05; until then
+Live at **https://lqa.seattle.here.events/** (since 2026-10-11 — a neighbourhood under its city; lqa.here.events from 2026-10-05, now a redirect; until then
 `fosdal.net/lqa-events/`, which GitHub Pages cannot redirect) — a GitHub Actions
 cron refreshes the data once a day at noon Pacific and deploys straight to GitHub Pages (no
 data commits).
@@ -24,7 +24,7 @@ Embed on any site:
 
 ```html
 <div id="lqa-events"></div>
-<script src="https://lqa.here.events/embed.js" data-max="8" defer></script>
+<script src="https://lqa.seattle.here.events/embed.js" data-max="8" defer></script>
 ```
 
 Options via data-attributes: `data-max`, `data-venue`, `data-target`,
