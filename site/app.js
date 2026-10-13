@@ -763,17 +763,57 @@
   });
 
   // ---- the way to the other cities (Steve, 2026-10-12) ----
-  // the state's outline after the eyebrow (city.js stateOutline, from
-  // scripts/state-outline.mjs), muted, and a "See All" pill before the
-  // theme pill: both go to the map of every city at here.events
+  // After the eyebrow, a small carousel of state outlines: the home state and
+  // the two nearest states with a here.events city (states.js, written by
+  // scripts/state-outline.mjs --states), turning on its own every few seconds,
+  // ‹ › either side to step it, still under the pointer; the state itself is
+  // a link to the map of every city (Steve: "a three state carousel with < >
+  // on the left on right make it rotate, but when clicked on go to
+  // here.events"). A "See All" pill before the theme pill goes there too.
+  // Without states.js (a city not yet synced) the home state stands alone.
   var CITIES_URL = 'https://here.events/';
+  var STATE_TURN_MS = 4000;
+  function carouselStates() { // [home, nearest, next nearest] by the states' centres
+    var all = typeof LQAStates !== 'undefined' ? LQAStates : null, home = CITY.state;
+    if (!all || !all[home]) return CITY.stateOutline ? [{ name: home || '', d: CITY.stateOutline }] : [];
+    var h = all[home].c, k = Math.cos(h[1] * Math.PI / 180);
+    var dist = function (n) { var c = all[n].c, dx = (c[0] - h[0]) * k, dy = c[1] - h[1]; return dx * dx + dy * dy; };
+    var others = Object.keys(all).filter(function (n) { return n !== home; }).sort(function (a, b) { return dist(a) - dist(b); }).slice(0, 2);
+    return [home].concat(others).map(function (n) { return { name: n, d: all[n].d }; });
+  }
   function mountCityLinks() {
-    var eyebrow = document.querySelector('.masthead .eyebrow');
-    if (eyebrow && CITY.stateOutline) {
+    var eyebrow = document.querySelector('.masthead .eyebrow'), states = carouselStates();
+    if (eyebrow && states.length) {
+      var box = document.createElement('span'); box.className = 'eyebrow-states' + (states.length > 1 ? ' is-carousel' : '');
       var a = document.createElement('a'); a.className = 'eyebrow-state'; a.href = CITIES_URL;
-      a.title = 'Every city on here.events'; a.setAttribute('aria-label', 'See all cities on here.events');
-      a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + CITY.stateOutline + '"/></svg>';
-      eyebrow.stateLink = a; eyebrow.appendChild(a);
+      a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path/></svg>';
+      var path = a.querySelector('path'), at = 0, timer = null;
+      function show(i) {
+        at = (i + states.length) % states.length;
+        var st = states[at];
+        path.setAttribute('d', st.d);
+        a.title = (st.name ? st.name + ' — ' : '') + 'every city on here.events';
+        a.setAttribute('aria-label', 'See all cities on here.events' + (st.name ? ' (' + st.name + ')' : ''));
+      }
+      function turn() { a.classList.add('is-turning'); setTimeout(function () { show(at + 1); a.classList.remove('is-turning'); }, 180); }
+      function start() { stop(); if (states.length > 1 && !document.hidden) timer = setInterval(turn, STATE_TURN_MS); }
+      function stop() { if (timer) clearInterval(timer); timer = null; }
+      show(0);
+      if (states.length > 1) {
+        var prev = document.createElement('button'), next = document.createElement('button');
+        prev.type = next.type = 'button'; prev.className = 'es-step es-prev'; next.className = 'es-step es-next';
+        prev.setAttribute('aria-label', 'Previous state'); next.setAttribute('aria-label', 'Next state');
+        prev.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+        next.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+        prev.addEventListener('click', function () { show(at - 1); start(); });
+        next.addEventListener('click', function () { show(at + 1); start(); });
+        box.appendChild(prev); box.appendChild(a); box.appendChild(next);
+        box.addEventListener('mouseenter', stop); box.addEventListener('mouseleave', start);
+        box.addEventListener('focusin', stop); box.addEventListener('focusout', start);
+        document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) start();
+      } else box.appendChild(a);
+      eyebrow.stateLink = box; eyebrow.appendChild(box);
     }
     var tools = document.querySelector('.masthead-tools'), tt = $('themeToggle');
     if (tools && tt) {
