@@ -141,17 +141,14 @@ h1 {
   line-height: .92; text-transform: uppercase; letter-spacing: .01em; margin: 0;
 }
 .masthead-text { min-width: 0; max-width: 100%; } /* a flex item would grow to its widest line and push past a phone's edge */
-/* the state strip after the eyebrow (app.js mountCityLinks, outlines from states.js): the eyebrow's line is a flex row, the strip taking the rest of it out to the title's right edge, outlines in the eyebrow's muted grey drifting left round and round, the strip's ends faded, ‹ › either side; each state a link to the map of every city, orange under the pointer (Steve, 2026-10-12: "the state icon in grey is good", "a three state carousel with < > on the left on right", "three states displayed at once", "smooth slide, not jump, the state span should fit the width of the bigger text") */
+/* the state strip after the eyebrow (app.js mountCityLinks, outlines from states.js): the eyebrow's line is a flex row, the strip taking the rest of it out to the title's right edge, outlines in the eyebrow's muted grey drifting left round and round, the strip's ends faded, no arrows (Steve: "no arrows"); each state a link to the map of every city, orange under the pointer (Steve, 2026-10-12: "the state icon in grey is good", "a three state carousel with < > on the left on right", "three states displayed at once", "smooth slide, not jump, the state span should fit the width of the bigger text") */
 .masthead .eyebrow { display: flex; align-items: center; gap: .3em; }
 .eyebrow-states { display: inline-flex; align-items: center; gap: .15em; flex: 1 1 0; min-width: 0; color: var(--ink-soft); }
 .es-view { position: relative; display: block; flex: 1 1 0; min-width: 0; height: 1em; overflow: hidden; -webkit-mask-image: linear-gradient(to right, transparent, #000 1em, #000 calc(100% - 1em), transparent); mask-image: linear-gradient(to right, transparent, #000 1em, #000 calc(100% - 1em), transparent); }
 .es-track { position: absolute; left: 0; top: 0; display: flex; gap: .15em; will-change: transform; } /* out of the flow, so the strip's content never widens the eyebrow's line past the title */
 .eyebrow-state { display: block; flex: none; width: 1em; height: 1em; color: inherit; text-decoration: none; }
-.eyebrow-state svg, .es-step svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
+.eyebrow-state svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
 .eyebrow-state:hover, .eyebrow-state:focus-visible { color: var(--gold); outline: none; }
-.es-step { display: inline-block; box-sizing: content-box; width: .7em; height: .7em; padding: .45em .3em; margin: -.45em -.15em; border: 0; background: none; color: inherit; cursor: pointer; opacity: .7; } /* the glyph small, the hit area a thumb's */
-.es-step svg { stroke-width: 2.4; }
-.es-step:hover, .es-step:focus-visible { opacity: 1; color: var(--ink); outline: none; }
 /* "See All": the pill before the theme pill, to the same map (Steve, 2026-10-12); in the pinned bar the chip's text folds away and the map glyph stays */
 .masthead-tools .see-all { order: 4; display: inline-flex; align-items: center; gap: .45rem; min-height: calc(1.7rem + 8px); padding: 0 .95em; text-decoration: none; }
 .masthead-tools .see-all svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }

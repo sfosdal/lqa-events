@@ -767,17 +767,16 @@
   // outlines drifting steadily left (a ticker, its ends faded): every state
   // with a here.events city (states.js, written by scripts/state-outline.mjs
   // --states), the home state first and the rest by distance, round and
-  // round; ‹ › either side glide it one state; still under the pointer; each
-  // state is a link to the map of every city (Steve: "a three state
-  // carousel with < > on the left on right make it rotate, but when clicked
-  // on go to here.events", "three states displayed at once", "scroll and
-  // fade not jump", "smooth slide, not jump, the state span should fit the
-  // width of the bigger text"). A "See All" pill before the theme pill goes
+  // round, no arrows; still under the pointer; each state is a link to the
+  // map of every city (Steve: "a three state carousel with < > on the left
+  // on right make it rotate, but when clicked on go to here.events", "three
+  // states displayed at once", "scroll and fade not jump", "smooth slide,
+  // not jump, the state span should fit the width of the bigger text", "no
+  // arrows"). A "See All" pill before the theme pill goes
   // there too. Without states.js (a city not yet synced) the home state
   // stands alone, still.
   var CITIES_URL = 'https://here.events/';
   var DRIFT_PX_S = 9; // the strip's pace: about a state every two seconds
-  var GLIDE_PX_S = 120; // an arrow's glide
   function carouselStates() { // [home, then the others nearest first] by the states' centres
     var all = typeof LQAStates !== 'undefined' ? LQAStates : null, home = CITY.state;
     if (!all || !all[home]) return CITY.stateOutline ? [{ name: home || '', d: CITY.stateOutline }] : [];
@@ -793,7 +792,7 @@
       var box = document.createElement('span'); box.className = 'eyebrow-states' + (moves ? ' is-carousel' : '');
       var view = document.createElement('span'); view.className = 'es-view';
       var track = document.createElement('span'); track.className = 'es-track'; view.appendChild(track);
-      var links = [], at = 0, offset = 0, slot = 0, glide = 0, paused = false, last = 0, raf = 0;
+      var links = [], at = 0, offset = 0, slot = 0, paused = false, last = 0, raf = 0;
       var instant = matchMedia('(prefers-reduced-motion: reduce)').matches;
       function makeLink() {
         var a = document.createElement('a'); a.className = 'eyebrow-state'; a.href = CITIES_URL;
@@ -822,31 +821,16 @@
         fit();
       }
       function place() { track.style.transform = 'translateX(' + (-offset).toFixed(2) + 'px)'; }
-      function step(now) { // the drift, and an arrow's glide on top of it
+      function step(now) { // the drift
         var dt = Math.min(0.1, (now - last) / 1000); last = now;
-        var dx = (paused || instant) ? 0 : DRIFT_PX_S * dt;
-        if (glide) { var g = Math.min(Math.abs(glide), GLIDE_PX_S * dt) * (glide > 0 ? 1 : -1); glide -= g; dx += g; if (Math.abs(glide) < 0.01) glide = 0; }
-        offset += dx;
+        if (!(paused || instant)) offset += DRIFT_PX_S * dt;
         while (offset >= slot && slot) { offset -= slot; at++; render(); } // a state left the window: the links shift one along
-        while (offset < 0 && slot) { offset += slot; at--; render(); }
         place();
-        raf = (moves && (glide || !(paused || instant)) && !document.hidden) ? requestAnimationFrame(step) : 0;
+        raf = (moves && !(paused || instant) && !document.hidden) ? requestAnimationFrame(step) : 0;
       }
       function run() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(step); } }
-      function nudge(dir) { // an arrow: one state in that direction (instantly under reduced motion)
-        if (instant) { at += dir; render(); return; }
-        glide += dir * slot; run();
-      }
-      box.appendChild(view);
+      box.appendChild(view); // no arrows (Steve, 2026-10-12: "no arrows"): the strip drifts, and holds still under the pointer
       if (moves) {
-        var prev = document.createElement('button'), next = document.createElement('button');
-        prev.type = next.type = 'button'; prev.className = 'es-step es-prev'; next.className = 'es-step es-next';
-        prev.setAttribute('aria-label', 'Previous states'); next.setAttribute('aria-label', 'Next states');
-        prev.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
-        next.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
-        prev.addEventListener('click', function () { nudge(-1); });
-        next.addEventListener('click', function () { nudge(1); });
-        box.insertBefore(prev, view); box.appendChild(next);
         box.addEventListener('mouseenter', function () { paused = true; });
         box.addEventListener('mouseleave', function () { paused = false; run(); });
         box.addEventListener('focusin', function () { paused = true; });
