@@ -5554,6 +5554,86 @@
    "date": "2026-10-11",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1477172/boy-harsher-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "BECU 2026 Day of Purpose",
+   "date": "2026-10-12",
+   "time": "",
+   "url": "https://www.becu.org/members-matter/community-involvement/Annual-Day-of-Service",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "NAZA",
+   "date": "2026-10-12",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/naza",
+   "movie": true,
+   "end": "17:20:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-10-12",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "18:02:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Lady",
+   "date": "2026-10-12",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/lady",
+   "movie": true,
+   "end": "18:05:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Ginger Snaps",
+   "date": "2026-10-12",
+   "time": "18:30:00",
+   "url": "https://www.siff.net/programs-and-events/siff-movie-club/ginger-snaps",
+   "end": "20:18:00"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Guess What? Trivia!",
+   "date": "2026-10-12",
+   "time": "19:00:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "RUSH: Fifty Something",
+   "date": "2026-10-12",
+   "time": "19:30:00",
+   "url": "https://www.ticketmaster.com/rush-fifty-something-seattle-washington-10-12-2026/event/0F006355C70C4DD7",
+   "type": "concert",
+   "tickets": {
+    "box": 455,
+    "resale": 114,
+    "checked": "2026-10-12T23:01:05.404Z",
+    "from": 255
+   }
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Boy Harsher with True Blue and Kassie Krut",
+   "date": "2026-10-12",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1477494/boy-harsher-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Sex Pistols (Steve Jones, Paul Cook, Glen Matlock) featuring Frank Carter with Starcrawler",
+   "date": "2026-10-12",
+   "time": "20:30:00",
+   "url": "https://www.axs.com/events/909826/sex-pistols-steve-jones-paul-cook-glen-matlock-featuring-frank-carter-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
