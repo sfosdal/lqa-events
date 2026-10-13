@@ -763,76 +763,17 @@
   });
 
   // ---- the way to the other cities (Steve, 2026-10-12) ----
-  // After the eyebrow, out to the title's right edge, a strip of state
-  // outlines drifting steadily left (a ticker, its ends faded): every state
-  // with a here.events city (states.js, written by scripts/state-outline.mjs
-  // --states), the home state first and the rest by distance, round and
-  // round, no arrows; still under the pointer; each state is a link to the
-  // map of every city (Steve: "a three state carousel with < > on the left
-  // on right make it rotate, but when clicked on go to here.events", "three
-  // states displayed at once", "scroll and fade not jump", "smooth slide,
-  // not jump, the state span should fit the width of the bigger text", "no
-  // arrows"). A "See All" pill before the theme pill goes
-  // there too. Without states.js (a city not yet synced) the home state
-  // stands alone, still.
+  // An "Other Places" pill before the theme pill, to the map of every city
+  // ("See All" until 2026-10-13: "=> other places"). The strip of state
+  // outlines drifting after the eyebrow, built the same day, went away on
+  // 2026-10-13 (Steve: "this needs to go away"); the city's `state` and
+  // `stateOutline` in city.js and scripts/state-outline.mjs stay for a revisit.
   var CITIES_URL = 'https://here.events/';
-  var DRIFT_PX_S = 6; // the strip's pace: a state every three seconds or so, slow enough to be a texture
-  function carouselStates() { // [home, then the others nearest first] by the states' centres
-    var all = typeof LQAStates !== 'undefined' ? LQAStates : null, home = CITY.state;
-    if (!all || !all[home]) return CITY.stateOutline ? [{ name: home || '', d: CITY.stateOutline }] : [];
-    var h = all[home].c, k = Math.cos(h[1] * Math.PI / 180);
-    var dist = function (n) { var c = all[n].c, dx = (c[0] - h[0]) * k, dy = c[1] - h[1]; return dx * dx + dy * dy; };
-    var others = Object.keys(all).filter(function (n) { return n !== home; }).sort(function (a, b) { return dist(a) - dist(b); });
-    return [home].concat(others).map(function (n) { return { name: n, d: all[n].d }; });
-  }
   function mountCityLinks() {
-    var eyebrow = document.querySelector('.masthead .eyebrow'), states = carouselStates();
-    if (eyebrow && states.length) {
-      var moves = states.length > 1;
-      var box = document.createElement('span'); box.className = 'eyebrow-states' + (moves ? ' is-carousel' : '');
-      var view = document.createElement('span'); view.className = 'es-view';
-      var track = document.createElement('span'); track.className = 'es-track'; view.appendChild(track);
-      // The motion is one CSS animation on the compositor (smooth at any pace;
-      // a script moving the track a tenth of a pixel a frame looked jumpy —
-      // Steve, 2026-10-12: "still a little jumpy"): the track holds the whole
-      // cycle of states as many times over as the strip is wide plus one, and
-      // slides by exactly one cycle, so the end of the run is the start again.
-      var instant = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var reps = 0;
-      function makeLink(st) {
-        var a = document.createElement('a'); a.className = 'eyebrow-state'; a.href = CITIES_URL;
-        a.title = (st.name ? st.name + ' — ' : '') + 'every city on here.events';
-        a.setAttribute('aria-label', 'See all cities on here.events' + (st.name ? ' (' + st.name + ')' : ''));
-        a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + st.d + '"/></svg>';
-        return a;
-      }
-      function fill(n) { // n copies of the cycle on the track
-        if (n === reps) return;
-        reps = n; track.innerHTML = '';
-        for (var r = 0; r < n; r++) states.forEach(function (st, i) { var a = makeLink(st); if (r > 0) { a.tabIndex = -1; a.setAttribute('aria-hidden', 'true'); } track.appendChild(a); }); // one copy for the keyboard and the reader
-      }
-      function measure() {
-        if (!moves) return fill(1);
-        var first = track.firstChild || (fill(1), track.firstChild);
-        var slot = first.getBoundingClientRect().width + (parseFloat(getComputedStyle(track).columnGap) || 0);
-        var cycle = slot * states.length;
-        fill(Math.ceil(view.getBoundingClientRect().width / cycle) + 1);
-        track.style.setProperty('--cycle', cycle.toFixed(2) + 'px');
-        track.style.setProperty('--cycle-s', (cycle / DRIFT_PX_S).toFixed(1) + 's');
-      }
-      box.appendChild(view); // no arrows (Steve, 2026-10-12: "no arrows"): the strip drifts (styles.css es-drift), and holds still under the pointer (CSS)
-      eyebrow.stateLink = box; eyebrow.appendChild(box);
-      measure();
-      if (moves && !instant) {
-        track.classList.add('is-drifting');
-        if (window.ResizeObserver) new ResizeObserver(function () { measure(); }).observe(view); // the strip's width follows the title's (the Teams view swaps it)
-        else window.addEventListener('resize', function () { measure(); });
-      }
-    }
     var tools = document.querySelector('.masthead-tools'), tt = $('themeToggle');
     if (tools && tt) {
       var pill = document.createElement('a'); pill.className = 'chip see-all'; pill.href = CITIES_URL; pill.title = 'Every city on here.events';
-      pill.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>See All</span>';
+      pill.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>Other Places</span>';
       tools.insertBefore(pill, tt);
     }
   }
@@ -1182,7 +1123,6 @@
       if (!('events' in el.dataset)) el.dataset.events = el.textContent;
       var t = open ? (el.dataset.teams || el.dataset.events) : el.dataset.events;
       el.textContent = t; el.hidden = !t;
-      if (el.stateLink) el.appendChild(el.stateLink); // the state after the eyebrow rides along (mountCityLinks)
     });
     if (open) fitTeamStrip(); else fitFilterBar(); // back to the list: the bar measured its own way (a fold left from the Teams view would stick)
     $('teamsView').hidden = !open;

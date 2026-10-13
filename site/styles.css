@@ -140,20 +140,8 @@ h1 {
   font-family: var(--display); font-weight: 700; font-size: clamp(2.6rem, 7vw, 4.2rem);
   line-height: .92; text-transform: uppercase; letter-spacing: .01em; margin: 0;
 }
-.masthead-text { flex: 1 1 auto; min-width: 0; max-width: 100%; } /* takes the band's width, so the state strip on the eyebrow's line runs across to the tools (Steve, 2026-10-12: "the state scroll should extend if it looks nice, but be more subtle") */ /* a flex item would grow to its widest line and push past a phone's edge */
-/* the state strip after the eyebrow (app.js mountCityLinks, outlines from states.js): the eyebrow's line is a flex row, the strip taking the rest of it out to the title's right edge, outlines in the eyebrow's muted grey drifting left round and round, the strip's ends faded, no arrows (Steve: "no arrows"); each state a link to the map of every city, orange under the pointer (Steve, 2026-10-12: "the state icon in grey is good", "a three state carousel with < > on the left on right", "three states displayed at once", "smooth slide, not jump, the state span should fit the width of the bigger text") */
-.masthead .eyebrow { display: flex; align-items: center; gap: .3em; }
-.eyebrow-states { display: inline-flex; align-items: center; gap: .15em; flex: 1 1 0; min-width: 0; margin-right: 1.5rem; color: var(--ink-soft); opacity: .5; transition: opacity .3s; } /* faint, a texture more than a control; fuller under the pointer */
-.eyebrow-states:hover, .eyebrow-states:focus-within { opacity: 1; }
-.es-view { position: relative; display: block; flex: 1 1 0; min-width: 0; height: 1em; overflow: hidden; -webkit-mask-image: linear-gradient(to right, transparent, #000 4em, #000 calc(100% - 6em), transparent); mask-image: linear-gradient(to right, transparent, #000 4em, #000 calc(100% - 6em), transparent); } /* long fades: the strip comes out of nothing after the eyebrow and dies away before the tools */
-.es-track { position: absolute; left: 0; top: 0; display: flex; gap: .15em; }
-.es-track.is-drifting { animation: es-drift var(--cycle-s, 30s) linear infinite; will-change: transform; } /* one cycle of states per run, on the compositor; app.js sets --cycle and --cycle-s */
-.eyebrow-states:hover .es-track, .eyebrow-states:focus-within .es-track { animation-play-state: paused; }
-@keyframes es-drift { to { transform: translate3d(calc(-1 * var(--cycle, 0px)), 0, 0); } } /* out of the flow, so the strip's content never widens the eyebrow's line past the title */
-.eyebrow-state { display: block; flex: none; width: 1em; height: 1em; color: inherit; text-decoration: none; }
-.eyebrow-state svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linejoin: round; stroke-linecap: round; }
-.eyebrow-state:hover, .eyebrow-state:focus-visible { color: var(--gold); outline: none; }
-/* "See All": the pill before the theme pill, to the same map (Steve, 2026-10-12); in the pinned bar the chip's text folds away and the map glyph stays */
+.masthead-text { min-width: 0; max-width: 100%; } /* a flex item would grow to its widest line and push past a phone's edge */
+/* "Other Places" (See All until 2026-10-13): the pill before the theme pill, to the same map (Steve, 2026-10-12); in the pinned bar the chip's text folds away and the map glyph stays */
 .masthead-tools .see-all { order: 4; display: inline-flex; align-items: center; gap: .45rem; min-height: calc(1.7rem + 8px); padding: 0 .95em; text-decoration: none; }
 .masthead-tools .see-all svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
 .masthead-tools .see-all:hover { border-color: var(--ink-soft); }
@@ -1890,8 +1878,8 @@ body.sheet-open { overflow: hidden; }
   .filterbar #filterToggle svg, .filterbar #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
   /* the tools sit at the top right, on the eyebrow's line (short, so the room is there), clear of the title below; a flex row would cost the phone a line */
   .bar-title .masthead-tools { display: none; }
-  .masthead > .masthead-tools { position: absolute; top: 2.5rem; right: 0; margin: 0; } /* the See All pill alone, at the top right on the eyebrow's line (short, so the room is there) */
-  .eyebrow-states { margin-right: 0; } .es-view { -webkit-mask-image: linear-gradient(to right, transparent, #000 1.2em, #000 calc(100% - 1.5em), transparent); mask-image: linear-gradient(to right, transparent, #000 1.2em, #000 calc(100% - 1.5em), transparent); } .masthead .eyebrow { padding-right: 6.4rem; } /* a phone's titles are short, so the eyebrow's line takes the whole width and the strip runs to just short of the See All pill at the right */
+  .masthead > .masthead-tools { position: absolute; top: 2.5rem; right: 0; margin: 0; } /* the Other Places pill alone, at the top right on the eyebrow's line (short, so the room is there) */
+  .masthead .eyebrow { padding-right: 7.5rem; } /* the eyebrow's line ends short of the Other Places pill at the right (a long eyebrow, "Omaha & Lincoln", would run under it) */
   .masthead-tools .theme-toggle { display: none; } /* no theme pill on a phone (Steve, 2026-09-16): the site follows the system setting there */
   .masthead-tools .chip { min-height: 1.9rem; padding: .3em .55em; }
   /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
