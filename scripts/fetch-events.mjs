@@ -12,6 +12,7 @@ import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
 import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates, parseShowboxEvents } from './sources.mjs';
 import { mergeWithArchive, unionArchives } from './merge.mjs';
+import { feedSources, emptyListGate } from './feeds.mjs';
 import { calmTitle, isNotice } from './titles.mjs';
 import { applySchedules } from './schedules.mjs';
 import { applySetTimes } from './settimes.mjs';
@@ -422,6 +423,7 @@ const ticketmasterRooms = Object.entries(CITY.venues).filter(([, v]) => v.tm)
   .map(([label, v]) => () => ticketmasterVenue({ venueId: v.tm.id, venueMatch: v.tm.match, label, fallbackUrl: v.tm.fallbackUrl, exclude: v.tm.exclude }));
 const sources = [
   ...ticketmasterRooms,
+  ...feedSources(CITY, BROWSER_UA), // rooms with their own calendar (city.js `feed`) — none here yet; the sisters use it
   showbox,
   // McCaw Hall comes from the Seattle Center sweep below (every performance,
   // with times); its RSS only supplies the venue's own detail-page links.
@@ -474,6 +476,9 @@ const fresh = all
   .filter((e) => !isNotice(e.title)) // a closure or construction notice is information, not an event (Steve, 2026-09-18)
   .map((e) => ({ ...e, title: calmTitle(e.title) })) // shouted titles come down to Title Case (Steve, 2026-09-18)
   .filter((e) => { const k = `${e.venue}|${e.title}|${e.date}`; if (seen.has(k)) return false; seen.add(k); return true; });
+// the empty-list gate (feeds.mjs): nothing upcoming in this build's own pull means every source
+// is down — say so and stop rather than publish an empty calendar
+if (!emptyListGate(fresh, today, sources.length)) process.exit(1);
 
 // carry past events forward. Two copies of the archive: the live feed and
 // the `archive` branch's file (every past event ever published; the workflow
