@@ -788,40 +788,67 @@
     if (eyebrow && states.length) {
       var turns = states.length > STATE_SHOWN; // fewer states than the window: all of them, still
       var box = document.createElement('span'); box.className = 'eyebrow-states' + (turns ? ' is-carousel' : '');
-      var links = states.slice(0, STATE_SHOWN).map(function () {
+      var view = document.createElement('span'); view.className = 'es-view';
+      var track = document.createElement('span'); track.className = 'es-track'; view.appendChild(track);
+      // one more link than shows: the one sliding in (or out) during a turn
+      var links = states.slice(0, turns ? STATE_SHOWN + 1 : STATE_SHOWN).map(function () {
         var a = document.createElement('a'); a.className = 'eyebrow-state'; a.href = CITIES_URL;
         a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path/></svg>';
-        return a;
+        track.appendChild(a); return a;
       });
-      var at = 0, timer = null;
-      function show(i) { // the window starts at state i
-        at = (i % states.length + states.length) % states.length;
+      var at = 0, timer = null, busy = false;
+      var SLIDE_MS = 450, instant = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function render(start) { // the links carry the states from `start` on
         links.forEach(function (a, j) {
-          var st = states[(at + j) % states.length];
+          var st = states[((start + j) % states.length + states.length) % states.length];
           a.querySelector('path').setAttribute('d', st.d);
           a.title = (st.name ? st.name + ' — ' : '') + 'every city on here.events';
           a.setAttribute('aria-label', 'See all cities on here.events' + (st.name ? ' (' + st.name + ')' : ''));
-          a.classList.toggle('is-home', st.name === CITY.state);
+          a.style.opacity = '';
         });
       }
-      function turn() { box.classList.add('is-turning'); setTimeout(function () { show(at + 1); box.classList.remove('is-turning'); }, 180); }
-      function start() { stop(); if (turns && !document.hidden) timer = setInterval(turn, STATE_TURN_MS); }
+      function settle(i) { // the window at state i, no motion
+        at = (i % states.length + states.length) % states.length;
+        track.classList.add('no-anim'); track.style.transform = ''; render(at);
+        void track.offsetWidth; track.classList.remove('no-anim'); busy = false;
+      }
+      // the window slides one slot (Steve, 2026-10-12: "should scroll and fade not
+      // jump"): forward, the track moves left while the first state fades out and
+      // the fourth fades in; back, the track starts a slot left and moves right
+      function turn(dir) {
+        if (busy) return;
+        if (instant || !turns) return settle(at + dir);
+        busy = true;
+        var last = links[links.length - 1];
+        if (dir > 0) {
+          last.style.opacity = '0'; void track.offsetWidth;
+          track.style.transform = 'translateX(calc(-1 * var(--slot)))';
+          links[0].style.opacity = '0'; last.style.opacity = '';
+        } else {
+          track.classList.add('no-anim'); render(at - 1);
+          track.style.transform = 'translateX(calc(-1 * var(--slot)))'; links[0].style.opacity = '0';
+          void track.offsetWidth; track.classList.remove('no-anim');
+          track.style.transform = ''; links[0].style.opacity = ''; last.style.opacity = '0';
+        }
+        setTimeout(function () { settle(at + dir); }, SLIDE_MS + 30);
+      }
+      function start() { stop(); if (turns && !document.hidden && !instant) timer = setInterval(function () { turn(1); }, STATE_TURN_MS); }
       function stop() { if (timer) clearInterval(timer); timer = null; }
-      show(0);
+      settle(0);
       if (turns) {
         var prev = document.createElement('button'), next = document.createElement('button');
         prev.type = next.type = 'button'; prev.className = 'es-step es-prev'; next.className = 'es-step es-next';
         prev.setAttribute('aria-label', 'Previous states'); next.setAttribute('aria-label', 'Next states');
         prev.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
         next.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
-        prev.addEventListener('click', function () { show(at - 1); start(); });
-        next.addEventListener('click', function () { show(at + 1); start(); });
-        box.appendChild(prev); links.forEach(function (a) { box.appendChild(a); }); box.appendChild(next);
+        prev.addEventListener('click', function () { turn(-1); start(); });
+        next.addEventListener('click', function () { turn(1); start(); });
+        box.appendChild(prev); box.appendChild(view); box.appendChild(next);
         box.addEventListener('mouseenter', stop); box.addEventListener('mouseleave', start);
         box.addEventListener('focusin', stop); box.addEventListener('focusout', start);
         document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
-        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) start();
-      } else links.forEach(function (a) { box.appendChild(a); });
+        start();
+      } else box.appendChild(view);
       eyebrow.stateLink = box; eyebrow.appendChild(box);
     }
     var tools = document.querySelector('.masthead-tools'), tt = $('themeToggle');
