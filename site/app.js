@@ -763,18 +763,21 @@
   });
 
   // ---- the way to the other cities (Steve, 2026-10-12) ----
-  // After the eyebrow, a small carousel of state outlines, three at a time:
-  // every state with a here.events city (states.js, written by
-  // scripts/state-outline.mjs --states), the home state first and the rest
-  // by distance from it, the window sliding one state every few seconds,
-  // ‹ › either side to step it, still under the pointer; each state is a
-  // link to the map of every city (Steve: "a three state carousel with < >
-  // on the left on right make it rotate, but when clicked on go to
-  // here.events", then "three states displayed at once"). A "See All" pill
-  // before the theme pill goes there too. Without states.js (a city not yet
-  // synced) the home state stands alone.
+  // After the eyebrow, out to the title's right edge, a strip of state
+  // outlines drifting steadily left (a ticker, its ends faded): every state
+  // with a here.events city (states.js, written by scripts/state-outline.mjs
+  // --states), the home state first and the rest by distance, round and
+  // round; ‹ › either side glide it one state; still under the pointer; each
+  // state is a link to the map of every city (Steve: "a three state
+  // carousel with < > on the left on right make it rotate, but when clicked
+  // on go to here.events", "three states displayed at once", "scroll and
+  // fade not jump", "smooth slide, not jump, the state span should fit the
+  // width of the bigger text"). A "See All" pill before the theme pill goes
+  // there too. Without states.js (a city not yet synced) the home state
+  // stands alone, still.
   var CITIES_URL = 'https://here.events/';
-  var STATE_TURN_MS = 4000, STATE_SHOWN = 3;
+  var DRIFT_PX_S = 9; // the strip's pace: about a state every two seconds
+  var GLIDE_PX_S = 120; // an arrow's glide
   function carouselStates() { // [home, then the others nearest first] by the states' centres
     var all = typeof LQAStates !== 'undefined' ? LQAStates : null, home = CITY.state;
     if (!all || !all[home]) return CITY.stateOutline ? [{ name: home || '', d: CITY.stateOutline }] : [];
@@ -786,70 +789,75 @@
   function mountCityLinks() {
     var eyebrow = document.querySelector('.masthead .eyebrow'), states = carouselStates();
     if (eyebrow && states.length) {
-      var turns = states.length > STATE_SHOWN; // fewer states than the window: all of them, still
-      var box = document.createElement('span'); box.className = 'eyebrow-states' + (turns ? ' is-carousel' : '');
+      var moves = states.length > 1;
+      var box = document.createElement('span'); box.className = 'eyebrow-states' + (moves ? ' is-carousel' : '');
       var view = document.createElement('span'); view.className = 'es-view';
       var track = document.createElement('span'); track.className = 'es-track'; view.appendChild(track);
-      // one more link than shows: the one sliding in (or out) during a turn
-      var links = states.slice(0, turns ? STATE_SHOWN + 1 : STATE_SHOWN).map(function () {
+      var links = [], at = 0, offset = 0, slot = 0, glide = 0, paused = false, last = 0, raf = 0;
+      var instant = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function makeLink() {
         var a = document.createElement('a'); a.className = 'eyebrow-state'; a.href = CITIES_URL;
         a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path/></svg>';
-        track.appendChild(a); return a;
-      });
-      var at = 0, timer = null, busy = false;
-      var SLIDE_MS = 450, instant = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      function render(start) { // the links carry the states from `start` on
+        return a;
+      }
+      function render() { // the links carry the states from `at` on, round and round
         links.forEach(function (a, j) {
-          var st = states[((start + j) % states.length + states.length) % states.length];
+          var st = states[((at + j) % states.length + states.length) % states.length];
           a.querySelector('path').setAttribute('d', st.d);
           a.title = (st.name ? st.name + ' — ' : '') + 'every city on here.events';
           a.setAttribute('aria-label', 'See all cities on here.events' + (st.name ? ' (' + st.name + ')' : ''));
-          a.style.opacity = '';
         });
       }
-      function settle(i) { // the window at state i, no motion
-        at = (i % states.length + states.length) % states.length;
-        track.classList.add('no-anim'); track.style.transform = ''; render(at);
-        void track.offsetWidth; track.classList.remove('no-anim'); busy = false;
+      function fit() { // as many links as the strip is wide, plus the two in motion at its ends
+        var want = moves ? Math.ceil(view.getBoundingClientRect().width / Math.max(slot, 1)) + 2 : 1;
+        if (!moves) want = states.length;
+        while (links.length < want) { var a = makeLink(); links.push(a); track.appendChild(a); }
+        while (links.length > want) track.removeChild(links.pop());
+        render();
       }
-      // the window slides one slot (Steve, 2026-10-12: "should scroll and fade not
-      // jump"): forward, the track moves left while the first state fades out and
-      // the fourth fades in; back, the track starts a slot left and moves right
-      function turn(dir) {
-        if (busy) return;
-        if (instant || !turns) return settle(at + dir);
-        busy = true;
-        var last = links[links.length - 1];
-        if (dir > 0) {
-          last.style.opacity = '0'; void track.offsetWidth;
-          track.style.transform = 'translateX(calc(-1 * var(--slot)))';
-          links[0].style.opacity = '0'; last.style.opacity = '';
-        } else {
-          track.classList.add('no-anim'); render(at - 1);
-          track.style.transform = 'translateX(calc(-1 * var(--slot)))'; links[0].style.opacity = '0';
-          void track.offsetWidth; track.classList.remove('no-anim');
-          track.style.transform = ''; links[0].style.opacity = ''; last.style.opacity = '0';
-        }
-        setTimeout(function () { settle(at + dir); }, SLIDE_MS + 30);
+      function measure() {
+        var a = links[0] || makeLink(); if (!a.parentNode) track.appendChild(a);
+        if (!links.length) links.push(a);
+        slot = a.getBoundingClientRect().width + parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 0;
+        fit();
       }
-      function start() { stop(); if (turns && !document.hidden && !instant) timer = setInterval(function () { turn(1); }, STATE_TURN_MS); }
-      function stop() { if (timer) clearInterval(timer); timer = null; }
-      settle(0);
-      if (turns) {
+      function place() { track.style.transform = 'translateX(' + (-offset).toFixed(2) + 'px)'; }
+      function step(now) { // the drift, and an arrow's glide on top of it
+        var dt = Math.min(0.1, (now - last) / 1000); last = now;
+        var dx = (paused || instant) ? 0 : DRIFT_PX_S * dt;
+        if (glide) { var g = Math.min(Math.abs(glide), GLIDE_PX_S * dt) * (glide > 0 ? 1 : -1); glide -= g; dx += g; if (Math.abs(glide) < 0.01) glide = 0; }
+        offset += dx;
+        while (offset >= slot && slot) { offset -= slot; at++; render(); } // a state left the window: the links shift one along
+        while (offset < 0 && slot) { offset += slot; at--; render(); }
+        place();
+        raf = (moves && (glide || !(paused || instant)) && !document.hidden) ? requestAnimationFrame(step) : 0;
+      }
+      function run() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(step); } }
+      function nudge(dir) { // an arrow: one state in that direction (instantly under reduced motion)
+        if (instant) { at += dir; render(); return; }
+        glide += dir * slot; run();
+      }
+      box.appendChild(view);
+      if (moves) {
         var prev = document.createElement('button'), next = document.createElement('button');
         prev.type = next.type = 'button'; prev.className = 'es-step es-prev'; next.className = 'es-step es-next';
         prev.setAttribute('aria-label', 'Previous states'); next.setAttribute('aria-label', 'Next states');
         prev.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
         next.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
-        prev.addEventListener('click', function () { turn(-1); start(); });
-        next.addEventListener('click', function () { turn(1); start(); });
-        box.appendChild(prev); box.appendChild(view); box.appendChild(next);
-        box.addEventListener('mouseenter', stop); box.addEventListener('mouseleave', start);
-        box.addEventListener('focusin', stop); box.addEventListener('focusout', start);
-        document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
-        start();
-      } else box.appendChild(view);
+        prev.addEventListener('click', function () { nudge(-1); });
+        next.addEventListener('click', function () { nudge(1); });
+        box.insertBefore(prev, view); box.appendChild(next);
+        box.addEventListener('mouseenter', function () { paused = true; });
+        box.addEventListener('mouseleave', function () { paused = false; run(); });
+        box.addEventListener('focusin', function () { paused = true; });
+        box.addEventListener('focusout', function () { paused = false; run(); });
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) run(); });
+        if (window.ResizeObserver) new ResizeObserver(function () { measure(); }).observe(view); // the strip's width follows the title's (the Teams view swaps it)
+        else window.addEventListener('resize', function () { measure(); });
+      }
       eyebrow.stateLink = box; eyebrow.appendChild(box);
+      measure(); place();
+      if (moves) run();
     }
     var tools = document.querySelector('.masthead-tools'), tt = $('themeToggle');
     if (tools && tt) {
