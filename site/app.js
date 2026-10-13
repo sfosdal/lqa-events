@@ -776,7 +776,7 @@
   // there too. Without states.js (a city not yet synced) the home state
   // stands alone, still.
   var CITIES_URL = 'https://here.events/';
-  var DRIFT_PX_S = 9; // the strip's pace: about a state every two seconds
+  var DRIFT_PX_S = 6; // the strip's pace: a state every three seconds or so, slow enough to be a texture
   function carouselStates() { // [home, then the others nearest first] by the states' centres
     var all = typeof LQAStates !== 'undefined' ? LQAStates : null, home = CITY.state;
     if (!all || !all[home]) return CITY.stateOutline ? [{ name: home || '', d: CITY.stateOutline }] : [];
