@@ -792,56 +792,42 @@
       var box = document.createElement('span'); box.className = 'eyebrow-states' + (moves ? ' is-carousel' : '');
       var view = document.createElement('span'); view.className = 'es-view';
       var track = document.createElement('span'); track.className = 'es-track'; view.appendChild(track);
-      var links = [], at = 0, offset = 0, slot = 0, paused = false, last = 0, raf = 0;
+      // The motion is one CSS animation on the compositor (smooth at any pace;
+      // a script moving the track a tenth of a pixel a frame looked jumpy —
+      // Steve, 2026-10-12: "still a little jumpy"): the track holds the whole
+      // cycle of states as many times over as the strip is wide plus one, and
+      // slides by exactly one cycle, so the end of the run is the start again.
       var instant = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      function makeLink() {
+      var reps = 0;
+      function makeLink(st) {
         var a = document.createElement('a'); a.className = 'eyebrow-state'; a.href = CITIES_URL;
-        a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path/></svg>';
+        a.title = (st.name ? st.name + ' — ' : '') + 'every city on here.events';
+        a.setAttribute('aria-label', 'See all cities on here.events' + (st.name ? ' (' + st.name + ')' : ''));
+        a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + st.d + '"/></svg>';
         return a;
       }
-      function render() { // the links carry the states from `at` on, round and round
-        links.forEach(function (a, j) {
-          var st = states[((at + j) % states.length + states.length) % states.length];
-          a.querySelector('path').setAttribute('d', st.d);
-          a.title = (st.name ? st.name + ' — ' : '') + 'every city on here.events';
-          a.setAttribute('aria-label', 'See all cities on here.events' + (st.name ? ' (' + st.name + ')' : ''));
-        });
-      }
-      function fit() { // as many links as the strip is wide, plus the two in motion at its ends
-        var want = moves ? Math.ceil(view.getBoundingClientRect().width / Math.max(slot, 1)) + 2 : 1;
-        if (!moves) want = states.length;
-        while (links.length < want) { var a = makeLink(); links.push(a); track.appendChild(a); }
-        while (links.length > want) track.removeChild(links.pop());
-        render();
+      function fill(n) { // n copies of the cycle on the track
+        if (n === reps) return;
+        reps = n; track.innerHTML = '';
+        for (var r = 0; r < n; r++) states.forEach(function (st, i) { var a = makeLink(st); if (r > 0) { a.tabIndex = -1; a.setAttribute('aria-hidden', 'true'); } track.appendChild(a); }); // one copy for the keyboard and the reader
       }
       function measure() {
-        var a = links[0] || makeLink(); if (!a.parentNode) track.appendChild(a);
-        if (!links.length) links.push(a);
-        slot = a.getBoundingClientRect().width + parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 0;
-        fit();
+        if (!moves) return fill(1);
+        var first = track.firstChild || (fill(1), track.firstChild);
+        var slot = first.getBoundingClientRect().width + (parseFloat(getComputedStyle(track).columnGap) || 0);
+        var cycle = slot * states.length;
+        fill(Math.ceil(view.getBoundingClientRect().width / cycle) + 1);
+        track.style.setProperty('--cycle', cycle.toFixed(2) + 'px');
+        track.style.setProperty('--cycle-s', (cycle / DRIFT_PX_S).toFixed(1) + 's');
       }
-      function place() { track.style.transform = 'translateX(' + (-offset).toFixed(2) + 'px)'; }
-      function step(now) { // the drift
-        var dt = Math.min(0.1, (now - last) / 1000); last = now;
-        if (!(paused || instant)) offset += DRIFT_PX_S * dt;
-        while (offset >= slot && slot) { offset -= slot; at++; render(); } // a state left the window: the links shift one along
-        place();
-        raf = (moves && !(paused || instant) && !document.hidden) ? requestAnimationFrame(step) : 0;
-      }
-      function run() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(step); } }
-      box.appendChild(view); // no arrows (Steve, 2026-10-12: "no arrows"): the strip drifts, and holds still under the pointer
-      if (moves) {
-        box.addEventListener('mouseenter', function () { paused = true; });
-        box.addEventListener('mouseleave', function () { paused = false; run(); });
-        box.addEventListener('focusin', function () { paused = true; });
-        box.addEventListener('focusout', function () { paused = false; run(); });
-        document.addEventListener('visibilitychange', function () { if (!document.hidden) run(); });
+      box.appendChild(view); // no arrows (Steve, 2026-10-12: "no arrows"): the strip drifts (styles.css es-drift), and holds still under the pointer (CSS)
+      eyebrow.stateLink = box; eyebrow.appendChild(box);
+      measure();
+      if (moves && !instant) {
+        track.classList.add('is-drifting');
         if (window.ResizeObserver) new ResizeObserver(function () { measure(); }).observe(view); // the strip's width follows the title's (the Teams view swaps it)
         else window.addEventListener('resize', function () { measure(); });
       }
-      eyebrow.stateLink = box; eyebrow.appendChild(box);
-      measure(); place();
-      if (moves) run();
     }
     var tools = document.querySelector('.masthead-tools'), tt = $('themeToggle');
     if (tools && tt) {
