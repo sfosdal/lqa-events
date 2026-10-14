@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mergeWithArchive, unionArchives } from './merge.mjs';
+import { mergeWithArchive, unionArchives, eventKey } from './merge.mjs';
 
 const TODAY = '2026-08-24';
 const CUTOFF = '2025-08-24';
@@ -54,6 +54,15 @@ test('fresh data wins when a past event is still listed by a source', () => {
   const out = mergeWithArchive(fresh, archived, TODAY, CUTOFF);
   assert.equal(out.length, 1);
   assert.equal(out[0].url, 'fresh-url');
+});
+
+test('two showings of one show on one day are two events: the key carries the clock', () => {
+  const six = { ...ev('2026-08-25', 'Show'), time: '18:30' }, nine = { ...ev('2026-08-25', 'Show'), time: '21:00:00' };
+  assert.notEqual(eventKey(six), eventKey(nine));
+  assert.equal(eventKey(six), eventKey({ ...six, time: '18:30:00' })); // with or without seconds, the same key
+  const out = mergeWithArchive([six, nine], [], TODAY, CUTOFF);
+  assert.deepEqual(out.map((e) => e.time), ['18:30', '21:00:00']);
+  assert.equal(unionArchives([six], [nine]).length, 2);
 });
 
 test('result is sorted by date then time', () => {

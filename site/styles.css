@@ -1694,6 +1694,31 @@ html:not(.teams-open) .team-strip { display: none; }
 }
 .sheet-actions .chip { background: var(--mist); border-color: var(--line); }
 body.sheet-open { overflow: hidden; }
+/* the city switcher (2026-10-14): the same sheet from the Other Places pill and the footer's More Cities — a bottom
+   sheet on phones, a centred dialog on wider screens (the listing sheet becomes a pop placed by app.js there; this
+   one has no card to hang off) — the map link first, then every city grouped by state, this site marked, not linked */
+.sheet.city-sheet { position: fixed; inset: 0; z-index: 35; display: flex; align-items: flex-end; justify-content: center; } /* over the sticky bar (30), under the toast (40) */
+.sheet.city-sheet[hidden] { display: none; }
+.sheet.city-sheet .sheet-back { display: block; }
+.city-map { display: inline-flex; align-items: center; gap: .5rem; margin: 0 0 1rem; font-weight: 600; text-decoration: none; color: var(--ink); }
+.city-map svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: var(--gold); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.city-map:hover { color: var(--gold); }
+.city-groups { columns: 9rem; column-gap: 1.4rem; margin-bottom: 1.1rem; } /* columns, not a grid: a tall state (Washington) packs beside the short ones instead of pushing a row down */
+.city-groups section { break-inside: avoid; margin-bottom: .9rem; }
+.city-groups h3 { margin: 0 0 .3rem; font: 500 .68rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.city-groups ul { list-style: none; margin: 0; padding: 0; }
+.city-groups li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .45rem; padding: .18rem 0; font-size: .95rem; }
+.city-groups li a { color: var(--ink); text-decoration: none; font-weight: 600; }
+.city-groups li a:hover { color: var(--gold); }
+.city-groups li small { font-family: var(--mono); font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.city-groups li.is-here span { font-weight: 700; color: var(--gold); }
+.city-groups li.is-soon span { color: var(--ink-soft); }
+.city-close { display: block; margin: 0 auto; }
+@media (min-width: 641px) {
+  .sheet.city-sheet { align-items: center; }
+  .sheet.city-sheet .sheet-card { width: min(46rem, calc(100vw - 2rem)); max-height: 85vh; max-height: 85dvh; overflow: auto; border-radius: 12px; padding: 1.1rem 1.4rem 1.2rem; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
+  .city-close { display: none; } /* outside click or Esc, like every other pop */
+}
 /* wider screens: the same sheet is a pop hanging off the clicked card — the
    site's floating-panel look (see .pop), placed by app.js, no backdrop, no
    Close button (outside click / Esc, like every other pop) */

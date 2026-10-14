@@ -62,10 +62,15 @@ const VTIMEZONE = DST_OFF ? [
   'END:VTIMEZONE',
 ];
 
-export function eventUid(e) {
-  const hash = createHash('sha1').update(`${e.venue}|${e.title}|${e.date}`).digest('hex');
+// The UID hashes venue|title|date (stable across runs, so a subscribed calendar keeps its entries). When two showings
+// of one show share a day (the de-dupe key carries the clock since 2026-10-14) every one of them hashes the clock in
+// too, so the feed never repeats a UID; a show with one showing keeps the UID it always had.
+export function eventUid(e, withTime = false) {
+  const base = `${e.venue}|${e.title}|${e.date}`;
+  const hash = createHash('sha1').update(withTime ? `${base}|${(e.time || '').slice(0, 5)}` : base).digest('hex');
   return `${hash}@${CITY.ics.uidDomain}`;
 }
+const dayKey = (e) => `${e.venue}|${e.title}|${e.date}`;
 
 export function escapeText(s) {
   return String(s)
@@ -113,8 +118,8 @@ function addHours(date, time, hours) {
   return `${t.getFullYear()}${pad(t.getMonth() + 1)}${pad(t.getDate())}T${pad(t.getHours())}${pad(t.getMinutes())}00`;
 }
 
-function eventLines(e, dtstamp) {
-  const lines = ['BEGIN:VEVENT', `UID:${eventUid(e)}`, `DTSTAMP:${dtstamp}`];
+function eventLines(e, dtstamp, twice) {
+  const lines = ['BEGIN:VEVENT', `UID:${eventUid(e, twice)}`, `DTSTAMP:${dtstamp}`];
   if (e.time) {
     const [h, m] = e.time.split(':');
     lines.push(`DTSTART;TZID=${TZID}:${dateDigits(e.date)}T${pad(h)}${pad(m)}00`);
@@ -150,6 +155,8 @@ function eventLines(e, dtstamp) {
 }
 
 export function buildIcs(events, now = new Date(), { calname = CITY.ics.name } = {}) {
+  const showings = new Map(); // how many showings each venue|title|date has in this feed
+  for (const e of events) showings.set(dayKey(e), (showings.get(dayKey(e)) || 0) + 1);
   const dtstamp =
     `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}` +
     `T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
@@ -165,7 +172,7 @@ export function buildIcs(events, now = new Date(), { calname = CITY.ics.name } =
     'REFRESH-INTERVAL;VALUE=DURATION:P1D', // the feed is rebuilt once a day at noon (Steve, 2026-10-11)
     'X-PUBLISHED-TTL:P1D',
     ...VTIMEZONE,
-    ...events.flatMap((e) => eventLines(e, dtstamp)),
+    ...events.flatMap((e) => eventLines(e, dtstamp, showings.get(dayKey(e)) > 1)),
     'END:VCALENDAR',
   ];
   return lines.map(foldLine).join('\r\n') + '\r\n';

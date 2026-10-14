@@ -67,13 +67,19 @@ export function tribeType(categories, allowed) {
 /**
  * Map The Events Calendar's REST rows to feed events. Daily rows — a title
  * the venue repeats on more than `maxRepeat` dates (box-office hours, an
- * exhibition's run) — are left out, as is anything `drop` matches.
+ * exhibition's run) — are left out, as is anything `drop` matches. A venue
+ * feed names its room (`venueLabel`); a city-wide feed (`venueLabel` null —
+ * a resort's calendar covering several rooms) takes each row's own venue
+ * name, for the aliases to fold, and `rooms` (a regex on that name) keeps
+ * only the rooms wanted from it.
  * Returns [{ venue, title, date, time, url, type? }].
  */
 export function mapTribeEvents(rows, venueLabel, opts = {}) {
-  const { drop, maxRepeat = 8, types, defaultType } = opts;
+  const { drop, maxRepeat = 8, types, defaultType, rooms, label = venueLabel || 'feed' } = opts;
   const allowed = types ? new Set(types) : null;
-  const list = (Array.isArray(rows) ? rows : rows?.events || []).filter((e) => e && e.title && e.start_date && e.status !== 'draft' && !e.hide_from_listings);
+  const rowVenue = (e) => decode(e.venue?.venue || e.venue?.name || '');
+  const list = (Array.isArray(rows) ? rows : rows?.events || []).filter((e) => e && e.title && e.start_date && e.status !== 'draft' && !e.hide_from_listings)
+    .filter((e) => !rooms || rooms.test(rowVenue(e)));
   const dates = new Map();
   for (const e of list) { const t = decode(e.title); if (!dates.has(t)) dates.set(t, new Set()); dates.get(t).add(e.start_date.slice(0, 10)); }
   const out = [];
@@ -83,12 +89,12 @@ export function mapTribeEvents(rows, venueLabel, opts = {}) {
     if (drop && drop.test(title)) continue;
     if (dates.get(title).size > maxRepeat) { daily++; continue; }
     const [date, clock] = e.start_date.split(' ');
-    const ev = { venue: venueLabel, title, date, time: e.all_day || !clock ? '' : clock.slice(0, 5), url: e.website || e.url || '' };
+    const ev = { venue: venueLabel || rowVenue(e), title, date, time: e.all_day || !clock ? '' : clock.slice(0, 5), url: e.website || e.url || '' };
     const type = tribeType(e.categories, allowed) || defaultType;
     if (type) ev.type = type;
     out.push(ev);
   }
-  if (daily) console.log(`${venueLabel}: ${daily} daily rows (hours, exhibitions) left out`);
+  if (daily) console.log(`${label}: ${daily} daily rows (hours, exhibitions) left out`);
   return out;
 }
 
@@ -104,7 +110,7 @@ async function fetchTribe(url, ua, label, opts) {
     all.push(...(data.events || []));
     if (page >= (data.total_pages || 1)) break;
   }
-  const evs = mapTribeEvents(all, label, opts);
+  const evs = mapTribeEvents(all, opts.venue, { ...opts, label });
   console.log(`${label} (Events Calendar): ${evs.length} events from ${all.length} rows`);
   return evs;
 }
@@ -241,7 +247,7 @@ export function feedSources(city, ua) {
   const run = (feed, label, venue) => () => {
     const fn = KINDS[feed.kind];
     if (!fn) { console.error(`${label}: unknown feed kind "${feed.kind}"`); return []; }
-    return fn(feed.url, ua, label, { drop: feed.drop, maxRepeat: feed.maxRepeat, types, defaultType: venue ? city.venues[venue].type : undefined, feed, venue });
+    return fn(feed.url, ua, label, { drop: feed.drop, maxRepeat: feed.maxRepeat, rooms: feed.rooms, types, defaultType: venue ? city.venues[venue].type : feed.type, feed, venue });
   };
   return [
     ...Object.entries(city.venues || {}).filter(([, v]) => v.feed).map(([label, v]) => run(v.feed, label, label)),

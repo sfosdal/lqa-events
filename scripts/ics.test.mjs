@@ -83,6 +83,14 @@ test('UID is stable across runs and unique per venue|title|date', () => {
   assert.match(eventUid(timed), /^[0-9a-f]{40}@fosdal\.net$/);
 });
 
+test('a second showing on the same day gets its own UID; a lone showing keeps the old one', () => {
+  const six = { ...timed, time: '18:30' }, nine = { ...timed, time: '21:00' };
+  const ics = buildIcs([six, nine], NOW);
+  const uids = [...ics.matchAll(/^UID:(.+)$/gm)].map((m) => m[1]);
+  assert.equal(uids.length, 2); assert.notEqual(uids[0], uids[1]);
+  assert.match(buildIcs([six], NOW), new RegExp('UID:' + eventUid(six).replace('.', '\\.')));
+});
+
 test('text fields are escaped per RFC 5545', () => {
   const tricky = { ...allDay, title: 'A, B; C\\D\nE' };
   const ics = buildIcs([tricky], NOW);

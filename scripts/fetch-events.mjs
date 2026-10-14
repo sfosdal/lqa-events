@@ -11,7 +11,7 @@
 import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
 import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates, parseShowboxEvents } from './sources.mjs';
-import { mergeWithArchive, unionArchives } from './merge.mjs';
+import { mergeWithArchive, unionArchives, eventKey } from './merge.mjs';
 import { feedSources, emptyListGate } from './feeds.mjs';
 import { calmTitle, isNotice } from './titles.mjs';
 import { applySchedules } from './schedules.mjs';
@@ -475,7 +475,7 @@ const fresh = all
   .filter((e) => e.date && e.date >= cutoff && e.date <= horizon)
   .filter((e) => !isNotice(e.title)) // a closure or construction notice is information, not an event (Steve, 2026-09-18)
   .map((e) => ({ ...e, title: calmTitle(e.title) })) // shouted titles come down to Title Case (Steve, 2026-09-18)
-  .filter((e) => { const k = `${e.venue}|${e.title}|${e.date}`; if (seen.has(k)) return false; seen.add(k); return true; });
+  .filter((e) => { const k = eventKey(e); if (seen.has(k)) return false; seen.add(k); return true; }); // venue|title|date|clock (merge.mjs): a second showing on one day is kept
 // the empty-list gate (feeds.mjs): nothing upcoming in this build's own pull means every source
 // is down — say so and stop rather than publish an empty calendar
 if (!emptyListGate(fresh, today, sources.length)) process.exit(1);

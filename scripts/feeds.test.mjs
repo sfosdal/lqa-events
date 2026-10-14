@@ -45,6 +45,19 @@ test('films are a movie where the city lists that type, arts where it does not; 
   assert.equal(ev.type, 'arts');
 });
 
+test('a city-wide Tribe feed takes the venue from each row and `rooms` keeps only the rooms wanted', () => {
+  const rows = [
+    { title: 'Nerd Halen', start_date: '2026-10-17 20:00:00', venue: { venue: 'The Shag Room' }, url: 'https://x/e/1' },
+    { title: 'Samantha Fish', start_date: '2026-10-24 19:00:00', venue: { venue: '24 Oxford' }, url: 'https://x/e/2' },
+    { title: 'Treaty Oak Revival', start_date: '2026-10-23 19:00:00', venue: { venue: 'The Theater' }, url: 'https://x/e/3' },
+  ];
+  const all = mapTribeEvents(rows, null, { defaultType: 'concert' });
+  assert.deepEqual(all.map((e) => e.venue), ['The Shag Room', '24 Oxford', 'The Theater']);
+  assert.equal(all[0].type, 'concert');
+  const some = mapTribeEvents(rows, null, { rooms: /shag room|24 oxford/i });
+  assert.deepEqual(some.map((e) => e.title), ['Nerd Halen', 'Samantha Fish']);
+});
+
 test('feedSources makes one source per venue with a feed and names an unknown kind', () => {
   const city = { types: [{ key: 'arts' }], venues: { A: { tm: { id: 'x' } }, B: { feed: { kind: 'tribe', url: 'https://x/wp-json/tribe/events/v1/events' } }, C: { feed: { kind: 'nope', url: 'https://x/' } } } };
   const srcs = feedSources(city, 'ua');

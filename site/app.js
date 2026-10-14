@@ -770,12 +770,69 @@
   // 2026-10-13 (Steve: "this needs to go away"); the city's `state` and
   // `stateOutline` in city.js and scripts/state-outline.mjs stay for a revisit.
   var CITIES_URL = 'https://here.events/';
+  // Since 2026-10-14 the pill (and a More Cities link in the footer) opens a
+  // sheet of every city on here.events, grouped by state, from cities.js
+  // (generated in lqa by scripts/cities-list.mjs from the map's cities.json;
+  // Steve: "city switcher: add it"); without cities.js the pill is a plain link
+  // to the map, as before.
+  var CITIES = window.LQACities, citySheet = null;
+  function buildCitySheet() {
+    var sh = document.createElement('div'); sh.id = 'citySheet'; sh.className = 'sheet city-sheet'; sh.hidden = true;
+    var back = document.createElement('div'); back.className = 'sheet-back'; sh.appendChild(back);
+    var card = document.createElement('div'); card.className = 'sheet-card'; card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true'); card.setAttribute('aria-labelledby', 'citySheetTitle'); card.tabIndex = -1; sh.appendChild(card);
+    var eyebrow = document.createElement('p'); eyebrow.className = 'sheet-venue'; eyebrow.textContent = 'here.events'; card.appendChild(eyebrow);
+    var h = document.createElement('h2'); h.className = 'sheet-title'; h.id = 'citySheetTitle'; h.textContent = 'Other Places'; card.appendChild(h);
+    var map = document.createElement('a'); map.className = 'city-map'; map.href = CITIES.map || CITIES_URL;
+    map.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>The map — every city on here.events</span>';
+    card.appendChild(map);
+    var groups = document.createElement('div'); groups.className = 'city-groups'; card.appendChild(groups);
+    var byState = {}, order = [];
+    (CITIES.cities || []).forEach(function (c) { if (!byState[c.stateName]) { byState[c.stateName] = []; order.push(c.stateName); } byState[c.stateName].push(c); });
+    order.forEach(function (st) {
+      var sec = document.createElement('section'); var h3 = document.createElement('h3'); h3.textContent = st; sec.appendChild(h3);
+      var ul = document.createElement('ul');
+      byState[st].forEach(function (c) {
+        var li = document.createElement('li'), here = c.key === CITY.key;
+        var a = document.createElement(here || !c.live ? 'span' : 'a'); a.textContent = c.name;
+        if (here) { li.className = 'is-here'; a.setAttribute('aria-current', 'page'); a.title = 'This site'; }
+        else if (!c.live) { li.className = 'is-soon'; a.title = 'Coming soon'; }
+        else a.href = c.url;
+        li.appendChild(a);
+        if (c.city && c.name.indexOf(c.city) < 0) { var n = document.createElement('small'); n.textContent = c.city; li.appendChild(n); } // Lower Queen Anne · Seattle
+        if (!c.live) { var soon = document.createElement('small'); soon.textContent = 'soon'; li.appendChild(soon); }
+        ul.appendChild(li);
+      });
+      sec.appendChild(ul); groups.appendChild(sec);
+    });
+    var close = document.createElement('button'); close.type = 'button'; close.className = 'chip city-close'; close.textContent = 'Close'; card.appendChild(close);
+    function off() { sh.hidden = true; document.body.classList.remove('sheet-open'); document.removeEventListener('keydown', esc); }
+    function esc(e) { if (e.key === 'Escape') off(); }
+    back.addEventListener('click', off); close.addEventListener('click', off);
+    sh.open = function () { sh.hidden = false; document.body.classList.add('sheet-open'); document.addEventListener('keydown', esc); card.focus(); };
+    document.body.appendChild(sh);
+    return sh;
+  }
+  function openCitySheet(e) {
+    if (!CITIES || !CITIES.cities || !CITIES.cities.length) return; // no list: the link goes to the map
+    e.preventDefault();
+    if (!citySheet) citySheet = buildCitySheet();
+    citySheet.open();
+  }
   function mountCityLinks() {
     var tools = document.querySelector('.masthead-tools'), tt = $('themeToggle');
     if (tools && tt) {
-      var pill = document.createElement('a'); pill.className = 'chip see-all'; pill.href = CITIES_URL; pill.title = 'Every city on here.events';
+      var pill = document.createElement('a'); pill.className = 'chip see-all'; pill.href = CITIES_URL; pill.title = CITIES ? 'Every city on here.events' : 'Every city on here.events (the map)';
       pill.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>Other Places</span>';
+      pill.addEventListener('click', openCitySheet);
       tools.insertBefore(pill, tt);
+    }
+    // the footer: a More Cities link ahead of Advertise, the same sheet
+    var links = document.querySelector('footer .foot-links');
+    if (links) {
+      var more = document.createElement('a'); more.className = 'foot-link'; more.id = 'moreCities'; more.href = CITIES_URL; more.title = 'Every city on here.events';
+      more.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>More Cities</span>';
+      more.addEventListener('click', openCitySheet);
+      links.insertBefore(more, links.firstChild);
     }
   }
   mountCityLinks();

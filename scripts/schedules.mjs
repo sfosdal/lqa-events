@@ -17,6 +17,7 @@
 import { TEAMS, CITY } from './badges.mjs';
 import { cleanMarks } from './marks.mjs';
 import { addClips } from './highlights.mjs';
+import { lnbpSeason, lnbpForm } from './lnbp.mjs'; // the LNBP backend (El Calor de Cancún)
 import { readFileSync } from 'node:fs';
 
 const UA = CITY.userAgent;
@@ -690,6 +691,7 @@ const FORM_KINDS = {
   milb: (t) => milbForm(t.form.league, t.form.id, t.form.leagueName, t.slug, t.label),
   digitalshift: (t) => digitalshiftForm(t.form.service, t.form.id, t.slug, t.label),
   seawolves: () => seawolvesForm(),
+  lnbp: (t) => lnbpForm(t.form.id),
 };
 export const FORM = CITY.teams.filter((t) => t.form && FORM_KINDS[t.form.kind]).map((t) => ({ slug: t.slug, fetch: () => FORM_KINDS[t.form.kind](t) }));
 
@@ -786,6 +788,7 @@ const SEASON_KINDS = {
   hockeytech: (t) => hockeytech(t.season.league, t.season.key, t.season.id, WHL_OPTS(t.season.league), t.season.leagueName || t.season.league.toUpperCase()),
   digitalshift: (t) => digitalshift(t.season.service, t.season.id, t.venue),
   seawolves: () => seawolves(),
+  lnbp: (t) => lnbpSeason(t.season.id),
 };
 export const SOURCES = CITY.teams.filter((t) => t.season && SEASON_KINDS[t.season.kind]).map((t) => ({ slug: t.slug, fetch: () => SEASON_KINDS[t.season.kind](t) }));
 

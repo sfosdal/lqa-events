@@ -12,7 +12,12 @@
  * `statusSince` (when the cancellation was first detected, ISO time) —
  * a status seen for the first time is stamped `nowISO`.
  */
-const key = (e) => `${e.venue}|${e.title}|${e.date}`;
+// The event key every de-dupe agrees on (the fresh list in fetch-events.mjs, the archive union and merge here, the
+// ICS UID when two showings share a day): venue, title, date AND the clock — a 6:30 and a 9:00 showing of one show
+// are two events, not a duplicate (Steve, 2026-10-14: "add the time to the key"; the 9 PM showing of a two-show night
+// at the Teatro de Cancún was being folded). The clock is cut to HH:MM, as sources give it with or without seconds.
+export const eventKey = (e) => `${e.venue}|${e.title}|${e.date}|${(e.time || '').slice(0, 5)}`;
+const key = eventKey;
 
 export function mergeWithArchive(fresh, archived, todayStr, cutoffStr, nowISO = new Date().toISOString()) {
   const freshKeys = new Set(fresh.map(key));
