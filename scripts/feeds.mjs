@@ -31,7 +31,7 @@
  *                its REST API (Field Arts & Events Hall answered 401 to every /wp-json call from
  *                2026-10-14; the export still served). The list view exports the month that
  *                holds `tribe-bar-date`, from that date on, at most 30 events — so the fetch
- *                walks month by month for eight months, and again from the day after the last
+ *                walks month by month for a year, and again from the day after the last
  *                event when a month came back full. Rows are reshaped like REST rows and mapped
  *                the same way; URL is the event page, LOCATION's first part the room,
  *                CATEGORIES the type.
@@ -168,7 +168,7 @@ const addDays = (ymd, n) => { const d = new Date(`${ymd}T00:00:00Z`); d.setUTCDa
 const nextMonth = (ymd) => { const d = new Date(`${ymd.slice(0, 7)}-01T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() + 1); return d.toISOString().slice(0, 10); };
 async function fetchIcs(url, ua, label, opts) {
   const today = new Date().toISOString().slice(0, 10);
-  const until = nextMonth(addDays(today, 7 * 30)); // eight months out, like the build's horizon
+  const until = nextMonth(addDays(today, 365)); // a year out, the build's horizon (fetch-events WINDOW_DAYS)
   const rows = [];
   const seen = new Set();
   let bar = today;
