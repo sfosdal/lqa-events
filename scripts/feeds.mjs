@@ -27,6 +27,14 @@
  *                room, a Spanish date and a commented-out category; the clock sits on the event
  *                page ("6:30 P.M. y 9:00 P.M." = two showings, one listing each). `cities` picks
  *                the towns to keep, each with an optional suffix for its room names.
+ *   ics        — The Events Calendar's iCal export (`<list url>?ical=1`) for a site that has shut
+ *                its REST API (Field Arts & Events Hall answered 401 to every /wp-json call from
+ *                2026-10-14; the export still served). The list view exports the month that
+ *                holds `tribe-bar-date`, from that date on, at most 30 events — so the fetch
+ *                walks month by month for eight months, and again from the day after the last
+ *                event when a month came back full. Rows are reshaped like REST rows and mapped
+ *                the same way; URL is the event page, LOCATION's first part the room,
+ *                CATEGORIES the type.
  *   jsonld     — any page that marks its events up as schema.org Event (eticket.mx's city and
  *                venue listings): name, startDate as the wall clock, url, location.name, the
  *                offers' availability (every one SoldOut = sold out), eventStatus. `at` keeps only
@@ -112,6 +120,76 @@ async function fetchTribe(url, ua, label, opts) {
   }
   const evs = mapTribeEvents(all, opts.venue, { ...opts, label });
   console.log(`${label} (Events Calendar): ${evs.length} events from ${all.length} rows`);
+  return evs;
+}
+
+// ---- The Events Calendar's iCal export ----
+/**
+ * A minimal iCalendar reader: folded lines joined, VEVENTs as { PROP: { value, params } }
+ * with the text escapes (\, \; \\ \n) undone. Enough for a Tribe export; not a full RFC 5545.
+ */
+export function parseIcs(text) {
+  const lines = String(text || '').replace(/\r\n?/g, '\n').replace(/\n[ \t]/g, '').split('\n');
+  const out = [];
+  let cur = null;
+  for (const line of lines) {
+    if (line === 'BEGIN:VEVENT') { cur = {}; continue; }
+    if (line === 'END:VEVENT') { if (cur) out.push(cur); cur = null; continue; }
+    if (!cur) continue;
+    const i = line.indexOf(':');
+    if (i < 0) continue;
+    const [name, ...params] = line.slice(0, i).split(';');
+    const value = line.slice(i + 1).replace(/\\n/gi, '\n').replace(/\\([,;\\])/g, '$1');
+    cur[name] = { value, params: Object.fromEntries(params.map((q) => q.split('='))) };
+  }
+  return out;
+}
+
+/** Tribe iCal VEVENTs as rows shaped like its REST rows, for mapTribeEvents. */
+export function icsToTribeRows(text) {
+  return parseIcs(text).map((v) => {
+    const dt = v.DTSTART;
+    if (!v.SUMMARY || !dt) return null;
+    const m = dt.value.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2}))?/);
+    if (!m) return null;
+    const allDay = dt.params.VALUE === 'DATE' || !m[4];
+    return {
+      title: decode(v.SUMMARY.value), start_date: `${m[1]}-${m[2]}-${m[3]} ${allDay ? '00:00' : `${m[4]}:${m[5]}`}:00`,
+      all_day: allDay, status: 'publish', url: (v.URL || {}).value || '',
+      venue: { venue: decode(((v.LOCATION || {}).value || '').split(',')[0]) },
+      categories: ((v.CATEGORIES || {}).value || '').split(',').map((n) => n.trim()).filter(Boolean).map((name) => ({ name })),
+      uid: (v.UID || {}).value || '',
+    };
+  }).filter(Boolean);
+}
+
+const ICS_PAGE = 30; // the export's cap per call
+const addDays = (ymd, n) => { const d = new Date(`${ymd}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const nextMonth = (ymd) => { const d = new Date(`${ymd.slice(0, 7)}-01T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() + 1); return d.toISOString().slice(0, 10); };
+async function fetchIcs(url, ua, label, opts) {
+  const today = new Date().toISOString().slice(0, 10);
+  const until = nextMonth(addDays(today, 7 * 30)); // eight months out, like the build's horizon
+  const rows = [];
+  const seen = new Set();
+  let bar = today;
+  for (let call = 1; call <= 30 && bar < until; call++) {
+    const u = new URL(url);
+    u.searchParams.set('ical', '1'); u.searchParams.set('tribe-bar-date', bar);
+    const res = await fetch(u, { headers: { 'User-Agent': ua, Accept: 'text/calendar,*/*' } });
+    if (!res.ok) { console.error(`${label} from ${bar} HTTP ${res.status}`); break; }
+    const batch = icsToTribeRows(await res.text()).filter((r) => r.start_date >= today);
+    let last = bar;
+    for (const r of batch) {
+      const k = r.uid || `${r.title}|${r.start_date}`;
+      if (seen.has(k)) continue;
+      seen.add(k); rows.push(r);
+      if (r.start_date.slice(0, 10) > last) last = r.start_date.slice(0, 10);
+    }
+    // a full page may have cut the month short: go on from the day after its last event; else the next month
+    bar = batch.length >= ICS_PAGE && last > bar ? addDays(last, 1) : nextMonth(bar);
+  }
+  const evs = mapTribeEvents(rows, opts.venue, { ...opts, label });
+  console.log(`${label} (iCal): ${evs.length} events from ${rows.length} rows`);
   return evs;
 }
 
@@ -235,7 +313,7 @@ async function fetchJsonLd(url, ua, label, opts) {
   return evs;
 }
 
-const KINDS = { tribe: fetchTribe, tusboletos: fetchTusboletos, jsonld: fetchJsonLd };
+const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd };
 
 /**
  * One source thunk per city.js venue with a `feed` (its listings pinned to that row) and one per

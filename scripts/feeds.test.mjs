@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents } from './feeds.mjs';
+import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows } from './feeds.mjs';
 
 const room = 'Field Arts &#038; Events Hall &#8211; Donna M. Morris Theater';
 const row = (title, start, extra = {}) => ({ title, start_date: start, status: 'publish', all_day: false, venue: { venue: room }, categories: [], ...extra });
@@ -142,4 +142,31 @@ test('the empty-list gate stops a build whose own pull has nothing upcoming, unl
   assert.equal(emptyListGate([{ date: '2026-09-01' }], today, 6, {}), false);
   assert.equal(emptyListGate([], today, 6, { ALLOW_EMPTY_LIST: '1' }), true);
   assert.equal(emptyListGate([], today, 0, {}), true); // nothing configured: nothing to judge
+});
+
+const ICS = [
+  'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VTIMEZONE', 'TZID:America/Los_Angeles', 'BEGIN:DAYLIGHT', 'DTSTART:20250309T100000', 'END:DAYLIGHT', 'END:VTIMEZONE',
+  'BEGIN:VEVENT', 'DTSTART;TZID=America/Los_Angeles:20261014T190000', 'DTEND;TZID=America/Los_Angeles:20261014T210000',
+  'UID:10008056-1792004400@fieldhallevents.org', 'SUMMARY:Cozy Comedy Presents: Gary Gulman: The Grandiloquent ', ' Tour',
+  'URL:https://fieldhallevents.org/event/gary-gulman/', 'LOCATION:Field Arts &amp; Events Hall – Donna M. Morris Theater\\, 201 W Front Street\\, Port Angeles',
+  'CATEGORIES:Comedy,Guest Presenter', 'END:VEVENT',
+  'BEGIN:VEVENT', 'DTSTART;VALUE=DATE:20261101', 'UID:2@x', 'SUMMARY:Open House', 'END:VEVENT',
+  'BEGIN:VEVENT', 'DTSTART;TZID=America/Los_Angeles:20261015T100000', 'UID:3@x', 'SUMMARY:Box Office Open', 'END:VEVENT',
+  'END:VCALENDAR'].join('\r\n');
+
+test('a Tribe iCal export reads like its REST rows: folded lines joined, escapes undone, the room from LOCATION, all-day dates', () => {
+  const rows = icsToTribeRows(ICS);
+  assert.equal(parseIcs(ICS).length, 3); // the VTIMEZONE's DTSTART is not an event
+  assert.equal(rows[0].title, 'Cozy Comedy Presents: Gary Gulman: The Grandiloquent Tour');
+  assert.equal(rows[0].start_date, '2026-10-14 19:00:00');
+  assert.equal(rows[0].venue.venue, 'Field Arts & Events Hall – Donna M. Morris Theater');
+  assert.deepEqual(rows[0].categories.map((c) => c.name), ['Comedy', 'Guest Presenter']);
+  assert.equal(rows[0].url, 'https://fieldhallevents.org/event/gary-gulman/');
+  assert.equal(rows[1].all_day, true);
+  assert.equal(rows[1].start_date, '2026-11-01 00:00:00');
+  const evs = mapTribeEvents(rows, 'Field Arts & Events Hall', { drop: /^box office open$/i, types: ['arts', 'concert'] });
+  assert.deepEqual(evs.map((e) => [e.title, e.date, e.time, e.type || null]), [
+    ['Cozy Comedy Presents: Gary Gulman: The Grandiloquent Tour', '2026-10-14', '19:00', 'arts'],
+    ['Open House', '2026-11-01', '', null],
+  ]);
 });
