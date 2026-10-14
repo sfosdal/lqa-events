@@ -5641,6 +5641,81 @@
    "date": "2026-10-12",
    "time": "20:30:00",
    "url": "https://www.axs.com/events/909826/sex-pistols-steve-jones-paul-cook-glen-matlock-featuring-frank-carter-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Kelsey Lu Live on KEXP (Open To The Public)",
+   "date": "2026-10-13",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/kelsey-lu-live-on-kexp-kexp_513734/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Screen Printing Open Session",
+   "date": "2026-10-13",
+   "time": "16:00:00",
+   "url": "https://link.dice.fm/Nc777a1ae9fe",
+   "type": "community",
+   "end": "20:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Lady",
+   "date": "2026-10-13",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/lady",
+   "movie": true,
+   "end": "17:50:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Primetime",
+   "date": "2026-10-13",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/primetime",
+   "movie": true,
+   "end": "18:17:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "NAZA",
+   "date": "2026-10-13",
+   "time": "16:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/naza",
+   "movie": true,
+   "end": "18:05:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Amélie Farren, Lilith Max, Rabbitology ",
+   "date": "2026-10-13",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/Bdbe8a560e10",
+   "type": "concert",
+   "end": "23:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Young Miko - Late Checkout Tour",
+   "date": "2026-10-13",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/young-miko-late-checkout-tour-seattle-washington-10-13-2026/event/0F006482B3FBE83D",
+   "type": "concert",
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-10-13T22:07:47.457Z",
+    "from": 50.55
+   }
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Mon Rovîa with Sydney Rose, Sarah Julia",
+   "date": "2026-10-13",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1435107/mon-rovia-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
