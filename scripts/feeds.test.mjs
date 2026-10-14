@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mapTribeEvents, tribeType, feedSources, emptyListGate } from './feeds.mjs';
+import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents } from './feeds.mjs';
 
 const room = 'Field Arts &#038; Events Hall &#8211; Donna M. Morris Theater';
 const row = (title, start, extra = {}) => ({ title, start_date: start, status: 'publish', all_day: false, venue: { venue: room }, categories: [], ...extra });
@@ -50,6 +50,77 @@ test('feedSources makes one source per venue with a feed and names an unknown ki
   const srcs = feedSources(city, 'ua');
   assert.equal(srcs.length, 2);
   assert.deepEqual(srcs[1](), []); // unknown kind: an empty source, logged
+  const wide = feedSources({ types: [], venues: {}, feeds: [{ kind: 'tusboletos', url: 'https://x/eventos', label: 'TusBoletos' }, { kind: 'nope', url: 'https://x/' }] }, 'ua');
+  assert.equal(wide.length, 2); // city-wide feeds (cancun-events) make a source each too
+  assert.deepEqual(wide[1](), []);
+});
+
+// ---- TusBoletos (cancun-events, 2026-10-13) ----
+const CARD = (title, city, room, date, tag, slug) => `<div class="thumbnail"><img class="imgevento" src="/x.jpg" alt="${title}">
+  <div class="intro caption line-bottom"><h4>${title}</h4><p>…</p></div>
+  <div class="detail caption">  <p><i class="fa fa-star"></i>&nbsp; <b>${city}</b></p>
+    <p class="hidden-xs">&nbsp;<i class="fa fa-map-marker"></i>&nbsp; ${room}</p> <!--<p class="hidden-xs"><i class="fa fa-tag"></i>&nbsp; ${tag}</p>-->
+    <p class="fecha"><i class="fa fa-calendar"></i>&nbsp; ${date}</p><a class="btn btn-primary btn-block visible-xs" role="button" href="/evento/${slug}">Ver evento</a>
+  </p></div></div>`;
+const LIST = CARD('“Una Eva y Tres Galanes” - Cancún', 'Cancún, Quintana Roo', 'Teatro de Cancún', 'Jueves 15 de Octubre del 2026', '“Una Eva y Tres Galanes”', 'una-eva-y-tres-galanes-cancun')
+  + CARD('Harlem Globetrotters - Mérida', 'Mérida, Yucatán', 'Poliforum Zamná', 'Miercoles 14 de Octubre del 2026', 'Deportes', 'harlem-globetrotters-merida')
+  + CARD('Zenón y sus Amigos "Dance Party Tributo" - Playa de Carmen', 'Playa del Carmen, Quintana Roo', 'Teatro de la Ciudad', 'Martes 20 de Octubre del 2026', 'Concierto', 'zenon-playa-del-carmen')
+  + CARD('Insite - Cancún', 'Cancún, Quintana Roo', 'Teatro Alamos Cancún', 'Viernes 09 de Octubre del 2026', 'Concierto', 'insite-cancun');
+const CITIES = [{ match: /^canc[uú]n,/i }, { match: /^playa del carmen,/i, suffix: ', Playa del Carmen' }];
+
+test('Spanish dates: a dated day, a range without a year (every day in it), a wrong month', () => {
+  assert.deepEqual(spanishDates('Jueves 15 de Octubre del 2026'), ['2026-10-15']);
+  assert.deepEqual(spanishDates('Sábado 07 de Noviembre del 2026'), ['2026-11-07']);
+  assert.deepEqual(spanishDates('Del miercoles 28 de octubre al jueves 29 de octubre', '2026-10-13'), ['2026-10-28', '2026-10-29']);
+  assert.deepEqual(spanishDates('Del viernes 27 de noviembre al domingo 29 de noviembre', '2026-10-13'), ['2026-11-27', '2026-11-28', '2026-11-29']);
+  assert.deepEqual(spanishDates('Sábado 9 de enero', '2026-12-20'), ['2027-01-09']); // next January, not last
+  assert.deepEqual(spanishDates('el 3 de brumario'), []);
+});
+
+test('the TusBoletos list: only the chosen towns, the city suffix off the title, the quotes off a quoted title, the room suffixed for the second town', () => {
+  const cards = parseTusboletosList(LIST, { cities: CITIES });
+  assert.deepEqual(cards.map((c) => [c.title, c.room, c.dateText, c.tag]), [
+    ['Una Eva y Tres Galanes', 'Teatro de Cancún', 'Jueves 15 de Octubre del 2026', '“Una Eva y Tres Galanes”'],
+    ['Zenón y sus Amigos "Dance Party Tributo"', 'Teatro de la Ciudad, Playa del Carmen', 'Martes 20 de Octubre del 2026', 'Concierto'],
+    ['Insite', 'Teatro Alamos Cancún', 'Viernes 09 de Octubre del 2026', 'Concierto'],
+  ]);
+  assert.equal(cards[0].href, 'https://www.tusboletos.mx/evento/una-eva-y-tres-galanes-cancun');
+  assert.equal(parseTusboletosList(LIST).length, 4); // no cities: every card
+});
+
+test('the event page clock: two showings, one, none', () => {
+  const page = (t) => `<p><span style="color:#f68428"><i class="fa fa-clock-o"></i></span>&nbsp;\n   ${t}                                        </p>`;
+  assert.deepEqual(tusboletosTimes(page('6:30 P.M. y 9:00 P.M.')), ['18:30', '21:00']);
+  assert.deepEqual(tusboletosTimes(page('4:00 P.M  y 6:30 P.M')), ['16:00', '18:30']);
+  assert.deepEqual(tusboletosTimes(page('8:00 P.M.')), ['20:00']);
+  assert.deepEqual(tusboletosTimes(page('12:00 P.M.')), ['12:00']);
+  assert.deepEqual(tusboletosTimes(page('11:00 A.M.')), ['11:00']);
+  assert.deepEqual(tusboletosTimes('<p>no clock</p>'), []);
+});
+
+// ---- schema.org Event markup (eticket.mx) ----
+test('a page in ISO-8859-15 is decoded by its declared charset; UTF-8 is the default', () => {
+  const latin = new Uint8Array([...new TextEncoder().encode('<meta charset="iso-8859-15"><p>Canc'), 0xfa, ...new TextEncoder().encode('n</p>')]);
+  assert.equal(decodeBody(latin.buffer).slice(-13), '<p>Cancún</p>');
+  assert.equal(decodeBody(new TextEncoder().encode('<p>Cancún</p>').buffer, 'text/html; charset=utf-8'), '<p>Cancún</p>');
+  assert.equal(decodeBody(new TextEncoder().encode('<p>Cancún</p>').buffer), '<p>Cancún</p>');
+});
+
+test('schema.org events: the wall-clock start, the room, sold out when every offer is, a cancelled status, the `at` filter', () => {
+  const ev = (name, start, loc, avail, status) => ({ '@context': 'https://schema.org', '@type': 'Event', name, startDate: start, endDate: start.slice(0, 10), url: 'https://www.eticket.mx/masinformacion.aspx?idevento=1', eventStatus: status || 'https://schema.org/EventScheduled', location: { '@type': 'Place', name: loc }, offers: avail.map((a) => ({ '@type': 'Offer', availability: 'https://schema.org/' + a })) });
+  const html = `<html><script type="application/ld+json"> {"@type":"Organization","name":"eticket"} </script><script type="application/ld+json"> ${JSON.stringify([
+    ev('PANTEÓN ROCOCÓ', '2026-11-14T20:30:00-05:00', 'Plaza de Toros Cancún', ['InStock', 'InStock']),
+    ev('YURIDIA', '2026-11-26T21:00:00-05:00', 'Plaza de Toros Cancún', ['SoldOut', 'SoldOut']),
+    ev('FERIA', '2026-12-02', 'Foro Mérida', ['InStock'], 'https://schema.org/EventCancelled'),
+  ])} </script></html>`;
+  const out = parseJsonLdEvents(html);
+  assert.deepEqual(out.map((e) => [e.title, e.date, e.time, e.venue, !!e.soldOut, e.status || '']), [
+    ['PANTEÓN ROCOCÓ', '2026-11-14', '20:30', 'Plaza de Toros Cancún', false, ''],
+    ['YURIDIA', '2026-11-26', '21:00', 'Plaza de Toros Cancún', true, ''],
+    ['FERIA', '2026-12-02', '', 'Foro Mérida', false, 'cancelled'],
+  ]);
+  assert.equal(parseJsonLdEvents(html, { at: /canc[uú]n/i }).length, 2);
+  assert.equal(parseJsonLdEvents(html, { venue: 'Plaza de Toros Cancún' })[2].venue, 'Plaza de Toros Cancún'); // a per-venue feed pins the row
 });
 
 test('the empty-list gate stops a build whose own pull has nothing upcoming, unless allowed', () => {

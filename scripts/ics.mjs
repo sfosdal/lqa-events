@@ -18,7 +18,9 @@ const DEFAULT_DURATION_H = 3;
 // Rolling tz definition so clients that ignore IANA names still get the
 // zone's standard/daylight names: the US zones, which all change on the
 // second Sunday of March and the first of November — bar Hawaii (and
-// Arizona), which keep standard time all year (honolulu-events, 2026-10-11).
+// Arizona), which keep standard time all year (honolulu-events, 2026-10-11),
+// and Quintana Roo, on Eastern Standard Time all year since 2015
+// (cancun-events, 2026-10-13).
 const US_ZONES = {
   'America/Los_Angeles': ['-0800', '-0700', 'PST', 'PDT'],
   'America/Denver': ['-0700', '-0600', 'MST', 'MDT'],
@@ -27,6 +29,7 @@ const US_ZONES = {
   'America/New_York': ['-0500', '-0400', 'EST', 'EDT'],
   'America/Anchorage': ['-0900', '-0800', 'AKST', 'AKDT'],
   'Pacific/Honolulu': ['-1000', null, 'HST', null],
+  'America/Cancun': ['-0500', null, 'EST', null],
 };
 const [STD_OFF, DST_OFF, STD_NAME, DST_NAME] = US_ZONES[TZID] || US_ZONES['America/Los_Angeles'];
 const VTIMEZONE = DST_OFF ? [

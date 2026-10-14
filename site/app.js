@@ -353,6 +353,7 @@
     return d;
   }
   function holidaysFor(y) {
+    if (CITY.holidays) return CITY.holidays(y).map(function (h) { return { date: ymd(h[0]), title: h[1] }; }); // a city outside the US brings its own list (cancun-events, 2026-10-13: city.js holidays(y) → [[Date, name], …])
     var thanks = nthWeekday(y, 10, 4, 4);
     var friday = new Date(thanks); friday.setDate(thanks.getDate() + 1);
     return [

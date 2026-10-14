@@ -32,3 +32,9 @@ test('notices are recognised by title', () => {
   assert.equal(isNotice('Closer: The Musical'), false);
   assert.equal(isNotice('Monster Jam'), false);
 });
+
+test('a shouted Spanish title comes down whole: its articles and prepositions are words, not acronyms', () => {
+  assert.equal(calmTitle('EL MUNDO DE FEDE VIGEVANI'), 'El Mundo De Fede Vigevani');
+  assert.equal(calmTitle('YURIDIA - LAS CARTAS SOBRE LA MESA TOUR'), 'Yuridia - Las Cartas Sobre La Mesa Tour');
+  assert.equal(calmTitle('PANTEÓN ROCOCÓ'), 'Panteón Rococó');
+});
