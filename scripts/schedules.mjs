@@ -267,12 +267,12 @@ export function normalizePwhl(games, teamId, playoff, pre, opts = PWHL_OPTS) {
 // standings row yet (an expansion side) counts as a .500 club. app.js shows
 // it as it shows ESPN's, with a tilde. games: normalizePwhl's; rows: the standings
 // (team_id, games_played, points); returns the games, odds attached.
-export function pwhlOdds(games, rows, teamId, leagueName = 'PWHL') {
+export function pwhlOdds(games, rows, teamId, leagueName = 'PWHL', oppId = (g) => (String(g.opp?.logo || '').match(/logos\/(\d+)\.\w+/) || [])[1]) { // oppId: the opponent's standings id from its game (HockeyTech numbers the crests; GameSheet games carry it, see gamesheet())
   const share = {};
   for (const r of rows || []) { const gp = Number(r.games_played); if (gp) share[String(r.team_id)] = Number(r.points) / (2 * gp); }
   const us = share[String(teamId)];
   return (games || []).map((g) => {
-    const oid = (String(g.opp?.logo || '').match(/logos\/(\d+)\.\w+/) || [])[1], them = share[oid] ?? 0.5; // a club with no row (an expansion side) is taken as league-average
+    const oid = oppId(g), them = share[oid] ?? 0.5; // a club with no row (an expansion side) is taken as league-average
     if (g.res || us == null) return g;
     const edge = 0.03, a = Math.min(0.97, Math.max(0.03, us + (g.home ? edge : -edge))), b = Math.min(0.97, Math.max(0.03, them + (g.home ? -edge : edge)));
     const p = Math.round((a - a * b) / (a + b - 2 * a * b) * 100);
@@ -321,6 +321,77 @@ const pwhl = (teamId) => hockeytech('pwhl', '446521baf8c38984', teamId, PWHL_OPT
 // The junior leagues' crests are at the same host under the league's code; no
 // club page is linked (chl.ca turns scripts away, and the clubs' own sites vary).
 const WHL_OPTS = (league) => ({ logo: (oid) => `https://assets.leaguestat.com/${league}/logos/${oid}.png` });
+
+// GameSheet (the NAHL moved its stats there in 2024; HockeyTech's NAHL feed
+// is dead): gateway.gamesheet.io/stats with the league site's public partner
+// key. /seasons?filter[leagues]= lists the league's seasons (the regular one
+// is_active; the Robertson Cup and the exhibition slate are seasons of their
+// own), /unifiedschedule?filter[seasons]=&filter[teams]= a club's games —
+// timeStampZulu is the true instant, status scheduled|final, home/visitor
+// carry title, abbr, logo, goals and result "W"/"L", goalsByPeriod gains
+// ot_1 / so keys when it went past regulation — and /standings?filter
+// [seasons]=&filter[divisions]= the division table (stats W-L-OTL-SOL in
+// GTYPEREC, the home split in HREC, rank by points).
+const GS = 'https://gateway.gamesheet.io/stats';
+async function gsJson(path, key) {
+  const r = await fetch(`${GS}/${path}`, { headers: { 'X-Gamesheet-Partner-ApiKey': key, accept: 'application/json' } });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const d = await r.json();
+  if (d.status !== 'success') throw new Error(d.errors?.[0]?.message || d.status || 'not a success');
+  return d.data;
+}
+export function normalizeGamesheet(rows, teamId, playoff, pre) {
+  return (rows || []).filter((g) => String(g.home?.id) === String(teamId) || String(g.visitor?.id) === String(teamId)).map((g) => {
+    const home = String(g.home.id) === String(teamId);
+    const us = home ? g.home : g.visitor, them = home ? g.visitor : g.home;
+    const tbd = !g.timeStampZulu || /tbd|tba/i.test(g.time || '');
+    const final = g.status === 'final' && Number.isFinite(Number(us.goals)) && Number.isFinite(Number(them.goals));
+    const periods = Object.keys(us.goalsByPeriod || {});
+    const ot = periods.includes('so') ? 'SO' : periods.some((k) => /^ot/.test(k)) ? 'OT' : null;
+    return withResult({
+      date: tbd ? seattleDate(new Date(g.date + ' 12:00 UTC').toISOString()) : seattleDate(g.timeStampZulu), time: tbd ? null : seattleTime(g.timeStampZulu), tbd, home,
+      ...(playoff ? { playoff: true } : pre ? { pre: true } : {}),
+      opp: { name: them.title, short: String(them.title || '').split(' ').slice(-1)[0], abbrev: them.abbr, logo: them.logo, id: String(them.id) },
+      venue: String(g.location || '').trim(),
+    }, final ? { us: Number(us.goals), them: Number(them.goals), won: Number(us.goals) > Number(them.goals), ...(ot ? { ot } : {}) } : null);
+  });
+}
+async function gamesheetSeasons(league, key) { // newest first; the active regular season flagged
+  return (await gsJson(`seasons?filter[leagues]=${league}`, key)).map((x) => ({ id: Number(x.id), name: x.title, active: !!x.is_active, start: x.start })).sort((a, b) => b.id - a.id);
+}
+const gsRegular = (x) => !/exhibition|pre-?season|cup|playoff|prospect|showcase|all-?star/i.test(x.name);
+async function gamesheetStandings(league, key, seasonId, division) {
+  const d = await gsJson(`standings?filter[seasons]=${seasonId}${division ? `&filter[divisions]=${division}` : ''}`, key);
+  return d.flatMap((x) => x.standings || []);
+}
+async function gamesheet(league, key, teamId, division, leagueName) {
+  const seasons = await gamesheetSeasons(league, key);
+  const reg = seasons.find((x) => x.active && gsRegular(x)) || seasons.find(gsRegular);
+  if (!reg) throw new Error('no regular season listed');
+  const runs = [reg, ...seasons.filter((x) => x.id > reg.id && (/cup|playoff/i.test(x.name) || /exhibition|pre-?season/i.test(x.name)))];
+  const out = [];
+  for (const r of runs) out.push(...normalizeGamesheet(await gsJson(`unifiedschedule?filter[seasons]=${r.id}&filter[teams]=${teamId}`, key), teamId, /cup|playoff/i.test(r.name), /exhibition|pre-?season/i.test(r.name)));
+  let rows = [];
+  try { rows = (await gamesheetStandings(league, key, reg.id, division)).map((s) => ({ team_id: s.team?.id, games_played: s.stats?.GP, points: s.stats?.PTS })); }
+  catch (e) { console.error(`schedules: gamesheet ${league} standings skipped — ${e.message}`); }
+  const games = pwhlOdds(out, rows, teamId, leagueName, (g) => g.opp?.id).map((g) => { const { id, ...opp } = g.opp; return { ...g, opp }; }); // the opponent's id served the odds only
+  return games.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+}
+export function gamesheetForm(s) { // a standings row → the form block (W-L-OTL-SOL, ranked in the division)
+  const st = s.stats || {}, n = Number(s.rank);
+  const where = s.division?.title ? `the ${String(s.division.title).replace(/^the /i, '')}` : 'the league';
+  return { record: st.GTYPEREC || [st.W, st.L, st.OTL, st.SOL].join('-'), standing: n ? `${ordinal(n)} in ${where}` : undefined, ...(st.HREC ? { home: st.HREC } : {}),
+    club: { ...(s.team?.title ? { name: s.team.title } : {}), ...(s.team?.abbreviation ? { abbr: s.team.abbreviation } : {}) } };
+}
+async function gamesheetFormFetch(league, key, teamId, division, slug, label) {
+  const seasons = await gamesheetSeasons(league, key);
+  const reg = seasons.find((x) => x.active && gsRegular(x)) || seasons.find(gsRegular);
+  if (!reg) throw new Error('no regular season listed');
+  const s = (await gamesheetStandings(league, key, reg.id, division)).find((x) => String(x.team?.id) === String(teamId));
+  if (!s) throw new Error('team not in standings');
+  const news = await clubNews(slug, label, Promise.resolve([]));
+  return { ...gamesheetForm(s), ...(news.length ? { news } : {}) };
+}
 
 // Where each club stands: { record: 'W-L', standing: '3rd in AL West',
 // home?: 'W-L' }. ESPN's team endpoint carries a record summary and a
@@ -688,6 +759,7 @@ const FORM_KINDS = {
   espn: (t) => espnForm(t.espn.sport, t.espn.league, Number(t.espn.id), t.label, t.slug),
   pwhl: (t) => pwhlForm(t.form.id, t.slug, t.label),
   hockeytech: (t) => hockeytechFormFetch(t.form.league, t.form.key, t.form.id, t.slug, t.label),
+  gamesheet: (t) => gamesheetFormFetch(t.form.league, t.form.key, t.form.id, t.form.division, t.slug, t.label),
   milb: (t) => milbForm(t.form.league, t.form.id, t.form.leagueName, t.slug, t.label),
   digitalshift: (t) => digitalshiftForm(t.form.service, t.form.id, t.slug, t.label),
   seawolves: () => seawolvesForm(),
@@ -786,6 +858,7 @@ const SEASON_KINDS = {
   espn: (t) => espn(t.espn.sport, t.espn.league, Number(t.espn.id)),
   pwhl: (t) => pwhl(t.season.id),
   hockeytech: (t) => hockeytech(t.season.league, t.season.key, t.season.id, WHL_OPTS(t.season.league), t.season.leagueName || t.season.league.toUpperCase()),
+  gamesheet: (t) => gamesheet(t.season.league, t.season.key, t.season.id, t.season.division, t.season.leagueName || 'the league'),
   digitalshift: (t) => digitalshift(t.season.service, t.season.id, t.venue),
   seawolves: () => seawolves(),
   lnbp: (t) => lnbpSeason(t.season.id),

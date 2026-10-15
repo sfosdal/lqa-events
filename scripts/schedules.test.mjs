@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseYoutube, matchYoutube, parseNflPage, titleDate } from './highlights.mjs';
-import { pickMoves, bigMove, shortMove, applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, htRegular, pwhlOdds, hockeytechForm, normalizeDigitalshift, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
+import { pickMoves, bigMove, shortMove, applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, htRegular, pwhlOdds, hockeytechForm, normalizeGamesheet, gamesheetForm, normalizeDigitalshift, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
 const LQA = globalThis.LQACity.key === 'lqa' ? false : 'Lower Queen Anne data — skipped for another city'; // the city-dependent cases below
 // The fixtures' expected clocks are written in Seattle wall time; a sister
 // city in another zone (city.js `tz`) reads the same instant on its own clock.
@@ -446,4 +446,29 @@ test('ESPN: a 23:59 Eastern clock with timeValid still true is a placeholder too
   const [g] = normalizeEspn({ events: [{ date: '2026-11-03T04:59Z', competitions: [{ venue: { fullName: 'Stan Sheriff Center' }, timeValid: true, status: { type: { detail: 'Mon, November 2nd at 11:59 PM EST' } },
     competitors: [{ team: { id: '62' }, homeAway: 'home' }, { team: { id: '2567', displayName: 'Seattle U Redhawks' }, homeAway: 'away' }] }] }] }, '62');
   assert.equal(g.date, '2026-11-02'); assert.equal(g.time, null); assert.equal(g.tbd, true);
+});
+
+test('normalizeGamesheet: a GameSheet row → the game shape in the city zone, OT/SO read from the period keys, the opponent id kept for the odds', () => {
+  const side = (id, title, abbr, goals, periods) => ({ id, title, abbr, logo: `https://img/${id}`, goals, result: null, goalsByPeriod: periods, overallRecord: '0-0-0-0' });
+  const rows = [
+    { gameId: 1, date: 'Sep 18, 2026', time: '7:05 PM', status: 'final', location: 'Nelson Center', timeStampZulu: '2026-09-19T00:05:00Z', gameType: 'regular_season',
+      home: side(1, 'Springfield Jr. Blues', 'SPR', 4, { 1: 0, 2: 2, 3: 2, final: 4 }), visitor: side(523270, 'Anchorage Wolverines', 'ANC', 7, { 1: 3, 2: 2, 3: 2, final: 7 }) },
+    { gameId: 2, date: 'Sep 23, 2026', time: '7:00 PM', status: 'final', location: 'Sullivan Arena', timeStampZulu: '2026-09-24T03:00:00Z',
+      home: side(523270, 'Anchorage Wolverines', 'ANC', 3, { 1: 1, 2: 0, 3: 1, ot_1: 0, so: 2, final: 3 }), visitor: side(9, 'Iowa Falls Pistol Shrimp', 'IF', 2, { 1: 1, 2: 1, 3: 0, ot_1: 0, so: 1, final: 2 }) },
+    { gameId: 3, date: 'Nov 6, 2026', time: '7:00 PM', status: 'scheduled', location: 'Sullivan Arena', timeStampZulu: '2026-11-07T04:00:00Z',
+      home: side(523270, 'Anchorage Wolverines', 'ANC', null, {}), visitor: side(7, 'Fairbanks Ice Dogs', 'FAI', null, {}) },
+    { gameId: 4, date: 'Nov 8, 2026', time: '7:00 PM', status: 'scheduled', location: 'Elsewhere', timeStampZulu: '2026-11-09T04:00:00Z', home: side(7, 'Fairbanks Ice Dogs', 'FAI', null, {}), visitor: side(8, 'Kenai River Brown Bears', 'KEN', null, {}) },
+  ];
+  const g = normalizeGamesheet(rows, 523270);
+  assert.equal(g.length, 3); // the fourth game is two other clubs'
+  const zone = (iso) => ({ date: new Date(iso).toLocaleDateString('en-CA', { timeZone: TZ }), time: new Date(iso).toLocaleTimeString('en-GB', { timeZone: TZ, hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' }) });
+  assert.deepEqual(g[0], { ...zone('2026-09-19T00:05:00Z'), tbd: false, home: false, opp: { name: 'Springfield Jr. Blues', short: 'Blues', abbrev: 'SPR', logo: 'https://img/1', id: '1' }, venue: 'Nelson Center', res: { us: 7, them: 4, won: true } });
+  assert.deepEqual(g[1].res, { us: 3, them: 2, won: true, ot: 'SO' });
+  assert.equal(g[1].home, true);
+  assert.equal(g[2].res, undefined);
+  assert.deepEqual(normalizeGamesheet(rows.slice(2, 3), 523270, true)[0].playoff, true);
+});
+test('gamesheetForm: a standings row reads W-L-OTL-SOL, ranks in the division, keeps the home split and the club name', () => {
+  assert.deepEqual(gamesheetForm({ rank: 2, division: { id: 81371, title: 'Midwest Division' }, team: { id: 523270, title: 'Anchorage Wolverines', abbreviation: 'ANC' }, stats: { W: 6, L: 3, OTL: 0, SOL: 1, GP: 10, PTS: 13, GTYPEREC: '6-3-0-1', HREC: '3-1-0-0' } }),
+    { record: '6-3-0-1', standing: '2nd in the Midwest Division', home: '3-1-0-0', club: { name: 'Anchorage Wolverines', abbr: 'ANC' } });
 });
