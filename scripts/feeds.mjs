@@ -668,13 +668,31 @@ export function cardDates(text, today = new Date()) {
     if (guess < now - 31 * 86400e3) y += 1;
   }
   const rest = t.slice(m.index + m[0].length);
-  const clock = /(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/i.exec(rest) || /(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/i.exec(t);
-  const time = clock ? `${String((Number(clock[1]) % 12) + (clock[3].toLowerCase() === 'p' ? 12 : 0)).padStart(2, '0')}:${clock[2] || '00'}` : '';
+  const time = cardClock(rest) || cardClock(t);
   const start = Date.UTC(y, mo1 - 1, Number(d1));
   const end = d2 ? Date.UTC(y, mo2 - 1, Number(d2)) : start;
   const out = [];
   for (let d = start; d <= end && out.length < 7; d += 86400e3) out.push({ date: new Date(d).toISOString().slice(0, 10), time });
   return out;
+}
+/**
+ * The first clock in a card's text, 24-hour. A range whose start carries no meridiem
+ * ("5:30‑7 pm", "10‑12 pm", "12–8 pm") borrows the end's, flipped when that would put
+ * the start after the end (10‑12 pm is 10 in the morning; 5:30‑7 pm is half past five).
+ */
+export function cardClock(text) {
+  const t = String(text || '');
+  const to24 = (h, mm, ap) => `${String((Number(h) % 12) + (ap.toLowerCase() === 'p' ? 12 : 0)).padStart(2, '0')}:${mm || '00'}`;
+  const range = /(\d{1,2})(?::(\d{2}))?\s*(?:([ap])\.?m\.?)?\s*[-–‑—]\s*(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/i.exec(t);
+  const single = /(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/i.exec(t);
+  if (range && (!single || range.index <= single.index)) {
+    const [, h1, m1, ap1, h2, m2, ap2] = range;
+    if (ap1) return to24(h1, m1, ap1);
+    const end = to24(h2, m2, ap2); let start = to24(h1, m1, ap2);
+    if (start > end) start = to24(h1, m1, ap2.toLowerCase() === 'p' ? 'a' : 'p');
+    return start;
+  }
+  return single ? to24(single[1], single[2], single[3]) : '';
 }
 /** The cards of a listing page → feed events (see the header). */
 export function parseCards(html, { item, title, when, place, venue, drop, type, types, base = '', time: defaultTime = '' } = {}) {
@@ -682,7 +700,7 @@ export function parseCards(html, { item, title, when, place, venue, drop, type, 
   for (const card of String(html || '').split(item).slice(1)) {
     const tm = title.exec(card); const wm = when.exec(card);
     if (!tm || !wm) continue;
-    const name = decode(tm[2]); const url = decode(tm[1]);
+    const name = decode(tm[2].replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim(); const url = decode(tm[1]); // a title may wrap a tag or two (Waterfront Park's no-widow spans)
     if (!name || (drop && drop.test(name))) continue;
     const pm = place && place.exec(card);
     const room = venue || (pm && decode(pm[1])) || '';
