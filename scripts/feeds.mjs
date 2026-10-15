@@ -68,8 +68,11 @@
  *                Square's neighbourhood calendar, 2026-10-15): the page is cut into cards at `item`,
  *                and in each `title` captures the link and the name, `when` the date text ("October
  *                15, 2026 | 10:00 AM - 2:00 PM"; "December 05-06, 2026 | …" is one row per day, up to
- *                a week) and `place` the room, which folds by alias or into `groundsVenue` like any
- *                city-wide feed; `type` is the rows' default type.
+ *                a week; "15 Oct" with no year is the nearest one forward; every capture group is
+ *                joined, so a date span and a clock span can be two groups) and `place` the room,
+ *                which folds by alias or into `groundsVenue` like any city-wide feed; `type` is the
+ *                rows' default type. Also a room's own `feed` (the Central Saloon's Modern Events
+ *                Calendar list, whose JSON-LD has dates but no clocks).
  *
  * Also here: the empty-list gate every build runs (`emptyListGate`) — a
  * fresh pull with zero upcoming events is a scouting failure or an outage,
@@ -640,18 +643,31 @@ const CARD_MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, au
  * 10:00; "December 05-06, 2026 | 10:00 AM - 4:00 PM" and "October 31 - November 2, 2026" one per
  * day, at most seven; no clock → an all-day row. [] when there is no readable date.
  */
-export function cardDates(text) {
+export function cardDates(text, today = new Date()) {
   const t = decode(text);
-  const m = /([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:\s*[-–]\s*(?:([A-Za-z]{3,9})\.?\s+)?(\d{1,2}))?,?\s*(\d{4})/.exec(t);
-  if (!m) return [];
-  const mo1 = CARD_MONTHS[m[1].slice(0, 3).toLowerCase()];
-  const mo2 = m[3] ? CARD_MONTHS[m[3].slice(0, 3).toLowerCase()] : mo1;
+  // "October 15, 2026", "December 05-06, 2026", "October 31 - November 2, 2026", "15 Oct", "15 Oct 2026"
+  // month first — not a clock's hour after the month ("Oct 7:00 pm") and not the month of a day-first date ("15 Oct")
+  let m = /(?<!\d\s{0,2})([A-Za-z]{3,9})\.?\s+(\d{1,2})(?![:\d])(?:\s*[-–]\s*(?:([A-Za-z]{3,9})\.?\s+)?(\d{1,2}))?(?:,?\s*(\d{4}))?/.exec(t);
+  let mon1, d1, mon2, d2, year;
+  if (m && CARD_MONTHS[m[1].slice(0, 3).toLowerCase()]) { [mon1, d1, mon2, d2, year] = [m[1], m[2], m[3], m[4], m[5]]; }
+  else {
+    m = /(\d{1,2})\s+([A-Za-z]{3,9})\.?(?:\s+(\d{4}))?/.exec(t);
+    if (!m || !CARD_MONTHS[m[2].slice(0, 3).toLowerCase()]) return [];
+    [d1, mon1, year] = [m[1], m[2], m[3]];
+  }
+  const mo1 = CARD_MONTHS[mon1.slice(0, 3).toLowerCase()];
+  const mo2 = mon2 ? CARD_MONTHS[mon2.slice(0, 3).toLowerCase()] : mo1;
   if (!mo1 || !mo2) return [];
-  const y = Number(m[5]);
-  const clock = /(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/i.exec(t.slice(m.index + m[0].length)) || /(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/i.exec(t);
+  let y = year ? Number(year) : today.getUTCFullYear();
+  if (!year) { // no year printed: the nearest one forward, a month of slack for a listing that keeps last week's rows
+    const guess = Date.UTC(y, mo1 - 1, Number(d1)); const now = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    if (guess < now - 31 * 86400e3) y += 1;
+  }
+  const rest = t.slice(m.index + m[0].length);
+  const clock = /(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/i.exec(rest) || /(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/i.exec(t);
   const time = clock ? `${String((Number(clock[1]) % 12) + (clock[3].toLowerCase() === 'p' ? 12 : 0)).padStart(2, '0')}:${clock[2] || '00'}` : '';
-  const start = Date.UTC(y, mo1 - 1, Number(m[2]));
-  const end = m[4] ? Date.UTC(y, mo2 - 1, Number(m[4])) : start;
+  const start = Date.UTC(y, mo1 - 1, Number(d1));
+  const end = d2 ? Date.UTC(y, mo2 - 1, Number(d2)) : start;
   const out = [];
   for (let d = start; d <= end && out.length < 7; d += 86400e3) out.push({ date: new Date(d).toISOString().slice(0, 10), time });
   return out;
@@ -667,7 +683,7 @@ export function parseCards(html, { item, title, when, place, venue, drop, type, 
     const pm = place && place.exec(card);
     const room = venue || (pm && decode(pm[1])) || '';
     let href = url; try { href = new URL(url, base || 'https://localhost/').href; } catch { /* keep as written */ }
-    for (const { date, time } of cardDates(wm[1])) {
+    for (const { date, time } of cardDates(wm.slice(1).filter(Boolean).join(' '))) { // every group of `when` — a date and a clock in separate spans
       const ev = { venue: room, title: name, date, time, url: href };
       if (type && (!types || types.includes(type))) ev.type = type;
       out.push(ev);

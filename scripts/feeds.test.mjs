@@ -283,3 +283,14 @@ test('parseCards cuts a listing into cards and keeps the link, the name, the roo
     { venue: 'Asylum Collective', title: 'Craft Club & Brunch', date: '2026-10-18', time: '13:00', url: 'https://pioneersquare.org/our-events/craft/', type: 'community' },
   ]);
 });
+
+test('cardDates with no year printed takes the nearest year forward, day-first too, and a clock from a second group', () => {
+  const today = new Date('2026-10-15T12:00:00Z');
+  assert.deepEqual(cardDates('15 Oct 7:00 pm', today), [{ date: '2026-10-15', time: '19:00' }]);
+  assert.deepEqual(cardDates('3 Jan 8:00 pm', today), [{ date: '2027-01-03', time: '20:00' }]);
+  assert.deepEqual(cardDates('Oct 1', today), [{ date: '2026-10-01', time: '' }]); // last fortnight's row, this year still
+  assert.deepEqual(cardDates('Aug 20', today), [{ date: '2027-08-20', time: '' }]);
+  const html = '<article class="mec-event-article"><h3 class="mec-event-title"><a href="https://c.com/events/x/">Ska Island</a></h3><span class="mec-start-date-label">17 Oct</span> … <span class="mec-start-time">7:00 pm</span></article>';
+  const out = parseCards(html, { item: /<article class="mec-event-article"/, title: /class="mec-event-title"><a[^>]*href="([^"]+)"[^>]*>([^<]+)</, when: /mec-start-date-label">([^<]+)<\/span>[\s\S]{0,800}?mec-start-time">([^<]+)</, venue: 'Central Saloon' });
+  assert.equal(out.length, 1); assert.equal(out[0].time, '19:00'); assert.equal(out[0].venue, 'Central Saloon'); assert.equal(out[0].title, 'Ska Island');
+});
