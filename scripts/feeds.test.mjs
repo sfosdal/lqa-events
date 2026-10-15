@@ -324,8 +324,8 @@ test('cardClock: a range start without a meridiem borrows the end\'s, flipped wh
   assert.deepEqual(cardDates('Thursday Oct 29 5:30‑7 pm', new Date('2026-10-15')), [{ date: '2026-10-29', time: '17:30' }]);
 });
 
-test('parseCards strips tags inside a title (Waterfront Park\'s no-widow spans)', () => {
-  const html = '<div class="grid-item" data-id="1"><a href="https://waterfrontparkseattle.org/blog/event/x/?date=202611031000"><div class="inner-wrap"><h3 class="widont ">Tuesday Nov 3</h3><h3 class="widont date-time">10 am‑12 pm</h3><h4 class="widont ">Secrets of Seattle&#8217;s Shoreline Walking<span class="nbsp">&nbsp;</span>Tour</h4></div></a></div>';
-  const out = parseCards(html, { item: /<div class="grid-item"/, title: /<a href="([^"]+)">[\s\S]*?<h4 class="widont ">([\s\S]*?)<\/h4>/, when: /<h3 class="widont ">([^<]+)<\/h3><h3 class="widont date-time">([^<]*)<\/h3>/, venue: 'Waterfront Park', type: 'community' });
+test('parseCards strips tags inside a title and a date (Waterfront Park\'s no-widow spans)', () => {
+  const html = '<div class="grid-item" data-id="1"><a href="https://waterfrontparkseattle.org/blog/event/x/?date=202611031000"><div class="inner-wrap"><h3 class="widont ">Tuesday Nov 3,<span class="nbsp">&nbsp;</span>2026</h3><h3 class="widont date-time">10 am‑12 pm</h3><h4 class="widont ">Secrets of Seattle&#8217;s Shoreline Walking<span class="nbsp">&nbsp;</span>Tour</h4></div></a></div>';
+  const out = parseCards(html, { item: /<div class="grid-item"/, title: /<a href="([^"]+)">[\s\S]*?<h4 class="widont ">([\s\S]*?)<\/h4>/, when: /<h3 class="widont ">([\s\S]*?)<\/h3><h3 class="widont date-time">([^<]*)<\/h3>/, venue: 'Waterfront Park', type: 'community' });
   assert.deepEqual(out, [{ venue: 'Waterfront Park', title: 'Secrets of Seattle’s Shoreline Walking Tour', date: '2026-11-03', time: '10:00', url: 'https://waterfrontparkseattle.org/blog/event/x/?date=202611031000', type: 'community' }]);
 });

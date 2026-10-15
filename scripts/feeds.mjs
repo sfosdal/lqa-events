@@ -705,7 +705,7 @@ export function parseCards(html, { item, title, when, place, venue, drop, type, 
     const pm = place && place.exec(card);
     const room = venue || (pm && decode(pm[1])) || '';
     let href = url; try { href = new URL(url, base || 'https://localhost/').href; } catch { /* keep as written */ }
-    for (const { date, time: clock } of cardDates(wm.slice(1).filter(Boolean).join(' '))) {
+    for (const { date, time: clock } of cardDates(wm.slice(1).filter(Boolean).map((x) => x.replace(/<[^>]+>/g, ' ')).join(' '))) { // tags inside a date too ("Jan 2,<span>&nbsp;</span>2027")
       const time = clock || defaultTime; // `time`: the clock a listing never prints (the art walk is 5 to 8 every first Thursday) // every group of `when` — a date and a clock in separate spans
       const ev = { venue: room, title: name, date, time, url: href };
       if (type && (!types || types.includes(type))) ev.type = type;
