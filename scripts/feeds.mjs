@@ -760,7 +760,8 @@ const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, j
 /**
  * One source thunk per city.js venue with a `feed` (its listings pinned to that row) and one per
  * entry of city.js `feeds` (city-wide: each listing keeps the room the feed names, for the aliases
- * and `groundsVenue` in fetch-events.mjs to fold), for fetch-events.mjs's source list.
+ * and `groundsVenue` in fetch-events.mjs to fold — unless the entry names a `venue`, which then
+ * takes every row, as a room feed does), for fetch-events.mjs's source list.
  */
 export function feedSources(city, ua) {
   const types = (city.types || []).map((t) => t.key);
@@ -771,7 +772,7 @@ export function feedSources(city, ua) {
   };
   return [
     ...Object.entries(city.venues || {}).filter(([, v]) => v.feed).map(([label, v]) => run(v.feed, label, label)),
-    ...(city.feeds || []).map((f) => run(f, f.label || f.kind, null)),
+    ...(city.feeds || []).map((f) => run(f, f.label || f.kind, f.venue || null)), // `venue` pins a city-wide feed's rows to one row (seattle-events: the Alliance calendar → Around Pioneer Square)
   ];
 }
 

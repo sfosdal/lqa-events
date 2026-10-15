@@ -66,6 +66,9 @@ test('feedSources makes one source per venue with a feed and names an unknown ki
   const wide = feedSources({ types: [], venues: {}, feeds: [{ kind: 'tusboletos', url: 'https://x/eventos', label: 'TusBoletos' }, { kind: 'nope', url: 'https://x/' }] }, 'ua');
   assert.equal(wide.length, 2); // city-wide feeds (cancun-events) make a source each too
   assert.deepEqual(wide[1](), []);
+  const pinned = feedSources({ types: [{ key: 'community' }], venues: { Around: { type: 'community' } }, feeds: [{ kind: 'nope', url: 'https://x/', venue: 'Around' }] }, 'ua');
+  assert.equal(pinned.length, 1); // a city-wide feed with a `venue` is a source like a room feed (seattle-events)
+  assert.deepEqual(pinned[0](), []);
 });
 
 // ---- TusBoletos (cancun-events, 2026-10-13) ----
