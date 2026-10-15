@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom } from './feeds.mjs';
+import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom, icsStart, mapIcsFile, eventLinks } from './feeds.mjs';
 
 const room = 'Field Arts &#038; Events Hall &#8211; Donna M. Morris Theater';
 const row = (title, start, extra = {}) => ({ title, start_date: start, status: 'publish', all_day: false, venue: { venue: room }, categories: [], ...extra });
@@ -216,4 +216,37 @@ test('pageRoom names a venue page by the room most of its cards carry, and nothi
   assert.equal(pageRoom([{ room: 'CBA Santurce' }, { room: 'CBA Santurce' }, { room: '' }]), 'CBA Santurce');
   assert.equal(pageRoom([{ room: 'Coliseo' }, { room: 'Bithorn' }, { room: 'Clemente' }, { room: 'Coliseo' }]), '');
   assert.equal(pageRoom([]), '');
+});
+
+const vevent = (summary, dtstart, extra = '') => `BEGIN:VEVENT\nUID:${Math.random()}\n${dtstart}\nSUMMARY:${summary}\n${extra}\nEND:VEVENT\n`;
+test('a season calendar (Sidearm): UTC starts land on the city clock, rooms keep the home dates, rename tidies the title, the Tickets line is the link', () => {
+  const ics = 'BEGIN:VCALENDAR\n' +
+    vevent("[W] University of Alaska Anchorage Women's Volleyball vs Western Washington - Kids Free", 'DTSTART:20261106T040000Z', 'LOCATION:\\, Alaska Airlines Center\nDESCRIPTION:UAA vs WWU\\nTickets: https://aac-uaa.evenue.net/list/UAD\\n\nURL:https://goseawolves.com/calendar.aspx?game_id=1&amp;sport_id=9') +
+    vevent("University of Alaska Anchorage Women's Volleyball at Central Washington", 'DTSTART:20261107T030000Z', 'LOCATION:Ellensburg\\, Wash.\nURL:https://goseawolves.com/calendar.aspx?game_id=2') +
+    vevent("University of Alaska Anchorage Men's Basketball vs Biola", 'DTSTART;VALUE=DATE:20261128', 'LOCATION:Alaska Airlines Center (aux gym)\nURL:https://goseawolves.com/calendar.aspx?game_id=3&amp;sport_id=4') +
+    'END:VCALENDAR\n';
+  const out = mapIcsFile(ics, { tz: 'America/Anchorage', rooms: /alaska airlines center/i, type: 'sports', types: ['concert', 'sports'], today: '2026-10-15',
+    rename: [[/^\[[A-Z]\]\s*/, ''], [/^University of Alaska Anchorage /, 'UAA ']] });
+  assert.deepEqual(out, [
+    { venue: ', Alaska Airlines Center', title: "UAA Women's Volleyball vs Western Washington - Kids Free", date: '2026-11-05', time: '19:00', url: 'https://aac-uaa.evenue.net/list/UAD', type: 'sports' },
+    { venue: 'Alaska Airlines Center (aux gym)', title: "UAA Men's Basketball vs Biola", date: '2026-11-28', time: '', url: 'https://goseawolves.com/calendar.aspx?game_id=3&sport_id=4', type: 'sports' },
+  ]);
+});
+
+test('a season calendar pinned to a room (PrestoSports): the sport prefix and the score go, past games are left out, a TZID start is read in its zone', () => {
+  const ics = vevent('(Baseball) Alaska Goldpanners of Fairbanks at Anchorage Glacier Pilots (1-7)', 'DTSTART:20260602T020000Z', 'LOCATION:Mulcahy Stadium') +
+    vevent('(Baseball) Mat-Su Miners at Anchorage Bucs', 'DTSTART:20270612T030000Z', 'LOCATION:Mulcahy Stadium') +
+    vevent('(Baseball) Anchorage Bucs at Mat-Su Miners', 'DTSTART:20270613T030000Z', 'LOCATION:Hermon Brothers Field');
+  const out = mapIcsFile(ics, { venue: 'Mulcahy Stadium', tz: 'America/Anchorage', rooms: /mulcahy/i, defaultType: 'sports', today: '2026-10-15', rename: [[/^\(Baseball\)\s*/, ''], [/\s*\(\d+-\d+\)\s*$/, '']] });
+  assert.deepEqual(out, [{ venue: 'Mulcahy Stadium', title: 'Mat-Su Miners at Anchorage Bucs', date: '2027-06-11', time: '19:00', url: '', type: 'sports' }]);
+  assert.deepEqual(icsStart({ value: '20261106T190000', params: { TZID: 'America/New_York' } }, 'America/Anchorage'), ['2026-11-06', '15:00']);
+  assert.deepEqual(icsStart({ value: '20261106T190000', params: {} }, 'America/Anchorage'), ['2026-11-06', '19:00']);
+  assert.deepEqual(icsStart({ value: '20261106', params: { VALUE: 'DATE' } }, 'America/Anchorage'), ['2026-11-06', '']);
+});
+
+test('eventLinks picks the ticket links of a listing page once each, absolute, without their tracking query', () => {
+  const html = '<a href="https://www.eventbrite.com/e/parlor-in-the-round-tickets-1994714434570?aff=oddtdtcreator">Buy</a> <a href="/live-events">Learn</a>' +
+    '<a href="https://www.eventbrite.com/e/parlor-in-the-round-tickets-1994714434570">Buy</a><a href="https://www.eventbrite.com/e/vitamin-comedy-tickets-1998453361802&amp;x=1">Buy</a>';
+  assert.deepEqual(eventLinks(html, /eventbrite\.com\/e\//, 'https://www.beartoothak.com/live-events'),
+    ['https://www.eventbrite.com/e/parlor-in-the-round-tickets-1994714434570', 'https://www.eventbrite.com/e/vitamin-comedy-tickets-1998453361802&x=1']);
 });

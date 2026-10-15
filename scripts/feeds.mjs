@@ -44,6 +44,21 @@
  *                page for its showings and clock, the category pages for its type — fetched through
  *                scripts/cffi-fetch.py (a Chrome TLS fingerprint, via uv), since its edge refuses
  *                plain clients (San Juan, 2026-10-14).
+ *   icsfile    — one whole-season iCalendar file (Sidearm's calendar.ics for a college's teams,
+ *                PrestoSports' `?print=ical` for a summer league): one fetch, every VEVENT a row.
+ *                DTSTART in UTC becomes the city's wall clock (`tz`), a TZID one is read in its
+ *                zone, a floating one as written, VALUE=DATE is an all-day row. `rooms` keeps the
+ *                LOCATIONs wanted (a college's calendar lists its away games too), `rename` is a
+ *                list of [regex, replacement] applied to the title in order ("[W] University of
+ *                Alaska Anchorage Women's Volleyball vs X" → "UAA Women's Volleyball vs X"), the
+ *                link is DESCRIPTION's "Tickets: <url>" when there is one, else URL (Anchorage,
+ *                2026-10-15).
+ *   linked     — a listing page whose events are links to ticket pages that carry schema.org Event
+ *                markup (Bear Tooth Theatrepub's Squarespace page: a date, a title and a "Buy
+ *                Tickets" link to Eventbrite per show, nothing machine-readable on the page
+ *                itself): the links `match` picks (unique, query stripped, at most `max` = 40) are
+ *                fetched one by one and read like `jsonld`; `at` keeps those whose location names
+ *                the room (Anchorage, 2026-10-15).
  *
  * Also here: the empty-list gate every build runs (`emptyListGate`) — a
  * fresh pull with zero upcoming events is a scouting failure or an outage,
@@ -470,7 +485,111 @@ async function fetchTicketera(url, ua, label, opts) {
   return out;
 }
 
-const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera };
+// ---- a whole-season iCalendar file (Sidearm, PrestoSports) ----
+const ICS_WALL = new Map(); // zone → formatter giving "YYYY-MM-DD HH:MM" on that zone's clock
+function wallClock(ms, tz) {
+  if (!ICS_WALL.has(tz)) ICS_WALL.set(tz, new Intl.DateTimeFormat('sv-SE', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }));
+  return ICS_WALL.get(tz).format(new Date(ms)).replace(/‎/g, '').replace(',', '');
+}
+/** The instant (ms) of a wall-clock reading in a zone: a UTC guess, corrected by the zone's offset at that guess (twice, for a DST edge). */
+function zonedInstant(y, mo, d, h, mi, tz) {
+  let ms = Date.UTC(y, mo - 1, d, h, mi);
+  for (let i = 0; i < 2; i++) {
+    const w = wallClock(ms, tz);
+    const guess = Date.UTC(+w.slice(0, 4), +w.slice(5, 7) - 1, +w.slice(8, 10), +w.slice(11, 13), +w.slice(14, 16));
+    ms -= guess - Date.UTC(y, mo - 1, d, h, mi);
+  }
+  return ms;
+}
+/** A VEVENT's DTSTART → ['YYYY-MM-DD', 'HH:MM' | ''] on the city's clock. */
+export function icsStart(dt, tz) {
+  const m = String(dt.value || '').match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(?:\d{2})?(Z)?)?$/);
+  if (!m) return null;
+  const [, y, mo, d, h, mi, z] = m;
+  if (dt.params.VALUE === 'DATE' || !h) return [`${y}-${mo}-${d}`, ''];
+  if (z) { const w = wallClock(Date.UTC(+y, +mo - 1, +d, +h, +mi), tz); return [w.slice(0, 10), w.slice(11, 16)]; }
+  if (dt.params.TZID && dt.params.TZID !== tz) { const w = wallClock(zonedInstant(+y, +mo, +d, +h, +mi, dt.params.TZID), tz); return [w.slice(0, 10), w.slice(11, 16)]; }
+  return [`${y}-${mo}-${d}`, `${h}:${mi}`]; // floating, or already the city's zone
+}
+/**
+ * Every VEVENT of a season calendar → feed events. `venue` pins them to one room; without it each
+ * row keeps its LOCATION for the aliases to fold. `rooms` (a regex on LOCATION) keeps the rooms
+ * wanted, `drop` (on the title) leaves rows out, `rename` rewrites the title in order.
+ */
+export function mapIcsFile(text, { venue, tz = 'UTC', rooms, drop, rename = [], type, types, defaultType, label = 'feed', today = '' } = {}) {
+  const allowed = types ? new Set(types) : null;
+  const out = [];
+  const seen = new Set();
+  for (const v of parseIcs(text)) {
+    if (!v.SUMMARY || !v.DTSTART) continue;
+    const where = decode((v.LOCATION || {}).value || '');
+    if (rooms && !rooms.test(where)) continue;
+    let title = decode(v.SUMMARY.value);
+    for (const [re, to] of rename) title = title.replace(re, to);
+    title = title.trim();
+    if (!title || (drop && drop.test(title))) continue;
+    const start = icsStart(v.DTSTART, tz);
+    if (!start || start[0] < today) continue;
+    const desc = (v.DESCRIPTION || {}).value || '';
+    const tickets = /Tickets:\s*(https?:\/\/\S+)/i.exec(desc);
+    const ev = { venue: venue || where, title, date: start[0], time: start[1], url: decode(tickets ? tickets[1] : (v.URL || {}).value || '') };
+    const t = (type && (!allowed || allowed.has(type)) ? type : null) || tribeType(((v.CATEGORIES || {}).value || '').split(',').filter(Boolean), allowed) || defaultType;
+    if (t) ev.type = t;
+    const k = `${ev.venue}|${ev.title}|${ev.date}|${ev.time}`;
+    if (seen.has(k)) continue;
+    seen.add(k); out.push(ev);
+  }
+  return out;
+}
+async function fetchIcsFile(url, ua, label, opts) {
+  const { feed = {} } = opts;
+  const res = await fetch(url, { headers: { 'User-Agent': ua, Accept: 'text/calendar,*/*' } });
+  if (!res.ok) { console.error(`${label} HTTP ${res.status}`); return []; }
+  const text = await res.text();
+  const evs = mapIcsFile(text, { ...opts, rename: feed.rename, type: feed.type, label, today: new Date().toISOString().slice(0, 10) });
+  console.log(`${label} (iCal file): ${evs.length} events from ${(text.match(/BEGIN:VEVENT/g) || []).length} rows`);
+  return evs;
+}
+
+// ---- a listing page whose events are links to pages with schema.org markup ----
+/** The links in a page that `match` picks: absolute, query and hash stripped, each once, in page order. */
+export function eventLinks(html, match, base) {
+  const out = [];
+  const seen = new Set();
+  for (const m of String(html || '').matchAll(/href=["']([^"']+)["']/g)) {
+    let href = decode(m[1]);
+    try { href = new URL(href, base).href; } catch { continue; }
+    href = href.replace(/[?#].*$/, '');
+    if (!match.test(href) || seen.has(href)) continue;
+    seen.add(href); out.push(href);
+  }
+  return out;
+}
+async function fetchLinked(url, ua, label, opts) {
+  const { feed = {}, venue, types, defaultType, drop } = opts;
+  const match = feed.match || /eventbrite\.com\/e\//;
+  const links = eventLinks(await fetchText(url, ua), match, url).slice(0, feed.max || 40);
+  const out = [];
+  let pages = 0;
+  for (const link of links) {
+    try {
+      if (pages) await new Promise((r) => setTimeout(r, 400));
+      const evs = parseJsonLdEvents(await fetchText(link, ua), { venue, at: feed.at, types });
+      pages++;
+      for (const ev of evs) {
+        if (drop && drop.test(ev.title)) continue;
+        if (!ev.url) ev.url = link;
+        const t = feed.type || defaultType;
+        if (t && (!types || types.includes(t))) ev.type = t;
+        out.push(ev);
+      }
+    } catch (err) { console.error(`${label}: ${link} ${err.message}`); }
+  }
+  console.log(`${label} (linked pages): ${out.length} events from ${pages} of ${links.length} ticket pages`);
+  return out;
+}
+
+const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera, icsfile: fetchIcsFile, linked: fetchLinked };
 
 /**
  * One source thunk per city.js venue with a `feed` (its listings pinned to that row) and one per
@@ -482,7 +601,7 @@ export function feedSources(city, ua) {
   const run = (feed, label, venue) => () => {
     const fn = KINDS[feed.kind];
     if (!fn) { console.error(`${label}: unknown feed kind "${feed.kind}"`); return []; }
-    return fn(feed.url, ua, label, { drop: feed.drop, maxRepeat: feed.maxRepeat, rooms: feed.rooms, types, defaultType: venue ? city.venues[venue].type : feed.type, feed, venue });
+    return fn(feed.url, ua, label, { drop: feed.drop, maxRepeat: feed.maxRepeat, rooms: feed.rooms, types, defaultType: venue ? city.venues[venue].type : feed.type, feed, venue, tz: city.tz });
   };
   return [
     ...Object.entries(city.venues || {}).filter(([, v]) => v.feed).map(([label, v]) => run(v.feed, label, label)),
