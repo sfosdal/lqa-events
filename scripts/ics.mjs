@@ -30,6 +30,7 @@ const US_ZONES = {
   'America/Anchorage': ['-0900', '-0800', 'AKST', 'AKDT'],
   'Pacific/Honolulu': ['-1000', null, 'HST', null],
   'America/Cancun': ['-0500', null, 'EST', null],
+  'America/Puerto_Rico': ['-0400', null, 'AST', null],
 };
 const [STD_OFF, DST_OFF, STD_NAME, DST_NAME] = US_ZONES[TZID] || US_ZONES['America/Los_Angeles'];
 const VTIMEZONE = DST_OFF ? [

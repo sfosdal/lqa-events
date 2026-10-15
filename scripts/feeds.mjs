@@ -40,6 +40,10 @@
  *                offers' availability (every one SoldOut = sold out), eventStatus. `at` keeps only
  *                the events whose location matches. The page's charset is honoured (eticket
  *                serves ISO-8859-15, decoded as windows-1252).
+ *   ticketera  — ticketera.com (Puerto Rico's ticketer): the rooms' own listing pages, each event's
+ *                page for its showings and clock, the category pages for its type — fetched through
+ *                scripts/cffi-fetch.py (a Chrome TLS fingerprint, via uv), since its edge refuses
+ *                plain clients (San Juan, 2026-10-14).
  *
  * Also here: the empty-list gate every build runs (`emptyListGate`) — a
  * fresh pull with zero upcoming events is a scouting failure or an outage,
@@ -50,7 +54,10 @@
 const decode = (s) => String(s || '')
   .replace(/&#8211;/g, '–').replace(/&#8217;/g, '’').replace(/&#8216;/g, '‘').replace(/&#8220;/g, '“').replace(/&#8221;/g, '”')
   .replace(/&#038;|&amp;/g, '&').replace(/&#039;/g, "'").replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+  .replace(/&([A-Za-z]+);/g, (m, n) => LATIN[n] || m) // the accented letters a Spanish listing spells as entities (Ticketera: "La &Uacute;ltima Noche")
   .replace(/\s+/g, ' ').trim();
+const LATIN = { aacute: 'á', eacute: 'é', iacute: 'í', oacute: 'ó', uacute: 'ú', Aacute: 'Á', Eacute: 'É', Iacute: 'Í', Oacute: 'Ó', Uacute: 'Ú', ntilde: 'ñ', Ntilde: 'Ñ', uuml: 'ü', Uuml: 'Ü', iquest: '¿', iexcl: '¡', ccedil: 'ç', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“', ndash: '–', mdash: '—', hellip: '…' };
 
 // The Events Calendar's categories → the site's event types. Films are a
 // 'movie' only where the city lists that type (lqa does; a town with no
@@ -313,7 +320,157 @@ async function fetchJsonLd(url, ua, label, opts) {
   return evs;
 }
 
-const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd };
+// ---- Ticketera (ticketera.com, Puerto Rico's ticketer) ----
+/**
+ * Ticketera's pages are server-rendered (the Carbonhouse platform), but its
+ * Fastly edge answers Node, curl and any "Mozilla" client with HTTP 406 or a
+ * "Client Challenge" page, and serves the same URL in full to a Chrome TLS
+ * handshake — so the pages come through scripts/cffi-fetch.py (curl_cffi,
+ * run by uv, one process per batch); `uv` has to be on PATH where a city
+ * configures this kind (its workflow installs it). Without uv the fetch
+ * falls back to plain fetch, which may be refused — the build says so.
+ *
+ *   feeds: [{ kind: 'ticketera', label: 'Ticketera', url: 'https://www.ticketera.com',
+ *             pages: ['/events/venue/coliseo-de-puerto-rico', …],  // the rooms' own listings (a category page lists the island)
+ *             rooms: /coliseo|music hall/i,   // optional: keep only listings at these rooms (a category page's filter)
+ *             drop: /abonados/i }]            // optional: season-ticket packages and the like
+ *
+ * Each listing names its room (the `location` line), so it folds onto a
+ * venue row by alias like TusBoletos's. Dates on the listing are Spanish or
+ * English month abbreviations ("oct. 16, 2026", "oct. 30 - nov. 1, 2026",
+ * "Sep. 17, 2026 - Oct. 25, 2026"); the clock and the per-date showings
+ * are on the event page (a multi-day run lists one showing per date and
+ * time; a single date carries "Inicio del Evento 8:30 p. m."). The category
+ * pages (/events/category/conciertos …) give each event its type.
+ */
+const TK_MONTHS = { ene: 0, jan: 0, feb: 1, mar: 2, abr: 3, apr: 3, may: 4, jun: 5, jul: 6, ago: 7, aug: 7, sep: 8, set: 8, oct: 9, nov: 10, dic: 11, dec: 11 };
+const tkIso = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+/** A listing's date text → [start, end] as ISO ("oct. 22 - 23, 2026" → ['2026-10-22', '2026-10-23']); [] when unreadable. */
+export function ticketeraDates(text, today = new Date().toISOString().slice(0, 10)) {
+  const toks = [];
+  let mo = null;
+  for (const m of strip(text).matchAll(/(?:([a-z]{3})[a-z]*\.?\s+)?\b(\d{1,2})\b(?:\s*,\s*(\d{4}))?/g)) {
+    if (m[1] !== undefined) { if (!(m[1] in TK_MONTHS)) continue; mo = TK_MONTHS[m[1]]; }
+    if (mo === null) continue;
+    toks.push({ mo, day: Number(m[2]), year: m[3] ? Number(m[3]) : null });
+  }
+  if (!toks.length) return [];
+  const [a, b = a] = [toks[0], toks[toks.length - 1]];
+  if (b.year === null) { // no year anywhere: the next one from today
+    b.year = Number(today.slice(0, 4));
+    if (tkIso(b.year, b.mo, b.day) < new Date(Date.parse(today + 'T12:00:00Z') - 31 * 86400e3).toISOString().slice(0, 10)) b.year++;
+  }
+  if (a.year === null) a.year = a.mo > b.mo ? b.year - 1 : b.year; // "dic. 30 - ene. 2, 2027" starts the year before
+  const start = tkIso(a.year, a.mo, a.day), end = tkIso(b.year, b.mo, b.day);
+  return end >= start ? [start, end] : [start, start];
+}
+/** A listing page → cards [{ title, room, dateText, href }] (the Vue search templates on the page are skipped). */
+export function parseTicketeraList(html, base = 'https://www.ticketera.com') {
+  const pick = (c, re) => { const m = re.exec(c); return m ? decode(m[1]) : ''; };
+  const out = [];
+  for (const c of String(html || '').split(/<div class="eventItem/).slice(1)) {
+    if (/v-html=|v-text=/.test(c.slice(0, 400))) continue; // the search result template, not a listing
+    const href = pick(c, /class="title[^"]*">\s*<a href="([^"]+)"/);
+    if (!href) continue;
+    const dateText = pick(c, /class="date">([\s\S]*?)<\/div>/).replace(/<[^>]+>/g, '');
+    out.push({ title: pick(c, /class="title[^"]*">\s*<a href="[^"]+"[^>]*>([\s\S]*?)<\/a>/), room: pick(c, /class="location\s*">([\s\S]*?)<\/div>/), dateText: decode(dateText), href: new URL(href, base).href });
+  }
+  return out;
+}
+const tk24 = (h, m, ap) => { let hh = Number(h) % 12; if (/p/i.test(ap)) hh += 12; return `${String(hh).padStart(2, '0')}:${m || '00'}`; };
+/**
+ * An event page → { showings: [{ date, time, soldOut? }], time } — the showings list (one row
+ * per date and time, "viernes, oct. 30 · 8:00 PM"), years inferred from `start` (a month
+ * before the start's rolls into the next year), and the sidebar clock for a page with no list.
+ */
+export function parseTicketeraDetail(html, start) {
+  const h = String(html || '');
+  const y0 = Number((start || '').slice(0, 4)) || new Date().getFullYear(), m0 = Number((start || '').slice(5, 7)) - 1;
+  const showings = [];
+  for (const row of h.split(/id="showing_\d+"/).slice(1)) {
+    const cell = row; // up to the next showing: its date, clock, ticket link and offers
+    const md = /m-date__month">\s*([a-záé]+)\.?\s*<\/span><span class="m-date__day">\s*(\d{1,2})/i.exec(cell);
+    const t = /class="time cell">\s*(\d{1,2})(?::(\d{2}))?\s*([AP])M/i.exec(cell);
+    if (!md) continue;
+    const mo = TK_MONTHS[strip(md[1]).slice(0, 3)];
+    if (mo === undefined) continue;
+    const y = start && mo < m0 ? y0 + 1 : y0;
+    const s = { date: tkIso(y, mo, Number(md[2])), time: t ? tk24(t[1], t[2], t[3]) : '' };
+    if (/agotado|sold\s*out/i.test(cell)) s.soldOut = true;
+    showings.push(s);
+  }
+  const st = /sidebar_event_starts[\s\S]*?<span>\s*(\d{1,2})(?::(\d{2}))?\s*<span data-time="([ap])/i.exec(h);
+  return { showings, time: st ? tk24(st[1], st[2], st[3]) : '' };
+}
+/** The room a listing page belongs to: the name most of its cards carry ('' for a category page, which mixes rooms). */
+export function pageRoom(cards) {
+  const n = new Map();
+  for (const c of cards) if (c.room) n.set(c.room, (n.get(c.room) || 0) + 1);
+  const top = [...n.entries()].sort((a, b) => b[1] - a[1])[0];
+  return top && top[1] * 2 > cards.length ? top[0] : '';
+}
+const TK_CATEGORY = { conciertos: 'concert', deportes: 'sports', teatros: 'arts', familia: 'community', gastronomico: 'community', conferencias: 'community' };
+/** Pages fetched through the Chrome-fingerprint helper (scripts/cffi-fetch.py via uv), url → text; a failure is logged and the URL left out. */
+const chromeCache = new Map(); // one fetch of a page per build, however many feed rows ask for it
+async function chromeFetch(urls, label) {
+  const out = new Map();
+  for (const u of urls) if (chromeCache.has(u)) out.set(u, chromeCache.get(u));
+  const want = [...new Set(urls.filter((u) => !chromeCache.has(u)))];
+  if (!want.length) return out;
+  const { spawnSync } = await import('node:child_process');
+  const script = new URL('./cffi-fetch.py', import.meta.url);
+  const r = spawnSync('uv', ['run', '--quiet', script.pathname, ...want], { encoding: 'utf8', maxBuffer: 256 << 20 });
+  if (r.error || r.status !== 0) {
+    console.error(`${label}: cffi-fetch.py did not run (${r.error ? r.error.message : `exit ${r.status}: ${(r.stderr || '').trim().slice(-300)}`}) — plain fetch instead, which the site may refuse`);
+    for (const u of want) { try { out.set(u, await fetchText(u, '')); chromeCache.set(u, out.get(u)); } catch (err) { console.error(`${label}: ${u} ${err.message}`); } }
+    return out;
+  }
+  for (const [u, v] of Object.entries(JSON.parse(r.stdout))) { if (typeof v === 'string') { out.set(u, v); chromeCache.set(u, v); } else console.error(`${label}: ${u} ${v.error}`); }
+  return out;
+}
+async function fetchTicketera(url, ua, label, opts) {
+  const { feed = {}, venue, types } = opts;
+  const base = url.replace(/\/$/, '');
+  const abs = (p) => new URL(p, base + '/').href;
+  const pages = (feed.pages || ['/events']).map(abs);
+  const catPages = Object.keys(TK_CATEGORY).map((c) => abs(`/events/category/${c}`));
+  const html = await chromeFetch([...pages, ...catPages], label);
+  const typeOf = new Map(); // event page → type, from the category listings
+  for (const c of Object.keys(TK_CATEGORY)) for (const card of parseTicketeraList(html.get(abs(`/events/category/${c}`)) || '', base)) typeOf.set(card.href, TK_CATEGORY[c]);
+  const cards = new Map();
+  for (const p of pages) {
+    const list = parseTicketeraList(html.get(p) || '', base);
+    const room = pageRoom(list); // a room's own page lists the odd event with no location line: it is that room's
+    for (const card of list) if (!cards.has(card.href)) cards.set(card.href, card.room || !room ? card : { ...card, room });
+  }
+  const allowed = types ? new Set(types) : null;
+  const keep = [...cards.values()].filter((c) => (!feed.rooms || feed.rooms.test(c.room)) && !(feed.drop && feed.drop.test(c.title)));
+  const details = await chromeFetch(keep.map((c) => c.href), label);
+  const out = [];
+  for (const c of keep) {
+    let [start, end] = ticketeraDates(c.dateText);
+    if (!start) { const d = spanishDates(c.dateText); if (d.length) [start, end] = [d[0], d[d.length - 1]]; } // the odd listing written out ("4 al 6 de diciembre del 2026")
+    if (!start) { console.error(`${label}: no date in "${c.dateText}" (${c.title})`); continue; }
+    const d = parseTicketeraDetail(details.get(c.href) || '', start);
+    let shows = d.showings.filter((s) => s.date >= start && s.date <= end);
+    if (!shows.length) { // no showings list: every day of a short run, the first day of a season-long one
+      const days = [];
+      for (let t = Date.parse(start + 'T12:00:00Z'); t <= Date.parse(end + 'T12:00:00Z'); t += 86400e3) days.push(new Date(t).toISOString().slice(0, 10));
+      shows = (days.length <= 14 ? days : [start]).map((date) => ({ date, time: d.time }));
+    }
+    const type = typeOf.get(c.href);
+    for (const s of shows) {
+      const ev = { venue: venue || c.room, title: c.title, date: s.date, time: s.time, url: c.href };
+      if (s.soldOut) ev.soldOut = true;
+      if (type && (!allowed || allowed.has(type))) ev.type = type;
+      out.push(ev);
+    }
+  }
+  console.log(`${label} (Ticketera): ${out.length} listings from ${keep.length} events on ${pages.length} pages, ${details.size} event pages read`);
+  return out;
+}
+
+const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera };
 
 /**
  * One source thunk per city.js venue with a `feed` (its listings pinned to that row) and one per

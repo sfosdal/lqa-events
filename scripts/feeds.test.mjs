@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows } from './feeds.mjs';
+import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom } from './feeds.mjs';
 
 const room = 'Field Arts &#038; Events Hall &#8211; Donna M. Morris Theater';
 const row = (title, start, extra = {}) => ({ title, start_date: start, status: 'publish', all_day: false, venue: { venue: room }, categories: [], ...extra });
@@ -169,4 +169,51 @@ test('a Tribe iCal export reads like its REST rows: folded lines joined, escapes
     ['Cozy Comedy Presents: Gary Gulman: The Grandiloquent Tour', '2026-10-14', '19:00', 'arts'],
     ['Open House', '2026-11-01', '', null],
   ]);
+});
+
+// ---- Ticketera ----
+test('ticketeraDates reads single dates, ranges across a month, English series and a year roll-over', () => {
+  assert.deepEqual(ticketeraDates('oct. 16, 2026'), ['2026-10-16', '2026-10-16']);
+  assert.deepEqual(ticketeraDates('oct. 22 - 23, 2026'), ['2026-10-22', '2026-10-23']);
+  assert.deepEqual(ticketeraDates('oct. 30 - nov. 1, 2026'), ['2026-10-30', '2026-11-01']);
+  assert.deepEqual(ticketeraDates('Sep. 17, 2026 - Oct. 25, 2026'), ['2026-09-17', '2026-10-25']);
+  assert.deepEqual(ticketeraDates('Oct. 1, 2026 - Oct 31, 2026'), ['2026-10-01', '2026-10-31']);
+  assert.deepEqual(ticketeraDates('dic. 30 - ene. 2, 2027'), ['2026-12-30', '2027-01-02']);
+  assert.deepEqual(ticketeraDates('feb. 18 - 21', '2026-10-15'), ['2027-02-18', '2027-02-21']); // no year: the next one
+  assert.deepEqual(ticketeraDates('próximamente'), []);
+});
+
+const tkCard = (href, title, room, date) => `<div class="eventItem entry featured clearfix">
+  <div class="thumb"><a href="${href}" title="More Info for ${title}" tabindex="-1"><img src="x.jpg"/></a></div>
+  <div class="info clearfix"><div class="date">${date}</div>
+  <div class="location ">\n\t\t\t\t${room}\t\t\t</div>
+  <div class="presented-by">Alexandra, LLC</div>
+  <h2 class="title  ">\n\t\t<a href="${href}" title="More Info"> ${title}</a>\t</h2>
+  <div class="buttons"><a href="${href}#tickets" class="tickets onsalenow " title="Buy Tickets">Boletos</a></div></div></div>`;
+const tkSingle = '<span class="m-date__singleDate"><span class="m-date__month">oct. </span><span class="m-date__day">16</span><span class="m-date__year">, 2026</span></span>';
+const tkRange = '<span class="m-date__rangeFirst"><span class="m-date__month">oct. </span><span class="m-date__day">30</span></span><span class="m-date__separator"> - </span><span class="m-date__rangeLast"><span class="m-date__month">nov. </span><span class="m-date__day"> 1</span><span class="m-date__year">, 2026</span></span>';
+test('parseTicketeraList reads the listings and skips the Vue search template on the page', () => {
+  const html = tkCard('https://www.ticketera.com/events/detail/the-noise-la-ultima-noche', 'The Noise - La &Uacute;ltima Noche', 'Coliseo de Puerto Rico', tkSingle)
+    + tkCard('https://www.ticketera.com/events/detail/monster-jam-2026', 'Monster Jam 2026', 'Coliseo de Puerto Rico', tkRange)
+    + '<div class="eventItem entry small clearfix"><div class="thumb"><a :href="data.full_url"></a></div><div class="date" v-html="data.date_string"></div><div class="h3 title"><a :href="data.full_url" v-text="data.name"></a></div></div>';
+  const cards = parseTicketeraList(html);
+  assert.equal(cards.length, 2);
+  assert.deepEqual(cards[0], { title: 'The Noise - La Última Noche', room: 'Coliseo de Puerto Rico', dateText: 'oct. 16, 2026', href: 'https://www.ticketera.com/events/detail/the-noise-la-ultima-noche' });
+  assert.equal(cards[1].dateText, 'oct. 30 - nov. 1, 2026');
+});
+
+const tkShowing = (wd, mo, day, time, extra = '') => `<div class="showings_wrapper"><div id="showing_30${day}" class="listItem  clearfix ">
+  <span class="cell showings_date"><span class="m-date__singleDate"><span class="m-date__weekday">${wd}, </span><span class="m-date__month">${mo}. </span><span class="m-date__day">${day}</span></span></span>
+  <span class="time cell">\n\t\t${time}\t\t</span><span class="buttons cell"><a href="https://choli.ticketera.com/event/x" class="tickets onsalenow ">Boletos</a>${extra}</span></div></div>`;
+test('parseTicketeraDetail reads one showing per date and time, infers the year from the start, and the sidebar clock when there is no list', () => {
+  const html = '<div class="event_showings"><div class="list clearfix">' + tkShowing('viernes', 'dic', 30, '8:00 PM') + tkShowing('sábado', 'ene', 2, '1:00 PM', ' <span>Agotado</span>') + '</div></div>';
+  assert.deepEqual(parseTicketeraDetail(html, '2026-12-30'), { showings: [{ date: '2026-12-30', time: '20:00' }, { date: '2027-01-02', time: '13:00', soldOut: true }], time: '' });
+  const single = '<li class="item sidebar_event_starts"><div class="label">Inicio del Evento</div><span> 8:30<span data-time="p. m.">p. m.</span></span></li><div class="event_showings"><div class="list clearfix"></div></div>';
+  assert.deepEqual(parseTicketeraDetail(single, '2026-11-11'), { showings: [], time: '20:30' });
+});
+
+test('pageRoom names a venue page by the room most of its cards carry, and nothing for a mixed category page', () => {
+  assert.equal(pageRoom([{ room: 'CBA Santurce' }, { room: 'CBA Santurce' }, { room: '' }]), 'CBA Santurce');
+  assert.equal(pageRoom([{ room: 'Coliseo' }, { room: 'Bithorn' }, { room: 'Clemente' }, { room: 'Coliseo' }]), '');
+  assert.equal(pageRoom([]), '');
 });
