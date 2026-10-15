@@ -3880,7 +3880,7 @@
         row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' var(--tint), transparent)';
         var time = document.createElement('span');
         time.className = 'time';
-        if (e.time) clockCell(time, fmtTime(e.time, e.date)); else time.textContent = fmtTime(e.time); // "all day" stays a word
+        clockCell(time, e.time ? fmtTime(e.time, e.date) : 'ALL DAY'); // an all-day row reads ALL over DAY in the clock face, like a timed one (Steve, 2026-10-14); the word was "all day" before
         var sn = null;
         if (e.series) {
           // "2 of 4" after the title (Steve, 2026-09-15 — it sat under the time); the gutter graph picks the row up by id
