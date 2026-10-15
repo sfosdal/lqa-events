@@ -59,6 +59,17 @@
  *                itself): the links `match` picks (unique, query stripped, at most `max` = 40) are
  *                fetched one by one and read like `jsonld`; `at` keeps those whose location names
  *                the room (Anchorage, 2026-10-15).
+ *   squarespace — a Squarespace site's events collection (`<collection page>?format=json`): its
+ *                `upcoming` items carry an epoch-ms startDate read on the site's own clock
+ *                (website.timeZone), a title, a site-relative fullUrl and, city-wide, a
+ *                location.addressTitle room (the Everett pattern, shared 2026-10-15 for the Seattle
+ *                Jazz Fellowship and Nordo in Pioneer Square). `drop` takes titles by name.
+ *   cards       — a server-rendered listing with no markup to speak of (the Alliance for Pioneer
+ *                Square's neighbourhood calendar, 2026-10-15): the page is cut into cards at `item`,
+ *                and in each `title` captures the link and the name, `when` the date text ("October
+ *                15, 2026 | 10:00 AM - 2:00 PM"; "December 05-06, 2026 | …" is one row per day, up to
+ *                a week) and `place` the room, which folds by alias or into `groundsVenue` like any
+ *                city-wide feed; `type` is the rows' default type.
  *
  * Also here: the empty-list gate every build runs (`emptyListGate`) — a
  * fresh pull with zero upcoming events is a scouting failure or an outage,
@@ -330,7 +341,8 @@ export function parseJsonLdEvents(html, { venue, at, types } = {}) {
 }
 async function fetchJsonLd(url, ua, label, opts) {
   const html = await fetchText(url, ua);
-  const evs = parseJsonLdEvents(html, { venue: opts.venue, at: opts.feed?.at, types: opts.types });
+  const drop = opts.drop || opts.feed?.drop;
+  const evs = parseJsonLdEvents(html, { venue: opts.venue, at: opts.feed?.at, types: opts.types }).filter((e) => !drop || !drop.test(e.title));
   console.log(`${label} (schema.org events): ${evs.length} events`);
   return evs;
 }
@@ -589,7 +601,89 @@ async function fetchLinked(url, ua, label, opts) {
   return out;
 }
 
-const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera, icsfile: fetchIcsFile, linked: fetchLinked };
+// ---- a Squarespace events collection ----
+/**
+ * `<collection page>?format=json` answers with the same data the page renders: `upcoming`
+ * items carrying an epoch-ms startDate, an HTML-escaped title, a site-relative fullUrl and a
+ * location.addressTitle room. The clock is the site's own (website.timeZone).
+ * Returns [{ venue, title, date, time, url, type? }].
+ */
+export function mapSquarespaceEvents(data, { venue, base = '', drop, type, types, label = 'feed' } = {}) {
+  const tz = data?.website?.timeZone || 'UTC';
+  const fmt = new Intl.DateTimeFormat('sv-SE', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  const out = [];
+  for (const it of data?.upcoming || data?.items || []) {
+    if (!Number.isFinite(it.startDate)) continue;
+    const title = decode(it.title || '');
+    if (!title || (drop && drop.test(title))) continue;
+    const [date, time] = fmt.format(new Date(it.startDate)).split(' '); // "2026-10-20 19:30"
+    const ev = { venue: venue || decode(it.location?.addressTitle || '') || label, title, date, time: time || '', url: it.fullUrl ? new URL(it.fullUrl, base || 'https://localhost/').href : base };
+    if (type && (!types || types.includes(type))) ev.type = type;
+    out.push(ev);
+  }
+  return out;
+}
+async function fetchSquarespace(url, ua, label, opts) {
+  const { feed = {}, venue, types, defaultType, drop } = opts;
+  const u = new URL(url); u.searchParams.set('format', 'json');
+  const res = await fetch(u, { headers: { 'User-Agent': ua, Accept: 'application/json' } });
+  if (!res.ok) { console.error(`${label} HTTP ${res.status}`); return []; }
+  const evs = mapSquarespaceEvents(await res.json(), { venue, base: u.origin, drop: drop || feed.drop, type: feed.type || defaultType, types, label });
+  console.log(`${label} (Squarespace): ${evs.length} events`);
+  return evs;
+}
+
+// ---- a server-rendered listing cut into cards ----
+const CARD_MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+/**
+ * A card's date text → [{ date, time }]: "October 15, 2026 | 10:00 AM - 2:00 PM" is one row at
+ * 10:00; "December 05-06, 2026 | 10:00 AM - 4:00 PM" and "October 31 - November 2, 2026" one per
+ * day, at most seven; no clock → an all-day row. [] when there is no readable date.
+ */
+export function cardDates(text) {
+  const t = decode(text);
+  const m = /([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:\s*[-–]\s*(?:([A-Za-z]{3,9})\.?\s+)?(\d{1,2}))?,?\s*(\d{4})/.exec(t);
+  if (!m) return [];
+  const mo1 = CARD_MONTHS[m[1].slice(0, 3).toLowerCase()];
+  const mo2 = m[3] ? CARD_MONTHS[m[3].slice(0, 3).toLowerCase()] : mo1;
+  if (!mo1 || !mo2) return [];
+  const y = Number(m[5]);
+  const clock = /(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/i.exec(t.slice(m.index + m[0].length)) || /(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b/i.exec(t);
+  const time = clock ? `${String((Number(clock[1]) % 12) + (clock[3].toLowerCase() === 'p' ? 12 : 0)).padStart(2, '0')}:${clock[2] || '00'}` : '';
+  const start = Date.UTC(y, mo1 - 1, Number(m[2]));
+  const end = m[4] ? Date.UTC(y, mo2 - 1, Number(m[4])) : start;
+  const out = [];
+  for (let d = start; d <= end && out.length < 7; d += 86400e3) out.push({ date: new Date(d).toISOString().slice(0, 10), time });
+  return out;
+}
+/** The cards of a listing page → feed events (see the header). */
+export function parseCards(html, { item, title, when, place, venue, drop, type, types, base = '' } = {}) {
+  const out = [];
+  for (const card of String(html || '').split(item).slice(1)) {
+    const tm = title.exec(card); const wm = when.exec(card);
+    if (!tm || !wm) continue;
+    const name = decode(tm[2]); const url = decode(tm[1]);
+    if (!name || (drop && drop.test(name))) continue;
+    const pm = place && place.exec(card);
+    const room = venue || (pm && decode(pm[1])) || '';
+    let href = url; try { href = new URL(url, base || 'https://localhost/').href; } catch { /* keep as written */ }
+    for (const { date, time } of cardDates(wm[1])) {
+      const ev = { venue: room, title: name, date, time, url: href };
+      if (type && (!types || types.includes(type))) ev.type = type;
+      out.push(ev);
+    }
+  }
+  return out;
+}
+async function fetchCards(url, ua, label, opts) {
+  const { feed = {}, venue, types, defaultType, drop } = opts;
+  const html = await fetchText(url, ua);
+  const evs = parseCards(html, { item: feed.item, title: feed.title, when: feed.when, place: feed.place, venue, drop: drop || feed.drop, type: feed.type || defaultType, types, base: url });
+  console.log(`${label} (cards): ${evs.length} events from ${Math.max(0, String(html).split(feed.item).length - 1)} cards`);
+  return evs;
+}
+
+const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera, icsfile: fetchIcsFile, linked: fetchLinked, squarespace: fetchSquarespace, cards: fetchCards };
 
 /**
  * One source thunk per city.js venue with a `feed` (its listings pinned to that row) and one per

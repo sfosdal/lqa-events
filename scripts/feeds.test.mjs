@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom, icsStart, mapIcsFile, eventLinks } from './feeds.mjs';
+import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom, icsStart, mapIcsFile, eventLinks, mapSquarespaceEvents, cardDates, parseCards } from './feeds.mjs';
 
 const room = 'Field Arts &#038; Events Hall &#8211; Donna M. Morris Theater';
 const row = (title, start, extra = {}) => ({ title, start_date: start, status: 'publish', all_day: false, venue: { venue: room }, categories: [], ...extra });
@@ -249,4 +249,37 @@ test('eventLinks picks the ticket links of a listing page once each, absolute, w
     '<a href="https://www.eventbrite.com/e/parlor-in-the-round-tickets-1994714434570">Buy</a><a href="https://www.eventbrite.com/e/vitamin-comedy-tickets-1998453361802&amp;x=1">Buy</a>';
   assert.deepEqual(eventLinks(html, /eventbrite\.com\/e\//, 'https://www.beartoothak.com/live-events'),
     ['https://www.eventbrite.com/e/parlor-in-the-round-tickets-1994714434570', 'https://www.eventbrite.com/e/vitamin-comedy-tickets-1998453361802&x=1']);
+});
+
+test('a Squarespace collection: upcoming items on the site clock, the room pinned or taken from the entry, drop by title', () => {
+  const data = { website: { timeZone: 'America/Los_Angeles' }, upcoming: [
+    { startDate: Date.UTC(2026, 9, 21, 2, 30), title: 'Alex Dugdale &amp; Friends', fullUrl: '/events/alex-dugdale', location: { addressTitle: 'Seattle Jazz Fellowship' } },
+    { startDate: Date.UTC(2026, 9, 22, 2, 0), title: 'Jam Session', fullUrl: '/events/jam' },
+    { startDate: 'tbd', title: 'No date' },
+  ] };
+  assert.deepEqual(mapSquarespaceEvents(data, { venue: 'Seattle Jazz Fellowship', base: 'https://seattlejazzfellowship.org', drop: /jam session/i, type: 'concert' }), [
+    { venue: 'Seattle Jazz Fellowship', title: 'Alex Dugdale & Friends', date: '2026-10-20', time: '19:30', url: 'https://seattlejazzfellowship.org/events/alex-dugdale', type: 'concert' },
+  ]);
+  assert.equal(mapSquarespaceEvents(data, { base: 'https://x.org' })[1].venue, 'feed'); // no room anywhere → the feed's label
+});
+
+test('cardDates reads one date with a clock, a day range as one row per day, and a month-crossing range', () => {
+  assert.deepEqual(cardDates('October 15, 2026 | 10:00 AM - 2:00 PM'), [{ date: '2026-10-15', time: '10:00' }]);
+  assert.deepEqual(cardDates('December 05-06, 2026 | 10:00 AM - 4:00 PM'), [{ date: '2026-12-05', time: '10:00' }, { date: '2026-12-06', time: '10:00' }]);
+  assert.deepEqual(cardDates('October 31 - November 2, 2026').map((d) => d.date), ['2026-10-31', '2026-11-01', '2026-11-02']);
+  assert.deepEqual(cardDates('November 1, 2026 | 7 PM'), [{ date: '2026-11-01', time: '19:00' }]);
+  assert.deepEqual(cardDates('Every Thursday'), []);
+});
+
+test('parseCards cuts a listing into cards and keeps the link, the name, the room and every date', () => {
+  const html = `<div class="grid-item"><h3><a href="https://psq.org/our-events/flea/">Occidental Square Flea</a></h3>
+      <p><strong>December 05-06, 2026 | 10:00 AM - 4:00 PM</strong></p><p>Occidental Square</p></div>
+    <div class="grid-item"><h3><a href="/our-events/craft/">Craft Club &amp; Brunch</a></h3><p><strong>October 18, 2026 | 1:00 PM - 4:00 PM</strong></p><p>Asylum Collective</p></div>
+    <div class="grid-item"><h3><a href="/x">No date card</a></h3></div>`;
+  const out = parseCards(html, { item: /<div class="grid-item">/, title: /<h3><a href="([^"]+)">([^<]+)<\/a>/, when: /<strong>([^<]+)<\/strong>/, place: /<\/strong><\/p>\s*<p>([^<]*)<\/p>/, type: 'community', base: 'https://pioneersquare.org/events/' });
+  assert.deepEqual(out, [
+    { venue: 'Occidental Square', title: 'Occidental Square Flea', date: '2026-12-05', time: '10:00', url: 'https://psq.org/our-events/flea/', type: 'community' },
+    { venue: 'Occidental Square', title: 'Occidental Square Flea', date: '2026-12-06', time: '10:00', url: 'https://psq.org/our-events/flea/', type: 'community' },
+    { venue: 'Asylum Collective', title: 'Craft Club & Brunch', date: '2026-10-18', time: '13:00', url: 'https://pioneersquare.org/our-events/craft/', type: 'community' },
+  ]);
 });
