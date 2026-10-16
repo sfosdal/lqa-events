@@ -125,7 +125,7 @@ export function tribeType(categories, allowed) {
 export function mapTribeEvents(rows, venueLabel, opts = {}) {
   const { drop, maxRepeat = 8, types, defaultType, rooms, label = venueLabel || 'feed' } = opts;
   const allowed = types ? new Set(types) : null;
-  const rowVenue = (e) => decode(e.venue?.venue || e.venue?.name || '');
+  const rowVenue = (e) => { const v = Array.isArray(e.venue) ? e.venue[0] : e.venue; return decode(v?.venue || v?.name || ''); }; // a community calendar (B-Town Blog, Burien) sends `venue` as a one-element array
   const list = (Array.isArray(rows) ? rows : rows?.events || []).filter((e) => e && e.title && e.start_date && e.status !== 'draft' && !e.hide_from_listings)
     .filter((e) => !rooms || rooms.test(rowVenue(e)));
   const dates = new Map();

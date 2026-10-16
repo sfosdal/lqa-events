@@ -58,6 +58,13 @@ test('a city-wide Tribe feed takes the venue from each row and `rooms` keeps onl
   assert.deepEqual(some.map((e) => e.title), ['Nerd Halen', 'Samantha Fish']);
 });
 
+test('a venue sent as a one-element array (B-Town Blog) reads like an object; an empty array is no venue', () => {
+  const rows = [row('Poe Night', '2026-10-17 19:30:00', { venue: [{ venue: 'Kennedy Catholic High School' }] }), row('Walk', '2026-10-18 10:00:00', { venue: [] })];
+  const out = mapTribeEvents(rows, null, { defaultType: 'community' });
+  assert.deepEqual(out.map((e) => e.venue), ['Kennedy Catholic High School', '']);
+  assert.deepEqual(mapTribeEvents(rows, null, { rooms: /kennedy/i }).map((e) => e.title), ['Poe Night']);
+});
+
 test('feedSources makes one source per venue with a feed and names an unknown kind', () => {
   const city = { types: [{ key: 'arts' }], venues: { A: { tm: { id: 'x' } }, B: { feed: { kind: 'tribe', url: 'https://x/wp-json/tribe/events/v1/events' } }, C: { feed: { kind: 'nope', url: 'https://x/' } } } };
   const srcs = feedSources(city, 'ua');
