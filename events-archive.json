@@ -5986,6 +5986,152 @@
    "date": "2026-10-15",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1414741/palace-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "2026 Seattle National College Fair",
+   "date": "2026-10-16",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=37174",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-10-16",
+   "time": "15:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "17:54:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "NAZA",
+   "date": "2026-10-16",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/naza",
+   "movie": true,
+   "end": "17:20:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Ken Russell’s The Devils",
+   "date": "2026-10-16",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/ken-russells-the-devils",
+   "movie": true,
+   "end": "18:09:00"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "Sawyer Hill - Everybody’s Home, Nobody’s Happy World Tour",
+   "date": "2026-10-16",
+   "time": "18:00:00",
+   "url": "https://www.ticketweb.com/event/sawyer-hill-everybodys-the-crocodile-tickets/14967543",
+   "type": "concert",
+   "status": "cancelled",
+   "statusSince": "2026-10-14T19:50:37.520Z"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Earlybirds Club",
+   "date": "2026-10-16",
+   "time": "18:00:00",
+   "url": "https://www.axs.com/events/1580819/earlybirds-club-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Opening Night GAS Film Festival",
+   "date": "2026-10-16",
+   "time": "18:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/opening-night-gas-film-festival",
+   "movie": true,
+   "end": "20:00:00"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "I'll Be Your Superhero",
+   "date": "2026-10-16",
+   "time": "18:00:00",
+   "url": "https://www.sct.org/onstage/productions/ill-be-your-superhero-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "This Wild Life",
+   "date": "2026-10-16",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/A74879b03ef2",
+   "status": "cancelled",
+   "type": "concert",
+   "end": "23:00:00",
+   "statusSince": "2026-09-22T01:01:07.384Z"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "NAMI's \"In Our Own Voice\" Workshops",
+   "date": "2026-10-16",
+   "time": "19:05:00",
+   "url": "https://www.sct.org/onstage/productions/nami-workshops-2026/",
+   "type": "community"
+  },
+  {
+   "venue": "On the Boards",
+   "title": "Holland Andrews and yuniya edi kwon",
+   "date": "2026-10-16",
+   "time": "19:30:00",
+   "url": "https://ontheboards.org/events/26-27/hdiftlan"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-10-16",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Malcolm Todd: Do That Again Tour",
+   "date": "2026-10-16",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/malcolm-todd-do-that-again-tour-seattle-washington-10-16-2026/event/0F0064C4A32BA7D1",
+   "type": "concert",
+   "tickets": {
+    "box": 0,
+    "resale": 13,
+    "checked": "2026-10-16T22:14:29.784Z",
+    "from": 158
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Pattie Gonia",
+   "date": "2026-10-16",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1250264/pattie-gonia-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "*LATE* Grindhaus w/ Bosco, Willow Pill, Tenderoni, Vander Von Odd",
+   "date": "2026-10-16",
+   "time": "22:30:00",
+   "url": "https://www.ticketweb.com/event/late-grindhaus-w-bosco-willow-the-crocodile-tickets/14655553",
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-10-16T21:50:49.837Z",
+    "from": 43.57
+   }
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Know Good with Blookah and Jeanlouis",
+   "date": "2026-10-16",
+   "time": "23:00:00",
+   "url": "https://www.axs.com/events/1495183/know-good-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
