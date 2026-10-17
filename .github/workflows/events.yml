@@ -27,6 +27,8 @@ jobs:
         env:
           TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
         run: node scripts/fetch-events.mjs
+      - name: Sitemap, robots.txt and event structured data
+        run: node scripts/seo.mjs
       - name: Keep the archive branch (every past event ever published)
         # The build read both copies of the archive (live feed + this branch)
         # and wrote their union to events-archive.json; commit it here when it
