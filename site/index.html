@@ -19,14 +19,13 @@
     if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
   } catch (e) { /* no storage — system it is */ }
 </script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=GT-TNHG85H7"></script>
+<!-- Google tag (gtag.js) — the here.events GA4 property, one stream for the map and every city; reports split by hostname -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BTQFXS68HN"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
-  gtag('config', 'GT-TNHG85H7');
+  gtag('config', 'G-BTQFXS68HN');
 </script>
 <title>Lower Queen Anne Events — around Seattle Center</title>
 <meta name="description" content="What's on around Seattle Center — Climate Pledge Arena, McCaw Hall, and Seattle Center grounds. Calendar, iCal feed, and embeddable widget.">
