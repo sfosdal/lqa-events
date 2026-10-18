@@ -352,11 +352,11 @@ test('mapLocalistEvents: one row per instance on the campus clock, the ticket li
   assert.deepEqual(mapLocalistEvents(data, { venue: 'Beall Concert Hall', type: 'arts', types: ['arts'] }).map((e) => [e.venue, e.type, e.title]), [['Beall Concert Hall', 'arts', 'UO Symphony Orchestra'], ['Beall Concert Hall', 'arts', 'UO Symphony Orchestra'], ['Beall Concert Hall', 'arts', 'Box Office Hours']]);
 });
 
-test('parseLudus: one row per upcoming showtime, the show page as the link, a sold_out_span → soldOut, past rows skipped', () => {
+test('parseLudus: one row per upcoming showtime, the show page as the link, the sold-out class → soldOut (the span is in every row), past rows skipped', () => {
   const show = (title, id, times) => `<div class="show_item" data-show-id="${id}"><h2 class="show_item_title"><span class="patron_heading_label">\n ${title} </span></h2>
     <a href="show_page.php?show_id=${id}"><div class="show_about_button learn_more_button">Learn More</div></a>${times}</div>`;
-  const when = (d, t, past = 0, sold = false) => `<div class="showtimes_item " id="x" data-past-date="${past}"><div class="admin_showtimes_item_title"><div class="desktop_copy"><span class="span_link" >\n ${d} <span style="color:#777777;">\n &nbsp; ${t} </span></span></div></div>
-    <div class="showtimes_item_get_tickets_button">Get Tickets</div>${sold ? '<div class="red_span sold_out_span"><i class="fa"></i> Sold Out </div>' : ''}</div>`;
+  const when = (d, t, past = 0, sold = false) => `<div class="showtimes_item ${sold ? 'sold-out' : ''}" id="x" data-past-date="${past}" data-manual-soldout="0"><div class="admin_showtimes_item_title"><div class="desktop_copy"><span class="span_link" >\n ${d} <span style="color:#777777;">\n &nbsp; ${t} </span></span></div></div>
+    <div class="showtimes_item_get_tickets_button">Get Tickets</div><div class="red_span sold_out_span"><i class="fa"></i> Sold Out </div></div>`;
   const html = show('Night of the Living Dead Live', 200529348, when('Saturday, October 17, 2026', '7:30 PM', 1) + when('Sunday, October 18, 2026', '2:00 PM', 0, true) + when('Friday, October 23, 2026', '7:30 PM'))
     + show('Auditions: Spring Show', 1, when('Monday, November 2, 2026', '6:00 PM'));
   assert.deepEqual(parseLudus(html, { venue: 'Very Little Theatre', base: 'https://thevlt.ludus.com/index.php', type: 'arts', types: ['arts'], drop: /^auditions/i }), [

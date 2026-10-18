@@ -800,8 +800,8 @@ async function fetchLocalist(url, ua, label, opts) {
 /**
  * The index page lists every show as a show_item (its name in patron_heading_label, Learn More →
  * show_page.php?show_id=) with one showtimes_item per performance ("Sunday, October 18, 2026
- * &nbsp; 2:00 PM"); data-past-date="1" rows are over and a sold_out_span marks a performance sold
- * out. Ludus sits behind Cloudflare, so the page comes through chromeFetch (cffi-fetch.py).
+ * &nbsp; 2:00 PM"); data-past-date="1" rows are over and the sold-out class on the row marks a performance
+ * sold out (the Sold Out span sits in every row, hidden until then). Ludus sits behind Cloudflare, so the page comes through chromeFetch (cffi-fetch.py).
  */
 export function parseLudus(html, { venue, base = '', drop, type, types, label = 'feed' } = {}) {
   const out = [];
@@ -811,14 +811,15 @@ export function parseLudus(html, { venue, base = '', drop, type, types, label = 
     if (!title || (drop && drop.test(title))) continue;
     const pm = /href="(show_page\.php\?show_id=\d+)"/.exec(show);
     let url = base; try { url = new URL(pm ? pm[1] : '', base || 'https://localhost/').href; } catch { /* keep the base */ }
-    for (const st of show.split(/<div class="showtimes_item\s*"/).slice(1)) {
+    for (const st of show.split(/<div class="showtimes_item\b/).slice(1)) { // the class list may go on: "showtimes_item sold-out"
       if (/data-past-date="1"/.test(st)) continue;
+      const classes = (/^([^"]*)"/.exec(st) || [, ''])[1];
       const wm = /span_link[^>]*>\s*([A-Za-z]+,\s*[A-Za-z]+\.?\s+\d{1,2},\s*\d{4})\s*<span[^>]*>\s*(?:&nbsp;)?\s*(\d{1,2}:\d{2}\s*[AP]M)/i.exec(st);
       if (!wm) continue;
       for (const { date, time } of cardDates(`${wm[1]} ${wm[2]}`)) {
         const ev = { venue: venue || label, title, date, time, url };
         if (type && (!types || types.includes(type))) ev.type = type;
-        if (/sold_out_span/.test(st)) ev.soldOut = true;
+        if (/\bsold-out\b/.test(classes) || /data-manual-soldout="1"/.test(st)) ev.soldOut = true; // the span is in every row; the class is the state (Ludus's own click handler reads it)
         out.push(ev);
       }
     }
