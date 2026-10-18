@@ -755,7 +755,85 @@ async function fetchNps(url, ua, label, opts) {
   return evs;
 }
 
-const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera, icsfile: fetchIcsFile, linked: fetchLinked, squarespace: fetchSquarespace, cards: fetchCards, nps: fetchNps };
+// ---- Localist (the university calendars: calendar.uoregon.edu) ----
+/**
+ * /api/2/events?venue_id=…&days=…&pp=100 (`page=` for the next hundred): events[].event with
+ * event_instances[].event_instance.start (ISO on the campus clock), ticket_url / localist_url,
+ * location_name and filters.event_types. One row per instance; `venue` pins the rows to a room,
+ * else each keeps its location_name for the aliases to fold.
+ */
+export function mapLocalistEvents(data, { venue, drop, type, types, defaultType, label = 'feed' } = {}) {
+  const allowed = types ? new Set(types) : null;
+  const out = [];
+  for (const { event: e } of data?.events || []) {
+    if (!e) continue;
+    const title = decode(e.title || '').replace(/\s+/g, ' ').trim();
+    if (!title || (drop && drop.test(title))) continue;
+    const url = e.ticket_url || e.localist_url || e.url || '';
+    const t = (type && (!allowed || allowed.has(type)) ? type : null) || tribeType((e.filters?.event_types || []).map((x) => x.name), allowed) || defaultType;
+    for (const { event_instance: inst } of e.event_instances || []) {
+      const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/.exec(inst?.start || '');
+      if (!m) continue;
+      const ev = { venue: venue || decode(e.location_name || '') || label, title, date: m[1], time: inst.all_day ? '' : m[2], url };
+      if (t) ev.type = t;
+      out.push(ev);
+    }
+  }
+  return out;
+}
+async function fetchLocalist(url, ua, label, opts) {
+  const { feed = {}, venue, types, defaultType, drop } = opts;
+  const out = [];
+  let next = url;
+  for (let page = 1; next && page <= (feed.pages || 5); page++) {
+    const res = await fetch(next, { headers: { 'User-Agent': ua, Accept: 'application/json' } });
+    if (!res.ok) { console.error(`${label} HTTP ${res.status}`); break; }
+    const data = await res.json();
+    out.push(...mapLocalistEvents(data, { venue, drop: drop || feed.drop, type: feed.type, types, defaultType, label }));
+    const u = new URL(next); next = data.page?.next_page ? (u.searchParams.set('page', data.page.next_page), u.href) : null;
+  }
+  console.log(`${label} (Localist): ${out.length} events`);
+  return out;
+}
+
+// ---- Ludus box offices (thevlt.ludus.com — community theatres) ----
+/**
+ * The index page lists every show as a show_item (its name in patron_heading_label, Learn More →
+ * show_page.php?show_id=) with one showtimes_item per performance ("Sunday, October 18, 2026
+ * &nbsp; 2:00 PM"); data-past-date="1" rows are over and a sold_out_span marks a performance sold
+ * out. Ludus sits behind Cloudflare, so the page comes through chromeFetch (cffi-fetch.py).
+ */
+export function parseLudus(html, { venue, base = '', drop, type, types, label = 'feed' } = {}) {
+  const out = [];
+  for (const show of String(html || '').split(/<div class="show_item"/).slice(1)) {
+    const tm = /patron_heading_label"[^>]*>\s*([\s\S]*?)\s*<\/span>/.exec(show);
+    const title = tm ? decode(tm[1].replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim() : '';
+    if (!title || (drop && drop.test(title))) continue;
+    const pm = /href="(show_page\.php\?show_id=\d+)"/.exec(show);
+    let url = base; try { url = new URL(pm ? pm[1] : '', base || 'https://localhost/').href; } catch { /* keep the base */ }
+    for (const st of show.split(/<div class="showtimes_item\s*"/).slice(1)) {
+      if (/data-past-date="1"/.test(st)) continue;
+      const wm = /span_link[^>]*>\s*([A-Za-z]+,\s*[A-Za-z]+\.?\s+\d{1,2},\s*\d{4})\s*<span[^>]*>\s*(?:&nbsp;)?\s*(\d{1,2}:\d{2}\s*[AP]M)/i.exec(st);
+      if (!wm) continue;
+      for (const { date, time } of cardDates(`${wm[1]} ${wm[2]}`)) {
+        const ev = { venue: venue || label, title, date, time, url };
+        if (type && (!types || types.includes(type))) ev.type = type;
+        if (/sold_out_span/.test(st)) ev.soldOut = true;
+        out.push(ev);
+      }
+    }
+  }
+  return out;
+}
+async function fetchLudus(url, ua, label, opts) {
+  const { feed = {}, venue, types, defaultType, drop } = opts;
+  const html = (await chromeFetch([url], label)).get(url) || '';
+  const evs = parseLudus(html, { venue: venue || label, base: url, drop: drop || feed.drop, type: feed.type || defaultType, types, label });
+  console.log(`${label} (Ludus): ${evs.length} performances from ${(html.match(/<div class="show_item"/g) || []).length} shows`);
+  return evs;
+}
+
+const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera, icsfile: fetchIcsFile, linked: fetchLinked, squarespace: fetchSquarespace, cards: fetchCards, nps: fetchNps, localist: fetchLocalist, ludus: fetchLudus };
 
 /**
  * One source thunk per city.js venue with a `feed` (its listings pinned to that row) and one per

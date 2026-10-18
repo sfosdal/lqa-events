@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom, icsStart, mapIcsFile, eventLinks, mapSquarespaceEvents, cardDates, parseCards, mapNpsEvents, cardClock } from './feeds.mjs';
+import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom, icsStart, mapIcsFile, eventLinks, mapSquarespaceEvents, cardDates, parseCards, mapNpsEvents, cardClock, mapLocalistEvents, parseLudus } from './feeds.mjs';
 
 const room = 'Field Arts &#038; Events Hall &#8211; Donna M. Morris Theater';
 const row = (title, start, extra = {}) => ({ title, start_date: start, status: 'publish', all_day: false, venue: { venue: room }, categories: [], ...extra });
@@ -338,4 +338,29 @@ test('parseCards strips tags inside a title and a date (Waterfront Park\'s no-wi
   const html = '<div class="grid-item" data-id="1"><a href="https://waterfrontparkseattle.org/blog/event/x/?date=202611031000"><div class="inner-wrap"><h3 class="widont ">Tuesday Nov 3,<span class="nbsp">&nbsp;</span>2026</h3><h3 class="widont date-time">10 am‑12 pm</h3><h4 class="widont ">Secrets of Seattle&#8217;s Shoreline Walking<span class="nbsp">&nbsp;</span>Tour</h4></div></a></div>';
   const out = parseCards(html, { item: /<div class="grid-item"/, title: /<a href="([^"]+)">[\s\S]*?<h4 class="widont ">([\s\S]*?)<\/h4>/, when: /<h3 class="widont ">([\s\S]*?)<\/h3><h3 class="widont date-time">([^<]*)<\/h3>/, venue: 'Waterfront Park', type: 'community' });
   assert.deepEqual(out, [{ venue: 'Waterfront Park', title: 'Secrets of Seattle’s Shoreline Walking Tour', date: '2026-11-03', time: '10:00', url: 'https://waterfrontparkseattle.org/blog/event/x/?date=202611031000', type: 'community' }]);
+});
+
+test('mapLocalistEvents: one row per instance on the campus clock, the ticket link first, the type from the event_types filter (Arts & Culture outranks Music in the shared bank)', () => {
+  const data = { events: [{ event: { title: 'UO Symphony Orchestra', localist_url: 'https://calendar.uoregon.edu/event/uo-symphony-orchestra-1019', ticket_url: 'https://ticket.uoregon.edu/somd27/10578', location_name: 'Beall Concert Hall',
+    filters: { event_types: [{ name: 'Arts & Culture' }, { name: 'Music' }, { name: 'Concert' }] },
+    event_instances: [{ event_instance: { start: '2026-10-20T19:30:00-07:00', all_day: false } }, { event_instance: { start: '2026-10-21T00:00:00-07:00', all_day: true } }] } },
+    { event: { title: 'Box Office Hours', location_name: 'Beall Concert Hall', event_instances: [{ event_instance: { start: '2026-10-22T10:00:00-07:00' } }] } }] };
+  assert.deepEqual(mapLocalistEvents(data, { types: ['concert', 'arts'], drop: /box office/i }), [
+    { venue: 'Beall Concert Hall', title: 'UO Symphony Orchestra', date: '2026-10-20', time: '19:30', url: 'https://ticket.uoregon.edu/somd27/10578', type: 'arts' },
+    { venue: 'Beall Concert Hall', title: 'UO Symphony Orchestra', date: '2026-10-21', time: '', url: 'https://ticket.uoregon.edu/somd27/10578', type: 'arts' },
+  ]);
+  assert.deepEqual(mapLocalistEvents(data, { venue: 'Beall Concert Hall', type: 'arts', types: ['arts'] }).map((e) => [e.venue, e.type, e.title]), [['Beall Concert Hall', 'arts', 'UO Symphony Orchestra'], ['Beall Concert Hall', 'arts', 'UO Symphony Orchestra'], ['Beall Concert Hall', 'arts', 'Box Office Hours']]);
+});
+
+test('parseLudus: one row per upcoming showtime, the show page as the link, a sold_out_span → soldOut, past rows skipped', () => {
+  const show = (title, id, times) => `<div class="show_item" data-show-id="${id}"><h2 class="show_item_title"><span class="patron_heading_label">\n ${title} </span></h2>
+    <a href="show_page.php?show_id=${id}"><div class="show_about_button learn_more_button">Learn More</div></a>${times}</div>`;
+  const when = (d, t, past = 0, sold = false) => `<div class="showtimes_item " id="x" data-past-date="${past}"><div class="admin_showtimes_item_title"><div class="desktop_copy"><span class="span_link" >\n ${d} <span style="color:#777777;">\n &nbsp; ${t} </span></span></div></div>
+    <div class="showtimes_item_get_tickets_button">Get Tickets</div>${sold ? '<div class="red_span sold_out_span"><i class="fa"></i> Sold Out </div>' : ''}</div>`;
+  const html = show('Night of the Living Dead Live', 200529348, when('Saturday, October 17, 2026', '7:30 PM', 1) + when('Sunday, October 18, 2026', '2:00 PM', 0, true) + when('Friday, October 23, 2026', '7:30 PM'))
+    + show('Auditions: Spring Show', 1, when('Monday, November 2, 2026', '6:00 PM'));
+  assert.deepEqual(parseLudus(html, { venue: 'Very Little Theatre', base: 'https://thevlt.ludus.com/index.php', type: 'arts', types: ['arts'], drop: /^auditions/i }), [
+    { venue: 'Very Little Theatre', title: 'Night of the Living Dead Live', date: '2026-10-18', time: '14:00', url: 'https://thevlt.ludus.com/show_page.php?show_id=200529348', type: 'arts', soldOut: true },
+    { venue: 'Very Little Theatre', title: 'Night of the Living Dead Live', date: '2026-10-23', time: '19:30', url: 'https://thevlt.ludus.com/show_page.php?show_id=200529348', type: 'arts' },
+  ]);
 });
