@@ -3471,7 +3471,7 @@
   function ticketsLine(e) {
     var t = e.tickets;
     var n = function (x) { return Number(x).toLocaleString('en-US'); };
-    var cap = VENUE_CAPACITY[e.venue];
+    var cap = e.capacity || VENUE_CAPACITY[e.venue]; // the night's own house (Ticketmaster's seat map, scripts/capacity.mjs) before the venue's usual one
     // a source that only says sold out (the Rep's feed, DICE): the fact and the house
     if (!t) return e.soldOut ? 'Sold out' + (cap ? ' \u00b7 ' + n(cap) + ' seats' : '') : '';
     var parts = [];

@@ -18,6 +18,7 @@ import { applySchedules } from './schedules.mjs';
 import { applySetTimes } from './settimes.mjs';
 import { slugify, BADGE_FEEDS, TEAMS, CITY } from './badges.mjs';
 import { ticketWebId } from './ticketweb.mjs';
+import { stampCapacity } from './capacity.mjs';
 
 const JSON_OUT = new URL('../site/events.json', import.meta.url);
 const ICS_OUT = new URL('../site/events.ics', import.meta.url);
@@ -547,6 +548,14 @@ for (const t of CITY.teams.filter((x) => x.inject)) {
     if (listed) { if (!listed.time && g.time && !g.tbd) listed.time = g.time; continue; } // the feed's listing stands; the league's first pitch fills a time it lacks
     merged.push({ venue: ground, title: `${t.inject.name || t.name || t.label} vs ${g.opp.name}`, date: g.date, time: g.time, url: t.inject.url, type: 'sports', ...(g.tbd ? { dateTbd: true } : {}), ...(g.watch ? { watch: g.watch } : {}) });
   }
+}
+// Each upcoming Ticketmaster event's own house size (scripts/capacity.mjs):
+// read once from Ticketmaster's seat-map manifest (paced, at most 120 a build),
+// then carried forward from the previous feed, so a build only asks about
+// events it has not seen.
+{
+  const c = await stampCapacity(merged, archived, { today, userAgent: CITY.userAgent });
+  console.log(`capacity: ${c.carried} carried forward, ${c.fetched} read from Ticketmaster, ${c.none} with no manifest, ${c.failed} failed, ${c.waiting} left for the next build${c.blocked ? ' (rate-limited — stopped)' : ''}`);
 }
 // Ticket availability for the Ticketmaster venues, from the local checker
 // (scripts/soldout-check.mjs → scripts/data/soldout.json, committed every six

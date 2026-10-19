@@ -66,7 +66,7 @@
     if (e.soldOut) return 'soldout';
     var t = e.tickets;
     if (!t || t.box == null || t.box <= 0) return '';
-    var cap = VENUE_CAPACITY[e.venue];
+    var cap = e.capacity || VENUE_CAPACITY[e.venue]; // the night's own house first
     return t.box <= (cap ? Math.ceil(cap * 0.05) : 100) ? 'nearly' : '';
   }
 
