@@ -445,6 +445,8 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 .fp-fold[aria-expanded="true"] svg { transform: rotate(90deg); }
 .fp-sub { display: flex; flex-direction: column; margin: 0 0 .25rem 1rem; padding-left: .3rem; border-left: 1px solid var(--line); }
 .fp-sub[hidden] { display: none; }
+.fp-tail .fp-name { color: var(--ink-soft); font-style: italic; } /* the "More rooms" row at a group's foot: the rooms the usual view hides, folded (2026-10-18) */
+.fp-tail:has(.fp-seg[data-mode="ex"]) .fp-name { opacity: 1; } /* it is usually all-Hide; dimming it too would make it vanish */
 /* three groups — the two venue lists (Lower Queen Anne the wider), Teams
    (Steve, 2026-09-20; Capacity rows dropped 2026-09-22) */
 @media (min-width: 641px) and (max-width: 899px) { .fp-tree .fp-cols { grid-template-columns: 1.1fr 1fr; } .fp-tree .fp-group:nth-child(3) { grid-column: 1; border-left: 0; padding-left: 0; padding-right: 1.25rem; border-top: 1px solid var(--line); padding-top: 1rem; margin-top: -.25rem; } } /* tablets: two columns, Teams under Lower Queen Anne (three squeezed the headings into wraps) */

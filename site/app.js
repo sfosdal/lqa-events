@@ -418,9 +418,9 @@
   // A neighbourhood's row: a chevron that unfolds its rooms, the name, and
   // the Show | Hide pair that sets all of them (city.js `hoods`).
   var HOOD_ROOMS = {}; // label → the rooms under it, in panel order
-  function hoodRow(label, n) {
-    var row = filterRow('hood', label, plainName(label), n, n + (n === 1 ? ' room' : ' rooms'));
-    row.classList.add('fp-hood');
+  function hoodRow(label, n, key, cls) {
+    var row = filterRow('hood', key || label, plainName(label), n, n + (n === 1 ? ' room' : ' rooms'));
+    row.classList.add(cls || 'fp-hood');
     var fold = document.createElement('button');
     fold.type = 'button'; fold.className = 'fp-fold'; fold.setAttribute('aria-expanded', 'false'); fold.setAttribute('aria-label', 'The rooms in ' + label);
     fold.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
@@ -481,21 +481,40 @@
       var n = upcoming.filter(function (e) { return t.re.test(e.title || ''); }).length;
       return filterRow('team', t.slug, name, n, t.label + ' home games');
     }
-    var cityRows = []; // the city column's rows, folded by neighbourhood below when the city asks
+    var cityRows = [], townRows = [], festRows = []; // [venue, row] pairs per group; the city column folds by neighbourhood below when the city asks
+    HOOD_ROOMS = {};
     state.venues.forEach(function (v) {
       var n = upcoming.filter(function (e) { return e.venue === v; }).length;
       var cap = VENUE_CAPACITY[v];
       var row = filterRow('venue', v, venueName(v), n, cap ? 'Holds about ' + cap.toLocaleString('en-US') : undefined);
       var g = venueGroup(v); // the festivals keep together, whatever their area
-      if (g === 'fest') pf.appendChild(row); else if (g === 'town') pt.appendChild(row); else cityRows.push([v, row]);
+      (g === 'fest' ? festRows : g === 'town' ? townRows : cityRows).push([v, row]);
     });
+    // The long tail (Steve, 2026-10-18: "even neighborhoods are getting
+    // complicated"): a group lists the rooms the usual view shows; the rooms
+    // it starts with hidden go behind one "More rooms" row at its foot — a
+    // chevron to open them, and a Show | Hide pair that works them all, like
+    // a neighbourhood's. A room the reader has turned on (a saved pref, a
+    // share code) is listed in the open part, so a row in use never folds.
+    function appendRooms(list, rows, key) {
+      var open = rows.filter(function (r) { return DEFAULT_VENUES_OFF.indexOf(r[0]) < 0 || state.venueMode[r[0]] === 'in'; });
+      var tail = rows.filter(function (r) { return open.indexOf(r) < 0; });
+      open.forEach(function (r) { list.appendChild(r[1]); });
+      if (!tail.length) return;
+      HOOD_ROOMS[key] = tail.map(function (r) { return r[0]; });
+      list.appendChild(hoodRow('More rooms', tail.length, key, 'fp-tail'));
+      var sub = document.createElement('div'); sub.className = 'fp-sub'; sub.hidden = true;
+      tail.forEach(function (r) { sub.appendChild(r[1]); });
+      list.appendChild(sub);
+    }
+    appendRooms(pt, townRows, 'tail:town');
+    appendRooms(pf, festRows, 'tail:fest');
     // A city-wide site folds its column by neighbourhood (city.js `hoods`;
     // seattle-events, 2026-10-18 — Steve: the panel "is getting too big"):
     // one row per neighbourhood whose Show | Hide sets every room in it, the
     // rooms themselves behind a chevron. A room in no list goes under
     // `hoodsRest`. A neighbourhood whose rooms disagree shows neither word
     // lit; the chevron is the way to see which room is which.
-    HOOD_ROOMS = {};
     if (CITY.hoods && cityRows.length) {
       var hoodOf = {}, byHood = {}, labels = [];
       CITY.hoods.forEach(function (h) { labels.push(h.label); h.venues.forEach(function (v) { hoodOf[v] = h.label; }); });
@@ -508,10 +527,10 @@
         HOOD_ROOMS[label] = rows.map(function (r) { return r[0]; });
         pv.appendChild(hoodRow(label, rows.length));
         var sub = document.createElement('div'); sub.className = 'fp-sub'; sub.hidden = true;
-        rows.forEach(function (r) { sub.appendChild(r[1]); });
+        appendRooms(sub, rows, 'tail:' + label); // the neighbourhood's own long tail folds inside it
         pv.appendChild(sub);
       });
-    } else cityRows.forEach(function (r) { pv.appendChild(r[1]); });
+    } else appendRooms(pv, cityRows, 'tail:city');
     // capacity bands keep their state, rule and share-code slots but no panel rows (Steve, 2026-09-22: "we do not need a specific capacity section")
     var pt = $('panelTeams');
     pt.innerHTML = '';
