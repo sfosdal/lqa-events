@@ -10,9 +10,9 @@
  *                       Google can show the event rich results. Rewritten on
  *                       every run (the block is found by its id), never
  *                       committed — like the __V__ stamp.
- *   site/index.html   — a <nav class="city-links"> of real links to the map and
- *                       every other live city, right before <footer> (the
- *                       crawlable link graph; the More Cities sheet is JavaScript).
+ *   site/index.html   — a static More Cities link to https://here.events/ as the
+ *                       first footer link (the crawlable path to the map, which
+ *                       links on to every city; the sheet itself is JavaScript).
  * Everything comes from city.js (site, name, tz), site/cities.js (the city and
  * state behind this key, for the venues' postal address) and events.json.
  * Shared: lives in lqa, copied to every city by sync-shared.sh.
@@ -94,30 +94,20 @@ export function sitemapXml(site, pages, today) {
 
 export function robotsTxt(site) { return `User-agent: *\nAllow: /\n\nSitemap: ${site}sitemap.xml\n`; }
 
-/** The live cities from the generated cities.js, in its order (state, then name). */
-export function citiesFrom(citiesJs) {
-  const m = citiesJs.match(/window\.LQACities = (\{[\s\S]*\});\s*$/);
-  return m ? JSON.parse(m[1]).cities.filter((c) => c.live) : [];
-}
-
-/** A <nav> of real links to the map and every other live city: the crawlable
- *  link graph between the sites. The More Cities pill and sheet build theirs in
- *  JavaScript, so without this the HTML of a city page links to no other city
- *  and Google saw each site as an island (2026-10-18: every city "Discovered -
- *  currently not indexed", referring page "None detected"). Visible, muted,
- *  the last thing above the footer (.city-links in styles.css). */
-export function cityLinksNav(cities, key) {
-  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-  const links = ['<a href="https://here.events/">All cities on here.events</a>']
-    .concat(cities.filter((c) => c.key !== key).map((c) => `<a href="${esc(c.url)}">${esc(c.name)}, ${esc(c.state)}</a>`));
-  return `<nav class="city-links" id="city-links" aria-label="More cities on here.events">${links.join('\n')}</nav>`;
-}
-
-/** Put (or replace) the city-links nav right before <footer>. */
-export function injectCityLinks(html, nav) {
+/** A static More Cities link to the map in the footer: the one crawlable link
+ *  between the sites. app.js builds the same link at runtime (and opens the
+ *  More Cities sheet on click), but a link that exists only in JavaScript is
+ *  no path for a crawler — on 2026-10-18 every city was "Discovered - currently
+ *  not indexed", referring page "None detected". The map's static city list
+ *  links on to every city. A visible row of all the cities was tried first and
+ *  dropped (Steve, 2026-10-19: "not needed on neighborhood or city pages"). */
+export const MAP_LINK = '<a class="foot-link" id="moreCities" href="https://here.events/" title="Every city on here.events">More Cities</a>';
+export function injectMapLink(html) {
   const stripped = html.replace(/<nav class="city-links" id="city-links"[\s\S]*?<\/nav>\n?/, '');
-  if (!/<footer>/.test(stripped)) throw new Error('index.html has no <footer>');
-  return stripped.replace('<footer>', `${nav}\n<footer>`);
+  if (/id="moreCities"/.test(stripped)) return stripped;
+  const m = stripped.match(/<div class="foot-links">[^\n]*\n/);
+  if (!m) throw new Error('index.html has no <div class="foot-links">');
+  return stripped.replace(m[0], `${m[0]}  ${MAP_LINK}\n`);
 }
 
 /** Put (or replace) the ld+json block right before </body>. */
@@ -141,14 +131,12 @@ export function main(siteDir = new URL('../site/', import.meta.url), today = new
   const place = existsSync(new URL('cities.js', siteDir)) ? placeFor(read('cities.js'), CITY.key, { city: CITY.name, state: '' }) : { city: CITY.name, state: '' };
   const { events } = JSON.parse(read('events.json'));
   const ld = jsonLd(events, place, { today, site });
-  const cities = existsSync(new URL('cities.js', siteDir)) ? citiesFrom(read('cities.js')) : [];
-  const html = cities.length ? injectCityLinks(read('index.html'), cityLinksNav(cities, CITY.key)) : read('index.html');
-  writeFileSync(new URL('index.html', siteDir), injectLd(html, ld));
+  writeFileSync(new URL('index.html', siteDir), injectLd(injectMapLink(read('index.html')), ld));
   const pages = [{ path: '', freq: 'daily' }];
   if (existsSync(new URL('advertise.html', siteDir))) pages.push({ path: 'advertise.html', freq: 'monthly' });
   writeFileSync(new URL('sitemap.xml', siteDir), sitemapXml(site, pages, today));
   writeFileSync(new URL('robots.txt', siteDir), robotsTxt(site));
-  console.log(`seo: ${ld['@graph'].length - 1} events as JSON-LD (${place.city}, ${place.state}), ${cities.length ? cities.length - 1 : 0} city links, sitemap ${pages.length} url(s), robots.txt → ${site}`);
+  console.log(`seo: ${ld['@graph'].length - 1} events as JSON-LD (${place.city}, ${place.state}), More Cities link in the footer, sitemap ${pages.length} url(s), robots.txt → ${site}`);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) main(process.env.SITE_DIR ? new URL(process.env.SITE_DIR.replace(/\/?$/, '/'), `file://${process.cwd()}/`) : undefined);

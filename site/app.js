@@ -905,10 +905,13 @@
     // the footer: a More Cities link ahead of Advertise, the same sheet
     var links = document.querySelector('footer .foot-links');
     if (links) {
-      var more = document.createElement('a'); more.className = 'foot-link'; more.id = 'moreCities'; more.href = CITIES_URL; more.title = 'Every city on here.events';
+      // seo.mjs writes this link into the HTML at build (a crawlable path to the
+      // map); reuse it when it is there, else make it
+      var more = document.getElementById('moreCities');
+      if (!more) { more = document.createElement('a'); more.className = 'foot-link'; more.id = 'moreCities'; links.insertBefore(more, links.firstChild); }
+      more.href = CITIES_URL; more.title = 'Every city on here.events';
       more.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>More Cities</span>';
       more.addEventListener('click', openCitySheet);
-      links.insertBefore(more, links.firstChild);
     }
   }
   mountCityLinks();

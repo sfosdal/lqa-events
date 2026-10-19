@@ -1795,14 +1795,8 @@ body.sheet-open { overflow: hidden; }
 /* ---- the static More Cities links (scripts/seo.mjs writes them at build, before <footer>): real <a> links to the map
    and every other live city, so the HTML of each site links to the rest and Google can walk the network (the pill and
    sheet are JavaScript). Muted, one running line, the last thing under the list; never printed. (2026-10-19) */
-.city-links { margin: 2.5rem 1.25rem 3.2rem; font-size: .78rem; line-height: 2; color: var(--ink-soft); } /* the bottom margin keeps the last line clear of the Top floater */
-.city-links a { color: inherit; text-decoration: none; white-space: nowrap; }
-.city-links a:hover { color: var(--ink); text-decoration: underline; }
-.city-links a:first-child { font-weight: 600; }
-.city-links a:not(:last-child)::after { content: "·"; margin: 0 .5em; opacity: .5; } /* the dot trails each link, so a wrapped line never opens with one */
 
 @media print {
-  .city-links { display: none; }
   /* a light sheet whatever the screen theme: the palette's light values,
      after the dark-theme rules so they win */
   :root.print-team, :root.print-team[data-theme="dark"] {

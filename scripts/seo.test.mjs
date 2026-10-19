@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { utcOffset, isoStart, isoEnd, eventLd, pickEvents, jsonLd, sitemapXml, robotsTxt, injectLd, placeFor, citiesFrom, cityLinksNav, injectCityLinks, EVENT_CAP } from './seo.mjs';
+import { utcOffset, isoStart, isoEnd, eventLd, pickEvents, jsonLd, sitemapXml, robotsTxt, injectLd, placeFor, injectMapLink, MAP_LINK, EVENT_CAP } from './seo.mjs';
 
 const SEA = { city: 'Seattle', state: 'WA' };
 
@@ -87,21 +87,12 @@ test('placeFor reads the city and state behind a key from cities.js', () => {
   assert.deepEqual(placeFor(js, 'nope', { city: 'F', state: '' }), { city: 'F', state: '' });
 });
 
-test('cityLinksNav: the map first, then every other live city as a real link; injected once before <footer>', () => {
-  const js = `// generated\nwindow.LQACities = ${JSON.stringify({ map: 'https://here.events/', cities: [
-    { key: 'anchorage', name: 'Anchorage', state: 'AK', url: 'https://anchorage.here.events/', live: true },
-    { key: 'seattle', name: 'Seattle', state: 'WA', url: 'https://seattle.here.events/', live: true },
-    { key: 'yakima', name: 'Yakima', state: 'WA', url: 'https://yakima.here.events/', live: false },
-  ] })};\n`;
-  const cities = citiesFrom(js);
-  assert.deepEqual(cities.map((c) => c.key), ['anchorage', 'seattle']);
-  const nav = cityLinksNav(cities, 'seattle');
-  assert.match(nav, /^<nav class="city-links" id="city-links" aria-label="More cities on here.events"><a href="https:\/\/here.events\/">All cities on here.events<\/a>\n<a href="https:\/\/anchorage.here.events\/">Anchorage, AK<\/a><\/nav>$/);
-  assert.ok(!nav.includes('seattle.here.events'), 'no link to itself');
-  assert.ok(!nav.includes('Yakima'), 'coming-soon cities stay out');
-  const html = '<body><main></main>\n<footer>f</footer>\n</body>';
-  const once = injectCityLinks(html, nav);
-  assert.equal(once, `<body><main></main>\n${nav}\n<footer>f</footer>\n</body>`);
-  assert.equal(injectCityLinks(once, nav), once, 'a second run replaces, never duplicates');
-  assert.throws(() => injectCityLinks('<body></body>', nav), /no <footer>/);
+test('injectMapLink: one static More Cities link to the map as the first footer link; idempotent; strips the old city-links nav', () => {
+  const html = '<body><main></main>\n<footer>\n  <div class="foot-links"> <!-- c -->\n  <a class="foot-link" id="advertise" href="advertise.html">A</a>\n  </div>\n</footer>\n</body>';
+  const once = injectMapLink(html);
+  assert.equal(once, `<body><main></main>\n<footer>\n  <div class="foot-links"> <!-- c -->\n  ${MAP_LINK}\n  <a class="foot-link" id="advertise" href="advertise.html">A</a>\n  </div>\n</footer>\n</body>`);
+  assert.equal(injectMapLink(once), once, 'a second run adds nothing');
+  const old = html.replace('<footer>', '<nav class="city-links" id="city-links" aria-label="x"><a href="https://here.events/">All</a></nav>\n<footer>');
+  assert.equal(injectMapLink(old), once, 'the 2026-10-18 nav row is removed');
+  assert.throws(() => injectMapLink('<body></body>'), /no <div class="foot-links">/);
 });
