@@ -415,12 +415,34 @@
     row.appendChild(lab); row.appendChild(seg); // no counts on the rows (Steve, 2026-09-22: "drop the counts")
     return row;
   }
+  // A neighbourhood's row: a chevron that unfolds its rooms, the name, and
+  // the Show | Hide pair that sets all of them (city.js `hoods`).
+  var HOOD_ROOMS = {}; // label → the rooms under it, in panel order
+  function hoodRow(label, n) {
+    var row = filterRow('hood', label, plainName(label), n, n + (n === 1 ? ' room' : ' rooms'));
+    row.classList.add('fp-hood');
+    var fold = document.createElement('button');
+    fold.type = 'button'; fold.className = 'fp-fold'; fold.setAttribute('aria-expanded', 'false'); fold.setAttribute('aria-label', 'The rooms in ' + label);
+    fold.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+    row.insertBefore(fold, row.firstChild);
+    return row;
+  }
+  // every room Show → 'in', every room Hide → 'ex', otherwise no mark
+  function hoodMode(label) {
+    var rooms = HOOD_ROOMS[label] || [], first = rooms.length ? state.venueMode[rooms[0]] || '' : '';
+    return rooms.every(function (v) { return (state.venueMode[v] || '') === first; }) ? first : '';
+  }
+  function setFold(row, open) {
+    var fold = row.querySelector('.fp-fold'), sub = row.nextElementSibling;
+    if (!fold || !sub || !sub.classList.contains('fp-sub')) return;
+    sub.hidden = !open; fold.setAttribute('aria-expanded', String(open));
+  }
   // Panel rows are plain text: the venue / type / team colours show on the
   // calendar and agenda, not here.
   function plainName(label) {
-    var name = document.createElement('span');
+    var name = document.createElement('span'), text = document.createElement('span');
     name.className = 'fp-name';
-    name.appendChild(document.createTextNode(label));
+    text.textContent = label; name.appendChild(text); // in a span of its own so a too-long name clips with an ellipsis like a linked one
     return name;
   }
   // A name that links out (venue events page, team schedule) — or plain text
@@ -459,12 +481,37 @@
       var n = upcoming.filter(function (e) { return t.re.test(e.title || ''); }).length;
       return filterRow('team', t.slug, name, n, t.label + ' home games');
     }
+    var cityRows = []; // the city column's rows, folded by neighbourhood below when the city asks
     state.venues.forEach(function (v) {
       var n = upcoming.filter(function (e) { return e.venue === v; }).length;
       var cap = VENUE_CAPACITY[v];
-      var list = venueGroup(v) === 'fest' ? pf : venueGroup(v) === 'town' ? pt : pv; // the festivals keep together, whatever their area
-      list.appendChild(filterRow('venue', v, venueName(v), n, cap ? 'Holds about ' + cap.toLocaleString('en-US') : undefined));
+      var row = filterRow('venue', v, venueName(v), n, cap ? 'Holds about ' + cap.toLocaleString('en-US') : undefined);
+      var g = venueGroup(v); // the festivals keep together, whatever their area
+      if (g === 'fest') pf.appendChild(row); else if (g === 'town') pt.appendChild(row); else cityRows.push([v, row]);
     });
+    // A city-wide site folds its column by neighbourhood (city.js `hoods`;
+    // seattle-events, 2026-10-18 — Steve: the panel "is getting too big"):
+    // one row per neighbourhood whose Show | Hide sets every room in it, the
+    // rooms themselves behind a chevron. A room in no list goes under
+    // `hoodsRest`. A neighbourhood whose rooms disagree shows neither word
+    // lit; the chevron is the way to see which room is which.
+    HOOD_ROOMS = {};
+    if (CITY.hoods && cityRows.length) {
+      var hoodOf = {}, byHood = {}, labels = [];
+      CITY.hoods.forEach(function (h) { labels.push(h.label); h.venues.forEach(function (v) { hoodOf[v] = h.label; }); });
+      var rest = CITY.hoodsRest || 'Elsewhere';
+      cityRows.forEach(function (r) { var h = hoodOf[r[0]] || rest; (byHood[h] = byHood[h] || []).push(r); });
+      if (byHood[rest]) labels.push(rest);
+      labels.forEach(function (label) {
+        var rows = byHood[label];
+        if (!rows) return;
+        HOOD_ROOMS[label] = rows.map(function (r) { return r[0]; });
+        pv.appendChild(hoodRow(label, rows.length));
+        var sub = document.createElement('div'); sub.className = 'fp-sub'; sub.hidden = true;
+        rows.forEach(function (r) { sub.appendChild(r[1]); });
+        pv.appendChild(sub);
+      });
+    } else cityRows.forEach(function (r) { pv.appendChild(r[1]); });
     // capacity bands keep their state, rule and share-code slots but no panel rows (Steve, 2026-09-22: "we do not need a specific capacity section")
     var pt = $('panelTeams');
     pt.innerHTML = '';
@@ -490,7 +537,8 @@
   function syncFilters() {
     syncPresets();
     document.querySelectorAll('#filterPanel .fp-seg[data-group]').forEach(function (seg) {
-      var mode = state[GROUP_MAP[seg.dataset.group]][seg.dataset.key] || '';
+      var hood = seg.dataset.group === 'hood';
+      var mode = hood ? hoodMode(seg.dataset.key) : state[GROUP_MAP[seg.dataset.group]][seg.dataset.key] || '';
       seg.dataset.mode = mode;
       seg.querySelectorAll('.fp-seg-b').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === mode ? 'true' : 'false'); });
     });
@@ -655,12 +703,20 @@
       var chk = e.target.closest('#filterPanel .fp-check');
       if (chk && !e.target.closest('a')) seg = chk.closest('.fp-row').querySelector('.fp-seg[data-group]');
     }
+    if (seg && seg.dataset.group === 'hood') { // the neighbourhood's pair: every room in it to Show or Hide, or cleared when that word was already lit
+      var next = hoodMode(seg.dataset.key) === want ? null : want;
+      (HOOD_ROOMS[seg.dataset.key] || []).forEach(function (v) { setMode(state.venueMode, v, next); });
+      applyFilters();
+      return;
+    }
     if (seg) {
       var map = state[GROUP_MAP[seg.dataset.group]];
       setMode(map, seg.dataset.key, map[seg.dataset.key] === want ? null : want);
       applyFilters();
       return;
     }
+    var fb = e.target.closest('#filterPanel .fp-fold'); // the chevron: the neighbourhood's rooms, open or folded
+    if (fb) { setFold(fb.closest('.fp-row'), fb.getAttribute('aria-expanded') !== 'true'); return; }
     var ab = e.target.closest('.fp-set[data-scope]'); // a group's Show All / Hide All (Steve, 2026-09-14): every row in it set to Show, or every one to Hide
     if (ab) {
       var mode = ab.dataset.on === '1' ? 'in' : 'ex', scope = ab.dataset.scope;

@@ -361,7 +361,7 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 /* the groups sit in columns with a rule between them (a rule above, on
    phones, where they stack) */
 .fp-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1.25rem 0; } /* wide enough that no name wraps; tablets get two columns */
-.fp-group { padding: 0 1.25rem; }
+.fp-group { padding: 0 1.25rem; min-width: 0; } /* columns share the width evenly; a long name clips with an ellipsis rather than pushing the next column out of the panel (2026-10-18, the neighbourhood rows) */
 .fp-group:first-child { padding-left: 0; }
 .fp-group:last-child { padding-right: 0; }
 .fp-group + .fp-group { border-left: 1px solid var(--line); }
@@ -436,6 +436,15 @@ html.is-scrolled { --titleh: 2.2rem; --barh: calc(var(--barh-base) + var(--title
 .fp-name a { text-decoration-color: var(--line); }
 .fp-name a:hover { text-decoration-color: var(--ink-soft); }
 .fp-row:has(.fp-seg[data-mode="ex"]) .fp-name { opacity: .55; } /* a hidden row reads dimmed — the colour change alone, no strike-through (Steve, 2026-10-05) */
+/* a city-wide site folds its column by neighbourhood (seattle-events, 2026-10-18): the neighbourhood's row carries a chevron that
+   opens the rooms under it, indented behind a hairline; its Show | Hide pair works every room at once */
+.fp-hood .fp-name { font-weight: 600; }
+.fp-fold { flex: none; width: 1.15rem; height: 1.15rem; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 4px; background: none; padding: 0; margin: 0 -.1rem 0 -.2rem; color: var(--ink-soft); cursor: pointer; }
+.fp-fold:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.fp-fold svg { width: .72rem; height: .72rem; transition: transform .15s; }
+.fp-fold[aria-expanded="true"] svg { transform: rotate(90deg); }
+.fp-sub { display: flex; flex-direction: column; margin: 0 0 .25rem 1rem; padding-left: .3rem; border-left: 1px solid var(--line); }
+.fp-sub[hidden] { display: none; }
 /* three groups — the two venue lists (Lower Queen Anne the wider), Teams
    (Steve, 2026-09-20; Capacity rows dropped 2026-09-22) */
 @media (min-width: 641px) and (max-width: 899px) { .fp-tree .fp-cols { grid-template-columns: 1.1fr 1fr; } .fp-tree .fp-group:nth-child(3) { grid-column: 1; border-left: 0; padding-left: 0; padding-right: 1.25rem; border-top: 1px solid var(--line); padding-top: 1rem; margin-top: -.25rem; } } /* tablets: two columns, Teams under Lower Queen Anne (three squeezed the headings into wraps) */
