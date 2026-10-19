@@ -1,5 +1,5 @@
 // Writes site/cities.js — every city on here.events, for the city switcher in
-// app.js (the "Other Places" pill and the footer's More Cities; Steve,
+// app.js (the "More Cities" pill and the footer's More Cities; Steve,
 // 2026-10-14: "city switcher: add it"). Read from the here-events repo's
 // site/cities.json (the map's own list, the one place a city is added), so the
 // switcher and the map always agree. Shared: built here in lqa and copied to

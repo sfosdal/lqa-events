@@ -764,8 +764,9 @@
   });
 
   // ---- the way to the other cities (Steve, 2026-10-12) ----
-  // An "Other Places" pill before the theme pill, to the map of every city
-  // ("See All" until 2026-10-13: "=> other places"). The strip of state
+  // A "More Cities" pill before the theme pill, to the map of every city
+  // ("See All" until 2026-10-13, "Other Places" until 2026-10-18 — Steve: the pill
+  // and the footer's More Cities "should be named identically"). The strip of state
   // outlines drifting after the eyebrow, built the same day, went away on
   // 2026-10-13 (Steve: "this needs to go away"); the city's `state` and
   // `stateOutline` in city.js and scripts/state-outline.mjs stay for a revisit.
@@ -781,7 +782,7 @@
     var back = document.createElement('div'); back.className = 'sheet-back'; sh.appendChild(back);
     var card = document.createElement('div'); card.className = 'sheet-card'; card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true'); card.setAttribute('aria-labelledby', 'citySheetTitle'); card.tabIndex = -1; sh.appendChild(card);
     var eyebrow = document.createElement('p'); eyebrow.className = 'sheet-venue'; eyebrow.textContent = 'here.events'; card.appendChild(eyebrow);
-    var h = document.createElement('h2'); h.className = 'sheet-title'; h.id = 'citySheetTitle'; h.textContent = 'Other Places'; card.appendChild(h);
+    var h = document.createElement('h2'); h.className = 'sheet-title'; h.id = 'citySheetTitle'; h.textContent = 'More Cities'; card.appendChild(h);
     var map = document.createElement('a'); map.className = 'city-map'; map.href = CITIES.map || CITIES_URL;
     map.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>The map — every city on here.events</span>';
     card.appendChild(map);
@@ -822,7 +823,7 @@
     var tools = document.querySelector('.masthead-tools'), tt = $('themeToggle');
     if (tools && tt) {
       var pill = document.createElement('a'); pill.className = 'chip see-all'; pill.href = CITIES_URL; pill.title = CITIES ? 'Every city on here.events' : 'Every city on here.events (the map)';
-      pill.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>Other Places</span>';
+      pill.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>More Cities</span>';
       pill.addEventListener('click', openCitySheet);
       tools.insertBefore(pill, tt);
     }

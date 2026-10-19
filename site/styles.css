@@ -141,7 +141,7 @@ h1 {
   line-height: .92; text-transform: uppercase; letter-spacing: .01em; margin: 0;
 }
 .masthead-text { min-width: 0; max-width: 100%; } /* a flex item would grow to its widest line and push past a phone's edge */
-/* "Other Places" (See All until 2026-10-13): the pill before the theme pill, to the same map (Steve, 2026-10-12); in the pinned bar the chip's text folds away and the map glyph stays */
+/* "More Cities" (See All until 2026-10-13, Other Places until 2026-10-18): the pill before the theme pill, to the same map (Steve, 2026-10-12); in the pinned bar the chip's text folds away and the map glyph stays */
 .masthead-tools .see-all { order: 4; display: inline-flex; align-items: center; gap: .45rem; min-height: calc(1.7rem + 8px); padding: 0 .95em; text-decoration: none; }
 .masthead-tools .see-all svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
 .masthead-tools .see-all:hover { border-color: var(--ink-soft); }
@@ -1694,7 +1694,7 @@ html:not(.teams-open) .team-strip { display: none; }
 }
 .sheet-actions .chip { background: var(--mist); border-color: var(--line); }
 body.sheet-open { overflow: hidden; }
-/* the city switcher (2026-10-14): the same sheet from the Other Places pill and the footer's More Cities — a bottom
+/* the city switcher (2026-10-14): the same sheet from the More Cities pill and the footer's More Cities — a bottom
    sheet on phones, a centred dialog on wider screens (the listing sheet becomes a pop placed by app.js there; this
    one has no card to hang off) — the map link first, then every city grouped by state, this site marked, not linked */
 .sheet.city-sheet { position: fixed; inset: 0; z-index: 35; display: flex; align-items: flex-end; justify-content: center; } /* over the sticky bar (30), under the toast (40) */
@@ -1903,8 +1903,8 @@ body.sheet-open { overflow: hidden; }
   .filterbar #filterToggle svg, .filterbar #subscribeBtn svg { width: 1.1rem; height: 1.1rem; }
   /* the tools sit at the top right, on the eyebrow's line (short, so the room is there), clear of the title below; a flex row would cost the phone a line */
   .bar-title .masthead-tools { display: none; }
-  .masthead > .masthead-tools { position: absolute; top: 2.5rem; right: 0; margin: 0; } /* the Other Places pill alone, at the top right on the eyebrow's line (short, so the room is there) */
-  .masthead .eyebrow { padding-right: 7.5rem; } /* the eyebrow's line ends short of the Other Places pill at the right (a long eyebrow, "Omaha & Lincoln", would run under it) */
+  .masthead > .masthead-tools { position: absolute; top: 2.5rem; right: 0; margin: 0; } /* the More Cities pill alone, at the top right on the eyebrow's line (short, so the room is there) */
+  .masthead .eyebrow { padding-right: 7.5rem; } /* the eyebrow's line ends short of the More Cities pill at the right (a long eyebrow, "Omaha & Lincoln", would run under it) */
   .masthead-tools .theme-toggle { display: none; } /* no theme pill on a phone (Steve, 2026-09-16): the site follows the system setting there */
   .masthead-tools .chip { min-height: 1.9rem; padding: .3em .55em; }
   /* a 320px phone: measured, the row ran 34px past its box. The mini-calendar chip loses its chevron (its pressed state says open or closed) and the gaps close up a little: the row fits with room to spare and no control hidden */
