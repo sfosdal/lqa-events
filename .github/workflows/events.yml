@@ -81,3 +81,10 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: IndexNow ping (Bing, DuckDuckGo, Yandex read it; Google does not)
+        # the key is public by design: it is served as site/<key>.txt, which is how IndexNow checks the sender owns the host
+        continue-on-error: true
+        run: |
+          site="${{ steps.deployment.outputs.page_url }}"; host="${site#https://}"; host="${host%/}"
+          curl -sS -X POST https://api.indexnow.org/indexnow -H 'Content-Type: application/json; charset=utf-8' \
+            -d "{\"host\":\"$host\",\"key\":\"fe2ea473c89f46282202fd67297ff630\",\"urlList\":[\"$site\"]}" -o /dev/null -w "indexnow $host: HTTP %{http_code}\n"
