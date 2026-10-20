@@ -82,6 +82,14 @@
  *                on that room, required where the city has a groundsVenue) picks the shows, and
  *                each kept show's page is read like `jsonld` for its clock, sold-out offers and
  *                status (the Royal Room via Stranger Tickets, Seattle 2026-10-19).
+ *   spektrix    — a Spektrix box office's public API (system.spektrix.com/<client>/api/v3): /events
+ *                for the names, /instances for every performance (`start` is the theatre's wall
+ *                clock), one row each; cancelled ones and events marked "exclude from the events
+ *                page" are left out, `drop` takes classes and auditions by name, and the first
+ *                `maxStatus` (default 60) upcoming performances are asked /status — none available
+ *                = sold out. `link` is the ticket page, `{id}` filled with the event id's leading
+ *                digits — the number the theatre's own purchase site uses (Pentacle Theatre,
+ *                Salem 2026-10-20).
  *
  * Also here: the empty-list gate every build runs (`emptyListGate`) — a
  * fresh pull with zero upcoming events is a scouting failure or an outage,
@@ -901,7 +909,50 @@ async function fetchBoldtype(url, ua, label, opts) {
   return out;
 }
 
-const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera, icsfile: fetchIcsFile, linked: fetchLinked, squarespace: fetchSquarespace, cards: fetchCards, nps: fetchNps, localist: fetchLocalist, ludus: fetchLudus, boldtype: fetchBoldtype };
+// ---- Spektrix box offices (system.spektrix.com/<client>/api/v3 — theatres) ----
+/**
+ * events: [{ id, name, attribute_SLExcludeFromViewEventsPage }]; instances: [{ id, event: { id },
+ * start: "2026-10-21T19:30:00" (the theatre's clock), cancelled }]. One row per instance on or
+ * after `today`; `link` is the ticket page with `{id}` = the event id's leading digits.
+ */
+export function mapSpektrix(events, instances, { venue, link = '', drop, type, types, today = '', label = 'feed' } = {}) {
+  const byId = new Map((events || []).map((e) => [e.id, e]));
+  const out = [];
+  for (const inst of instances || []) {
+    const e = byId.get(inst?.event?.id);
+    if (!e || inst.cancelled || e.attribute_SLExcludeFromViewEventsPage) continue;
+    const title = decode(e.name || '');
+    if (!title || (drop && drop.test(title))) continue;
+    const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/.exec(inst.start || '');
+    if (!m || (today && m[1] < today)) continue;
+    const num = (/^\d+/.exec(e.id) || [''])[0];
+    const ev = { venue: venue || label, title, date: m[1], time: m[2], url: link.replace('{id}', num), instance: inst.id };
+    if (type && (!types || types.includes(type))) ev.type = type;
+    out.push(ev);
+  }
+  return out;
+}
+async function fetchSpektrix(url, ua, label, opts) {
+  const { feed = {}, venue, types, defaultType, drop } = opts;
+  const api = url.replace(/\/+$/, '');
+  const get = async (path) => { const res = await fetch(`${api}/${path}`, { headers: { 'User-Agent': ua, Accept: 'application/json' }, signal: AbortSignal.timeout(60000) }); if (!res.ok) throw new Error(`HTTP ${res.status} on ${path}`); return res.json(); };
+  const today = new Date().toISOString().slice(0, 10);
+  const [events, instances] = await Promise.all([get('events'), get(`instances?startFrom=${today}`)]);
+  const out = mapSpektrix(events, instances, { venue, link: feed.link || '', drop: drop || feed.drop, type: feed.type || defaultType, types, today, label });
+  let asked = 0, sold = 0;
+  for (const ev of out.slice(0, feed.maxStatus ?? 60)) {
+    try {
+      if (asked++) await new Promise((r) => setTimeout(r, 200));
+      const st = await get(`instances/${ev.instance}/status`);
+      if (st && st.capacity > 0 && st.available === 0) { ev.soldOut = true; sold++; }
+    } catch (err) { console.error(`${label}: status ${ev.instance} ${err.message}`); }
+  }
+  for (const ev of out) delete ev.instance;
+  console.log(`${label} (Spektrix): ${out.length} performances, ${sold} sold out of ${asked} asked`);
+  return out;
+}
+
+const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera, icsfile: fetchIcsFile, linked: fetchLinked, squarespace: fetchSquarespace, cards: fetchCards, nps: fetchNps, localist: fetchLocalist, ludus: fetchLudus, boldtype: fetchBoldtype, spektrix: fetchSpektrix };
 
 /**
  * One source thunk per city.js venue with a `feed` (its listings pinned to that row) and one per

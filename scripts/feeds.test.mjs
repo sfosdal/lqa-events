@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom, icsStart, mapIcsFile, eventLinks, mapSquarespaceEvents, cardDates, parseCards, mapNpsEvents, cardClock, mapLocalistEvents, parseLudus, parseBoldtypeList } from './feeds.mjs';
+import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom, icsStart, mapIcsFile, eventLinks, mapSquarespaceEvents, cardDates, parseCards, mapNpsEvents, cardClock, mapLocalistEvents, parseLudus, parseBoldtypeList, mapSpektrix } from './feeds.mjs';
 
 const room = 'Field Arts &#038; Events Hall &#8211; Donna M. Morris Theater';
 const row = (title, start, extra = {}) => ({ title, start_date: start, status: 'publish', all_day: false, venue: { venue: room }, categories: [], ...extra });
@@ -381,4 +381,21 @@ test('parseBoldtypeList: each Browse row → id, show link, title and room; a fe
     { id: '188000001', url: 'https://www.strangertickets.com/events/188000001/half-giraffe-ep-release', title: 'Half Giraffe EP release', place: 'Royal Room Seattle, WA', room: 'Royal Room' },
     { id: '188000002', url: 'https://www.strangertickets.com/events/188000002/rock-n-roll', title: 'Rock & Roll Night', place: 'The Royal Room Seattle, WA', room: '' },
   ]);
+});
+
+test('a Spektrix instance becomes a performance on the theatre clock; cancelled, hidden, dropped and past ones are left out', () => {
+  const events = [
+    { id: '3201AQVH', name: 'Angel Street (Gaslight) ' },
+    { id: '6601AQMN', name: 'Fall 2026 Acting Class' },
+    { id: '8201APNK', name: 'Bedroom Farce', attribute_SLExcludeFromViewEventsPage: true },
+  ];
+  const instances = [
+    { id: 'i1', event: { id: '3201AQVH' }, start: '2026-10-21T19:30:00', cancelled: false },
+    { id: 'i2', event: { id: '3201AQVH' }, start: '2026-10-25T14:00:00', cancelled: true },
+    { id: 'i3', event: { id: '6601AQMN' }, start: '2026-10-22T09:00:00' },
+    { id: 'i4', event: { id: '8201APNK' }, start: '2027-05-07T19:30:00' },
+    { id: 'i5', event: { id: '3201AQVH' }, start: '2026-10-01T19:30:00' },
+  ];
+  const evs = mapSpektrix(events, instances, { venue: 'Pentacle Theatre', link: 'https://purchase.example.org/EventAvailability?EventId={id}', drop: /class/i, type: 'arts', types: ['arts'], today: '2026-10-20' });
+  assert.deepEqual(evs, [{ venue: 'Pentacle Theatre', title: 'Angel Street (Gaslight)', date: '2026-10-21', time: '19:30', url: 'https://purchase.example.org/EventAvailability?EventId=3201', instance: 'i1', type: 'arts' }]);
 });
