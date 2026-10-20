@@ -291,7 +291,7 @@ export function tusboletosTimes(html) {
 }
 const listCache = new Map(); // one fetch of a ticketer's list per build, however many rows read it
 async function fetchText(url, ua) {
-  const res = await fetch(url, { headers: { 'User-Agent': ua, Accept: 'text/html,*/*' } });
+  const res = await fetch(url, { headers: { 'User-Agent': ua, Accept: 'text/html,*/*' }, signal: AbortSignal.timeout(60000) }); // a host that never answers fails the page, not the build
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return decodeBody(await res.arrayBuffer(), res.headers.get('content-type') || '');
 }
@@ -854,20 +854,26 @@ export function parseBoldtypeList(html) {
     const link = /href="(https?:\/\/[^"]+\/events\/(\d+)\/[^"]+)"[^>]*class="title"[^>]*>([\s\S]*?)<\/a>/.exec(row);
     if (!link) continue; // a festival's own subsite, not a show
     const place = /class="eventLocation">([\s\S]*?)<\/td>/.exec(row);
-    out.push({ id: link[2], url: link[1], title: text(link[3]), place: text(place && place[1]) });
+    const room = place && /<a[^>]*>([\s\S]*?)<\/a>/.exec(place[1]);
+    out.push({ id: link[2], url: link[1], title: text(link[3]), place: text(place && place[1]), room: text(room && room[1]) });
   }
   return out;
 }
+const BOLDTYPE_DATE_ONLY = /^\s*(?:(?:mon|tue|wed|thu|fri|sat|sun)[a-z]*,?\s+)?(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(?:st|nd|rd|th)?\s*$/i;
 async function fetchBoldtype(url, ua, label, opts) {
   const { feed = {}, venue, types, defaultType, drop } = opts;
-  const rooms = feed.rooms || opts.rooms;
+  const rooms = feed.rooms || opts.rooms; // tested on the Venue cell, room and town ("El Sid at the APEX Everett, WA"): the city buttons are loose (Everett sits under Seattle), so `city: ''` + a town in `rooms` reads by place
   const seen = new Map();
   for (let page = 1; page <= (feed.maxPages || 30); page++) {
     const body = new URLSearchParams({ page: String(page), terms: '', city: feed.city || '', date: '', end: '', venue: '' });
-    const res = await fetch(new URL('/Actions/Events/BrowseEvents.html', url), { method: 'POST', body, headers: { 'User-Agent': ua, Accept: 'text/html,*/*' } });
+    let res;
+    for (let tries = 1; ; tries++) { // the box office drops a connection, or answers 502, now and then on a long walk
+      try { res = await fetch(new URL('/Actions/Events/BrowseEvents.html', url), { method: 'POST', body, headers: { 'User-Agent': ua, Accept: 'text/html,*/*' }, signal: AbortSignal.timeout(30000) }); if (res.status >= 500) throw new Error(`HTTP ${res.status} on page ${page}`); res = { ok: res.ok, status: res.status, html: await res.text() }; break; }
+      catch (err) { if (tries >= 4) throw err; await new Promise((r) => setTimeout(r, 2000 * tries)); }
+    }
     if (!res.ok) throw new Error(`HTTP ${res.status} on page ${page}`);
     const before = seen.size;
-    for (const c of parseBoldtypeList(await res.text())) if (!seen.has(c.id)) seen.set(c.id, c);
+    for (const c of parseBoldtypeList(res.html)) if (!seen.has(c.id)) seen.set(c.id, c);
     if (seen.size === before) break; // past the last page the list repeats
     await new Promise((r) => setTimeout(r, 250));
   }
@@ -877,10 +883,14 @@ async function fetchBoldtype(url, ua, label, opts) {
   for (const c of keep) {
     try {
       if (pages) await new Promise((r) => setTimeout(r, 250));
-      const evs = parseJsonLdEvents(await fetchText(c.url, ua), { venue, types });
+      const html = await fetchText(c.url, ua).catch(async () => { await new Promise((r) => setTimeout(r, 2000)); return fetchText(c.url, ua); }); // one more try after a dropped connection
+      const evs = parseJsonLdEvents(html, { venue, types });
       pages++;
       for (const ev of evs) {
         if (!ev.url) ev.url = c.url;
+        const so = /^\s*sold\s*out\b[\s:!-]*/i.exec(ev.title || ''); // "SOLD OUT The Doubleclicks": the box office's tag in the name
+        if (so) { ev.title = ev.title.slice(so[0].length); ev.soldOut = true; }
+        if (BOLDTYPE_DATE_ONLY.test(ev.title || '')) ev.title = `Show at ${c.room || ev.venue}`; // a run named by its night ("Saturday Oct 31") names nothing
         const t = feed.type || defaultType;
         if (t && (!types || types.includes(t))) ev.type = t;
         out.push(ev);

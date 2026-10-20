@@ -378,7 +378,7 @@ test('parseBoldtypeList: each Browse row → id, show link, title and room; a fe
       <td class="eventLocation">The Royal Room Seattle, WA</td></tr>
   </tbody></table>`;
   assert.deepEqual(parseBoldtypeList(html), [
-    { id: '188000001', url: 'https://www.strangertickets.com/events/188000001/half-giraffe-ep-release', title: 'Half Giraffe EP release', place: 'Royal Room Seattle, WA' },
-    { id: '188000002', url: 'https://www.strangertickets.com/events/188000002/rock-n-roll', title: 'Rock & Roll Night', place: 'The Royal Room Seattle, WA' },
+    { id: '188000001', url: 'https://www.strangertickets.com/events/188000001/half-giraffe-ep-release', title: 'Half Giraffe EP release', place: 'Royal Room Seattle, WA', room: 'Royal Room' },
+    { id: '188000002', url: 'https://www.strangertickets.com/events/188000002/rock-n-roll', title: 'Rock & Roll Night', place: 'The Royal Room Seattle, WA', room: '' },
   ]);
 });
