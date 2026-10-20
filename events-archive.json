@@ -6575,12 +6575,11 @@
    "url": "https://www.ticketmaster.com/sara-bareilles-the-good-grief-tour-seattle-washington-10-19-2026/event/0F0064C1F9B4F1E5",
    "type": "concert",
    "tickets": {
-    "box": 0,
-    "resale": 62,
-    "checked": "2026-10-18T01:39:45.111Z",
-    "from": 133
-   },
-   "soldOut": true
+    "box": 1,
+    "resale": 29,
+    "checked": "2026-10-20T00:58:45.446Z",
+    "from": 130.5
+   }
   }
  ]
 }
