@@ -6496,6 +6496,91 @@
    "date": "2026-10-18",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1433010/finn-wolfhard-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Slift Live on KEXP in the Gathering Space",
+   "date": "2026-10-19",
+   "time": "13:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/slift-live-on-kexp-in-the-gathering-space/",
+   "end": "13:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "NAZA",
+   "date": "2026-10-19",
+   "time": "15:50:00",
+   "url": "https://www.siff.net/cinema/in-theaters/naza",
+   "movie": true,
+   "end": "17:10:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The History of Concrete",
+   "date": "2026-10-19",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/the-history-of-concrete",
+   "movie": true,
+   "end": "17:56:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Ken Russell’s The Devils",
+   "date": "2026-10-19",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/ken-russells-the-devils",
+   "movie": true,
+   "end": "18:24:00"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Guess What? Trivia!",
+   "date": "2026-10-19",
+   "time": "19:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-10-19",
+   "time": "19:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "22:09:00"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "@SiM with Zero 9:36",
+   "date": "2026-10-19",
+   "time": "19:30:00",
+   "url": "https://www.axs.com/events/1454994/sim-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001",
+   "status": "postponed",
+   "statusSince": "2026-10-06T06:30:06.780Z"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "SiM - POSTPONED with Zero 9:36",
+   "date": "2026-10-19",
+   "time": "19:30:00",
+   "url": "https://www.axs.com/events/1454994/sim-postponed-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001",
+   "status": "postponed",
+   "statusSince": "2026-10-13T21:20:48.739Z"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Sara Bareilles: The Good Grief Tour",
+   "date": "2026-10-19",
+   "time": "19:45:00",
+   "url": "https://www.ticketmaster.com/sara-bareilles-the-good-grief-tour-seattle-washington-10-19-2026/event/0F0064C1F9B4F1E5",
+   "type": "concert",
+   "tickets": {
+    "box": 0,
+    "resale": 62,
+    "checked": "2026-10-18T01:39:45.111Z",
+    "from": 133
+   },
+   "soldOut": true
   }
  ]
 }
