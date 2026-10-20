@@ -104,3 +104,12 @@ test('one build reads at most maxReads, soonest first, paced between reads', asy
   assert.deepEqual(waits, [3000]); // no wait before the first read
   assert.equal(r.waiting, 1);
 });
+
+test('a seed (the Mac-read capacity.json) counts as known: no read', async () => {
+  const f = fakeFetch({});
+  const list = [ev('C000000000000001')];
+  const r = await stampCapacity(list, [], { today: '2026-10-19', fetchImpl: f.impl, seed: { C000000000000001: 16061 } });
+  assert.equal(list[0].capacity, 16061);
+  assert.equal(r.carried, 1);
+  assert.deepEqual(f.asked, []);
+});

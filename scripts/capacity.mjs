@@ -44,8 +44,12 @@ export const MAX_READS = 120;
 // the previous feed when it was read before (0 = looked, no manifest — not
 // asked again), read otherwise. A read that fails (network, 5xx) or is not
 // reached leaves the event without one, so a later build asks again.
-export async function stampCapacity(events, previous, { today, fetchImpl = fetch, userAgent, paceMs = PACE_MS, maxReads = MAX_READS, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
-  const known = new Map();
+// `seed` (id → capacity) is scripts/data/capacity.json, read from a Mac by
+// scripts/capacity-seed.mjs: Ticketmaster blocks GitHub's runners on the
+// first read (2026-10-19), so until a server of Steve's reads them the seed
+// is where an Actions build gets its capacities.
+export async function stampCapacity(events, previous, { today, seed = {}, fetchImpl = fetch, userAgent, paceMs = PACE_MS, maxReads = MAX_READS, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
+  const known = new Map(Object.entries(seed).filter(([, c]) => Number.isInteger(c)));
   for (const e of previous || []) { const id = tmEventId(e.url); if (id && Number.isInteger(e.capacity)) known.set(id, e.capacity); }
   const todo = new Map(); // id → events still without one, soonest first
   let carried = 0;
