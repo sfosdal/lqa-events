@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom, icsStart, mapIcsFile, eventLinks, mapSquarespaceEvents, cardDates, parseCards, mapNpsEvents, cardClock, mapLocalistEvents, parseLudus } from './feeds.mjs';
+import { mapTribeEvents, tribeType, feedSources, emptyListGate, spanishDates, parseTusboletosList, tusboletosTimes, decodeBody, parseJsonLdEvents, parseIcs, icsToTribeRows, ticketeraDates, parseTicketeraList, parseTicketeraDetail, pageRoom, icsStart, mapIcsFile, eventLinks, mapSquarespaceEvents, cardDates, parseCards, mapNpsEvents, cardClock, mapLocalistEvents, parseLudus, parseBoldtypeList } from './feeds.mjs';
 
 const room = 'Field Arts &#038; Events Hall &#8211; Donna M. Morris Theater';
 const row = (title, start, extra = {}) => ({ title, start_date: start, status: 'publish', all_day: false, venue: { venue: room }, categories: [], ...extra });
@@ -362,5 +362,23 @@ test('parseLudus: one row per upcoming showtime, the show page as the link, the 
   assert.deepEqual(parseLudus(html, { venue: 'Very Little Theatre', base: 'https://thevlt.ludus.com/index.php', type: 'arts', types: ['arts'], drop: /^auditions/i }), [
     { venue: 'Very Little Theatre', title: 'Night of the Living Dead Live', date: '2026-10-18', time: '14:00', url: 'https://thevlt.ludus.com/show_page.php?show_id=200529348', type: 'arts', soldOut: true },
     { venue: 'Very Little Theatre', title: 'Night of the Living Dead Live', date: '2026-10-23', time: '19:30', url: 'https://thevlt.ludus.com/show_page.php?show_id=200529348', type: 'arts' },
+  ]);
+});
+
+test('parseBoldtypeList: each Browse row → id, show link, title and room; a festival subsite row without a show link is skipped', () => {
+  const html = `<table><tbody>
+    <tr class="item"><td class="eventTitle"><a href="https://www.strangertickets.com/events/188000001/half-giraffe-ep-release" target="_parent"><img class="eventImg" src="/imager/x.jpg"></a>
+      <a href="https://www.strangertickets.com/events/188000001/half-giraffe-ep-release" class="title" target="_parent">
+        Half Giraffe EP release<br></a></td>
+      <td class="eventTime">Sat, Oct 24 at 8:30pm</td>
+      <td class="eventLocation"><a href="/Browse#venue=1-royal-room" target="_parent">Royal Room<br></a> Seattle, WA</td>
+      <td class="availability"><a class="btn">Buy Tickets</a></td></tr>
+    <tr class="item"><td class="eventTitle"><a href="https://lachocolatefest.strangertickets.com" target="_parent">LA Chocolate Fest</a></td></tr>
+    <tr class="item"><td class="eventTitle"><a href="https://www.strangertickets.com/events/188000002/rock-n-roll" class="title" target="_parent">Rock &amp; Roll Night<br></a></td>
+      <td class="eventLocation">The Royal Room Seattle, WA</td></tr>
+  </tbody></table>`;
+  assert.deepEqual(parseBoldtypeList(html), [
+    { id: '188000001', url: 'https://www.strangertickets.com/events/188000001/half-giraffe-ep-release', title: 'Half Giraffe EP release', place: 'Royal Room Seattle, WA' },
+    { id: '188000002', url: 'https://www.strangertickets.com/events/188000002/rock-n-roll', title: 'Rock & Roll Night', place: 'The Royal Room Seattle, WA' },
   ]);
 });

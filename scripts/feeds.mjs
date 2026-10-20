@@ -77,6 +77,11 @@
  *   nps         — the National Park Service events API for one park (`parkCode=`; NPS_API_KEY in
  *                the environment, else the data.gov DEMO_KEY): one row per listed date at the
  *                first start time (Klondike Gold Rush NHP's Seattle unit, Pioneer Square 2026-10-15).
+ *   boldtype    — a Bold Type Tickets box office (strangertickets.com, merctickets.com): its Browse
+ *                list, POSTed page by page for one `city`, names each show's room; `rooms` (a regex
+ *                on that room, required where the city has a groundsVenue) picks the shows, and
+ *                each kept show's page is read like `jsonld` for its clock, sold-out offers and
+ *                status (the Royal Room via Stranger Tickets, Seattle 2026-10-19).
  *
  * Also here: the empty-list gate every build runs (`emptyListGate`) — a
  * fresh pull with zero upcoming events is a scouting failure or an outage,
@@ -834,7 +839,59 @@ async function fetchLudus(url, ua, label, opts) {
   return evs;
 }
 
-const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera, icsfile: fetchIcsFile, linked: fetchLinked, squarespace: fetchSquarespace, cards: fetchCards, nps: fetchNps, localist: fetchLocalist, ludus: fetchLudus };
+// ---- Bold Type Tickets (strangertickets.com, merctickets.com) ----
+/**
+ * The Browse page fills itself from POST /Actions/Events/BrowseEvents.html (city, page — every
+ * field has to be sent, or the page number is ignored), ten shows a page in a table: the show's
+ * link and title, a free-text date ("Wed, Oct 28, 7pm door, 8pm show"), the room with its town.
+ * The dates are read from each show's own page instead, whose schema.org Event is exact.
+ * Returns [{ id, url, title, place }] in page order.
+ */
+export function parseBoldtypeList(html) {
+  const text = (s) => decode(String(s || '').replace(/<[^>]+>/g, ' '));
+  const out = [];
+  for (const [, row] of String(html || '').matchAll(/<tr class="item">([\s\S]*?)<\/tr>/g)) {
+    const link = /href="(https?:\/\/[^"]+\/events\/(\d+)\/[^"]+)"[^>]*class="title"[^>]*>([\s\S]*?)<\/a>/.exec(row);
+    if (!link) continue; // a festival's own subsite, not a show
+    const place = /class="eventLocation">([\s\S]*?)<\/td>/.exec(row);
+    out.push({ id: link[2], url: link[1], title: text(link[3]), place: text(place && place[1]) });
+  }
+  return out;
+}
+async function fetchBoldtype(url, ua, label, opts) {
+  const { feed = {}, venue, types, defaultType, drop } = opts;
+  const rooms = feed.rooms || opts.rooms;
+  const seen = new Map();
+  for (let page = 1; page <= (feed.maxPages || 30); page++) {
+    const body = new URLSearchParams({ page: String(page), terms: '', city: feed.city || '', date: '', end: '', venue: '' });
+    const res = await fetch(new URL('/Actions/Events/BrowseEvents.html', url), { method: 'POST', body, headers: { 'User-Agent': ua, Accept: 'text/html,*/*' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status} on page ${page}`);
+    const before = seen.size;
+    for (const c of parseBoldtypeList(await res.text())) if (!seen.has(c.id)) seen.set(c.id, c);
+    if (seen.size === before) break; // past the last page the list repeats
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  const keep = [...seen.values()].filter((c) => (!rooms || rooms.test(c.place)) && !(drop && drop.test(c.title)));
+  const out = [];
+  let pages = 0;
+  for (const c of keep) {
+    try {
+      if (pages) await new Promise((r) => setTimeout(r, 250));
+      const evs = parseJsonLdEvents(await fetchText(c.url, ua), { venue, types });
+      pages++;
+      for (const ev of evs) {
+        if (!ev.url) ev.url = c.url;
+        const t = feed.type || defaultType;
+        if (t && (!types || types.includes(t))) ev.type = t;
+        out.push(ev);
+      }
+    } catch (err) { console.error(`${label}: ${c.url} ${err.message}`); }
+  }
+  console.log(`${label} (Bold Type): ${out.length} events from ${pages} of ${keep.length} kept shows (${seen.size} listed)`);
+  return out;
+}
+
+const KINDS = { tribe: fetchTribe, ics: fetchIcs, tusboletos: fetchTusboletos, jsonld: fetchJsonLd, ticketera: fetchTicketera, icsfile: fetchIcsFile, linked: fetchLinked, squarespace: fetchSquarespace, cards: fetchCards, nps: fetchNps, localist: fetchLocalist, ludus: fetchLudus, boldtype: fetchBoldtype };
 
 /**
  * One source thunk per city.js venue with a `feed` (its listings pinned to that row) and one per
