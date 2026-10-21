@@ -6580,6 +6580,109 @@
     "checked": "2026-10-20T00:58:45.446Z",
     "from": 130.5
    }
+  },
+  {
+   "venue": "Convention Center",
+   "title": "2026 NCS Annual Meeting",
+   "date": "2026-10-20",
+   "time": "",
+   "url": "https://www.neurocriticalcare.org/Events/Annual-Meeting",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Hockey Happy Hour",
+   "date": "2026-10-20",
+   "time": ""
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Ken Russell’s The Devils",
+   "date": "2026-10-20",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/ken-russells-the-devils",
+   "movie": true,
+   "end": "17:54:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "NAZA",
+   "date": "2026-10-20",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/naza",
+   "movie": true,
+   "end": "17:35:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Kraken vs. Detroit Red Wings",
+   "date": "2026-10-20",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-kraken-vs-detroit-red-wings-seattle-washington-10-20-2026/event/0F0064C4A03FA23B",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Prime Video",
+     "KONG"
+    ]
+   },
+   "tickets": {
+    "box": 10,
+    "resale": 566,
+    "checked": "2026-10-21T01:06:59.230Z",
+    "from": 80.79
+   }
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-10-20",
+   "time": "18:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "21:39:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Tyondai Braxton",
+   "date": "2026-10-20",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/Le265f631990",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Matchstick Productions Presents, \"The Way Out\" 2026 Ski Film",
+   "date": "2026-10-20",
+   "time": "19:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/matchstick-productions-presents-the-way-out-2026-ski-film",
+   "movie": true,
+   "end": "20:30:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Sara Bareilles: The Good Grief Tour",
+   "date": "2026-10-20",
+   "time": "19:45:00",
+   "url": "https://www.ticketmaster.com/sara-bareilles-the-good-grief-tour-seattle-washington-10-20-2026/event/0F0064C1F9B9F1EB",
+   "type": "concert",
+   "tickets": {
+    "box": 1,
+    "resale": 31,
+    "checked": "2026-10-21T01:53:51.248Z",
+    "from": 150.5
+   }
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "The Blasting Company",
+   "date": "2026-10-20",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1493740/the-blasting-company-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
