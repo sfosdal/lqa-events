@@ -55,7 +55,7 @@ jobs:
           node-version: '22'
       - uses: astral-sh/setup-uv@v6   # uv runs scripts/cffi-fetch.py (curl_cffi: a Chrome TLS fingerprint): Ticketmaster's seat-map host blocks GitHub's runners' plain reads (capacity.mjs)
       - name: Test
-        run: node --test scripts/*.test.mjs
+        run: node --test scripts/*.test.mjs lambda/*.test.mjs
       - name: Fetch & aggregate events
         env:
           TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}

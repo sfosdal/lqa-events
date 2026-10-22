@@ -63,6 +63,21 @@ in the address bar, but reversible; `LQAFilter.encodeSearch`/`decodeSearch`),
 `matchesFilter` so another site can apply the same code to its own copy of
 `events.json`.
 
+The same codes carry the view into the two things that leave the page (2026-10-22):
+
+- **The embed widget.** The snippet under *Embed* is rewritten as the filters change, with
+  `data-filter` (the code), `data-search` and `data-soldout` on the script tag; `embed.js`
+  then loads `city.js` + `filter.js` from the site and shows exactly what that view shows,
+  and its "Full calendar" link opens the same view. A view that shows everything writes the
+  plain snippet.
+- **Calendar subscriptions.** GitHub Pages serves only the feeds the build wrote, so *Add To
+  My Calendar* offers a pre-built file where one matches (the no-movies default, one hidden
+  team, "only" one venue) and otherwise the live feed `https://cal.here.events/?site=<host>&f=<code>[&s=…][&so=1]`
+  — `lambda/index.mjs`, one AWS Lambda for every city: it fetches that site's `events.json`,
+  `city.js` and `filter.js`, runs the site's own rule in a VM context per site and writes the
+  calendar with `scripts/ics.mjs` (`icsBuilder(city)`), cached an hour. Tests in
+  `lambda/handler.test.mjs`; `CAL_SERVER` in `app.js` names the server (empty = static files only).
+
 ## Layout
 
 - `scripts/build.mjs` — the build every city shares (since 2026-11-03): the

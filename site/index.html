@@ -419,9 +419,9 @@
       <div class="share-cols">
         <div>
           <h3>Events widget</h3>
-          <p>Drop these two lines into any page and the next events render in place.
-            Style it with the <code>lqa-ev-</code> CSS classes.</p>
-<pre><code>&lt;div id="lqa-events"&gt;&lt;/div&gt;
+          <p>Drop these two lines into any page and the next events render in place —
+            the events your filters show right now. Style it with the <code>lqa-ev-</code> CSS classes.</p>
+<pre><code id="embedSnippet">&lt;div id="lqa-events"&gt;&lt;/div&gt;
 &lt;script src="https://lqa.seattle.here.events/embed.js" data-max="8" defer&gt;&lt;/script&gt;</code></pre>
         </div>
         <div>
@@ -430,6 +430,7 @@
           <ul class="feed-list">
             <li><code>events.json</code> — <a href="events.json">JSON feed</a></li>
             <li><code>events.ics</code> — <a href="events.ics">iCalendar feed</a></li>
+            <li><code>cal.here.events</code> — <a id="liveFeedLink" href="https://cal.here.events/?site=lqa.seattle.here.events&amp;f=0">iCalendar feed of your filters</a></li>
           </ul>
           <p>Google and Outlook don't have feed formats of their own — they subscribe
             to the iCalendar feed. The <em>Add To My Calendar</em> button up top has
