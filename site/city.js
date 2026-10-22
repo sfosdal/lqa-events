@@ -85,7 +85,7 @@
     // Washington Huskies football (Big Ten), Husky Stadium on Montlake; ESPN's college-football feeds cover them like a pro club
     { slug: 'huskies', label: 'Huskies', name: 'Washington Huskies', abbr: 'WASH', re: /huskies/i, sport: 'football', venue: 'Husky Stadium', colors: ['#4b2e83', '#b7a57a'],
       espn: { sport: 'football', league: 'college-football', id: '264' }, season: { kind: 'espn' }, form: { kind: 'espn' },
-      inject: { url: 'https://gohuskies.com/sports/football/tickets' }, // likewise, no ticket feed for Husky Stadium
+      inject: { url: 'https://gohuskies.com/sports/football/schedule' }, // likewise, no ticket feed for Husky Stadium
       logo: 'https://a.espncdn.com/i/teamlogos/ncaa/500/264.png', schedule: 'https://gohuskies.com/sports/football/schedule',
       club: 'Washington Huskies', wiki: { title: 'Washington Huskies football', teamPage: true }, // college seasons are titled "2026 Washington Huskies football team", not "… season"
       news: [ST('uw-husky-football'), ['https://www.uwdawgpound.com/rss/current.xml', 'UW Dawg Pound']] },
@@ -240,9 +240,9 @@
       type: 'concert',
       cssVar: '--v-lumen',
       color: '#8b8fe8',
-      url: 'https://www.lumenfield.com/events',
+      url: 'https://www.lumenfield.com/',
       icon: 'https://www.google.com/s2/favicons?domain=www.lumenfield.com&sz=128',
-      tm: { id: 'KovZpZAEknnA', match: 'lumen field', fallbackUrl: 'https://www.lumenfield.com/events', exclude: /stadium tour|notification list/i },
+      tm: { id: 'KovZpZAEknnA', match: 'lumen field', fallbackUrl: 'https://www.lumenfield.com/', exclude: /stadium tour|notification list/i },
       soldOut: 'tm',
     },
     'Husky Stadium': {

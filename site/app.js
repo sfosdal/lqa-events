@@ -3954,9 +3954,10 @@
         var row = document.createElement('div');
         row.className = 'ev' + (e.time ? '' : ' is-allday');
         row.addEventListener('click', cardTap(e), true);
-        // the venue's hue over the card at --tint (stronger in light mode, where
-        // a faint wash on white disappears)
-        row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' var(--tint), transparent)';
+        // rows alternate light and dark grey (styles.css --row-a/--row-b, per
+        // theme); only a series keeps its venue's hue, at --tint, so the colour
+        // means "one of a run" (Steve, 2026-10-20)
+        if (e.series) { row.classList.add('is-series'); row.style.background = 'color-mix(in srgb, ' + venueColor(e.venue) + ' var(--tint), transparent)'; }
         var time = document.createElement('span');
         time.className = 'time';
         clockCell(time, e.time ? fmtTime(e.time, e.date) : 'ALL DAY'); // an all-day row reads ALL over DAY in the clock face, like a timed one (Steve, 2026-10-14); the word was "all day" before
@@ -3978,9 +3979,7 @@
         venue.appendChild(extLink(e.venue, VENUE_URL[e.venue], "See " + e.venue + "’s own events list"));
         venue.style.setProperty('--dot', venueColor(e.venue));
         var a = document.createElement('a');
-        a.href = e.url || '#';
-        a.target = '_blank';
-        a.rel = 'noopener';
+        if (e.url) { a.href = e.url; a.target = '_blank'; a.rel = 'noopener'; } // no link (scripts/links.mjs found it dead, venue page too): plain title, never '#'
         a.textContent = e.title;
         var titleLine = document.createElement('span');
         titleLine.className = 'ev-title';
