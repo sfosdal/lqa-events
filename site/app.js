@@ -623,7 +623,7 @@
     return true;
   }
   // a filter change also rewinds the agenda to its first page
-  function applyFilters() { syncFilters(); renderViewNote(); renderCal(); renderAgenda(); renderBoard(); updateSubscribe(); saveFilters(); }
+  function applyFilters() { syncFilters(); renderViewNote(); renderCal(); renderAgenda(); renderBoard(); updateSubscribe(); saveFilters(); if (window.LQAMap) LQAMap.render(); } // the Map view's pins follow the filters (local-map.js, in a city that has one)
   // ---- the view note (2026-09-20, for readers who never open the panel) ----
   // One plain line above the list while the view is not the usual one: the
   // preset's name when one matches, else what is hidden or added compared
@@ -969,10 +969,17 @@
   // a card over it listing everything on that day (openDayPop).
   var boardEnd = null; // the first of the last month on the grid
   function monthOpen() { return document.documentElement.classList.contains('month-open'); }
+  function placeKnob() { // the ink knob measured under the lit stop: the stops are as wide as their words, when shown (styles.css .vt-label; Steve, 2026-10-24)
+    var t = $('viewToggle'), b = t && t.querySelector('button[aria-checked="true"]');
+    if (!b) return;
+    t.style.setProperty('--knob-x', b.offsetLeft + 'px'); t.style.setProperty('--knob-w', b.offsetWidth + 'px');
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeKnob); // the words' width settles when the face loads
   function syncViewSwitch() { // the knob and the stops follow the view on show
-    var v = !$('teamsView').hidden ? 'teams' : monthOpen() ? 'month' : 'events';
+    var v = (window.LQAMap && LQAMap.isOpen()) ? 'map' : !$('teamsView').hidden ? 'teams' : monthOpen() ? 'month' : 'events'; // the Map view (local-map.js) is a fourth stop in a city that has one
     $('viewToggle').dataset.active = v;
     $('viewToggle').querySelectorAll('button[data-view]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.view === v)); });
+    placeKnob();
   }
   // the TODAY tab hangs from the mini calendar's foot; in the month view, from the sticky header's
   // the TODAY tab hangs from the mini calendar's foot; in the month view it rises from the sticky header — or, on a centred board with no header, floats as a chip under the filter bar
@@ -1213,6 +1220,7 @@
     if (document.documentElement.classList.contains('teams-open')) { fitTeamStrip(); return; } // the Teams view folds in its own order (the strip scrolls, so the bar never measures as tight)
     bar.classList.remove('is-tight');
     if (bar.scrollWidth > bar.clientWidth + 1) bar.classList.add('is-tight');
+    placeKnob(); // the stops words come and go with is-tight
   }
   fitFilterBar();
   window.addEventListener('resize', fitFilterBar);
@@ -1250,6 +1258,7 @@
   // every club's schedule in one list; 'auto' is the view's own choice
   // (defaultTeamSlug), made once the schedules are in.
   function setTeamsView(slug, push) {
+    if (slug && window.LQAMap && LQAMap.isOpen()) LQAMap.open(false, false); // a ?team= link or popstate opens Teams over the map
     var open = !!slug;
     document.documentElement.classList.toggle('teams-open', open);
     var bn = document.querySelector('.bar-name'), h1 = document.querySelector('.masthead h1'); // the masthead and the pinned bar's title name the view: the events, or the clubs
@@ -3383,6 +3392,10 @@
     var view = b && b.dataset.view !== cur ? b.dataset.view : nextStop($('viewToggle'), 'data-view', cur);
     b = $('viewToggle').querySelector('button[data-view="' + view + '"]');
     if (!b) return;
+    if (window.LQAMap) { // the Map stop, in a city that has one: Map in, or out of, the cycle
+      if (b.dataset.view === 'map') { if (!$('teamsView').hidden) setTeamsView(null, true); setMonthView(false, true); LQAMap.open(true, true); return; }
+      if (LQAMap.isOpen()) LQAMap.open(false, true);
+    }
     if (b.dataset.view === 'teams') { if ($('teamsView').hidden) setTeamsView(teamView.slug || new URLSearchParams(location.search).get('team') || 'auto', true); return; }
     if (!$('teamsView').hidden) setTeamsView(null, true);
     setMonthView(b.dataset.view === 'month', true);
@@ -3777,6 +3790,7 @@
     if (over()) bar.classList.add('is-tight');
     if (over()) strip.classList.add('is-crests');
     stripEdge();
+    placeKnob();
   }
   // more crests beyond the strip's right edge: a fade says so, lifted once scrolled to the end
   // the preset strip's own fade (same rule as the team strip's)
@@ -4315,4 +4329,5 @@
   }
   // a ?team= link opens the Teams view straight away
   if (new URLSearchParams(location.search).get('team')) setTeamsView(new URLSearchParams(location.search).get('team'), false);
+  window.LQAHooks = { dayItems: dayItems, byDate: function () { return state.byDate; }, boardEntry: boardEntry, closeDayPop: closeDayPop, syncViewSwitch: syncViewSwitch, fitFilterBar: fitFilterBar, todayStr: todayStr, venueColor: venueColor }; // what local-map.js borrows
 })();

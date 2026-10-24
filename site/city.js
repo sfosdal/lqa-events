@@ -125,6 +125,7 @@
   //            'ticketweb' = a plain fetch of the TicketWeb pages
   var VENUES = {
     'Climate Pledge Arena': {
+      geo: [47.6219, -122.35399],
       capacity: 18100,
       type: 'concert',
       cssVar: '--v-cpa',
@@ -135,6 +136,7 @@
       soldOut: 'tm',
     },
     'Seattle Center': {
+      geo: [47.6215, -122.351],
       capacity: 10000,
       type: 'community',
       cssVar: '--v-seactr',
@@ -143,6 +145,7 @@
       icon: 'https://www.seattlecenter.com/Dev/Logos/logobug.png',
     },
     'McCaw Hall': {
+      geo: [47.62398, -122.35039],
       capacity: 2900,
       type: 'arts',
       cssVar: '--v-mccaw',
@@ -150,6 +153,7 @@
       url: 'https://www.mccawhall.com/events',
     },
     'Seattle Rep': {
+      geo: [47.62393, -122.3536],
       capacity: 850,
       type: 'arts',
       cssVar: '--v-rep',
@@ -158,6 +162,7 @@
       icon: 'https://www.google.com/s2/favicons?domain=www.seattlerep.org&sz=128',
     },
     MoPOP: {
+      geo: [47.62146, -122.34818],
       capacity: 800,
       type: 'community',
       cssVar: '--v-mopop',
@@ -165,6 +170,7 @@
       url: 'https://www.mopop.org/events',
     },
     'Children\'s Theatre': {
+      geo: [47.62046, -122.35226],
       capacity: 480,
       type: 'arts',
       cssVar: '--v-sct',
@@ -172,6 +178,7 @@
       url: 'https://www.sct.org/tickets-shows/calendar/',
     },
     'Cornish Playhouse': {
+      geo: [47.62403, -122.35242],
       capacity: 460,
       type: 'arts',
       cssVar: '--v-cornish',
@@ -180,6 +187,7 @@
       icon: 'https://www.google.com/s2/favicons?domain=www.cornish.edu&sz=128',
     },
     'SIFF Cinema Uptown': {
+      geo: [47.62348, -122.35711],
       capacity: 450,
       type: 'community',
       cssVar: '--v-siff',
@@ -188,6 +196,7 @@
       icon: 'https://www.siff.net/images/SIFF_favicon_03.png',
     },
     'Pacific Science Center': {
+      geo: [47.61941, -122.35078],
       capacity: 400,
       type: 'community',
       cssVar: '--v-pacsci',
@@ -195,6 +204,7 @@
       url: 'https://pacificsciencecenter.org/events/',
     },
     'The Vera Project': {
+      geo: [47.6231, -122.35388],
       capacity: 300,
       type: 'concert',
       cssVar: '--v-vera',
@@ -203,6 +213,7 @@
       icon: 'https://www.google.com/s2/favicons?domain=theveraproject.org&sz=128',
     },
     'On the Boards': {
+      geo: [47.62583, -122.35819],
       capacity: 300,
       type: 'arts',
       cssVar: '--v-otb',
@@ -211,6 +222,7 @@
       icon: 'https://www.google.com/s2/favicons?domain=ontheboards.org&sz=128',
     },
     KEXP: {
+      geo: [47.62296, -122.35515],
       capacity: 200,
       type: 'concert',
       cssVar: '--v-kexp',
@@ -218,12 +230,14 @@
       url: 'https://www.kexp.org/events/kexp-events/',
     },
     'The Traveling Goat': {
+      geo: [47.62524, -122.35692],
       cssVar: '--v-goat',
       color: '#5fb3a1',
       url: 'https://www.travelinggoatseattle.com/events',
       icon: 'marks/traveling-goat.png',
     },
     'T-Mobile Park': {
+      geo: [47.5914, -122.33251],
       capacity: 47900,
       area: 'town',
       type: 'concert',
@@ -235,6 +249,7 @@
       soldOut: 'tm',
     },
     'Lumen Field': {
+      geo: [47.59535, -122.33164],
       capacity: 68700,
       area: 'town',
       type: 'concert',
@@ -246,6 +261,7 @@
       soldOut: 'tm',
     },
     'Husky Stadium': {
+      geo: [47.65037, -122.30198],
       capacity: 70000,
       area: 'town',
       type: 'concert',
@@ -255,6 +271,7 @@
       icon: 'https://www.google.com/s2/favicons?domain=gohuskies.com&sz=128',
     },
     'Convention Center': {
+      geo: [47.61139, -122.33255],
       capacity: 20000,
       area: 'town',
       type: 'expo',
@@ -263,10 +280,12 @@
       url: 'https://seattlecc.com/upcoming-events/',
     },
     'Starfire Stadium': {
+      url: 'https://www.starfiresports.com/',
       capacity: 4500,
       area: 'town',
     },
     'Paramount Theatre': {
+      geo: [47.61324, -122.33136],
       capacity: 2800,
       area: 'town',
       type: 'concert',
@@ -278,6 +297,7 @@
       soldOut: 'tm',
     },
     'Showbox at the Market': {
+      geo: [47.60851, -122.33947],
       capacity: 1150,
       area: 'town',
       type: 'concert',
@@ -287,6 +307,7 @@
       icon: 'https://www.google.com/s2/favicons?domain=www.showboxpresents.com&sz=128',
     },
     'Showbox SoDo': {
+      geo: [47.58805, -122.33393],
       capacity: 1800,
       area: 'town',
       type: 'concert',
@@ -296,6 +317,7 @@
       icon: 'https://www.google.com/s2/favicons?domain=www.showboxpresents.com&sz=128',
     },
     'The Crocodile': {
+      geo: [47.61465, -122.34907],
       capacity: 750,
       area: 'town',
       type: 'concert',
@@ -307,6 +329,7 @@
       soldOut: 'ticketweb',
     },
     Bumbershoot: {
+      geo: [47.6225, -122.3505], // placed by hand
       capacity: 25000,
       festival: true,
       cssVar: '--v-bumber',
@@ -315,6 +338,7 @@
       icon: 'https://www.google.com/s2/favicons?domain=bumbershoot.com&sz=128',
     },
     'Northwest Folklife': {
+      geo: [47.6208, -122.3498], // placed by hand
       capacity: 50000,
       festival: true,
       cssVar: '--v-folklife',
@@ -323,6 +347,7 @@
       icon: 'https://www.google.com/s2/favicons?domain=nwfolklife.org&sz=128',
     },
     PrideFest: {
+      geo: [47.62, -122.3522], // placed by hand
       capacity: 50000,
       festival: true,
       cssVar: '--v-pride',
@@ -331,6 +356,7 @@
       icon: 'https://www.google.com/s2/favicons?domain=www.seattlepridefest.org&sz=128',
     },
     'Capitol Hill Block Party': {
+      geo: [47.6142, -122.3185], // placed by hand
       capacity: 30000,
       area: 'town',
       festival: true,
@@ -424,6 +450,33 @@
     ics: { name: 'Lower Queen Anne Events', short: 'LQA Events', teams: 'Seattle home teams — every season', prodid: '-//fosdal.net//lqa-events//EN', uidDomain: 'fosdal.net',
       desc: 'Upcoming events around Seattle Center — Climate Pledge Arena\\, McCaw Hall\\, Seattle Center' },
     teams: TEAMS,
+    // the Map view (site/local-map.js, the Map stop): the ground scripts/build-local-map.mjs draws into site/local-map.json
+    // — the shoreline, the named lakes and the main roads inside bbox, read once from OpenStreetMap at build time (© OSM
+    // contributors, ODbL, credited in Sources) — with a pin on every room above that carries geo: [lat, lon] (Nominatim once,
+    // the festivals by hand). Steve, 2026-10-24: Kona first ("local map view for event locations"), then lqa and Seattle.
+    map: {
+      kind: 'urban',
+      bbox: [47.582, -122.372, 47.658, -122.288], // south, west, north, east — Seattle Center to the stadiums, Husky Stadium in the top right
+      home: [47.584, -122.368, 47.632, -122.3], // the view at first: the Center, downtown and SoDo; the fit button shows the whole frame
+      roads: ['motorway', 'trunk', 'primary', 'secondary'],
+      labels: [
+        { name: 'Lower Queen Anne', lat: 47.6262, lon: -122.3568, anchor: 'end' },
+        { name: 'Queen Anne', lat: 47.6352, lon: -122.3565, anchor: 'end' },
+        { name: 'Belltown', lat: 47.6152, lon: -122.3458, anchor: 'end' },
+        { name: 'Pike Place Market', lat: 47.6097, lon: -122.3422, anchor: 'end' },
+        { name: 'Downtown', lat: 47.6078, lon: -122.3328, anchor: 'start' },
+        { name: 'Pioneer Square', lat: 47.6018, lon: -122.3307, anchor: 'start' },
+        { name: 'SoDo', lat: 47.5855, lon: -122.3345, anchor: 'start' },
+        { name: 'South Lake Union', lat: 47.6248, lon: -122.3375, anchor: 'start' },
+        { name: 'Capitol Hill', lat: 47.6198, lon: -122.3205, anchor: 'start' },
+        { name: 'Eastlake', lat: 47.641, lon: -122.3258, anchor: 'start' },
+        { name: 'Montlake', lat: 47.6415, lon: -122.3045, anchor: 'start' },
+        { name: 'University District', lat: 47.6565, lon: -122.3135, anchor: 'end' },
+        { name: 'Elliott Bay', lat: 47.602, lon: -122.358, kind: 'water', anchor: 'middle' },
+        { name: 'Lake Union', lat: 47.6385, lon: -122.3345, kind: 'water', anchor: 'middle' },
+        { name: 'Portage Bay', lat: 47.6472, lon: -122.3125, kind: 'water', anchor: 'middle' },
+      ],
+    },
     venues: VENUES,
     defaultOn: DEFAULT_ON,
     defaultOff: DEFAULT_OFF,
