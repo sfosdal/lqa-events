@@ -132,7 +132,7 @@
       color: '#4da3f0',
       url: 'https://climatepledgearena.com/events/',
       icon: 'https://www.google.com/s2/favicons?domain=climatepledgearena.com&sz=128',
-      tm: { id: 'KovZ917Ahkk', match: 'climate pledge', fallbackUrl: 'https://climatepledgearena.com/events/', exclude: /arena tours?|all access pass/i },
+      tm: { id: 'KovZ917Ahkk', match: 'climate pledge', fallbackUrl: 'https://climatepledgearena.com/events/', exclude: /climate pledge arena tours?|all access pass/i },
       soldOut: 'tm',
     },
     'Seattle Center': {
