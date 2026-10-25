@@ -12,18 +12,22 @@
 // month view's day card) with the room's own site at its foot. Wheel, pinch,
 // drag and the +/−/fit buttons zoom and pan; two rooms on one spot are nudged
 // apart so both can be tapped. app.js lends what it needs via window.LQAHooks.
+// A site whose rows are circuits and regions rather than rooms (curling.events)
+// sets map.pins: 'places' — then a pin is a place the events name (each event's
+// `place` and `geo`, written by its build), on a world ground (map.kind 'world').
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   var CITY = window.LQACity, H = window.LQAHooks, svg = $('lmSvg');
   if (!CITY || !H || !svg) return;
   var VENUES = CITY.venues, ROOMS = Object.keys(VENUES).filter(function (v) { return VENUES[v].geo; });
+  var BY_PLACE = !!(CITY.map && CITY.map.pins === 'places'); // the pins are the places the events name, not the rooms
   var data = null, view = null, FRAME = { w: 1000, h: 1000 }, u = 1; // view: the viewBox in frame units; u: frame units per CSS pixel
   var NS = 'http://www.w3.org/2000/svg';
   var openVenue = null, rafId = 0;
 
   function el(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
-  function px(lat, lon) { var p = data.proj; return [(lon - p.cx) * p.k * p.s + p.w / 2, (p.cy - lat) * p.s + p.h / 2]; }
+  function px(lat, lon) { var p = data.proj; if (p.kind === 'miller') return [(lon - p.cx) * p.s + p.w / 2, (p.my0 - 1.25 * Math.asinh(Math.tan(.8 * lat * Math.PI / 180)) * 180 / Math.PI) * p.s]; return [(lon - p.cx) * p.k * p.s + p.w / 2, (p.cy - lat) * p.s + p.h / 2]; } // a world ground is Miller cylindrical; a city's is flat
   function version() { var s = document.querySelector('script[src*="local-map.js"]'); var m = s && /[?&]v=([^&]+)/.exec(s.getAttribute('src')); return m ? m[1] : ''; }
   function load() {
     if (data) return Promise.resolve(data);
@@ -56,14 +60,16 @@
   function unit() { var r = svg.getBoundingClientRect(); return r.width ? view.w / r.width : 1; }
   function isOpen() { return document.documentElement.classList.contains('map-open'); }
 
-  // the rooms' upcoming events under the filters, per room, in date order
+  // the rooms' upcoming events under the filters, per room, in date order — or per place, where the pins are places
+  // (every upcoming place is a pin, filtered out or not, so a filtered-out one shows as a hollow ring like an empty room)
   function tally() {
-    var today = H.todayStr(), by = H.byDate(), n = {}, next = {};
+    var today = H.todayStr(), by = H.byDate(), n = {}, next = {}, geo = {}, color = {};
     Object.keys(by).sort().forEach(function (d) {
       if (d < today) return;
-      H.dayItems(d).forEach(function (e) { n[e.venue] = (n[e.venue] || 0) + 1; (next[e.venue] = next[e.venue] || []).push(e); });
+      if (BY_PLACE) by[d].forEach(function (e) { if (e.geo && e.place && !geo[e.place]) { geo[e.place] = e.geo; color[e.place] = e.venue; } });
+      H.dayItems(d).forEach(function (e) { var k = BY_PLACE ? e.place : e.venue; if (BY_PLACE && !e.geo) return; n[k] = (n[k] || 0) + 1; (next[k] = next[k] || []).push(e); });
     });
-    return { n: n, next: next };
+    return { n: n, next: next, geo: geo, color: color };
   }
 
   // pins closer than a tap apart are pushed off each other (a few iterations
@@ -125,15 +131,20 @@
       (data.sea || []).forEach(function (d) { el('path', { d: d, 'class': 'lm-sea', 'fill-rule': 'evenodd' }, svg); });
       (data.water || []).forEach(function (d) { el('path', { d: d, 'class': 'lm-water', 'fill-rule': 'evenodd' }, svg); });
       ['secondary', 'primary', 'trunk', 'motorway'].forEach(function (c) { if (data.roads && data.roads[c]) el('path', { d: data.roads[c], 'class': 'lm-road lm-road-' + c }, svg); });
+    } else if (data.kind === 'world') { // the ocean everywhere, the countries over it, the state lines and the great lakes over those
+      el('rect', { x: -FRAME.w, y: -FRAME.h, width: FRAME.w * 3, height: FRAME.h * 3, 'class': 'lm-ocean' }, svg);
+      (data.land || []).forEach(function (d) { el('path', { d: d, 'class': 'lm-island', 'fill-rule': 'evenodd' }, svg); });
+      if (data.borders) el('path', { d: data.borders, 'class': 'lm-border' }, svg);
+      (data.water || []).forEach(function (d) { el('path', { d: d, 'class': 'lm-water', 'fill-rule': 'evenodd' }, svg); });
     } else {
       (data.far || data.neighbours || []).forEach(function (d) { el('path', { d: d, 'class': 'lm-far' }, svg); });
       (data.land || [data.island]).forEach(function (d) { el('path', { d: d, 'class': 'lm-island' }, svg); });
     }
     // ---- the rooms: size by count, then nudged apart, then labelled ----
-    var t = tally(), fs = 12.5 * u, total = 0;
-    var pins = ROOMS.map(function (v) {
-      var p = px(VENUES[v].geo[0], VENUES[v].geo[1]), n = t.n[v] || 0; total += n;
-      return { v: v, name: VENUES[v].short || v.replace(/ National Historic(al)? (Park|Site)$/, ''), ox: p[0], oy: p[1], x: p[0], y: p[1], n: n, r: (n ? 7 + 2.2 * Math.sqrt(n) : 5) * u, color: H.venueColor(v) };
+    var t = tally(), fs = 12.5 * u, total = 0, keys = BY_PLACE ? Object.keys(t.geo) : ROOMS;
+    var pins = keys.map(function (v) {
+      var g = BY_PLACE ? t.geo[v] : VENUES[v].geo, p = px(g[0], g[1]), n = t.n[v] || 0; total += n;
+      return { v: v, name: BY_PLACE ? v.split(',')[0] : (VENUES[v].short || v.replace(/ National Historic(al)? (Park|Site)$/, '')), ox: p[0], oy: p[1], x: p[0], y: p[1], n: n, r: (n ? 7 + 2.2 * Math.sqrt(n) : 5) * u, color: H.venueColor(BY_PLACE ? t.color[v] : v) }; // a place takes the hue of its first event's row
     });
     // crowding: the discs in view may cover about a sixth of it; past that every disc shrinks alike (a dense city at the whole-frame zoom), never below half
     var area = 0; pins.forEach(function (p) { if (p.ox > view.x - p.r && p.ox < view.x + view.w + p.r && p.oy > view.y - p.r && p.oy < view.y + view.h + p.r) area += Math.PI * p.r * p.r; });
@@ -170,12 +181,12 @@
       if (p.label) { var l = el('text', { x: p.label.tx, y: p.label.ty + fs * .36, 'text-anchor': p.label.anchor, 'font-size': fs, 'class': 'lm-name' }, g); l.textContent = p.name; }
     });
     var cap = $('lmCaption');
-    if (cap) cap.firstElementChild.textContent = total + ' upcoming at ' + ROOMS.filter(function (v) { return t.n[v]; }).length + ' of ' + ROOMS.length + ' places';
+    if (cap) cap.firstElementChild.textContent = total + ' upcoming at ' + keys.filter(function (v) { return t.n[v]; }).length + ' of ' + keys.length + ' places';
   }
   function schedule() { if (!rafId) rafId = requestAnimationFrame(function () { rafId = 0; render(); }); }
 
   // ---- zoom and pan ----
-  var MIN_W = function () { return FRAME.w / (data && data.kind === 'urban' ? 24 : 16); }; // a city zooms a little deeper: its rooms sit a block apart
+  var MIN_W = function () { return FRAME.w / (data && data.kind === 'urban' ? 24 : data && data.kind === 'world' ? 120 : 16); }; // a city zooms a little deeper: its rooms sit a block apart; the world much deeper, down to a state's towns
   var MAX_W = function () { return Math.max(FRAME.w, FRAME.h / ar()) * 1.3; }; // out to the whole ground (plus a margin) in the frame's own shape
   function clamp() {
     view.w = Math.min(MAX_W(), Math.max(MIN_W(), view.w)); view.h = view.w * ar();
@@ -239,13 +250,13 @@
     if (openVenue === v) { closePop(); return; }
     H.closeDayPop(); closePop();
     openVenue = v; g.classList.add('is-open');
-    var t = tally(), list = t.next[v] || [], room = VENUES[v];
+    var t = tally(), list = t.next[v] || [], room = VENUES[v] || {}; // a place has no row of its own, so no site link
     var pop = document.createElement('div'); pop.className = 'mb-pop lm-pop'; pop.setAttribute('role', 'dialog'); pop.dataset.venue = v;
     var h = document.createElement('h3'); h.textContent = v;
     var n = document.createElement('span'); n.className = 'mb-pop-n'; n.textContent = list.length ? list.length + ' upcoming' : 'nothing upcoming'; h.appendChild(n);
     pop.setAttribute('aria-label', v); pop.appendChild(h);
     if (!list.length) { var none = document.createElement('p'); none.className = 'mb-none'; none.textContent = 'Nothing listed under these filters'; pop.appendChild(none); }
-    list.slice(0, 6).forEach(function (e) { pop.appendChild(H.boardEntry(e, true)); });
+    list.slice(0, 6).forEach(function (e) { var tail = BY_PLACE && e.place ? ' — ' + e.place : ''; pop.appendChild(H.boardEntry(tail && e.title.slice(-tail.length) === tail ? Object.assign({}, e, { title: e.title.slice(0, -tail.length) }) : e, true)); }); // a place's card already names the place: the titles' "— Town, State" tail goes
     if (list.length > 6) { var more = document.createElement('p'); more.className = 'lm-more'; more.textContent = '+ ' + (list.length - 6) + ' more in the list'; pop.appendChild(more); }
     if (room.url) { var a = document.createElement('a'); a.className = 'lm-site'; a.href = room.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = (room.festival ? 'Festival site' : 'Venue site') + ' ↗'; pop.appendChild(a); }
     document.body.appendChild(pop);

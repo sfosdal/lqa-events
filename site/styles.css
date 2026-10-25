@@ -1967,6 +1967,8 @@ html.map-open .agenda, html.map-open .cal-toggle, html.map-open #calToday, html.
 .lm-island { fill: var(--land); stroke: var(--shore); stroke-width: calc(var(--u, 1) * 1.2); stroke-linejoin: round; }
 .lm-far { fill: var(--far); stroke: var(--shore); stroke-width: calc(var(--u, 1) * .8); opacity: .7; }
 .lm-land { fill: var(--land); }
+.lm-ocean { fill: var(--water); } /* a world ground: the sea under every country */
+.lm-border { fill: none; stroke: var(--shore); stroke-width: calc(var(--u, 1) * .45); opacity: .4; } /* a world ground: state and province lines */
 .lm-sea, .lm-water { fill: var(--water); stroke: var(--shore); stroke-width: calc(var(--u, 1) * .7); stroke-linejoin: round; }
 .lm-road { fill: none; stroke: var(--road); stroke-linecap: round; stroke-linejoin: round; stroke-width: calc(var(--u, 1) * .6); opacity: .45; }
 .lm-road-primary, .lm-road-trunk { stroke-width: calc(var(--u, 1) * .9); opacity: .6; }
