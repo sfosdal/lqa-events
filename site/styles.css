@@ -336,9 +336,9 @@ html.teams-open #calToday { display: none; }
 /* the Filter button rides at the end of the view pill, past a hairline, in every mode (Steve, 2026-10-24,
    "for all sites, and modes combine these"): icon + word like the stops, the word going with is-tight; while
    the panel is open it wears the ink like a knob of its own. It is not a stop: the knob never moves to it. */
-.view-toggle .vt-filter { width: auto; min-width: var(--tt); margin-left: 3px; padding: 0 .75rem 0 .7rem; border-left: 1px solid var(--line); border-radius: 0 999px 999px 0; }
+.view-toggle .vt-filter { width: auto; min-width: var(--tt); padding: 0 .7rem 0 .55rem; } /* a stop like the others — no divider (Steve, 2026-10-24: "vert lines should be consistent") */
 .filterbar.is-tight .view-toggle .vt-filter { width: auto; padding: 0 .35rem 0 .4rem; }
-.view-toggle .vt-filter[aria-expanded="true"], .view-toggle .vt-filter[aria-expanded="true"]:hover { background: var(--ink); color: var(--sky); border-radius: 999px; border-left-color: transparent; }
+.view-toggle .vt-filter[aria-expanded="true"], .view-toggle .vt-filter[aria-expanded="true"]:hover { background: var(--ink); color: var(--sky); border-radius: 999px; }
 /* the bar stays pinned at the top while the list scrolls (--barh is its
    height — the month dividers and the calendar strip stick just below it);
    the panel floats open under it, over the content, which stays put */
@@ -1956,8 +1956,8 @@ body.sheet-open { overflow: hidden; }
 html.map-open .agenda, html.map-open .cal-toggle, html.map-open #calToday, html.map-open .view-note { display: none; } /* the list and its calendar step aside; the filters and search stay — the pins follow them */
 .local-map { margin-top: 1.2rem; }
 .local-map[hidden] { display: none; }
-.lm-frame { /* the ground's own shape (--lm-ar from local-map.json), as tall as the window leaves over the pinned footer */
-  position: relative; width: min(100%, calc((100vh - 21.5rem) * var(--lm-ar, 1))); min-width: min(100%, 18rem); aspect-ratio: var(--lm-ar, 1); margin: 0 auto;
+.lm-frame { /* all the room there is: the content's width, and the height the window leaves between the toolbar and the pinned footer (local-map.js size() sets it; the calc is the first paint) — Steve, 2026-10-24 */
+  position: relative; width: 100%; height: calc(100vh - 21.5rem); min-height: 18rem; margin: 0 auto;
   border: 1px solid var(--line); border-radius: 12px; background: var(--mist); overflow: hidden;
   --land: color-mix(in srgb, var(--ink) 9%, var(--mist)); --shore: color-mix(in srgb, var(--ink) 38%, transparent); --far: color-mix(in srgb, var(--ink) 4%, var(--mist));
   --water: color-mix(in srgb, #4da3f0 26%, var(--mist)); --road: color-mix(in srgb, var(--ink) 30%, transparent);
@@ -1989,7 +1989,7 @@ html.map-open .agenda, html.map-open .cal-toggle, html.map-open #calToday, html.
 .lm-zoom button { width: 2rem; height: 2rem; padding: 0; display: grid; place-items: center; font: 600 1rem/1 var(--body); color: var(--ink); background: var(--sky); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
 .lm-zoom button:hover { border-color: var(--ink-soft); }
 .lm-zoom button svg { width: 1rem; height: 1rem; }
-.lm-caption { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin: .55rem auto 0; width: min(100%, calc((100vh - 21.5rem) * var(--lm-ar, 1))); min-width: min(100%, 18rem); font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.lm-caption { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin: .55rem auto 0; width: 100%; min-height: 1.6em; font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
 /* the pin's card: the month view's day card (.mb-pop), with the room's own site at its foot */
 .lm-pop .lm-site { display: inline-flex; align-items: center; gap: .35rem; margin-top: .35rem; font: 500 .78rem/1 var(--body); color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: .1rem; }
 .lm-pop .lm-site:hover { border-color: var(--ink); }

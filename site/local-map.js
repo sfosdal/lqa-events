@@ -34,12 +34,25 @@
     });
   }
   // the view at first: the city's `home` box (a wider frame holds the out-of-town rooms), else the whole frame
+  var atHome = true; // the view is still the opening one (no zoom or pan yet): it follows the frame's shape when that changes
   function home(draw) {
-    if (data && data.home) { var h = data.home, w = Math.max(h[2], h[3] * FRAME.w / FRAME.h); view = { x: h[0] + h[2] / 2 - w / 2, y: h[1] + h[3] / 2 - w * FRAME.h / FRAME.w / 2, w: w, h: w * FRAME.h / FRAME.w }; }
+    atHome = true;
+    if (data && data.home) { var h = data.home, a = ar(), w = Math.max(h[2], h[3] / a); view = { x: h[0] + h[2] / 2 - w / 2, y: h[1] + h[3] / 2 - w * a / 2, w: w, h: w * a }; }
     else fit(false);
     if (draw !== false) render();
   }
-  function fit(draw) { view = { x: 0, y: 0, w: FRAME.w, h: FRAME.h }; if (draw !== false) render(); }
+  function fit(draw) { atHome = false; var a = ar(), w = Math.max(FRAME.w, FRAME.h / a); view = { x: (FRAME.w - w) / 2, y: (FRAME.h - w * a) / 2, w: w, h: w * a }; if (draw !== false) render(); }
+  // the frame's own proportions (height over width): it fills the content's width and the height the window leaves,
+  // whatever the ground's shape — the viewBox follows the frame, not the other way round (Steve, 2026-10-24)
+  function ar() { var r = svg.parentElement.getBoundingClientRect(); return r.width > 0 && r.height > 0 ? r.height / r.width : FRAME.h / FRAME.w; }
+  function size() { // as tall as the window leaves between the frame's top and the pinned footer, less the caption under it (never under 18rem, or half the window on a short phone)
+    var fr = svg.parentElement, cap = $('lmCaption'), foot = document.querySelector('footer');
+    var top = fr.getBoundingClientRect().top + window.scrollY, floor = window.innerHeight - (foot ? foot.offsetHeight : 0);
+    var h = Math.floor(floor - top - (cap ? cap.offsetHeight + 10 : 0) - 8), rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    var min = Math.min(18 * rem, window.innerHeight * .5); fr.style.height = Math.max(h, min) + 'px';
+    var over = document.documentElement.scrollHeight - window.innerHeight; if (over > 0 && h - over >= min) fr.style.height = (h - over) + 'px'; // whatever the estimate missed (a caption that wrapped), once
+  }
+  function reshape() { if (!view) return; var cy = view.y + view.h / 2; view.h = view.w * ar(); view.y = cy - view.h / 2; } // the frame changed shape: keep the centre, follow the new proportions
   function unit() { var r = svg.getBoundingClientRect(); return r.width ? view.w / r.width : 1; }
   function isOpen() { return document.documentElement.classList.contains('map-open'); }
 
@@ -100,6 +113,7 @@
 
   function render() {
     if (!data || !isOpen()) return;
+    size(); if (atHome) home(false); else reshape(); clamp(); // the frame may have changed shape since the view was set
     u = unit();
     svg.setAttribute('viewBox', [view.x, view.y, view.w, view.h].map(function (v) { return v.toFixed(2); }).join(' '));
     svg.style.setProperty('--u', u);
@@ -162,16 +176,16 @@
 
   // ---- zoom and pan ----
   var MIN_W = function () { return FRAME.w / (data && data.kind === 'urban' ? 24 : 16); }; // a city zooms a little deeper: its rooms sit a block apart
+  var MAX_W = function () { return Math.max(FRAME.w, FRAME.h / ar()) * 1.3; }; // out to the whole ground (plus a margin) in the frame's own shape
   function clamp() {
-    var maxW = FRAME.w * 1.3, minW = MIN_W();
-    view.w = Math.min(maxW, Math.max(minW, view.w)); view.h = view.w * FRAME.h / FRAME.w;
-    view.x = Math.min(FRAME.w * 1.15 - view.w, Math.max(-FRAME.w * .15, view.x));
-    view.y = Math.min(FRAME.h * 1.15 - view.h, Math.max(-FRAME.h * .15, view.y));
+    view.w = Math.min(MAX_W(), Math.max(MIN_W(), view.w)); view.h = view.w * ar();
+    var lo = -FRAME.w * .15, hi = FRAME.w * 1.15 - view.w; view.x = hi < lo ? (lo + hi) / 2 : Math.min(hi, Math.max(lo, view.x)); // wider than the ground: centred on it
+    lo = -FRAME.h * .15; hi = FRAME.h * 1.15 - view.h; view.y = hi < lo ? (lo + hi) / 2 : Math.min(hi, Math.max(lo, view.y));
   }
   function zoomAt(cx, cy, f) { // cx, cy: client coordinates the zoom keeps still
     var r = svg.getBoundingClientRect(), k = view.w / r.width, fx = (cx - r.left) * k + view.x, fy = (cy - r.top) * k + view.y;
-    var w = view.w / f; w = Math.min(FRAME.w * 1.3, Math.max(MIN_W(), w)); var ff = view.w / w;
-    view.x = fx - (fx - view.x) / ff; view.y = fy - (fy - view.y) / ff; view.w = w; view.h = w * FRAME.h / FRAME.w;
+    atHome = false; var w = view.w / f; w = Math.min(MAX_W(), Math.max(MIN_W(), w)); var ff = view.w / w;
+    view.x = fx - (fx - view.x) / ff; view.y = fy - (fy - view.y) / ff; view.w = w; view.h = w * ar();
     clamp(); closePop(); schedule();
   }
   var pts = {}, drag = null, pinch = null;
@@ -188,12 +202,12 @@
     var ids = Object.keys(pts);
     if (pinch && ids.length === 2) {
       var a = pts[ids[0]], b = pts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y), f = d / (pinch.d || 1);
-      view.w = pinch.w; view.h = view.w * FRAME.h / FRAME.w; zoomAt(pinch.mx, pinch.my, f); return;
+      view.w = pinch.w; view.h = view.w * ar(); zoomAt(pinch.mx, pinch.my, f); return;
     }
     if (!drag) return;
     var k = view.w / svg.getBoundingClientRect().width, dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (!drag.moved && Math.hypot(dx, dy) < 4) return;
-    drag.moved = true; svg.classList.add('is-dragging'); closePop();
+    drag.moved = true; atHome = false; svg.classList.add('is-dragging'); closePop();
     view.x = drag.vx - dx * k; view.y = drag.vy - dy * k; clamp();
     svg.setAttribute('viewBox', [view.x, view.y, view.w, view.h].join(' '));
   });
@@ -255,7 +269,7 @@
     closePop();
     if (remember) { try { localStorage.setItem('lqa-map', on ? '1' : '0'); if (on) localStorage.setItem('lqa-view', 'list'); } catch (e) { /* no storage */ } } // app.js restores List; this file then opens the map over it
     H.syncViewSwitch(); H.fitFilterBar();
-    if (on) load().then(function () { home(false); render(); });
+    if (on) load().then(function () { size(); home(false); render(); }); // size first: home() reads the frame's shape
   }
   window.LQAMap = { open: open, isOpen: isOpen, render: schedule };
   window.addEventListener('resize', function () { if (isOpen()) schedule(); });
