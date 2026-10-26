@@ -204,6 +204,47 @@
         if (labelFree(x + dx, y + dy, L.name.length * tfs * .68, L.anchor)) { tx = el('text', { x: x + dx, y: y + dy, 'text-anchor': L.anchor, 'font-size': tfs, 'class': 'lm-town' }, svg); tx.textContent = L.name; }
       }
     });
+    // ---- the other cities on here.events nearby, as highway mileage signs (Steve, 2026-10-26: "add labels for nearby locations … more like these, including distance"):
+    // one green sign per edge the cities lie beyond, a row each — name left, miles right — and a one-row sign on the spot of a city inside the view ----
+    var ctl = $('mapView').querySelector('.lm-zoom'), ctlBottom = 0; if (ctl) { var cr = ctl.getBoundingClientRect(), sr = svg.getBoundingClientRect(); ctlBottom = view.y + (cr.bottom - sr.top) * u; }
+    var sf = 15 * u, sRim = sf * .42, sPad = sRim + sf * .6, sRow = sf * 1.4, inset = 12 * u, bySide = { top: [], bottom: [], left: [], right: [] };
+    function sign(rows, x, y, anchor) { // rows: [{name, mi, url}] — the sign's top-left at x, y (anchor 'end': its top-right; 'middle': top-centre)
+      var g = el('g', { 'class': 'lm-sign' }, svg), board = el('rect', { y: y, rx: sf * .5, 'class': 'lm-sign-board' }, g); // one white line, the board's own edge (Steve, 2026-10-26: 'the white border should actually be the border'); the words well in from it
+      var items = rows.map(function (r, i) { // the words first, measured once drawn (a width guessed from the letter count ran the miles into a long name: "Spokane223")
+        var a = el('a', { href: r.url + '?view=map&from=' + encodeURIComponent(CITY.key), 'class': 'lm-city' }, g), ttl = el('title', {}, a); ttl.textContent = r.name + "'s calendar on here.events — about " + r.mi + ' miles';
+        var hit = el('rect', { y: y + sPad + sRow * i, height: sRow, 'class': 'lm-sign-hit' }, a), yy = y + sPad + sRow * (i + .75);
+        var t1 = el('text', { y: yy, 'text-anchor': 'start', 'font-size': sf, 'class': 'lm-sign-name' }, a); t1.textContent = r.name;
+        var t2 = el('text', { y: yy, 'text-anchor': 'end', 'font-size': sf, 'class': 'lm-sign-mi' }, a); t2.textContent = r.mi;
+        return { hit: hit, t1: t1, t2: t2 };
+      });
+      var nameW = 0, miW = 0; items.forEach(function (it) { nameW = Math.max(nameW, it.t1.getComputedTextLength()); miW = Math.max(miW, it.t2.getComputedTextLength()); });
+      var w = sPad * 2 + nameW + sf * 2.2 + miW, h = sPad * 2 + rows.length * sRow - sRow * .25, x0 = anchor === 'end' ? x - w : anchor === 'middle' ? x - w / 2 : x;
+      x0 = Math.min(view.x + view.w - inset - w, Math.max(view.x + inset, x0)); // the board stays inside the view, whatever it measured
+      board.setAttribute('x', x0); board.setAttribute('width', w); board.setAttribute('height', h);
+      items.forEach(function (it) { it.hit.setAttribute('x', x0); it.hit.setAttribute('width', w); it.t1.setAttribute('x', x0 + sPad); it.t2.setAttribute('x', x0 + w - sPad); }); // the whole row taps
+      return { w: w, h: h };
+    }
+    nearbyCities(100).forEach(function (c) {
+      var p = px(c.lat, c.lon), row = { name: c.name, mi: Math.max(1, Math.round(c.km * .621371)), url: c.url, x: p[0], y: p[1] };
+      if (p[0] > view.x + inset && p[0] < view.x + view.w - inset && p[1] > view.y + inset && p[1] < view.y + view.h - inset) { // inside the view: its dot, the sign beside it
+        el('circle', { cx: p[0], cy: p[1], r: 3.5 * u, 'class': 'lm-city-dot' }, svg);
+        sign([row], p[0] + 8 * u, p[1] - sRow * .75, 'start');
+        return;
+      }
+      var cx = view.x + view.w / 2, cy = view.y + view.h / 2, dx = (p[0] - cx) / view.w, dy = (p[1] - cy) / view.h; // which edge: the one its direction leaves by first
+      bySide[Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'bottom' : 'top')].push(row);
+    });
+    Object.keys(bySide).forEach(function (side) {
+      var rows = bySide[side]; if (!rows.length) return;
+      rows.sort(function (p, q) { return p.mi - q.mi; });
+      var mx = rows.reduce(function (t, r) { return t + r.x; }, 0) / rows.length, my = rows.reduce(function (t, r) { return t + r.y; }, 0) / rows.length; // where they lie, on average: the sign sits at that point of the edge
+      var h = sPad * 2 + rows.length * sRow - sRow * .25, y = Math.min(view.y + view.h - inset - h, Math.max(view.y + inset, my - h / 2));
+      if (side === 'right' && ctlBottom && y < ctlBottom + inset) y = Math.min(view.y + view.h - inset - h, ctlBottom + inset); // not under the zoom buttons // sign() keeps the board inside the view sideways once it has measured the words
+      if (side === 'top') sign(rows, mx, view.y + inset, 'middle');
+      else if (side === 'bottom') sign(rows, mx, view.y + view.h - inset - h, 'middle');
+      else if (side === 'left') sign(rows, view.x + inset, y, 'start');
+      else sign(rows, view.x + view.w - inset, y, 'end');
+    });
     pins.forEach(function (p) {
       if (Math.abs(p.x - p.ox) + Math.abs(p.y - p.oy) > 1.5 * u) el('path', { d: 'M' + p.ox + ' ' + p.oy + 'L' + p.x + ' ' + p.y, 'class': 'lm-leader' }, svg);
     });
@@ -245,6 +286,7 @@
   var pts = {}, drag = null, pinch = null;
   svg.addEventListener('pointerdown', function (e) {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.target.closest && e.target.closest('.lm-city')) return; // a sign is a plain link: no capture, or the click lands on the svg and the link never fires (Steve, 2026-10-26: 'the click to everett from Seattle isn't working')
     pts[e.pointerId] = { x: e.clientX, y: e.clientY }; svg.setPointerCapture(e.pointerId);
     var ids = Object.keys(pts);
     if (ids.length === 1) drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false, target: e.target.closest('.lm-pin') };
@@ -288,13 +330,50 @@
 
   // ---- the visitor's own spot (Steve, 2026-10-25: "find my location") ----
   // the browser's Geolocation API, on the visitor's say-so each time (its own permission prompt); nothing leaves the page
-  function note(text) { // a line under the frame, for a moment
+  function note(text, link, keep) { // a line under the frame, for a moment — with a link it stays until the next note
     var cap = $('lmCaption'); if (!cap) return;
     var n = cap.querySelector('.lm-note'); if (!n) { n = document.createElement('span'); n.className = 'lm-note'; cap.appendChild(n); }
-    n.textContent = text; clearTimeout(note.t); note.t = setTimeout(function () { n.textContent = ''; }, 6000);
+    n.textContent = text; clearTimeout(note.t);
+    if (link) { var a = document.createElement('a'); a.href = link.url; a.textContent = link.text; n.appendChild(a); }
+    if (!keep) note.t = setTimeout(function () { n.textContent = ''; }, 6000);
+  }
+  // the nearest other city on here.events to a spot (great-circle, km) — for a visitor off this map's ground; a
+  // neighbourhood site's own city (map.city) is not "another city", its rooms are on this map already
+  function nearestCity(lat, lon, within) {
+    var list = (window.LQACities && window.LQACities.cities) || [], own = CITY.key, cityKey = CITY.map && CITY.map.city && CITY.map.city.key, best = null;
+    list.forEach(function (c) {
+      if (!c.live || c.lat == null || c.key === own || c.key === cityKey || c.name !== c.city) return; // city-wide sites only: a neighbourhood's rooms are on its city's map
+      var dLat = (c.lat - lat) * Math.PI / 180, dLon = (c.lon - lon) * Math.PI / 180, a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat * Math.PI / 180) * Math.cos(c.lat * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      var km = 2 * 6371 * Math.asin(Math.sqrt(a));
+      if (km <= within && (!best || km < best.km)) best = { city: c, km: km };
+    });
+    return best;
+  }
+  var FROM = new URLSearchParams(location.search).get('from') || ''; // the city whose sign or location jump brought the visitor here: its sign is drawn however far it lies, so there is a way back (Steve, 2026-10-26)
+  function nearbyCities(within) { // the other city-wide sites within `within` km of this ground's centre, nearest first
+    var b = (CITY.map && CITY.map.home) || (CITY.map && CITY.map.bbox); if (!data || !b) return []; // [S, W, N, E] — miles are from the home box (downtown) when the city has one
+    var lat = (b[0] + b[2]) / 2, lon = (b[1] + b[3]) / 2, list = (window.LQACities && window.LQACities.cities) || [], own = CITY.key, cityKey = CITY.map && CITY.map.city && CITY.map.city.key, out = [];
+    list.forEach(function (c) {
+      if (!c.live || c.lat == null || c.key === own || c.key === cityKey || c.name !== c.city) return;
+      var dLat = (c.lat - lat) * Math.PI / 180, dLon = (c.lon - lon) * Math.PI / 180, a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat * Math.PI / 180) * Math.cos(c.lat * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      var km = 2 * 6371 * Math.asin(Math.sqrt(a)); if (km <= within || c.key === FROM) out.push({ key: c.key, name: c.name, url: c.url, lat: c.lat, lon: c.lon, km: km });
+    });
+    return out.sort(function (p, q) { return p.km - q.km; });
   }
   function goTo(m) { // centre on the spot, in as far as a few blocks if the view is wider than that
     atHome = false; var w = Math.min(view.w, MIN_W() * 4); view = { x: m.x - w / 2, y: m.y - w * ar() / 2, w: w, h: w * ar() }; clamp(); closePop(); schedule();
+  }
+  function place(c, b) { // a fix in hand (the browser's, or the test harness's): on this ground → the dot; off it → the nearest city on here.events
+    var p = px(c.latitude, c.longitude), m = { x: p[0], y: p[1], acc: (c.accuracy || 0) / 111320 * data.proj.s, at: Date.now() }; // metres → degrees of latitude → frame units
+    var slack = FRAME.w * .02;
+    if (p[0] < -slack || p[0] > FRAME.w + slack || p[1] < -slack || p[1] > FRAME.h + slack) { // off this ground: offer the nearest city instead (Steve, 2026-10-26: "take me to the everett page")
+      me = null; schedule();
+      var near = nearestCity(c.latitude, c.longitude, 80);
+      if (near) { note('You are near ' + near.city.name + ' — opening its calendar…', null, true); location.assign(near.city.url + '?view=map&from=' + encodeURIComponent(CITY.key) + '&me=' + [c.latitude.toFixed(4), c.longitude.toFixed(4), Math.round(c.accuracy || 0)].join(',')); } // the fix rides along, so the next site marks the spot too ("the next site should still highlight your location") // "it should jump" (Steve, 2026-10-26)
+      else note('You are outside this map');
+      return;
+    }
+    me = m; goTo(m); if (b) b.setAttribute('aria-pressed', 'true');
   }
   function locate(b) {
     if (!navigator.geolocation) { note('This browser gives no location'); return; }
@@ -302,10 +381,7 @@
     if (b) b.classList.add('is-busy');
     navigator.geolocation.getCurrentPosition(function (pos) {
       if (b) b.classList.remove('is-busy');
-      var c = pos.coords, p = px(c.latitude, c.longitude), m = { x: p[0], y: p[1], acc: (c.accuracy || 0) / 111320 * data.proj.s, at: Date.now() }; // metres → degrees of latitude → frame units
-      var slack = FRAME.w * .02;
-      if (p[0] < -slack || p[0] > FRAME.w + slack || p[1] < -slack || p[1] > FRAME.h + slack) { me = null; note('You are outside this map'); schedule(); return; }
-      me = m; goTo(m); if (b) b.setAttribute('aria-pressed', 'true');
+      place(pos.coords, b);
     }, function (err) {
       if (b) b.classList.remove('is-busy');
       note(err && err.code === 1 ? 'Location permission was declined' : 'Your location could not be found');
@@ -356,14 +432,17 @@
     H.syncViewSwitch(); H.fitFilterBar();
     if (on) load().then(function () { size(); home(false); render(); }); // size first: home() reads the frame's shape
   }
-  window.LQAMap = { open: open, isOpen: isOpen, render: schedule, locate: function (lat, lon, acc) { me = null; var p = px(lat, lon); goTo(me = { x: p[0], y: p[1], acc: (acc || 0) / 111320 * data.proj.s, at: Date.now() }); } }; // locate(): a spot given outright — the test harness's stand-in for the browser's fix
+  window.LQAMap = { open: open, isOpen: isOpen, render: schedule, locate: function (lat, lon, acc) { me = null; place({ latitude: lat, longitude: lon, accuracy: acc || 0 }); } }; // locate(): a spot given outright — the test harness's stand-in for the browser's fix, through the same path
   window.addEventListener('resize', function () { if (isOpen()) schedule(); });
   // at load: ?view=map, or the remembered choice — unless a ?team= link or a saved Month view got there first
   (function () {
     var q = new URLSearchParams(location.search), saved = null;
     try { saved = localStorage.getItem('lqa-map'); } catch (e) { /* unreadable storage */ }
     if (q.get('team') || document.documentElement.classList.contains('month-open')) { if (saved === '1') try { localStorage.setItem('lqa-map', '0'); } catch (e) { /* */ } return; }
-    if (q.get('view') === 'map' || (!q.get('view') && saved === '1')) open(true, false);
-    else load(); // warm, so the first tap draws at once
+    var carried = /^(-?[\d.]+),(-?[\d.]+)(?:,(\d+))?$/.exec(q.get('me') || ''); // a fix the last site passed on when it sent the visitor here
+    if (q.get('view') === 'map' || (!q.get('view') && saved === '1')) {
+      open(true, false);
+      if (carried) load().then(function () { size(); place({ latitude: +carried[1], longitude: +carried[2], accuracy: +carried[3] || 0 }); });
+    } else load(); // warm, so the first tap draws at once
   })();
 })();
