@@ -125,8 +125,8 @@
   }
   // labels: right of the pin first, then left, below, above — the first spot
   // clear of every label already placed (and the frame's edge); none, if none
-  function placeLabels(pins, fs) {
-    var boxes = [], cw = fs * .58, lh = fs * 1.25;
+  function placeLabels(pins, fs, seed) {
+    var boxes = (seed || []).slice(), cw = fs * .58, lh = fs * 1.25;
     function free(bx, self) { if (bx.x < view.x || bx.x + bx.w > view.x + view.w || bx.y < view.y || bx.y + bx.h > view.y + view.h) return false; return !boxes.some(function (o) { return o.pin !== self && bx.x < o.x + o.w && bx.x + bx.w > o.x && bx.y < o.y + o.h && bx.y + bx.h > o.y; }); }
     function disc(p) { boxes.push({ x: p.x - p.r, y: p.y - p.r, w: 2 * p.r, h: 2 * p.r, pin: p }); } // a square round the disc; a pin's own square is skipped for its own label (the diagonal spots clear the circle, not the square)
     pins.filter(function (p) { return p.n; }).forEach(disc); // the counted discs first; an empty pin's disc only after the counted names are placed (a name beats a hollow ring)
@@ -186,7 +186,77 @@
     var shrink = Math.min(1, Math.max(.5, Math.sqrt(.16 * view.w * view.h / (area || 1))));
     pins.forEach(function (p) { p.r *= shrink; p.cap = Math.max(p.r * .9, 10 * u); });
     spread(pins, 3 * u);
-    var boxes = placeLabels(pins, fs);
+    // ---- the other cities on here.events nearby, as highway mileage signs (Steve, 2026-10-26: "add labels for nearby locations … more like these, including distance"):
+    // one green sign per edge the cities lie beyond, a row each — name left, distance right — and a one-row sign beside the dot of a city inside the view.
+    // Laid out before the labels, which keep clear of the boards; drawn on top of everything (the layer is re-appended at the end) ----
+    var ctl = $('mapView').querySelector('.lm-zoom'), ctlBottom = 0, keepOut = []; if (ctl) { var cr = ctl.getBoundingClientRect(), sr = svg.getBoundingClientRect(); ctlBottom = view.y + (cr.bottom - sr.top) * u; keepOut.push({ x: view.x + (cr.left - sr.left) * u - 6 * u, y: view.y, w: (cr.width + 6) * u + 6 * u, h: ctlBottom - view.y + 6 * u }); } // the zoom buttons' column: no sign under it
+    var sf = 15 * u, sPad = sf * 1.02, capH = sf * .72, sRow = sf * 1.45, inset = 12 * u, bySide = { top: [], bottom: [], left: [], right: [] }, signLayer = el('g', { 'class': 'lm-signs' }, svg), signBoxes = [];
+    var dUnit = CITY.distanceUnit === 'km' ? 'km' : 'mi'; // city.js distanceUnit: 'km' where the roads are signed in kilometres (Steve, 2026-10-26: "mi for countries that support it or km for the others")
+    function overlaps(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
+    function inView(bx) { return bx.x >= view.x + inset && bx.x + bx.w <= view.x + view.w - inset && bx.y >= view.y + inset && bx.y + bx.h <= view.y + view.h - inset; }
+    function cover(a, b) { return Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y)); }
+    function crowding(bx) { var c = 0; pins.forEach(function (p) { c += cover(bx, { x: p.x - p.r, y: p.y - p.r, w: 2 * p.r, h: 2 * p.r }); }); signBoxes.concat(keepOut).forEach(function (o) { c += cover(bx, o) * 1000; }); return c; } // how much of the board lies over rooms (and, far worse, over another sign or the buttons)
+    function clearOfRooms(bx) { return crowding(bx) === 0; }
+    function sign(rows, placeAt) { // rows: [{name, dist, url}]; placeAt(w, h) names the board's top-left once the words are measured (a width guessed from the letter count ran "Spokane223" together)
+      var g = el('g', { 'class': 'lm-sign' }, signLayer), board = el('rect', { rx: sf * .5, 'class': 'lm-sign-board' }, g); // one white line, the board's own edge (Steve, 2026-10-26: 'the white border should actually be the border')
+      var items = rows.map(function (r) {
+        var a = el('a', { href: cityLink(r), 'class': 'lm-city' }, g), ttl = el('title', {}, a); ttl.textContent = r.name + "'s calendar on here.events — about " + r.dist + (dUnit === 'km' ? ' km' : ' miles');
+        var hit = el('rect', { height: sRow, 'class': 'lm-sign-hit' }, a);
+        var t1 = el('text', { 'text-anchor': 'start', 'font-size': sf, 'class': 'lm-sign-name' }, a); t1.textContent = r.name;
+        var t2 = el('text', { 'text-anchor': 'end', 'font-size': sf, 'class': 'lm-sign-mi' }, a); t2.textContent = r.dist + ' ' + dUnit;
+        return { hit: hit, t1: t1, t2: t2 };
+      });
+      var nameW = 0, miW = 0; items.forEach(function (it) { nameW = Math.max(nameW, it.t1.getComputedTextLength()); miW = Math.max(miW, it.t2.getComputedTextLength()); });
+      var w = sPad * 2 + nameW + sf * 2 + miW, h = sPad * 2 + capH + (rows.length - 1) * sRow; // the block of words, the capitals' top to the last baseline, inside the same margin on every side (Steve, 2026-10-26: "the margins must be nice")
+      var at = placeAt(w, h); if (!at) { g.remove(); return null; }
+      var x0 = Math.min(view.x + view.w - inset - w, Math.max(view.x + inset, at.x)), y0 = Math.min(view.y + view.h - inset - h, Math.max(view.y + inset, at.y)); // inside the view whatever it measured
+      board.setAttribute('x', x0); board.setAttribute('y', y0); board.setAttribute('width', w); board.setAttribute('height', h);
+      items.forEach(function (it, i) {
+        var base = y0 + sPad + capH + i * sRow;
+        it.hit.setAttribute('x', x0); it.hit.setAttribute('width', w); it.hit.setAttribute('y', base - capH - (sRow - capH) / 2); // the whole row taps
+        it.t1.setAttribute('x', x0 + sPad); it.t1.setAttribute('y', base); it.t2.setAttribute('x', x0 + w - sPad); it.t2.setAttribute('y', base);
+      });
+      var bx = { x: x0, y: y0, w: w, h: h }; signBoxes.push(bx); return bx;
+    }
+    function settle(bx, axis) { // the board slid along its edge (x for a top/bottom sign, y for a side one) to the nearest clear spot — failing one, the least crowded
+      var step = (axis === 'x' ? bx.w : bx.h) * .5, lim = axis === 'x' ? [view.x + inset, view.x + view.w - inset - bx.w] : [view.y + inset, view.y + view.h - inset - bx.h], best = null, bestC = Infinity;
+      for (var k = 0; k < 24; k++) {
+        var off = (k % 2 ? 1 : -1) * Math.ceil(k / 2) * step, v = Math.min(lim[1], Math.max(lim[0], (axis === 'x' ? bx.x : bx.y) + off));
+        var t = axis === 'x' ? { x: v, y: bx.y, w: bx.w, h: bx.h } : { x: bx.x, y: v, w: bx.w, h: bx.h }, c = crowding(t);
+        if (c === 0) return t;
+        if (c < bestC) { bestC = c; best = t; }
+      }
+      return best || bx;
+    }
+    nearbyCities(100).forEach(function (c) {
+      var p = px(c.lat, c.lon), row = { name: c.name, key: c.key, dist: Math.max(1, Math.round(dUnit === 'km' ? c.km : c.km * .621371)), url: c.url, x: p[0], y: p[1] };
+      if (p[0] > view.x + inset && p[0] < view.x + view.w - inset && p[1] > view.y + inset && p[1] < view.y + view.h - inset) { // inside the view: its dot, the sign beside it where the rooms leave room
+        el('circle', { cx: p[0], cy: p[1], r: 3.5 * u, 'class': 'lm-city-dot' }, signLayer);
+        var probe = sign([row], function (w, h) { // right of the dot, then left, below, above, the diagonals, then the same a step farther — the first spot in view and clear of the rooms' discs (Steve, 2026-10-26: "too much overlap")
+          var gap = 8 * u, spots = [];
+          [1, 2.2].forEach(function (m) { var g = gap * m; spots.push({ x: p[0] + g, y: p[1] - h / 2 }, { x: p[0] - g - w, y: p[1] - h / 2 }, { x: p[0] - w / 2, y: p[1] + g }, { x: p[0] - w / 2, y: p[1] - g - h }, { x: p[0] + g, y: p[1] + g }, { x: p[0] - g - w, y: p[1] + g }, { x: p[0] + g, y: p[1] - g - h }, { x: p[0] - g - w, y: p[1] - g - h }); });
+          for (var k = 0; k < spots.length; k++) { var bx = { x: spots[k].x, y: spots[k].y, w: w, h: h }; if (inView(bx) && clearOfRooms(bx)) return spots[k]; }
+          return null; // hemmed in: the sign goes to the edge instead, like a city beyond the view
+        });
+        if (probe) return;
+      }
+      var cx = view.x + view.w / 2, cy = view.y + view.h / 2, dx = (p[0] - cx) / view.w, dy = (p[1] - cy) / view.h; // which edge: the one its direction leaves by first
+      bySide[Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'bottom' : 'top')].push(row);
+    });
+    Object.keys(bySide).forEach(function (side) {
+      var rows = bySide[side]; if (!rows.length) return;
+      rows.sort(function (p, q) { return p.dist - q.dist; });
+      var mx = rows.reduce(function (t, r) { return t + r.x; }, 0) / rows.length, my = rows.reduce(function (t, r) { return t + r.y; }, 0) / rows.length; // where they lie, on average: the sign sits at that point of the edge
+      sign(rows, function (w, h) {
+        var y = Math.min(view.y + view.h - inset - h, Math.max(view.y + inset, my - h / 2)), x = Math.min(view.x + view.w - inset - w, Math.max(view.x + inset, mx - w / 2));
+        if (side === 'right' && ctlBottom && y < ctlBottom + inset) y = Math.min(view.y + view.h - inset - h, ctlBottom + inset); // not under the zoom buttons
+        if (side === 'top') return settle({ x: x, y: view.y + inset, w: w, h: h }, 'x');
+        if (side === 'bottom') return settle({ x: x, y: view.y + view.h - inset - h, w: w, h: h }, 'x');
+        if (side === 'left') return settle({ x: view.x + inset, y: y, w: w, h: h }, 'y');
+        return settle({ x: view.x + view.w - inset - w, y: y, w: w, h: h }, 'y');
+      });
+    });
+    var boxes = placeLabels(pins, fs, signBoxes); // the labels keep clear of the signs
     // ---- the places a visitor steers by, where a pin's label has not taken the spot ----
     var tfs = 10.5 * u;
     function labelFree(x, y, w, anchor) { var bx = { x: anchor === 'end' ? x - w : anchor === 'middle' ? x - w / 2 : x, y: y - tfs, w: w, h: tfs * 1.3 }; if (bx.x < view.x || bx.x + bx.w > view.x + view.w || bx.y < view.y || bx.y + bx.h > view.y + view.h) return false; return !boxes.some(function (o) { return bx.x < o.x + o.w && bx.x + bx.w > o.x && bx.y < o.y + o.h && bx.y + bx.h > o.y; }) && (boxes.push(bx), true); }
@@ -203,47 +273,6 @@
         el('circle', { cx: x, cy: y, r: 2.2 * u, 'class': 'lm-town-dot' }, svg);
         if (labelFree(x + dx, y + dy, L.name.length * tfs * .68, L.anchor)) { tx = el('text', { x: x + dx, y: y + dy, 'text-anchor': L.anchor, 'font-size': tfs, 'class': 'lm-town' }, svg); tx.textContent = L.name; }
       }
-    });
-    // ---- the other cities on here.events nearby, as highway mileage signs (Steve, 2026-10-26: "add labels for nearby locations … more like these, including distance"):
-    // one green sign per edge the cities lie beyond, a row each — name left, miles right — and a one-row sign on the spot of a city inside the view ----
-    var ctl = $('mapView').querySelector('.lm-zoom'), ctlBottom = 0; if (ctl) { var cr = ctl.getBoundingClientRect(), sr = svg.getBoundingClientRect(); ctlBottom = view.y + (cr.bottom - sr.top) * u; }
-    var sf = 15 * u, sRim = sf * .42, sPad = sRim + sf * .6, sRow = sf * 1.4, inset = 12 * u, bySide = { top: [], bottom: [], left: [], right: [] };
-    function sign(rows, x, y, anchor) { // rows: [{name, mi, url}] — the sign's top-left at x, y (anchor 'end': its top-right; 'middle': top-centre)
-      var g = el('g', { 'class': 'lm-sign' }, svg), board = el('rect', { y: y, rx: sf * .5, 'class': 'lm-sign-board' }, g); // one white line, the board's own edge (Steve, 2026-10-26: 'the white border should actually be the border'); the words well in from it
-      var items = rows.map(function (r, i) { // the words first, measured once drawn (a width guessed from the letter count ran the miles into a long name: "Spokane223")
-        var a = el('a', { href: r.url + '?view=map&from=' + encodeURIComponent(CITY.key), 'class': 'lm-city' }, g), ttl = el('title', {}, a); ttl.textContent = r.name + "'s calendar on here.events — about " + r.mi + ' miles';
-        var hit = el('rect', { y: y + sPad + sRow * i, height: sRow, 'class': 'lm-sign-hit' }, a), yy = y + sPad + sRow * (i + .75);
-        var t1 = el('text', { y: yy, 'text-anchor': 'start', 'font-size': sf, 'class': 'lm-sign-name' }, a); t1.textContent = r.name;
-        var t2 = el('text', { y: yy, 'text-anchor': 'end', 'font-size': sf, 'class': 'lm-sign-mi' }, a); t2.textContent = r.mi;
-        return { hit: hit, t1: t1, t2: t2 };
-      });
-      var nameW = 0, miW = 0; items.forEach(function (it) { nameW = Math.max(nameW, it.t1.getComputedTextLength()); miW = Math.max(miW, it.t2.getComputedTextLength()); });
-      var w = sPad * 2 + nameW + sf * 2.2 + miW, h = sPad * 2 + rows.length * sRow - sRow * .25, x0 = anchor === 'end' ? x - w : anchor === 'middle' ? x - w / 2 : x;
-      x0 = Math.min(view.x + view.w - inset - w, Math.max(view.x + inset, x0)); // the board stays inside the view, whatever it measured
-      board.setAttribute('x', x0); board.setAttribute('width', w); board.setAttribute('height', h);
-      items.forEach(function (it) { it.hit.setAttribute('x', x0); it.hit.setAttribute('width', w); it.t1.setAttribute('x', x0 + sPad); it.t2.setAttribute('x', x0 + w - sPad); }); // the whole row taps
-      return { w: w, h: h };
-    }
-    nearbyCities(100).forEach(function (c) {
-      var p = px(c.lat, c.lon), row = { name: c.name, mi: Math.max(1, Math.round(c.km * .621371)), url: c.url, x: p[0], y: p[1] };
-      if (p[0] > view.x + inset && p[0] < view.x + view.w - inset && p[1] > view.y + inset && p[1] < view.y + view.h - inset) { // inside the view: its dot, the sign beside it
-        el('circle', { cx: p[0], cy: p[1], r: 3.5 * u, 'class': 'lm-city-dot' }, svg);
-        sign([row], p[0] + 8 * u, p[1] - sRow * .75, 'start');
-        return;
-      }
-      var cx = view.x + view.w / 2, cy = view.y + view.h / 2, dx = (p[0] - cx) / view.w, dy = (p[1] - cy) / view.h; // which edge: the one its direction leaves by first
-      bySide[Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'bottom' : 'top')].push(row);
-    });
-    Object.keys(bySide).forEach(function (side) {
-      var rows = bySide[side]; if (!rows.length) return;
-      rows.sort(function (p, q) { return p.mi - q.mi; });
-      var mx = rows.reduce(function (t, r) { return t + r.x; }, 0) / rows.length, my = rows.reduce(function (t, r) { return t + r.y; }, 0) / rows.length; // where they lie, on average: the sign sits at that point of the edge
-      var h = sPad * 2 + rows.length * sRow - sRow * .25, y = Math.min(view.y + view.h - inset - h, Math.max(view.y + inset, my - h / 2));
-      if (side === 'right' && ctlBottom && y < ctlBottom + inset) y = Math.min(view.y + view.h - inset - h, ctlBottom + inset); // not under the zoom buttons // sign() keeps the board inside the view sideways once it has measured the words
-      if (side === 'top') sign(rows, mx, view.y + inset, 'middle');
-      else if (side === 'bottom') sign(rows, mx, view.y + view.h - inset - h, 'middle');
-      else if (side === 'left') sign(rows, view.x + inset, y, 'start');
-      else sign(rows, view.x + view.w - inset, y, 'end');
     });
     pins.forEach(function (p) {
       if (Math.abs(p.x - p.ox) + Math.abs(p.y - p.oy) > 1.5 * u) el('path', { d: 'M' + p.ox + ' ' + p.oy + 'L' + p.x + ' ' + p.y, 'class': 'lm-leader' }, svg);
@@ -262,6 +291,7 @@
       el('circle', { cx: me.x, cy: me.y, r: 5 * u, 'class': 'lm-me-dot' }, mg);
       var mt = el('title', {}, mg); mt.textContent = 'You are here';
     }
+    svg.appendChild(signLayer); // the signs over everything
     var cap = $('lmCaption'), own = keys.filter(function (v) { return VENUES[v] && t.n[v]; }).length, ownAll = keys.length - CITY_ROOMS.length;
     if (cap) cap.firstElementChild.textContent = total + ' upcoming at ' + own + ' of ' + ownAll + ' places' + (CITY_ROOMS.length ? ' · ' + cityTotal + ' more across ' + (CITYMAP.city || 'the city') : '');
   }
@@ -349,6 +379,9 @@
     });
     return best;
   }
+  var PREVIEW = (new URLSearchParams(location.search).get('preview') || ''); // a local demo: ?preview=seattle:8120,everett:8088 sends a city's sign or jump to that preview port instead of its live host, and carries the list along (nothing of it in production links)
+  var PREVIEW_PORT = {}; PREVIEW.split(',').forEach(function (kv) { var m = /^([\w-]+):(\d+)$/.exec(kv); if (m) PREVIEW_PORT[m[1]] = m[2]; });
+  function cityLink(c) { return (PREVIEW_PORT[c.key] ? 'http://localhost:' + PREVIEW_PORT[c.key] + '/repo/site/' : c.url) + '?view=map&from=' + encodeURIComponent(CITY.key) + (PREVIEW ? '&preview=' + encodeURIComponent(PREVIEW) : ''); }
   var FROM = new URLSearchParams(location.search).get('from') || ''; // the city whose sign or location jump brought the visitor here: its sign is drawn however far it lies, so there is a way back (Steve, 2026-10-26)
   function nearbyCities(within) { // the other city-wide sites within `within` km of this ground's centre, nearest first
     var b = (CITY.map && CITY.map.home) || (CITY.map && CITY.map.bbox); if (!data || !b) return []; // [S, W, N, E] — miles are from the home box (downtown) when the city has one
@@ -369,7 +402,7 @@
     if (p[0] < -slack || p[0] > FRAME.w + slack || p[1] < -slack || p[1] > FRAME.h + slack) { // off this ground: offer the nearest city instead (Steve, 2026-10-26: "take me to the everett page")
       me = null; schedule();
       var near = nearestCity(c.latitude, c.longitude, 80);
-      if (near) { note('You are near ' + near.city.name + ' — opening its calendar…', null, true); location.assign(near.city.url + '?view=map&from=' + encodeURIComponent(CITY.key) + '&me=' + [c.latitude.toFixed(4), c.longitude.toFixed(4), Math.round(c.accuracy || 0)].join(',')); } // the fix rides along, so the next site marks the spot too ("the next site should still highlight your location") // "it should jump" (Steve, 2026-10-26)
+      if (near) { note('You are near ' + near.city.name + ' — opening its calendar…', null, true); location.assign(cityLink(near.city) + '&me=' + [c.latitude.toFixed(4), c.longitude.toFixed(4), Math.round(c.accuracy || 0)].join(',')); } // the fix rides along, so the next site marks the spot too ("the next site should still highlight your location") // "it should jump" (Steve, 2026-10-26)
       else note('You are outside this map');
       return;
     }
