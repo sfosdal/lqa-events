@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates, parseShowboxEvents } from './sources.mjs';
+import { parseScCards, parseScListing, scListingDates, parseScDetailDate, parseScVenueCats, parseClockTime, tmType, diceType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates, parseShowboxEvents, parseMarinersIndex, parseMarinersEvent } from './sources.mjs';
 
 // --- Seattle Center calendar HTML (event cards; dates live on detail pages) ---
 
@@ -526,4 +526,38 @@ test('Showbox: the two Seattle rooms by name, headliner with support, date and s
     { venue: 'Showbox SoDo', title: 'Fruit Bats', date: '2026-10-09', time: '20:00:00', url: 'https://www.axs.com/events/1382157/x-tickets?skin=showboxpresents' },
     { venue: 'Showbox SoDo', title: 'Moved Band with Support', date: '2026-11-01', time: '19:30:00', url: 'https://www.axs.com/events/1/x-tickets?skin=showboxpresents', status: 'postponed' },
   ]);
+});
+
+// ---- the Mariners' events page (T-Mobile Park's own calendar, 2026-10-26) ----
+const nextPage = (obj) => `<html><body><script id="__NEXT_DATA__" type="application/json">${JSON.stringify(obj)}</script></body></html>`;
+test('parseMarinersIndex lists each featured event page under /mariners/tickets/events/ once, with its card text', () => {
+  const page = nextPage({ props: { blocks: [
+    { type: 'heading', headingText: 'Mariners Baseball' },
+    { type: 'featured-content', slug: 'mariners-baseball', media: { url: '/mariners/tickets/single-game-tickets', altText: 'Image of fans cheering at T-Mobile Park.' } },
+    { type: 'heading', headingText: 'Concerts & Events' },
+    { type: 'featured-content', slug: 'banana', media: { url: '/mariners/tickets/events/banana-ball', altText: 'Banana Ball is coming the T-Mobile Park in Seattle, WA on April 23 & 24, 2027.' } },
+    { type: 'button', url: '/mariners/tickets/events/banana-ball' },
+    { type: 'featured-content', slug: 'again', media: { url: '/mariners/tickets/events/banana-ball', altText: 'twice' } },
+  ] } });
+  assert.deepEqual(parseMarinersIndex(page), [{ url: 'https://www.mlb.com/mariners/tickets/events/banana-ball', alt: 'Banana Ball is coming the T-Mobile Park in Seattle, WA on April 23 & 24, 2027.' }]);
+  assert.deepEqual(parseMarinersIndex('<html>no data</html>'), []);
+});
+test('parseMarinersEvent: the heading names the event and its days, the year comes from the page text, the lottery link is the ticket link, one row a day', () => {
+  const page = nextPage({ props: { blocks: [
+    { type: 'heading', headingText: 'Banana Ball at T-Mobile Park' },
+    { type: 'heading', headingText: 'Banana Ball at T-Mobile Park on April 23 & 24' },
+    { type: 'wysiwyg', text: '<p>The <strong>Party Animals</strong> will face off against the <strong>Loco Beach Coconuts</strong> at T-Mobile Park on April 23 &amp; 24, 2027.</p>' },
+    { type: 'button', url: 'https://am.ticketmaster.com/mariners/' }, // the club's account manager, linked on every page — never the ticket link
+    { type: 'button', url: 'https://www.lottery.fansfirsttickets.com/' },
+    { type: 'heading', headingText: 'Looking to lock in your seats now?' },
+  ] } });
+  const it = { url: 'https://www.mlb.com/mariners/tickets/events/banana-ball', alt: '' };
+  assert.deepEqual(parseMarinersEvent(page, it), [
+    { venue: 'T-Mobile Park', title: 'Banana Ball', date: '2027-04-23', time: '', url: 'https://www.lottery.fansfirsttickets.com/', type: 'sports' },
+    { venue: 'T-Mobile Park', title: 'Banana Ball', date: '2027-04-24', time: '', url: 'https://www.lottery.fansfirsttickets.com/', type: 'sports' },
+  ]);
+  // no year anywhere: the next such date forward; no ticket link: the page itself
+  const bare = nextPage({ props: { blocks: [{ type: 'heading', headingText: 'Monster Jam at T-Mobile Park on June 5' }] } });
+  assert.deepEqual(parseMarinersEvent(bare, it, new Date('2026-10-26T12:00:00Z')), [{ venue: 'T-Mobile Park', title: 'Monster Jam', date: '2027-06-05', time: '', url: it.url, type: 'sports' }]);
+  assert.deepEqual(parseMarinersEvent(nextPage({ props: { blocks: [{ type: 'heading', headingText: 'Host an Event' }] } }), it), []);
 });

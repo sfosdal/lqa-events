@@ -687,3 +687,59 @@ export function parseShowboxEvents(html) {
   }
   return out;
 }
+
+/**
+ * The Mariners' events page (mlb.com/mariners/tickets/events) is a Next.js page: its
+ * __NEXT_DATA__ blob holds the page as nested content blocks, and each non-baseball event the
+ * club sells itself is a `featured-content` block linking under /mariners/tickets/events/ (Banana
+ * Ball, 2026-10-26: "Banana Ball is coming the T-Mobile Park in Seattle, WA on April 23 & 24,
+ * 2027."). Returns [{ url, alt }], one per event page, in page order, each page once.
+ */
+const MLB = 'https://www.mlb.com';
+function nextData(html) {
+  const m = /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/.exec(String(html || ''));
+  if (!m) return null;
+  try { return JSON.parse(m[1]); } catch { return null; }
+}
+export function parseMarinersIndex(html) {
+  const data = nextData(html);
+  const out = []; const seen = new Set();
+  const walk = (o) => {
+    if (Array.isArray(o)) { o.forEach(walk); return; }
+    if (!o || typeof o !== 'object') return;
+    if (o.type === 'featured-content') {
+      const path = o.media?.url || o.url || '';
+      if (/^\/mariners\/tickets\/events\/[^/?#]+/.test(path) && !seen.has(path)) { seen.add(path); out.push({ url: MLB + path, alt: String(o.media?.altText || '') }); }
+    }
+    Object.values(o).forEach(walk);
+  };
+  walk(data);
+  return out;
+}
+/**
+ * One event's page → rows. The title and dates come from a heading "<Event> at T-Mobile Park on
+ * April 23 & 24" (the year from the first "April 23 & 24, 2027" in the page's text, else the
+ * index card's alt text, else the next such date forward); "April 23 & 24", "April 23-24" and
+ * "April 23, 24 & 25" are one row a day. The ticket link is the page's lottery or ticket link
+ * (fansfirsttickets.com, tickets.com, ticketmaster) when it has one, else the page itself.
+ * No clock: the page prints none.
+ */
+export function parseMarinersEvent(html, { url: pageUrl = '', alt = '' } = {}, today = new Date()) {
+  const data = nextData(html);
+  const text = data ? JSON.stringify(data) : String(html || '');
+  const heads = []; const walk = (o) => { if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') { if (o.type === 'heading' && o.headingText) heads.push(String(o.headingText)); Object.values(o).forEach(walk); } };
+  walk(data);
+  const MONTH = '(January|February|March|April|May|June|July|August|September|October|November|December)';
+  const head = heads.map((h) => new RegExp(`^(.+?) at T-Mobile Park on ${MONTH}\\s+([\\d,&\\s-]+?)\\s*$`, 'i').exec(h.replace(/\s+/g, ' ').trim())).find(Boolean);
+  if (!head) return [];
+  const [, title, month, daysText] = head;
+  const days = (daysText.match(/\d{1,2}/g) || []).map(Number);
+  const ym = new RegExp(`${month}\\s+\\d{1,2}[^.]{0,20}?,?\\s*(20\\d\\d)`, 'i').exec(text) || new RegExp(`${month}\\s+\\d{1,2}[^.]{0,20}?,?\\s*(20\\d\\d)`, 'i').exec(alt);
+  const mo = MONTHS[month.toLowerCase()];
+  let year = ym ? Number(ym[1]) : today.getUTCFullYear();
+  if (!ym && Date.UTC(year, mo - 1, days[0] || 1) < Date.now() - 31 * 86400e3) year += 1;
+  // the lottery link first (fansfirsttickets.com), then a ticket page; never the club's account manager (am.ticketmaster.com)
+  const link = /https?:\/\/[^"'\\\s]*fansfirsttickets\.com[^"'\\\s]*/.exec(text) || /https?:\/\/(?!am\.)[^"'\\\s]*(?:tickets\.com|ticketmaster\.com)[^"'\\\s]*/.exec(text);
+  const ticket = link ? link[0].replace(/\\u0026/g, '&') : pageUrl;
+  return days.map((d) => ({ venue: 'T-Mobile Park', title: title.trim(), date: `${year}-${pad(mo)}-${pad(d)}`, time: '', url: ticket, type: 'sports' }));
+}
