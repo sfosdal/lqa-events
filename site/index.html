@@ -311,7 +311,12 @@
         </button>
       </div>
     </div>
-    <div id="mbGrid" class="mb-months"></div> <!-- the Map view (Steve, 2026-10-24): the ground with a pin on every room, sized by
+    <div id="mbGrid" class="mb-months"></div> <!-- one .mb-month block per month, appended by app.js appendMonth -->
+    <div id="mbSentinel" class="mb-sentinel" aria-hidden="true"></div>
+  </section>
+</section>
+
+<!-- the Map view (Steve, 2026-10-24): the ground with a pin on every room, sized by
      its upcoming events under the filters in force; a tapped pin opens its card.
      The rest of Seattle's rooms too, from city-map.json (scripts/city-map.mjs reads
      seattle.here.events' feed at build time) — Steve, 2026-10-25.
