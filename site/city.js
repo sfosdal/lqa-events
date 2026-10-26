@@ -432,10 +432,10 @@
   // The words the page uses for the place
   var WORDS = {
     teamCity: 'Seattle', // the board drops it from the clubs' names ("Seattle Kraken" → Kraken)
-    presetDefault: 'The big rooms — ' + DEFAULT_ON.join(', ') + ' — every team and type except Movies',
+    presetDefault: 'The big venues — ' + DEFAULT_ON.join(', ') + ' — every team and type except Movies',
     presetNeighborhood: 'Just Lower Queen Anne — no stadiums or Convention Center',
     presetBig: 'Only the places that hold 2,000 or more — the stadiums, the arena, McCaw Hall',
-    phrases: { all: 'Showing everything.', none: 'Showing nothing yet — open Filter and pick some venues.', neighborhood: 'Showing the neighborhood only, no stadiums.', big: 'Showing the big rooms only — the arena, the stadiums, McCaw Hall.' },
+    phrases: { all: 'Showing everything.', none: 'Showing nothing yet — open Filter and pick some venues.', neighborhood: 'Showing the neighborhood only, no stadiums.', big: 'Showing the big venues only — the arena, the stadiums, McCaw Hall.' },
   };
 
   global.LQACity = {
