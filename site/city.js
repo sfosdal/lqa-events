@@ -456,9 +456,15 @@
     // the festivals by hand). Steve, 2026-10-24: Kona first ("local map view for event locations"), then lqa and Seattle.
     map: {
       kind: 'urban',
-      bbox: [47.582, -122.372, 47.658, -122.288], // south, west, north, east — Seattle Center to the stadiums, Husky Stadium in the top right
-      home: [47.584, -122.368, 47.632, -122.3], // the view at first: the Center, downtown and SoDo; the fit button shows the whole frame
-      roads: ['motorway', 'trunk', 'primary', 'secondary'],
+      // the whole of Seattle's ground — the city's own bbox (seattle-events), since the Map shows every room in the city, the
+      // neighbourhood's own first (Steve, 2026-10-25: "maps for neighborhoods should include events from the entire city");
+      // the build widens it to 1.6:1 so a desktop frame zoomed right out still shows most of the Sound
+      bbox: [47.2, -122.56, 47.76, -122.05], // south, west, north, east — Tacoma and White River at the foot, Woodinville at the top right
+      home: [47.584, -122.368, 47.632, -122.3], // the build's home box: the Center, downtown and SoDo (used when focus is unset); the fit button shows the whole frame
+      focus: 'hood', // a neighbourhood site: the Map opens fitted to its own rooms (those without area: 'town') — Steve, 2026-10-24
+      city: { key: 'seattle', name: 'Seattle', url: 'https://seattle.here.events/' }, // the rest of the city's rooms and events, read from this site's feed at build time (scripts/city-map.mjs → city-map.json)
+      roads: ['motorway', 'trunk', 'primary'],
+      tolerance: 0.8,
       labels: [
         { name: 'Lower Queen Anne', lat: 47.6262, lon: -122.3568, anchor: 'end' },
         { name: 'Queen Anne', lat: 47.6352, lon: -122.3565, anchor: 'end' },
@@ -472,9 +478,30 @@
         { name: 'Eastlake', lat: 47.641, lon: -122.3258, anchor: 'start' },
         { name: 'Montlake', lat: 47.6415, lon: -122.3045, anchor: 'start' },
         { name: 'University District', lat: 47.6565, lon: -122.3135, anchor: 'end' },
+        { name: 'Ballard', lat: 47.6685, lon: -122.3846, anchor: 'end' },
+        { name: 'Fremont', lat: 47.651, lon: -122.35, anchor: 'start' },
+        { name: 'Greenwood', lat: 47.6905, lon: -122.355, anchor: 'end' },
+        { name: 'Beacon Hill', lat: 47.566, lon: -122.311, anchor: 'start' },
+        { name: 'Columbia City', lat: 47.559, lon: -122.287, anchor: 'start' },
+        { name: 'West Seattle', lat: 47.568, lon: -122.386, anchor: 'end' },
+        { name: 'Shoreline', lat: 47.756, lon: -122.341, anchor: 'end' },
+        { name: 'Kirkland', lat: 47.677, lon: -122.206, anchor: 'start' },
+        { name: 'Bellevue', lat: 47.61, lon: -122.201, anchor: 'start' },
+        { name: 'Redmond', lat: 47.674, lon: -122.121, anchor: 'start' },
+        { name: 'Woodinville', lat: 47.754, lon: -122.163, anchor: 'start' },
+        { name: 'Renton', lat: 47.483, lon: -122.217, anchor: 'start' },
+        { name: 'Tukwila', lat: 47.474, lon: -122.26, anchor: 'end' },
+        { name: 'Kent', lat: 47.381, lon: -122.235, anchor: 'start' },
+        { name: 'Federal Way', lat: 47.322, lon: -122.313, anchor: 'end' },
+        { name: 'Auburn', lat: 47.307, lon: -122.229, anchor: 'start' },
+        { name: 'Tacoma', lat: 47.253, lon: -122.444, anchor: 'end' },
         { name: 'Elliott Bay', lat: 47.602, lon: -122.358, kind: 'water', anchor: 'middle' },
         { name: 'Lake Union', lat: 47.6385, lon: -122.3345, kind: 'water', anchor: 'middle' },
         { name: 'Portage Bay', lat: 47.6472, lon: -122.3125, kind: 'water', anchor: 'middle' },
+        { name: 'Puget Sound', lat: 47.52, lon: -122.47, kind: 'water', anchor: 'middle' },
+        { name: 'Lake Washington', lat: 47.62, lon: -122.25, kind: 'water', anchor: 'middle' },
+        { name: 'Lake Sammamish', lat: 47.6, lon: -122.09, kind: 'water', anchor: 'middle' },
+        { name: 'Commencement Bay', lat: 47.285, lon: -122.43, kind: 'water', anchor: 'middle' },
       ],
     },
     venues: VENUES,

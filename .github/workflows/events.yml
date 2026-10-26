@@ -27,6 +27,8 @@ jobs:
         env:
           TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
         run: node scripts/fetch-events.mjs
+      - name: The rest of the city for the Map view (seattle.here.events' feed → site/city-map.json; never fails the build)
+        run: node scripts/city-map.mjs
       - name: Sitemap, robots.txt and event structured data
         run: node scripts/seo.mjs
       - name: Keep the archive branch (every past event ever published)

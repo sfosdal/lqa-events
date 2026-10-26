@@ -13,3 +13,5 @@ site/marks/opp/
 events-archive.json
 # the Natural Earth / OpenStreetMap read-through scripts/build-local-map.mjs caches (the output, site/local-map.json, is committed)
 .cache/
+# the rest of the city for a neighbourhood site's Map view, written by scripts/city-map.mjs each build
+site/city-map.json

@@ -1991,6 +1991,15 @@ html.map-open .agenda, html.map-open .cal-toggle, html.map-open #calToday, html.
 .lm-zoom button { width: 2rem; height: 2rem; padding: 0; display: grid; place-items: center; font: 600 1rem/1 var(--body); color: var(--ink); background: var(--sky); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
 .lm-zoom button:hover { border-color: var(--ink-soft); }
 .lm-zoom button svg { width: 1rem; height: 1rem; }
+.lm-zoom button[data-z="me"] { margin-top: .3rem; } /* the crosshair: the visitor's own spot, a little apart from the zoom */
+.lm-zoom button.is-busy { opacity: .5; cursor: progress; }
+.lm-zoom button[aria-pressed="true"] { color: #2f7fd6; border-color: #2f7fd6; }
+.lm-me-dot { fill: #2f7fd6; stroke: var(--mist); stroke-width: calc(var(--u, 1) * 2); }
+.lm-me-acc { fill: #2f7fd6; fill-opacity: .14; stroke: #2f7fd6; stroke-opacity: .45; stroke-width: calc(var(--u, 1) * .8); animation: lm-pulse 2.4s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes lm-pulse { 0% { fill-opacity: .22; } 100% { fill-opacity: .08; } }
+.lm-pin.is-city circle { opacity: .78; } /* the rest of the city on a neighbourhood map: a shade quieter than the neighbourhood's own rooms */
+.lm-pin.is-city .lm-name { font-weight: 500; fill: var(--ink-soft); }
+.lm-caption .lm-note { color: var(--ink); text-transform: none; letter-spacing: 0; font-family: var(--body); font-size: .8rem; }
 .lm-caption { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin: .55rem auto 0; width: 100%; min-height: 1.6em; font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
 /* the pin's card: the month view's day card (.mb-pop), with the room's own site at its foot */
 .lm-pop .lm-site { display: inline-flex; align-items: center; gap: .35rem; margin-top: .35rem; font: 500 .78rem/1 var(--body); color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: .1rem; }
