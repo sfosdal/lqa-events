@@ -94,7 +94,7 @@ if (M.kind === 'island') {
   const osm = await cached('osm-' + createHash('sha1').update(q).digest('hex').slice(0, 10) + '.json', async () => {
     console.log('reading OpenStreetMap through Overpass…');
     // the public servers turn requests away when every worker is busy (502/504 "at capacity", 429): try each mirror in turn, then wait and go round again
-    const MIRRORS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://overpass.private.coffee/api/interpreter'];
+    const MIRRORS = ['https://overpass-api.de/api/interpreter', 'https://overpass.openstreetmap.fr/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://overpass.private.coffee/api/interpreter']; // the French community's planet mirror answered when the main one and the two others sat at capacity for an hour (2026-10-26)
     let last = '';
     for (let round = 0; round < 4; round++) {
       for (const url of MIRRORS) {
@@ -108,7 +108,7 @@ if (M.kind === 'island') {
     throw new Error(`Overpass failed after every mirror and retry: ${last}`);
   });
   const tol = M.tolerance ?? 0.6, minArea = M.minArea ?? 6;
-  const wayOf = w => ({ nodes: w.nodes || w.geometry.map((g, i) => `${w.ref || w.id}:${i}`), pts: w.geometry.map(g => px([g.lon, g.lat])) });
+  const wayOf = w => ({ nodes: w.nodes || w.geometry.filter(Boolean).map((g, i) => `${w.ref || w.id}:${i}`), pts: w.geometry.filter(Boolean).map(g => px([g.lon, g.lat])) });
   const els = osm.elements;
   const coast = stitch(els.filter(e => e.type === 'way' && e.tags?.natural === 'coastline').map(wayOf)).map(c => ({ ...c, pts: simplify(c.pts, tol) }));
   const sea = seaRings(coast, rect);
@@ -116,7 +116,7 @@ if (M.kind === 'island') {
   const waters = [];
   for (const e of els.filter(e => e.tags?.natural === 'water')) {
     if (e.type === 'way') { if (e.nodes[0] === e.nodes[e.nodes.length - 1]) waters.push(wayOf(e).pts); }
-    else if (e.type === 'relation') memberRings(e.members.filter(m => m.type === 'way' && m.geometry).map(m => ({ role: m.role, nodes: m.geometry.map(g => g.lat + ',' + g.lon), pts: m.geometry.map(g => px([g.lon, g.lat])) }))).forEach(r => waters.push(r));
+    else if (e.type === 'relation') memberRings(e.members.filter(m => m.type === 'way' && m.geometry).map(m => ({ role: m.role, nodes: m.geometry.filter(Boolean).map(g => g.lat + ',' + g.lon), pts: m.geometry.filter(Boolean).map(g => px([g.lon, g.lat])) }))).forEach(r => waters.push(r));
   }
   const waterRings = waters.map(r => simplify(r, tol)).filter(r => r.length > 3 && Math.abs(signedArea(r)) >= minArea && r.some(p => p[0] > wide.x0 && p[0] < wide.x1 && p[1] > wide.y0 && p[1] < wide.y1));
   const roads = {};
