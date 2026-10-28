@@ -34,6 +34,7 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { readTicketWeb, ticketWebId } from './ticketweb.mjs';
 import { CITY } from './badges.mjs';
+import { tmFetch } from './tm-fetch.mjs'; // paced, and a 429, 5xx or dropped connection retried (Steve, 2026-10-28: "I want ticketmaster calls to not fail")
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'scripts', 'data', 'soldout.json'); // committed — the build (fetch-events.mjs) stamps it onto the feed
@@ -75,7 +76,7 @@ async function listEvents(venues = VENUES, idOf = (url) => { const m = (url || '
   const now = Date.now();
   for (const v of venues) {
     for (let page = 0; page < 5; page++) {
-      const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?apikey=${KEY}&venueId=${v.id}&sort=date,asc&size=200&page=${page}`);
+      const res = await tmFetch(`https://app.ticketmaster.com/discovery/v2/events.json?apikey=${KEY}&venueId=${v.id}&sort=date,asc&size=200&page=${page}`);
       if (!res.ok) { console.warn(v.label, 'discovery', res.status); break; }
       const data = await res.json();
       const evs = (data._embedded && data._embedded.events) || [];
@@ -107,7 +108,7 @@ async function listAwayGames() {
     if (!games.length) continue;
     let evs = [];
     try {
-      const res = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?apikey=${KEY}&keyword=${encodeURIComponent(name)}&startDateTime=${ymd(today)}T00:00:00Z&endDateTime=${ymd(until)}T23:59:59Z&sort=date,asc&size=100`); // no country: the Kraken's Canadian hosts list on Ticketmaster Canada
+      const res = await tmFetch(`https://app.ticketmaster.com/discovery/v2/events.json?apikey=${KEY}&keyword=${encodeURIComponent(name)}&startDateTime=${ymd(today)}T00:00:00Z&endDateTime=${ymd(until)}T23:59:59Z&sort=date,asc&size=100`); // no country: the Kraken's Canadian hosts list on Ticketmaster Canada
       if (!res.ok) { console.warn(slug, 'discovery', res.status); continue; }
       evs = ((await res.json())._embedded || {}).events || [];
     } catch (e) { console.warn(slug, 'discovery', String(e).slice(0, 60)); continue; }
