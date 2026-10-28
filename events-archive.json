@@ -7582,6 +7582,89 @@
    "date": "2026-10-26",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1426445/amble-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Modest Mouse Live on KEXP (Open To The Public)",
+   "date": "2026-10-27",
+   "time": "12:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/modest-mouse-live-on-kexp-kexp_519064/",
+   "end": "12:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-10-27",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "18:39:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Screen Printing Open Session",
+   "date": "2026-10-27",
+   "time": "16:00:00",
+   "url": "https://link.dice.fm/x83ce7784c5a",
+   "type": "community",
+   "end": "20:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wicker",
+   "date": "2026-10-27",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wicker",
+   "movie": true,
+   "end": "17:45:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Seattle 48 Hour Horror Film Project",
+   "date": "2026-10-27",
+   "time": "18:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/seattle-48-hour-horror-film-project-2026",
+   "movie": true,
+   "end": "20:25:00"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "Pouya w/ Ramirez",
+   "date": "2026-10-27",
+   "time": "19:00:00",
+   "url": "https://calendar.thecrocodile.com/shows/pouya-the-forever-glades-tour-27-oct#tickets",
+   "type": "concert"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Basement with High Vis, Big Boy and Lowertown",
+   "date": "2026-10-27",
+   "time": "19:00:00",
+   "url": "https://www.axs.com/events/1435443/basement-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Kacey Musgraves - Middle of Nowhere Tour ",
+   "date": "2026-10-27",
+   "time": "19:30:00",
+   "url": "https://www.ticketmaster.com/kacey-musgraves-middle-of-nowhere-tour-seattle-washington-10-27-2026/event/0F00649CAFFEADD8",
+   "type": "concert",
+   "capacity": 15838,
+   "tickets": {
+    "box": 3630,
+    "resale": 0,
+    "checked": "2026-10-22T00:36:33.327Z",
+    "from": 40.5
+   }
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Kacey Musgraves: Middle of Nowhere Tour",
+   "date": "2026-10-27",
+   "time": "19:30:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/kacey-musgraves-middle-of-nowhere-tour",
+   "type": "concert"
   }
  ]
 }
