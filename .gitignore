@@ -15,3 +15,4 @@ events-archive.json
 .cache/
 # the rest of the city for a neighbourhood site's Map view, written by scripts/city-map.mjs each build
 site/city-map.json
+failures.json

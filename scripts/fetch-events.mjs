@@ -8,6 +8,7 @@
  * expose feeds/APIs. Ticketmaster needs a free Discovery API key in env
  * TICKETMASTER_API_KEY (repo secret of the same name); with no key it's skipped.
  */
+import './failures.mjs'; // first: every outside call retried, the ones still failing written to failures.json (Steve, 2026-10-29)
 import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
 import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates, parseShowboxEvents, parseMarinersIndex, parseMarinersEvent } from './sources.mjs';
