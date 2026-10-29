@@ -43,11 +43,11 @@
 </svg>
 
 <!-- The FAQ (Steve, 2026-10-28, queued "creating a FAQ page"): one shared page for
-     every city; the city's name comes from its own city.js, so nothing here names a
-     place. Styled by .ad-page in styles.css, like Advertise. -->
+     every city, word for word, "here.events" over the heading on every site (Steve,
+     2026-10-29: "FAQ doesn't need the city/neighboorhood"). Styled by .ad-page in styles.css, like Advertise. -->
 <header class="masthead">
   <div class="masthead-text">
-    <p class="eyebrow" id="faqCity">here.events</p>
+    <p class="eyebrow">here.events</p>
     <h1>Questions</h1>
   </div>
 </header>
@@ -58,7 +58,7 @@
   <p>A free calendar of what’s on nearby: concerts, home games, theatre, festivals, films and local nights, gathered in one list from the venues and teams themselves. It is one of the here.events sites; <a href="https://here.events/">here.events</a> has the map of every city.</p>
 
   <h2>Where do the listings come from?</h2>
-  <p>From each venue’s own calendar and its ticket seller (Ticketmaster and others), plus the leagues’ schedules for the home teams. <em>Sources</em>, at the foot of the calendar, names them. Every listing links to the venue’s or the seller’s page.</p>
+  <p>From each venue’s own calendar and its ticket seller (Ticketmaster and others), plus the leagues’ schedules for the home teams. <a href="sources.html">Sources</a>, at the foot of the calendar, names them. Every listing links to the venue’s or the seller’s page.</p>
 
   <h2>How fresh is it?</h2>
   <p>The whole list is rebuilt once a day, around noon local time. Game times a league may still move are flagged, and plans do change — check the venue’s page before you go.</p>
@@ -86,9 +86,5 @@
 
   <a class="ad-back" href="./">← Back to the calendar</a>
 </main>
-<script>
-  // the city's name over the heading, as on its calendar page
-  try { var n = window.LQACity && LQACity.name; if (n) { document.getElementById('faqCity').textContent = n; document.title = 'Questions — ' + n + ' Events'; } } catch (e) {}
-</script>
 </body>
 </html>
