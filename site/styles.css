@@ -975,7 +975,13 @@ footer::after {
 /* two things across, one at each end — the credit and the links (the Updated
    stamp that sat dead centre between them was removed 2026-10-05, Steve) */
 @media (min-width: 641px) {
-  .foot-inner { display: grid; grid-template-columns: auto auto; justify-content: space-between; }
+  .foot-inner { display: grid; grid-template-columns: auto 1fr; }
+  /* the links fill the rest of the row, packed right; More Cities, first among
+     them, takes equal auto margins so it sits centred in the open space between
+     the credit and About (Steve, 2026-10-29: "more cities in the footer should be
+     centerd in this open space") */
+  footer .foot-links { justify-content: flex-end; }
+  footer #moreCities { margin-inline: auto; }
 }
 footer p { color: var(--ink-soft); font-size: .72rem; margin: 0; }
 .gw { display: flex; align-items: center; gap: .7rem; }
