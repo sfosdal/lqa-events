@@ -14,7 +14,7 @@ import { buildIcs } from './ics.mjs';
 import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates, parseShowboxEvents, parseMarinersIndex, parseMarinersEvent } from './sources.mjs';
 import { mergeWithArchive, unionArchives, eventKey, dropClashes } from './merge.mjs';
 import { fixLinks } from './links.mjs';
-import { feedSources, emptyListGate } from './feeds.mjs';
+import { feedSources, emptyListGate, feedFailedVenues } from './feeds.mjs';
 import { calmTitle, isNotice } from './titles.mjs';
 import { applySchedules } from './schedules.mjs';
 import { applySetTimes } from './settimes.mjs';
@@ -575,7 +575,9 @@ if (branchArchive === null) console.error('Archive branch unreadable — buildin
 const archived = unionArchives(liveArchive || [], branchArchive || []);
 console.log(`Archive: ${(liveArchive || []).length} events in the live feed, ${(branchArchive || []).length} on the archive branch, ${archived.length} in the union`);
 
-const merged = mergeWithArchive(fresh.concat(keepFailedVenues(archived, fresh, today)), archived, today, cutoff).slice(-MAX_EVENTS);
+// venues whose read failed keep their upcoming rows: Ticketmaster's (tm-fetch.mjs), then a leading own calendar's (feeds.mjs)
+const keptFailed = (archived, fresh, today) => { const tm = keepFailedVenues(archived, fresh, today); return tm.concat(keepFailedVenues(archived, fresh.concat(tm), today, feedFailedVenues, console.error, 'Own calendar')); };
+const merged = mergeWithArchive(fresh.concat(keptFailed(archived, fresh, today)), archived, today, cutoff).slice(-MAX_EVENTS);
 
 // League schedules flag floating dates Ticketmaster doesn't know yet, and
 // the full seasons (home and away) feed the site's Teams view
