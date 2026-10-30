@@ -530,7 +530,7 @@ export async function chromeFetch(urls, label) {
     for (const u of want) { try { out.set(u, await plainFetch(u)); chromeCache.set(u, out.get(u)); } catch (err) { console.error(`${label}: ${u} ${err.message}`); } }
     return out;
   }
-  for (const [u, v] of Object.entries(JSON.parse(r.stdout))) { if (typeof v === 'string') { out.set(u, v); chromeCache.set(u, v); } else { console.error(`${label}: ${u} ${v.error}`); globalThis[Symbol.for('here.events/recordFailure')]?.(`${u.startsWith('{') ? JSON.parse(u).url : u} (Chrome-fingerprint fetch)`, v.error); } }
+  for (const [u, v] of Object.entries(JSON.parse(r.stdout))) { if (typeof v === 'string') { out.set(u, v); chromeCache.set(u, v); } else { console.error(`${label}: ${u.startsWith('{') ? JSON.parse(u).url : u} ${v.error}`); const at = new URL(u.startsWith('{') ? JSON.parse(u).url : u); globalThis[Symbol.for('here.events/recordFailure')]?.(`${at.origin}${at.pathname} (Chrome-fingerprint fetch)`, v.error); } } // the query can carry keys and dates — never written down (failures.mjs)
   return out;
 }
 async function fetchTicketera(url, ua, label, opts) {
