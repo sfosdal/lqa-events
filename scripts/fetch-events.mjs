@@ -14,7 +14,7 @@ import { buildIcs } from './ics.mjs';
 import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates, parseShowboxEvents, parseMarinersIndex, parseMarinersEvent } from './sources.mjs';
 import { mergeWithArchive, unionArchives, eventKey, dropClashes } from './merge.mjs';
 import { fixLinks } from './links.mjs';
-import { feedSources, emptyListGate, feedFailedVenues } from './feeds.mjs';
+import { feedSources, emptyListGate, feedFailedVenues, chromeFetch } from './feeds.mjs';
 import { calmTitle, isNotice } from './titles.mjs';
 import { applySchedules } from './schedules.mjs';
 import { applySetTimes } from './settimes.mjs';
@@ -429,8 +429,13 @@ async function marinersEvents() {
 
 // Showbox at the Market + Showbox SoDo: AEG's whole Northwest listing on
 // one server-rendered page, the two Seattle rooms kept — parseShowboxEvents.
+// The page comes through the Chrome fingerprint (feeds.mjs chromeFetch): AEG's carbonhouse edge answers GitHub's
+// runners 406 (every Seattle run since 2026-10-29); a failed read keeps both rooms' upcoming rows from the last feed.
+const SHOWBOX_URL = 'https://www.showboxpresents.com/events/all';
 async function showbox() {
-  const evs = parseShowboxEvents(await pageText('https://www.showboxpresents.com/events/all'));
+  const html = (await chromeFetch([SHOWBOX_URL], 'Showbox Presents')).get(SHOWBOX_URL);
+  if (html == null) { feedFailedVenues.add('Showbox at the Market').add('Showbox SoDo'); throw new Error(`Showbox Presents unreadable ${SHOWBOX_URL}`); }
+  const evs = parseShowboxEvents(html);
   console.log(`Showbox: ${evs.length} shows (${evs.filter((e) => e.venue === 'Showbox SoDo').length} in SoDo)`);
   return evs;
 }
