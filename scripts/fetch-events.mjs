@@ -141,6 +141,13 @@ async function mccawUrls() {
 //     above are skipped so the same show isn't listed twice. ---
 const SC_CAL = 'https://www.seattlecenter.com/events/event-calendar';
 const SC_MAX_PAGES = 200;
+// A year's calendar runs about a year out (Bumbershoot, Folklife, the next
+// season's bookings). Twice (2026-10-29 ~00:50 and ~22:00 UTC) the site
+// served a list that ended in mid-January for a while — page 47 short, page
+// 48 empty, like a real end — and McCaw lost half its nights. A list that
+// ends nearer than this is named in the failure mail.
+const SC_SHORT_DAYS = 240;
+const SC_RETRY_MS = 3000;
 // standing daily attractions the calendar lists as an event every single day
 const SC_EXCLUDE = /sculpture walk/i;
 
@@ -172,22 +179,37 @@ async function seattleCenterSweep(dedicated, mccawUrl) {
   const seenUrl = new Set();
   let cards = [];
   let pages = 0;
+  let stop = `the ${SC_MAX_PAGES}-page cap`;
+  const read = (page) => fetch(`${SC_CAL}?page=${page}`, { headers: { 'user-agent': BROWSER_UA } });
   for (let page = 1; page <= SC_MAX_PAGES; page++) {
-    const res = await fetch(`${SC_CAL}?page=${page}`, { headers: { 'user-agent': BROWSER_UA } });
-    if (!res.ok) { console.error(`Seattle Center page ${page} HTTP ${res.status}`); break; }
+    const res = await read(page);
+    if (!res.ok) { console.error(`Seattle Center page ${page} HTTP ${res.status}`); stop = `HTTP ${res.status} on page ${page}`; break; }
     const html = await res.text();
     if (!venueLabels) {
       venueLabels = parseScVenueCats(html).map((c) => c.label);
       if (!venueLabels.length) console.error('Seattle Center: no venue categories found — page layout changed? (every event will read as "Seattle Center")');
     }
     // past the last page the site serves an empty list — or repeats the last one
-    const found = parseScListing(html).filter((c) => !seenUrl.has(c.url));
-    if (!found.length) break;
+    let found = parseScListing(html).filter((c) => !seenUrl.has(c.url));
+    if (!found.length) {
+      // a blip mid-list looks the same: ask once more before calling it the end
+      await new Promise((r) => setTimeout(r, SC_RETRY_MS));
+      const again = await read(page);
+      if (again.ok) found = parseScListing(await again.text()).filter((c) => !seenUrl.has(c.url));
+      if (!found.length) { stop = `no new cards on page ${page}, read twice`; break; }
+      console.log(`Seattle Center page ${page}: empty, then ${found.length} cards on the second read`);
+    }
     pages++;
     found.forEach((c) => seenUrl.add(c.url));
     cards = cards.concat(found);
     const dated = scListingDates(cards, today);
-    if (dated[dated.length - 1].date > horizon) break;
+    if (dated[dated.length - 1].date > horizon) { stop = `the ${WINDOW_DAYS}-day horizon on page ${page}`; break; }
+  }
+  const lastDate = cards.length ? scListingDates(cards, today).at(-1).date : '';
+  const shortOf = new Date(Date.now() + SC_SHORT_DAYS * 86400e3).toISOString().slice(0, 10);
+  if (stop.startsWith('no new cards') && !(lastDate >= shortOf)) {
+    console.error(`Seattle Center calendar cut short: the list ended after page ${pages} (the next one empty twice) with its last event on ${lastDate || 'no date'} (a full calendar runs past ${shortOf})`);
+    globalThis[Symbol.for('here.events/recordFailure')]?.('Seattle Center calendar', 'cut short (the list ended months before a year out)');
   }
 
   const events = [];
@@ -206,7 +228,7 @@ async function seattleCenterSweep(dedicated, mccawUrl) {
     if (type) ev.type = type;
     events.push(ev);
   }
-  console.log(`Seattle Center sweep: ${events.length} events from ${cards.length} cards over ${pages} pages (${atOwnSource} at venues with their own source, ${standing} standing attractions skipped)`);
+  console.log(`Seattle Center sweep: ${events.length} events from ${cards.length} cards over ${pages} pages (${atOwnSource} at venues with their own source, ${standing} standing attractions skipped); stopped by ${stop}; last event ${lastDate || 'none'}`);
   return events;
 }
 
