@@ -1,0 +1,23 @@
+# The weekly festival list (scripts/festival-finder.mjs): Monday 8:07 Seattle time, before the cities' noon
+# builds — closes last week's issue (its unticked boxes become noes) and opens this week's, which GitHub mails
+# to Steve. A box he ticks is read by every city's next build (scripts/festivals.mjs).
+name: Festival finder
+on:
+  schedule:
+    - cron: '7 15 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  find:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Find this week's festivals and open the list
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/festival-finder.mjs --open

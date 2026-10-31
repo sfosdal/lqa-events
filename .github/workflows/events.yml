@@ -59,6 +59,7 @@ jobs:
       - name: Fetch & aggregate events
         env:
           TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}   # reads the festival answers in sfosdal/lqa-events' issues (scripts/festivals.mjs)
         run: node scripts/fetch-events.mjs
       - name: The rest of the city for the Map view (seattle.here.events' feed → site/city-map.json; never fails the build)
         run: node scripts/city-map.mjs
