@@ -48,7 +48,10 @@ export const MAX_READS = 120;
 // scripts/capacity-seed.mjs: Ticketmaster blocks GitHub's runners on the
 // first read (2026-10-19), so until a server of Steve's reads them the seed
 // is where an Actions build gets its capacities.
-export async function stampCapacity(events, previous, { today, seed = {}, fetchImpl = fetch, userAgent, paceMs = PACE_MS, maxReads = MAX_READS, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
+// `fallbackFetch`: when the plain read is blocked, the same read once more through it (chromeManifestFetch below,
+// a Chrome TLS fingerprint) — and, if that answers, the rest of the build's reads too (Steve, 2026-10-30:
+// "capacities … from something that runs while you're offline").
+export async function stampCapacity(events, previous, { today, seed = {}, fetchImpl = fetch, fallbackFetch = null, userAgent, paceMs = PACE_MS, maxReads = MAX_READS, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
   const known = new Map(Object.entries(seed).filter(([, c]) => Number.isInteger(c)));
   for (const e of previous || []) { const id = tmEventId(e.url); if (id && Number.isInteger(e.capacity)) known.set(id, e.capacity); }
   const todo = new Map(); // id → events still without one, soonest first
@@ -60,25 +63,42 @@ export async function stampCapacity(events, previous, { today, seed = {}, fetchI
     if (!todo.has(id)) todo.set(id, []);
     todo.get(id).push(e);
   }
-  let fetched = 0, none = 0, failed = 0, reads = 0, blocked = false;
+  let fetched = 0, none = 0, failed = 0, reads = 0, blocked = false, switched = false;
   for (const [id, list] of todo) {
     if (reads >= maxReads) break;
     if (reads) await sleep(paceMs);
     reads++;
     let cap;
     try {
-      const r = await fetchImpl(MANIFEST_URL(id), { headers: userAgent ? { 'user-agent': userAgent } : {} });
-      if (r.ok) cap = manifestTotal(await r.json()) || 0;
-      else {
+      for (;;) {
+        const r = await fetchImpl(MANIFEST_URL(id), { headers: userAgent ? { 'user-agent': userAgent } : {} });
+        if (r.ok) { cap = manifestTotal(await r.json()) || 0; break; }
         const body = await r.text().catch(() => '');
-        if (r.status === 403 && /AccessDenied/.test(body)) cap = 0; // S3: no manifest for this listing
-        else if (r.status === 403 || r.status === 429) { blocked = true; break; } // the rate limiter: stop, the rest wait
-        else throw new Error(`HTTP ${r.status}`);
+        if (r.status === 403 && /AccessDenied/.test(body)) { cap = 0; break; } // S3: no manifest for this listing
+        if (r.status === 403 || r.status === 429) { // the rate limiter: try the fallback once, else stop and the rest wait
+          if (fallbackFetch && fetchImpl !== fallbackFetch) { fetchImpl = fallbackFetch; switched = true; continue; }
+          blocked = true; break;
+        }
+        throw new Error(`HTTP ${r.status}`);
       }
     } catch { failed++; continue; }
+    if (blocked) break;
     if (cap) fetched++; else none++;
     for (const e of list) e.capacity = cap;
   }
   const waiting = [...todo.values()].filter((l) => l[0].capacity === undefined).length - failed;
-  return { carried, fetched, none, failed, waiting, blocked };
+  return { carried, fetched, none, failed, waiting, blocked, switched };
+}
+
+// One manifest read through scripts/cffi-fetch.py (curl_cffi, Chrome's TLS handshake), shaped like a fetch
+// Response: Ticketmaster's edge blocks GitHub's runners' plain reads from the first one (2026-10-19).
+export async function chromeManifestFetch(url) {
+  const { spawnSync } = await import('node:child_process');
+  const r = spawnSync('uv', ['run', '--quiet', new URL('./cffi-fetch.py', import.meta.url).pathname, url], { encoding: 'utf8', maxBuffer: 64 << 20 });
+  if (r.error || r.status !== 0) throw new Error(`cffi-fetch.py: ${r.error ? r.error.message : `exit ${r.status}`}`);
+  const v = JSON.parse(r.stdout)[url];
+  if (typeof v === 'string') return { ok: true, status: 200, json: async () => JSON.parse(v), text: async () => v };
+  const status = Number((/HTTP (\d{3})/.exec(v.error) || [])[1]);
+  if (!status) throw new Error(v.error);
+  return { ok: false, status, text: async () => v.body || '' };
 }

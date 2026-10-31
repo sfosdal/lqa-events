@@ -20,7 +20,7 @@ import { applySchedules } from './schedules.mjs';
 import { applySetTimes } from './settimes.mjs';
 import { slugify, BADGE_FEEDS, TEAMS, CITY } from './badges.mjs';
 import { ticketWebId } from './ticketweb.mjs';
-import { stampCapacity } from './capacity.mjs';
+import { stampCapacity, chromeManifestFetch } from './capacity.mjs';
 import { tmFetch, tmFailed, keepFailedVenues } from './tm-fetch.mjs';
 
 const JSON_OUT = new URL('../site/events.json', import.meta.url);
@@ -606,8 +606,8 @@ for (const t of CITY.teams.filter((x) => x.inject)) {
 {
   let seed = {};
   try { seed = JSON.parse(readFileSync(new URL('./data/capacity.json', import.meta.url), 'utf8')).events || {}; } catch {} // the Mac-read seed (scripts/capacity-seed.mjs), if any
-  const c = await stampCapacity(merged, archived, { today, seed, userAgent: CITY.userAgent });
-  console.log(`capacity: ${c.carried} carried forward, ${c.fetched} read from Ticketmaster, ${c.none} with no manifest, ${c.failed} failed, ${c.waiting} left for the next build${c.blocked ? ' (rate-limited — stopped)' : ''}`);
+  const c = await stampCapacity(merged, archived, { today, seed, userAgent: CITY.userAgent, fallbackFetch: chromeManifestFetch });
+  console.log(`capacity: ${c.carried} carried forward, ${c.fetched} read from Ticketmaster, ${c.none} with no manifest, ${c.failed} failed, ${c.waiting} left for the next build${c.switched ? ' (plain reads blocked — read through cffi-fetch.py)' : ''}${c.blocked ? ' (rate-limited — stopped)' : ''}`);
 }
 // Ticket availability for the Ticketmaster venues, from the local checker
 // (scripts/soldout-check.mjs → scripts/data/soldout.json, committed every six

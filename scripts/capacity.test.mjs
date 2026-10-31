@@ -41,7 +41,7 @@ test('stampCapacity fetches an event once, then carries it forward without askin
   const a = [ev(id)];
   const r1 = await stampCapacity(a, [], { today: '2026-10-19', fetchImpl: first.impl });
   assert.equal(a[0].capacity, 16061);
-  assert.deepEqual(r1, { carried: 0, fetched: 1, none: 0, failed: 0, waiting: 0, blocked: false });
+  assert.deepEqual(r1, { carried: 0, fetched: 1, none: 0, failed: 0, waiting: 0, blocked: false, switched: false });
   assert.deepEqual(first.asked, [id]);
   assert.equal(MANIFEST_URL(id), `https://pubapi.ticketmaster.com/sdk/static/manifest/v1/${id}`);
 
@@ -58,7 +58,7 @@ test('no manifest is remembered as 0 (not asked again); a failed fetch is left f
   const list = [ev('AAAAAAAAAAAAAAAA'), ev('BBBBBBBBBBBBBBBB'), ev('CCCCCCCCCCCCCCCC'), ev('DDDDDDDDDDDDDDDD')];
   const r = await stampCapacity(list, [], { today: '2026-10-19', fetchImpl: f.impl });
   assert.deepEqual(list.map((e) => e.capacity), [0, undefined, undefined, 0]); // A, D: S3's AccessDenied for a key it lacks
-  assert.deepEqual(r, { carried: 0, fetched: 0, none: 2, failed: 2, waiting: 0, blocked: false });
+  assert.deepEqual(r, { carried: 0, fetched: 0, none: 2, failed: 2, waiting: 0, blocked: false, switched: false });
   const again = fakeFetch({});
   await stampCapacity([ev('AAAAAAAAAAAAAAAA')], list, { today: '2026-10-19', fetchImpl: again.impl });
   assert.deepEqual(again.asked, []);
@@ -112,4 +112,15 @@ test('a seed (the Mac-read capacity.json) counts as known: no read', async () =>
   assert.equal(list[0].capacity, 16061);
   assert.equal(r.carried, 1);
   assert.deepEqual(f.asked, []);
+});
+
+test('a blocked plain read is asked once more through the fallback, which then reads the rest', async () => {
+  const plain = fakeFetch({ AAAAAAAAAAAAAAAA: 'block', BBBBBBBBBBBBBBBB: 'block' });
+  const chrome = fakeFetch({ AAAAAAAAAAAAAAAA: manifest({ numSeats: 100 }), BBBBBBBBBBBBBBBB: manifest({ numSeats: 50 }) });
+  const list = [ev('AAAAAAAAAAAAAAAA'), ev('BBBBBBBBBBBBBBBB', { date: '2026-10-23' })];
+  const r = await stampCapacity(list, [], { today: '2026-10-19', fetchImpl: plain.impl, fallbackFetch: chrome.impl });
+  assert.deepEqual(list.map((e) => e.capacity), [100, 50]); assert.equal(r.switched, true); assert.equal(r.blocked, false);
+  assert.deepEqual(plain.asked, ['AAAAAAAAAAAAAAAA'], 'the plain fetch is not asked again once switched');
+  const both = fakeFetch({ AAAAAAAAAAAAAAAA: 'block' }), r2 = await stampCapacity([ev('AAAAAAAAAAAAAAAA')], [], { today: '2026-10-19', fetchImpl: both.impl, fallbackFetch: fakeFetch({ AAAAAAAAAAAAAAAA: 'block' }).impl });
+  assert.equal(r2.blocked, true); assert.equal(r2.failed, 0);
 });
