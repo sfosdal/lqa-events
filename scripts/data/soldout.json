@@ -1,17 +1,17 @@
 {
- "generated": "2026-10-31T01:06:57.302Z",
+ "generated": "2026-10-31T11:16:09.931Z",
  "_": "scripts/soldout-check.mjs (a local run — Ticketmaster inventory as a real Chrome sees it, TicketWeb pages (TW… keys, the Crocodile) by plain fetch; committed by scripts/soldout-run.sh). status: available = box-office tickets on sale; soldout = only resale left; none = the inventory call and the page both showed nothing (not treated as sold out); presale = public sale not started; unknown = the page gave no answer; a none/unknown run keeps the last real answer, its own checked time, note says so.",
  "events": {
   "TW14925643": {
    "status": "available",
    "primary": null,
    "resale": 0,
-   "fromPrimary": 39.92,
+   "fromPrimary": 42.09,
    "note": "1 of 1 ticket type on sale, availability M, no count",
    "name": "Ax and the Hatchetmen: The Late Checkout Tour 2026 w/ The Rare Occasions",
    "date": "2026-10-31",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:36.310Z"
+   "checked": "2026-10-31T10:11:48.476Z"
   },
   "TW14768243": {
    "status": "available",
@@ -22,7 +22,7 @@
    "name": "BAHAMAS: Industrial Sport & Sound Tour with Sister Ray",
    "date": "2026-11-03",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:37.126Z"
+   "checked": "2026-10-31T10:11:49.238Z"
   },
   "TW14958123": {
    "status": "available",
@@ -33,7 +33,7 @@
    "name": "Plini - An Unnameable Desire North American Tour w/ Night Verses & Portraits",
    "date": "2026-11-04",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:37.922Z"
+   "checked": "2026-10-31T10:11:49.854Z"
   },
   "TW14942023": {
    "status": "available",
@@ -44,7 +44,7 @@
    "name": "The Tallest Man On Earth, Andrea Von Kampen",
    "date": "2026-11-05",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:38.732Z"
+   "checked": "2026-10-31T10:11:50.617Z"
   },
   "TW14795943": {
    "status": "available",
@@ -55,7 +55,7 @@
    "name": "Tank and The Bangas - The Last Balloon Tour 2026 w/ Ariel J. & Zeus",
    "date": "2026-11-10",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:39.538Z"
+   "checked": "2026-10-31T10:11:51.390Z"
   },
   "TW14010024": {
    "status": "available",
@@ -66,7 +66,7 @@
    "name": "Armand Hammer, Sha Ray, DJ Haram",
    "date": "2026-11-11",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:40.345Z"
+   "checked": "2026-10-31T10:11:52.259Z"
   },
   "TW14978383": {
    "status": "available",
@@ -77,7 +77,7 @@
    "name": "Nekrogoblikon, Aborted, Signs of the Swarm, Party Cannon",
    "date": "2026-11-12",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:41.146Z"
+   "checked": "2026-10-31T10:11:53.253Z"
   },
   "TW14896643": {
    "status": "soldout",
@@ -87,7 +87,7 @@
    "name": "Son Volt, Kelly Willis",
    "date": "2026-11-13",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:41.921Z"
+   "checked": "2026-10-31T10:11:54.020Z"
   },
   "TW14970773": {
    "status": "available",
@@ -98,18 +98,18 @@
    "name": "Stephen Day Presents: The Self Titled Tour",
    "date": "2026-11-14",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:42.752Z"
+   "checked": "2026-10-31T10:11:54.782Z"
   },
   "TW14866603": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 39.92,
-   "note": "1 of 1 ticket type on sale, availability H, no count",
+   "note": "1 of 1 ticket type on sale, availability M, no count",
    "name": "Nite Wave present: The Cure, Depeche Mode & New Order Tribute Night",
    "date": "2026-11-27",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:43.511Z"
+   "checked": "2026-10-31T10:11:55.517Z"
   },
   "TW14171594": {
    "status": "available",
@@ -120,7 +120,7 @@
    "name": "Buck Meek, Kisser",
    "date": "2026-12-02",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:44.299Z"
+   "checked": "2026-10-31T10:11:56.301Z"
   },
   "TW14768543": {
    "status": "available",
@@ -131,7 +131,7 @@
    "name": "Mohanad Elshieky: Green Books",
    "date": "2026-12-17",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:45.050Z"
+   "checked": "2026-10-31T10:11:57.099Z"
   },
   "TW15033413": {
    "status": "unknown",
@@ -139,14 +139,14 @@
    "name": "Book of Love",
    "date": "2027-02-20",
    "venue": "The Crocodile",
-   "checked": "2026-10-31T00:33:46.214Z"
+   "checked": "2026-10-31T10:11:59.322Z"
   },
   "TW14896893": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 47.86,
-   "note": "1 of 1 ticket type on sale, availability M, no count",
+   "note": "kept from 2026-10-31: this run unknown (TypeError: fetch failed)",
    "name": "Death From Above 1979",
    "date": "2027-03-31",
    "venue": "The Crocodile",
@@ -161,7 +161,8 @@
    "name": "Gorillaz - The Mountain Tour",
    "date": "2026-10-31",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-10-31T00:33:54.634Z"
+   "checked": "2026-10-31T00:33:54.634Z",
+   "note": "kept from 2026-10-31: this run unknown (no answer in 90 s)"
   },
   "0F0064BADFD7E266": {
    "status": "available",
@@ -172,18 +173,98 @@
    "name": "Bryson Tiller Presents: The Neo Trapsoul Tour",
    "date": "2026-11-01",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-10-31T00:33:57.715Z"
+   "checked": "2026-10-31T00:33:57.715Z",
+   "note": "kept from 2026-10-31: this run unknown (no answer in 90 s)"
   },
   "0F0064C4A055A26F": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
    "fromResale": 44.77,
-   "note": "40 resale listed on the page",
+   "note": "kept from 2026-10-31: this run unknown (no answer in 90 s)",
    "name": "Seattle Kraken vs. Calgary Flames",
    "date": "2026-11-04",
    "venue": "Climate Pledge Arena",
    "checked": "2026-10-31T00:34:17.930Z"
+  },
+  "0F006454A56ACF3B": {
+   "status": "presale",
+   "name": "Seattle Reign FC vs. Orlando Pride",
+   "date": "2026-11-01",
+   "venue": "Lumen Field",
+   "checked": "2026-10-31T11:16:09.931Z"
+  },
+  "0F006383C3AA8409": {
+   "status": "presale",
+   "name": "Seattle Sounders FC vs. Los Angeles Football Club",
+   "date": "2026-11-07",
+   "venue": "Lumen Field",
+   "checked": "2026-10-31T11:16:09.931Z"
+  },
+  "0F0064A5987D8342": {
+   "status": "presale",
+   "name": "Not For Radio - A Summer In The Forest: North America Tour",
+   "date": "2026-11-11",
+   "venue": "Paramount Theatre",
+   "checked": "2026-10-31T11:16:09.931Z"
+  },
+  "0F0064A59F478F79": {
+   "status": "presale",
+   "name": "Not For Radio - A Summer In The Forest: North America Tour",
+   "date": "2026-11-12",
+   "venue": "Paramount Theatre",
+   "checked": "2026-10-31T11:16:09.931Z"
+  },
+  "0F0064861EBCE422": {
+   "status": "presale",
+   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
+   "date": "2026-11-20",
+   "venue": "Paramount Theatre",
+   "checked": "2026-10-31T11:16:09.931Z"
+  },
+  "0F0064861EC6E42E": {
+   "status": "presale",
+   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
+   "date": "2026-11-21",
+   "venue": "Paramount Theatre",
+   "checked": "2026-10-31T11:16:09.931Z"
+  },
+  "0F0064861ED0E440": {
+   "status": "presale",
+   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
+   "date": "2026-11-22",
+   "venue": "Paramount Theatre",
+   "checked": "2026-10-31T11:16:09.931Z"
+  },
+  "0F006183A46A0D87": {
+   "status": "presale",
+   "name": "Christine D'Clario - La Novia Tour ",
+   "date": "2027-01-30",
+   "venue": "Paramount Theatre",
+   "checked": "2026-10-31T11:16:09.931Z"
+  },
+  "0F006383E1719405": {
+   "status": "presale",
+   "name": "The Bald and the Beautiful LIVE: Very Bald, Very Beautiful",
+   "date": "2027-02-20",
+   "venue": "Paramount Theatre",
+   "checked": "2026-10-31T11:16:09.931Z"
+  },
+  "0F006556B05DB9C6": {
+   "status": "presale",
+   "name": "The Basement Yard Live",
+   "date": "2027-05-20",
+   "venue": "Paramount Theatre",
+   "checked": "2026-10-31T11:16:09.931Z"
+  },
+  "090064EA31098B51": {
+   "status": "presale",
+   "name": "Anaheim Ducks v Seattle Kraken",
+   "date": "2026-12-04",
+   "venue": "Honda Center",
+   "club": "kraken",
+   "away": true,
+   "checked": "2026-10-31T11:16:09.931Z"
   },
   "0F00648DA6968E56": {
    "status": "available",
@@ -2365,85 +2446,6 @@
    "club": "sounders",
    "away": true,
    "checked": "2026-10-31T01:06:57.301Z"
-  },
-  "0F006454A56ACF3B": {
-   "status": "presale",
-   "name": "Seattle Reign FC vs. Orlando Pride",
-   "date": "2026-11-01",
-   "venue": "Lumen Field",
-   "checked": "2026-10-31T01:06:57.302Z"
-  },
-  "0F006383C3AA8409": {
-   "status": "presale",
-   "name": "Seattle Sounders FC vs. Los Angeles Football Club",
-   "date": "2026-11-07",
-   "venue": "Lumen Field",
-   "checked": "2026-10-31T01:06:57.302Z"
-  },
-  "0F0064A5987D8342": {
-   "status": "presale",
-   "name": "Not For Radio - A Summer In The Forest: North America Tour",
-   "date": "2026-11-11",
-   "venue": "Paramount Theatre",
-   "checked": "2026-10-31T01:06:57.302Z"
-  },
-  "0F0064A59F478F79": {
-   "status": "presale",
-   "name": "Not For Radio - A Summer In The Forest: North America Tour",
-   "date": "2026-11-12",
-   "venue": "Paramount Theatre",
-   "checked": "2026-10-31T01:06:57.302Z"
-  },
-  "0F0064861EBCE422": {
-   "status": "presale",
-   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
-   "date": "2026-11-20",
-   "venue": "Paramount Theatre",
-   "checked": "2026-10-31T01:06:57.302Z"
-  },
-  "0F0064861EC6E42E": {
-   "status": "presale",
-   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
-   "date": "2026-11-21",
-   "venue": "Paramount Theatre",
-   "checked": "2026-10-31T01:06:57.302Z"
-  },
-  "0F0064861ED0E440": {
-   "status": "presale",
-   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
-   "date": "2026-11-22",
-   "venue": "Paramount Theatre",
-   "checked": "2026-10-31T01:06:57.302Z"
-  },
-  "0F006183A46A0D87": {
-   "status": "presale",
-   "name": "Christine D'Clario - La Novia Tour ",
-   "date": "2027-01-30",
-   "venue": "Paramount Theatre",
-   "checked": "2026-10-31T01:06:57.302Z"
-  },
-  "0F006383E1719405": {
-   "status": "presale",
-   "name": "The Bald and the Beautiful LIVE: Very Bald, Very Beautiful",
-   "date": "2027-02-20",
-   "venue": "Paramount Theatre",
-   "checked": "2026-10-31T01:06:57.302Z"
-  },
-  "0F006556B05DB9C6": {
-   "status": "presale",
-   "name": "The Basement Yard Live",
-   "date": "2027-05-20",
-   "venue": "Paramount Theatre",
-   "checked": "2026-10-31T01:06:57.302Z"
-  },
-  "090064EA31098B51": {
-   "status": "presale",
-   "name": "Anaheim Ducks v Seattle Kraken",
-   "date": "2026-12-04",
-   "venue": "Honda Center",
-   "club": "kraken",
-   "away": true,
-   "checked": "2026-10-31T01:06:57.302Z"
   }
  }
 }
