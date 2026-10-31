@@ -7909,6 +7909,95 @@
    "date": "2026-10-29",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1520014/everclear-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "AAP 2026 Annual Meeting",
+   "date": "2026-10-30",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=34804",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Fatherland",
+   "date": "2026-10-30",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/fatherland",
+   "movie": true,
+   "end": "17:37:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wicker",
+   "date": "2026-10-30",
+   "time": "16:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wicker",
+   "movie": true,
+   "end": "18:30:00"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Leonardo! A Wonderful Show about a Terrible Monster",
+   "date": "2026-10-30",
+   "time": "17:00:00",
+   "url": "https://www.sct.org/onstage/productions/leonardo-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "I'll Be Your Superhero",
+   "date": "2026-10-30",
+   "time": "18:00:00",
+   "url": "https://www.sct.org/onstage/productions/ill-be-your-superhero-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-10-30",
+   "time": "18:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "21:39:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Dance Theatre of Harlem",
+   "date": "2026-10-30",
+   "time": "19:30:00",
+   "url": "https://www.ticketmaster.com/dance-theatre-of-harlem-seattle-washington-10-30-2026/event/0F0064C1F1EFE80D",
+   "type": "arts",
+   "tickets": {
+    "box": 1461,
+    "resale": 3,
+    "checked": "2026-10-31T00:57:22.738Z",
+    "from": 25.8
+   }
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-10-30",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Rebecca Black with BAYLI",
+   "date": "2026-10-30",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1527342/rebecca-black-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "DIMELO: Quiébrala",
+   "date": "2026-10-30",
+   "time": "22:00",
+   "url": "https://calendar.thecrocodile.com/shows/dimelo-quiebrala-30-oct",
+   "type": "concert"
   }
  ]
 }
