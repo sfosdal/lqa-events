@@ -12,9 +12,9 @@ import './failures.mjs'; // first: every outside call retried, the ones still fa
 import { writeFileSync, readFileSync } from 'node:fs';
 import { buildIcs } from './ics.mjs';
 import { parseScListing, scListingDates, parseScVenueCats, mapDiceEvents, parseSiffScreenings, mapOtbEvents, mapRepEvents, tmType, scType, mapSccEvents, mccawUrlMap, parseSctCalendar, parseMopopCalendar, parsePacsciEvents, parseKexpEvents, parseGoatEvents, parseBlockPartyArtists, parseBumbershootSchedule, mapPrideFestEvents, parseFolklifeDates, parseShowboxEvents, parseMarinersIndex, parseMarinersEvent } from './sources.mjs';
-import { mergeWithArchive, unionArchives, eventKey, dropClashes } from './merge.mjs';
+import { mergeWithArchive, unionArchives, eventKey, dropClashes, keepQuietVenues, capUpcoming } from './merge.mjs';
 import { fixLinks } from './links.mjs';
-import { feedSources, emptyListGate, feedFailedVenues, chromeFetch } from './feeds.mjs';
+import { feedSources, emptyListGate, feedFailedVenues, feedQuietVenues, feedQuietSites, chromeFetch } from './feeds.mjs';
 import { calmTitle, isNotice } from './titles.mjs';
 import { applySchedules } from './schedules.mjs';
 import { applySetTimes } from './settimes.mjs';
@@ -27,8 +27,9 @@ import { tmFetch, tmFailed, keepFailedVenues } from './tm-fetch.mjs';
 const JSON_OUT = new URL('../site/events.json', import.meta.url);
 const ICS_OUT = new URL('../site/events.ics', import.meta.url);
 // A full year each way: venues announce whole seasons ahead, and past events
-// are kept for a year (carried forward from the previously published feed —
-// see mergeWithArchive).
+// are kept for good (carried forward from the previously published feed —
+// see mergeWithArchive; a year until Steve, 2026-10-31: "all old events should
+// be kept"). The window only bounds what a source adds.
 const WINDOW_DAYS = 365;
 // The live feed is read from the site's own domain (lqa.seattle.here.events
 // since 2026-10-11 — neighbourhoods sit under their city; lqa.here.events
@@ -42,7 +43,7 @@ const FEED_URL_OLD = 'https://lqa.here.events/events.json';
 // the orphan `archive` branch by the workflow after each successful build
 const ARCHIVE_URL = process.env.ARCHIVE_URL || 'https://raw.githubusercontent.com/sfosdal/lqa-events/archive/events-archive.json';
 const ARCHIVE_OUT = new URL('../events-archive.json', import.meta.url); // repo root, ignored; the workflow commits it to the branch
-const MAX_EVENTS = 4000; // sanity cap, not a display cap — a year back plus a year ahead across 14 venues runs ~2,500
+const MAX_EVENTS = 4000; // sanity cap on the UPCOMING rows (merge.mjs capUpcoming): past events are never trimmed
 
 const BROWSER_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
@@ -605,7 +606,7 @@ console.log(`Archive: ${(liveArchive || []).length} events in the live feed, ${(
 
 // venues whose read failed keep their upcoming rows: Ticketmaster's (tm-fetch.mjs), then a leading own calendar's (feeds.mjs)
 const keptFailed = (archived, fresh, today) => { const tm = keepFailedVenues(archived, fresh, today); return tm.concat(keepFailedVenues(archived, fresh.concat(tm), today, feedFailedVenues, console.error, 'Own calendar')); };
-const merged = mergeWithArchive(fresh.concat(keptFailed(archived, fresh, today)), archived, today, cutoff).slice(-MAX_EVENTS);
+const merged = capUpcoming(mergeWithArchive(fresh.concat(keptFailed(archived, fresh, today)), archived, today, cutoff), today, MAX_EVENTS);
 await stampFestivals(merged, { city: CITY.key }); // the festivals Steve approved from the weekly list (scripts/festivals.mjs)
 
 // League schedules flag floating dates Ticketmaster doesn't know yet, and
@@ -669,6 +670,10 @@ try {
   }
   console.log(`soldout: ${n} events with ticket counts (checked ${so.generated}), ${s} sold out, ${a} away games`);
 } catch (err) { console.error('soldout.json:', err.message); }
+// A source that suddenly gives nothing keeps what it gave last time. Run on the finished list, so the rows written above
+// (team home games, weekly tables) count as listed (merge.mjs keepQuietVenues; Steve, 2026-10-31: "feed source that errors
+// out (or is suddenly empty) should keep last events")
+merged.push(...keepQuietVenues(archived, merged, today, { venues: new Set([...Object.keys(CITY.venues || {}), CITY.groundsVenue].filter(Boolean)), feeds: feedQuietVenues, sites: feedQuietSites }));
 merged.sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
 if (Object.keys(seasons).length) {
   const postseason = JSON.parse(readFileSync(new URL('./data/postseason.json', import.meta.url), 'utf8')); // each league's playoff rounds (hand-kept), shown until the real games land
