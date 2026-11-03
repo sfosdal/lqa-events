@@ -481,6 +481,9 @@
     // the festivals by hand). Steve, 2026-10-24: Kona first ("local map view for event locations"), then lqa and Seattle.
     map: {
       kind: 'urban',
+      // the neighbourhood's own line, always drawn (Steve, 2026-11-02): OpenStreetMap has none for Lower Queen Anne, so the City of Seattle's
+      // Neighborhood Map Atlas (sub-neighbourhood "Lower Queen Anne", also called Uptown / Seattle Center), read once at build
+      boundary: { geojson: 'https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/nma_nhoods_sub/FeatureServer/0/query?where=S_HOOD%3D%27Lower+Queen+Anne%27&outFields=S_HOOD&outSR=4326&f=geojson', credit: 'Neighbourhood line from the City of Seattle’s Neighborhood Map Atlas.' },
       // the whole of Seattle's ground — the city's own bbox (seattle-events), since the Map shows every room in the city, the
       // neighbourhood's own first (Steve, 2026-10-25: "maps for neighborhoods should include events from the entire city");
       // the build widens it to 1.6:1 so a desktop frame zoomed right out still shows most of the Sound

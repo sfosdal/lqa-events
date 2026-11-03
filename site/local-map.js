@@ -225,6 +225,7 @@
       (data.sea || []).forEach(function (d) { el('path', { d: d, 'class': 'lm-sea', 'fill-rule': 'evenodd' }, svg); });
       (data.water || []).forEach(function (d) { el('path', { d: d, 'class': 'lm-water', 'fill-rule': 'evenodd' }, svg); });
       ['secondary', 'primary', 'trunk', 'motorway'].forEach(function (c) { if (data.roads && data.roads[c]) el('path', { d: data.roads[c], 'class': 'lm-road lm-road-' + c }, svg); });
+      if (data.boundary) el('path', { d: data.boundary, 'class': 'lm-boundary' }, svg); // the city's (or neighbourhood's) own line, always on (Steve, 2026-11-02)
     } else if (data.kind === 'world') { // the ocean everywhere, the countries over it, the state lines and the great lakes over those
       el('rect', { x: -FRAME.w, y: -FRAME.h, width: FRAME.w * 3, height: FRAME.h * 3, 'class': 'lm-ocean' }, svg);
       (data.land || []).forEach(function (d) { el('path', { d: d, 'class': 'lm-island', 'fill-rule': 'evenodd' }, svg); });
