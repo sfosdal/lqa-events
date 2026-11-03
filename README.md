@@ -65,6 +65,13 @@ in the address bar, but reversible; `LQAFilter.encodeSearch`/`decodeSearch`),
 
 ## Layout
 
+- `scripts/build.mjs` — the build every city shares (since 2026-11-03): the
+  Ticketmaster reads by venue id, a venue's two sources merged, venue naming,
+  the church and closure-notice filters, the date window and de-duping, the
+  empty-list gate, past events carried forward, a quiet venue's last events,
+  team schedules, link checks and every file written. A city's
+  `fetch-events.mjs` passes its own readers and a few options to `build()`
+  (the hooks are listed at the top of the file); `sync-shared.sh` copies it.
 - `scripts/fetch-events.mjs` — aggregates sources into `site/events.json` +
   `site/events.ics`. Dedicated sources first: Ticketmaster Discovery API
   (Climate Pledge Arena, T-Mobile Park, Lumen Field, and — since 2026-10-05 —
@@ -175,7 +182,8 @@ calendar for another town is:
   append-only), the calendar feed's header strings and the wording;
 - its own `site/index.html` and `styles.css` (masthead, panel headings,
   Sources text, the `--v-*` hues `city.js` names);
-- its own source scrapers in `scripts/fetch-events.mjs` for anything not on
+- its own source scrapers in `scripts/fetch-events.mjs`, handed to
+  `build()` from `scripts/build.mjs`, for anything not on
   Ticketmaster (here: the Seattle Center sweep, SIFF, the Rep, the
   festivals), and a schedule/form fetcher in `scripts/schedules.mjs` for any
   league ESPN, MLB, the NHL, the PWHL or MLR do not cover (`SEASON_KINDS`,
