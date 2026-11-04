@@ -65,8 +65,25 @@
   // a neighbourhood site (`map.focus: 'hood'`) opens on its own rooms — those
   // without `area: 'town'` — with room round them for the discs and names
   // (Steve, 2026-10-24: "focus to contain the URLs in that neighboorhood")
+  // the box round the neighbourhood's own line (map units), with a hair of room so the line is not on the frame's edge
+  var lineBoxOf = null, lineBoxVal = null;
+  function lineBox() {
+    if (!data || !data.boundary || !CITY.map || CITY.map.focus !== 'hood') return null;
+    if (lineBoxOf === data.boundary) return lineBoxVal;
+    var nums = data.boundary.match(/-?\d+(?:\.\d+)?/g), bx = [], by = [];
+    for (var i = 0; nums && i + 1 < nums.length; i += 2) { bx.push(+nums[i]); by.push(+nums[i + 1]); }
+    lineBoxOf = data.boundary; lineBoxVal = null;
+    if (bx.length < 2) return null;
+    var l = Math.min.apply(null, bx), r = Math.max.apply(null, bx), t = Math.min.apply(null, by), b = Math.max.apply(null, by);
+    var m = Math.max(r - l, b - t) * .06;
+    return (lineBoxVal = [l - m, t - m, r - l + 2 * m, b - t + 2 * m]);
+  }
   function hoodBox() {
     if (!data || !CITY.map || CITY.map.focus !== 'hood') return null;
+    // the neighbourhood's own line, as close as the map zooms (Steve, 2026-11-03: "I want the map zoom to show the
+    // neighborhood as zoomed in as possible"); home() widens it to the deepest zoom when the line is smaller still
+    var lb = lineBox();
+    if (lb) return lb;
     var pts = ROOMS.filter(function (v) { return VENUES[v].area !== 'town'; }).map(function (v) { return px(VENUES[v].geo[0], VENUES[v].geo[1]); });
     if (!pts.length) return null;
     var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
@@ -78,7 +95,7 @@
   var atHome = true; // the view is still the opening one (no zoom or pan yet): it follows the frame's shape when that changes
   function home(draw) {
     atHome = true; var hb = hoodBox();
-    if (hb || (data && data.home)) { var h = hb || data.home, a = ar(), w = Math.max(h[2], h[3] / a); view = { x: h[0] + h[2] / 2 - w / 2, y: h[1] + h[3] / 2 - w * a / 2, w: w, h: w * a }; }
+    if (hb || (data && data.home)) { var h = hb || data.home, a = ar(), w = Math.max(h[2], h[3] / a, hb ? MIN_W() : 0); view = { x: h[0] + h[2] / 2 - w / 2, y: h[1] + h[3] / 2 - w * a / 2, w: w, h: w * a }; }
     else fit(false);
     if (draw !== false) render();
   }
@@ -300,7 +317,10 @@
   function schedule() { if (!rafId) rafId = requestAnimationFrame(function () { rafId = 0; render(); }); }
 
   // ---- zoom and pan ----
-  var MIN_W = function () { return FRAME.w / (data && data.kind === 'urban' ? 24 : data && data.kind === 'world' ? 120 : 16); }; // a city zooms a little deeper: its rooms sit a block apart; the world much deeper, down to a state's towns
+  var MIN_W = function () { // a neighbourhood site may go as deep as fills a narrow frame with its own line (Steve, 2026-11-03)
+    var base = FRAME.w / (data && data.kind === 'urban' ? 24 : data && data.kind === 'world' ? 120 : 16), lb = lineBox();
+    return lb ? Math.min(base, Math.max(lb[2], lb[3] / ar())) : base;
+  }; // a city zooms a little deeper: its rooms sit a block apart; the world much deeper, down to a state's towns
   var COVER = function () { return !!data && data.kind === 'urban'; }; // a city's ground is a rectangle of data, so the view stays inside it and the frame is always full (Steve, 2026-10-25); an island sits in open sea, the world in ocean — those run on past the data
   var MAX_W = function () { var a = ar(); return COVER() ? Math.min(FRAME.w, FRAME.h / a) : Math.max(FRAME.w, FRAME.h / a) * 1.3; }; // out to the whole ground (plus a margin) in the frame's own shape — or, covered, as far as still fills it
   function clamp() {
