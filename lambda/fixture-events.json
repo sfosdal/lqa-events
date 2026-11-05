@@ -1,0 +1,432 @@
+{
+ "generated": "2026-11-05T20:15:01.365Z",
+ "events": [
+  {
+   "venue": "Convention Center",
+   "title": "A4LE LearningSCAPES 2026",
+   "date": "2026-11-05",
+   "time": "",
+   "url": "https://learningscapes.a4le.org/",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "Pacific Science Center",
+   "title": "Igniter Evening: Mysteries from the Deep",
+   "date": "2026-11-05",
+   "time": "",
+   "url": "https://pacificsciencecenter.org/events/igniter-mysteries-event/"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-11-05",
+   "time": "10:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-05",
+   "time": "15:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "18:24:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Teddy Swims: The UGLY Tour",
+   "date": "2026-11-05",
+   "time": "19:00:00",
+   "url": "https://www.ticketmaster.com/teddy-swims-the-ugly-tour-seattle-washington-11-05-2026/event/0F00648DA6968E56",
+   "type": "concert",
+   "capacity": 15884,
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-05T01:54:16.655Z",
+    "from": 108.25
+   }
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Dabda & Plash",
+   "date": "2026-11-05",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/Z9277596ec95",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Oh, Mary! (Touring)",
+   "date": "2026-11-05",
+   "time": "19:30:00",
+   "url": "https://www.ticketmaster.com/oh-mary-touring-seattle-washington-11-05-2026/event/0F0064E9B2C19116",
+   "type": "arts",
+   "capacity": 3016,
+   "tickets": {
+    "box": 0,
+    "resale": 23,
+    "checked": "2026-11-05T02:17:17.149Z",
+    "from": 145
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "The Traveling Goat Presents: Theresa Redmond",
+   "date": "2026-11-05",
+   "time": "19:30:00"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "The Tallest Man On Earth, Andrea Von Kampen",
+   "date": "2026-11-05",
+   "time": "20:00:00",
+   "url": "https://www.ticketweb.com/event/the-tallest-man-on-earth-the-crocodile-tickets/14942023",
+   "type": "concert",
+   "tickets": {
+    "box": 0,
+    "resale": 0,
+    "checked": "2026-11-05T01:53:39.030Z"
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Countess Luann de Lesseps",
+   "date": "2026-11-05",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1471564/countess-luann-de-lesseps-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Aria Live",
+   "date": "2026-11-05",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1504711/aria-live-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Downtown Boys Live on KEXP (Open To The Public)",
+   "date": "2026-11-06",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/downtown-boys-live-on-kexp-kexp_521562/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-06",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "17:58:00"
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Ghost Stories",
+   "date": "2026-11-06",
+   "time": "19:30:00",
+   "url": "https://www.mccawhall.com/events/detail/ghost-stories",
+   "type": "arts"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Oh, Mary! (Touring)",
+   "date": "2026-11-06",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/oh-mary-touring-seattle-washington-11-06-2026/event/0F0064E9B2C6911C",
+   "type": "arts",
+   "capacity": 3016,
+   "tickets": {
+    "box": 2,
+    "resale": 2,
+    "checked": "2026-11-05T02:17:22.836Z",
+    "from": 300
+   }
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Sea-Meow Convention",
+   "date": "2026-11-07",
+   "time": "10:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/sea-meow-convention",
+   "type": "expo"
+  },
+  {
+   "venue": "Husky Stadium",
+   "title": "Washington Huskies Football vs. Penn State Nittany Lions Football",
+   "date": "2026-11-07",
+   "time": "12:30:00",
+   "url": "https://gohuskies.com/sports/football/schedule",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "FS1"
+    ]
+   }
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "SP 101: Intro to VERA's Screen Print Studio",
+   "date": "2026-11-07",
+   "time": "13:00:00",
+   "url": "https://link.dice.fm/X7d86c4dd8bf",
+   "type": "community",
+   "end": "15:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Kraken vs. New York Rangers",
+   "date": "2026-11-07",
+   "time": "14:00:00",
+   "url": "https://www.ticketmaster.com/seattle-kraken-vs-new-york-rangers-seattle-washington-11-07-2026/event/0F0064C4A05AA27A",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Prime Video",
+     "KONG"
+    ]
+   },
+   "capacity": 16061,
+   "tickets": {
+    "box": 0,
+    "resale": 0,
+    "checked": "2026-11-05T01:54:56.705Z",
+    "from": 114.95
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "Lumen Field",
+   "title": "Seattle Sounders FC vs. Los Angeles Football Club",
+   "date": "2026-11-07",
+   "time": "16:00:00",
+   "url": "https://www.ticketmaster.com/seattle-sounders-fc-vs-los-angeles-seattle-washington-11-07-2026/event/0F006383C3AA8409",
+   "type": "sports",
+   "capacity": 70024
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Jake Minch - Getting Big Tour",
+   "date": "2026-11-07",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/x39e423a5b49",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Ghost Stories",
+   "date": "2026-11-07",
+   "time": "19:30:00",
+   "url": "https://www.mccawhall.com/events/detail/ghost-stories",
+   "type": "arts"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Dax with Navv",
+   "date": "2026-11-07",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1451267/dax-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "The Black Angels with GHOSTWOMAN",
+   "date": "2026-11-08",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1408464/the-black-angels-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Genesis Owusu Live on KEXP (Open To The Public)",
+   "date": "2026-11-09",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/genesis-owusu-live-on-kexp-kexp_505797/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Allison Russell Live on KEXP (Open To The Public)",
+   "date": "2026-11-10",
+   "time": "15:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/allison-russell-live-on-kexp-kexp_521452/",
+   "end": "15:30:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Screen Printing Open Session",
+   "date": "2026-11-10",
+   "time": "16:00:00",
+   "url": "https://link.dice.fm/F024f1b76898",
+   "type": "community",
+   "end": "20:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "Convention Center",
+   "title": "AMP 2026 Annual Meeting & Expo",
+   "date": "2026-11-12",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=36236",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "On the Boards",
+   "title": "Alex Tatarsky",
+   "date": "2026-11-12",
+   "time": "19:30:00",
+   "url": "https://ontheboards.org/events/26-27/sad-boys-in-harpy-land"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Yuki Chiba",
+   "date": "2026-11-12",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1533680/yuki-chiba-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Donor Benefits: Behind-the-Scenes Shops Tours",
+   "date": "2026-11-13",
+   "time": "17:00:00",
+   "url": "https://www.sct.org/onstage/productions/donor-benefits-behind-the-scenes-shops-tours/",
+   "type": "community"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "Son Volt, Kelly Willis",
+   "date": "2026-11-13",
+   "time": "19:00:00",
+   "url": "https://www.ticketweb.com/event/son-volt-kelly-willis-the-crocodile-tickets/14896643",
+   "type": "concert",
+   "tickets": {
+    "box": 0,
+    "resale": 0,
+    "checked": "2026-11-05T01:53:43.052Z"
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Inna",
+   "date": "2026-11-13",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1321052/inna-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Ghost Stories",
+   "date": "2026-11-14",
+   "time": "14:00:00",
+   "url": "https://www.mccawhall.com/events/detail/ghost-stories",
+   "type": "arts"
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Ghost Stories",
+   "date": "2026-11-15",
+   "time": "13:00:00",
+   "url": "https://www.mccawhall.com/events/detail/ghost-stories",
+   "type": "arts"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Garth Brooks - Blame It All On My Roots Arena Tour",
+   "date": "2026-11-15",
+   "time": "14:00:00",
+   "url": "https://www.ticketmaster.com/garth-brooks-blame-it-all-on-seattle-washington-11-15-2026/event/0F006550D301B5B7",
+   "type": "concert",
+   "capacity": 16260
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Kraken vs. Vancouver Canucks",
+   "date": "2026-11-19",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-kraken-vs-vancouver-canucks-seattle-washington-11-19-2026/event/0F0064C4A060A28A",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Prime Video",
+     "KONG"
+    ]
+   },
+   "capacity": 16061,
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-05T01:55:39.239Z",
+    "from": 101.99
+   }
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Kraken vs. Anaheim Ducks",
+   "date": "2026-11-23",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-kraken-vs-anaheim-ducks-seattle-washington-11-23-2026/event/0F0064C4A06BA2A4",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Prime Video",
+     "KONG"
+    ]
+   },
+   "capacity": 16061,
+   "tickets": {
+    "box": 0,
+    "resale": 0,
+    "checked": "2026-11-05T01:55:59.256Z",
+    "from": 63.96
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Kraken vs. Chicago Blackhawks",
+   "date": "2026-11-25",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-kraken-vs-chicago-blackhawks-seattle-washington-11-25-2026/event/0F0064C4A071A2AD",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Prime Video",
+     "KING",
+     "KONG"
+    ]
+   },
+   "capacity": 16061,
+   "tickets": {
+    "box": 0,
+    "resale": 0,
+    "checked": "2026-11-05T01:56:19.366Z",
+    "from": 90.75
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Kraken Pregame in the Armory 26/27",
+   "date": "2026-11-28",
+   "time": "17:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/kraken-pregame-in-the-armory-26/27",
+   "free": true,
+   "watch": {
+    "tv": [
+     "SN",
+     "TVAS",
+     "Prime Video",
+     "KONG"
+    ]
+   }
+  }
+ ]
+}

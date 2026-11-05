@@ -6,7 +6,9 @@ import { makeHandler } from './index.mjs';
 // the Lambda reads a site over HTTPS; here it reads this repo's own site/ for
 // one host and a renamed copy of it for another, so the per-site contexts can
 // be told apart
-const site = (f) => readFileSync(new URL(`../site/${f}`, import.meta.url), 'utf8');
+// events.json is the build's output (git-ignored, absent when CI runs the tests), so a 40-row cut of the live
+// feed stands in for it: Kraken games and sold-out shows included
+const site = (f) => readFileSync(new URL(f === 'events.json' ? './fixture-events.json' : `../site/${f}`, import.meta.url), 'utf8');
 const fetched = [];
 const fetchText = async (url) => {
   fetched.push(url);
