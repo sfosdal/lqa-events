@@ -3602,18 +3602,20 @@
   // site's own rule, so a widget shows what its maker saw. A view that shows
   // everything writes the plain snippet. The host and the container id come
   // from the markup's own snippet, which names this site.
-  var embedSnippet = $('embedSnippet');
-  var embedSrc = (/src="([^"]*embed\.js)"/.exec(embedSnippet.textContent) || [])[1] || CITY.site + 'embed.js';
-  var embedId = (/id="([^"]+)"/.exec(embedSnippet.textContent) || [])[1] || 'lqa-events';
+  var embedSnippet = $('embedSnippet'); // absent from a page whose Embed panel predates it: then only the live feed link follows
+  var embedText = embedSnippet ? embedSnippet.textContent : '';
+  var embedSrc = (/src="([^"]*embed\.js)"/.exec(embedText) || [])[1] || CITY.site + 'embed.js';
+  var embedId = (/id="([^"]+)"/.exec(embedText) || [])[1] || 'lqa-events';
   function renderEmbedSnippet() {
+    var live = $('liveFeedLink'); // the Data feeds list: the live feed of this view
+    if (live) live.href = CAL_SERVER ? liveFeedUrl() : 'events.ics';
+    if (!embedSnippet) return;
     var code = LQAFilter.encodeFilterCode(currentModes());
     var attrs = ' data-max="8"';
     if (!/^0+$/.test(code)) attrs += ' data-filter="' + code + '"';
     if (state.q) attrs += ' data-search="' + LQAFilter.encodeSearch(state.q) + '"';
     if (state.soldOnly) attrs += ' data-soldout';
     embedSnippet.textContent = '<div id="' + embedId + '"></div>\n<script src="' + embedSrc + '"' + attrs + ' defer></script>';
-    var live = $('liveFeedLink'); // the Data feeds list: the live feed of this view
-    if (live) live.href = CAL_SERVER ? liveFeedUrl() : 'events.ics';
   }
   $('copyFilterLink').addEventListener('click', function () {
     var code = LQAFilter.encodeFilterCode(currentModes());
