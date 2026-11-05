@@ -27,7 +27,7 @@
 //   { geojson: '<url>', credit: '…' } — a Polygon/MultiPolygon GeoJSON read
 //     once, for a neighbourhood OpenStreetMap has no line for (the City of
 //     Seattle's Neighborhood Map Atlas for Lower Queen Anne and Pioneer Square).
-// The line is clipped to a little past the frame like the roads.
+// The frame grows to take in the whole line (the view opens on the rooms all the same), so the map can zoom out to all of it.
 //
 // Both read-throughs are cached in .cache/ (gitignored) and the output is
 // committed: the Actions build never downloads anything. The labels (towns,
@@ -155,6 +155,17 @@ if (M.kind === 'island') {
   console.log(`island: ${land.length} land ring(s), ${far.length} neighbour(s)`);
 } else if (M.kind === 'urban') {
   let [S, Wl, N, E] = M.bbox;
+  // the frame takes in the whole line of the place, so the view can zoom out to all of it (Steve, 2026-11-05: "allow zooming out to
+  // show the complete city line inside the view for all cities/neighborhoods"); the view still opens on the rooms' box (`home`)
+  const lineRings = M.boundary ? await boundaryRings(M.boundary) : null, roomsBox = [S, Wl, N, E];
+  let grewToLine = false;
+  if (lineRings) {
+    let ls = Infinity, lw = Infinity, ln = -Infinity, le = -Infinity; // a loop, not Math.min(...): a city line can run to six figures of points
+    for (const r of lineRings) for (const [lon, lat] of r) { if (lat < ls) ls = lat; if (lat > ln) ln = lat; if (lon < lw) lw = lon; if (lon > le) le = lon; }
+    const pad = Math.max(ln - ls, le - lw) * .04;
+    const grown = [Math.min(S, ls - pad), Math.min(Wl, lw - pad), Math.max(N, ln + pad), Math.max(E, le + pad)].map(v => +v.toFixed(4));
+    if (grown.some((v, i) => v !== [S, Wl, N, E][i])) { [S, Wl, N, E] = grown; grewToLine = true; console.log(`bbox grown to the whole line → ${grown.join(', ')}`); }
+  }
   const cy = (S + N) / 2, k = Math.cos(cy * Math.PI / 180);
   // the ground is at least `aspect` wide for its height (1.6 unless the block says otherwise): a desktop frame zoomed right out then shows
   // most of its width, and the view never has to leave the data to fill the frame (local-map.js keeps a city ground covered — Steve, 2026-10-25)
@@ -188,12 +199,12 @@ if (M.kind === 'island') {
   }
   let boundary = '';
   if (M.boundary) { // the place's own line, clipped a little past the frame (roads' rule)
-    const rings = await boundaryRings(M.boundary);
-    boundary = rings.flatMap(r => clipPolyline(r.map(px), wide)).map(pc => simplify(pc.pts, M.boundary.tolerance ?? tol / 4)).filter(p => p.length > 1).map(p => pathOf(p, false)).join('');
+    boundary = lineRings.flatMap(r => clipPolyline(r.map(px), wide)).map(pc => simplify(pc.pts, M.boundary.tolerance ?? tol / 4)).filter(p => p.length > 1).map(p => pathOf(p, false)).join('');
     if (!boundary) console.log('boundary: nothing of it inside the frame');
   }
   let home = null;
-  if (M.home) { const [hs, hw, hn, he] = M.home, a = px([hw, hn]), b = px([he, hs]); home = [a[0], a[1], b[0] - a[0], b[1] - a[1]].map(v => +fmt(v)); }
+  const homeBox = M.home || (grewToLine ? roomsBox : null); // a frame grown to the line still opens on the rooms
+  if (homeBox) { const [hs, hw, hn, he] = homeBox, a = px([hw, hn]), b = px([he, hs]); home = [a[0], a[1], b[0] - a[0], b[1] - a[1]].map(v => +fmt(v)); }
   ground = { sea: sea.rings.map(r => pathOf(r)), water: waterRings.map(r => pathOf(r)), roads: Object.fromEntries(Object.entries(roads).map(([c, d]) => [c, d.join('')])), boundary, labels: (M.labels || []).map(toLabel(px)), home,
     credit: 'Shoreline, waters' + (M.boundary?.osm != null ? ', roads and the city line' : ' and roads') + ' © OpenStreetMap contributors, ODbL.' + (M.boundary?.credit ? ' ' + M.boundary.credit : '') };
   console.log(`urban: ${coast.length} coast chain(s) → ${sea.rings.length} sea ring(s), ${waterRings.length} waters, roads ${Object.entries(roads).map(([c, d]) => c + ' ' + d.length).join(', ')}`);
