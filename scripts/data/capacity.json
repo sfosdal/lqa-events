@@ -1,6 +1,6 @@
 {
  "_": "scripts/capacity-seed.mjs — each Ticketmaster event id → its house from the seat-map manifest (0 = no manifest), read from a Mac; the build seeds capacities from it",
- "generated": "2026-11-05T23:15:23.121Z",
+ "generated": "2026-11-06T23:07:14.676Z",
  "events": {
   "0F006183A46A0D87": 3015,
   "0F006383C3AA8409": 70024,
@@ -221,7 +221,11 @@
   "0F006556B05DB9C6": 3015,
   "0F006556BC11D88F": 3015,
   "0F00655DBA7187E3": 3259,
+  "0F006562C4887F64": 16033,
+  "0F006562DDF497B1": 3015,
+  "0F006562DDFA97C6": 3015,
   "0F0065634395F47C": 15838,
+  "0F006564C16194A1": 15558,
   "0F006565A6CD6A5F": 3016,
   "0F006565A6D36A76": 3016,
   "0F006565A6D86A82": 3016,

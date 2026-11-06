@@ -1,17 +1,7 @@
 {
- "generated": "2026-11-05T23:52:52.442Z",
+ "generated": "2026-11-06T23:40:53.484Z",
  "_": "scripts/soldout-check.mjs (a local run — Ticketmaster inventory as a real Chrome sees it, TicketWeb pages (TW… keys, the Crocodile) by plain fetch; committed by scripts/soldout-run.sh). status: available = box-office tickets on sale; soldout = only resale left; none = the inventory call and the page both showed nothing (not treated as sold out); presale = public sale not started; unknown = the page gave no answer; a none/unknown run keeps the last real answer, its own checked time, note says so.",
  "events": {
-  "TW14942023": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "note": "page says Sold Out",
-   "name": "The Tallest Man On Earth, Andrea Von Kampen",
-   "date": "2026-11-05",
-   "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:32.710Z"
-  },
   "TW14795943": {
    "status": "available",
    "primary": null,
@@ -21,7 +11,7 @@
    "name": "Tank and The Bangas - The Last Balloon Tour 2026 w/ Ariel J. & Zeus",
    "date": "2026-11-10",
    "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:33.978Z"
+   "checked": "2026-11-06T23:07:22.964Z"
   },
   "TW14010024": {
    "status": "available",
@@ -32,7 +22,7 @@
    "name": "Armand Hammer, Sha Ray, DJ Haram",
    "date": "2026-11-11",
    "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:34.810Z"
+   "checked": "2026-11-06T23:07:23.724Z"
   },
   "TW14978383": {
    "status": "available",
@@ -43,7 +33,7 @@
    "name": "Nekrogoblikon, Aborted, Signs of the Swarm, Party Cannon",
    "date": "2026-11-12",
    "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:35.603Z"
+   "checked": "2026-11-06T23:07:24.628Z"
   },
   "TW14896643": {
    "status": "soldout",
@@ -53,7 +43,7 @@
    "name": "Son Volt, Kelly Willis",
    "date": "2026-11-13",
    "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:36.270Z"
+   "checked": "2026-11-06T23:07:25.443Z"
   },
   "TW14970773": {
    "status": "available",
@@ -64,7 +54,7 @@
    "name": "Stephen Day Presents: The Self Titled Tour",
    "date": "2026-11-14",
    "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:37.061Z"
+   "checked": "2026-11-06T23:07:26.261Z"
   },
   "TW14866603": {
    "status": "available",
@@ -75,18 +65,18 @@
    "name": "Nite Wave present: The Cure, Depeche Mode & New Order Tribute Night",
    "date": "2026-11-27",
    "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:37.826Z"
+   "checked": "2026-11-06T23:07:26.943Z"
   },
   "TW14171594": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 37.35,
-   "note": "1 of 1 ticket type on sale, availability H, no count",
+   "note": "1 of 1 ticket type on sale, availability M, no count",
    "name": "Buck Meek, Kisser",
    "date": "2026-12-02",
    "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:38.631Z"
+   "checked": "2026-11-06T23:07:27.751Z"
   },
   "TW14768543": {
    "status": "available",
@@ -97,7 +87,7 @@
    "name": "Mohanad Elshieky: Green Books",
    "date": "2026-12-17",
    "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:39.489Z"
+   "checked": "2026-11-06T23:07:28.497Z"
   },
   "TW15033413": {
    "status": "unknown",
@@ -105,7 +95,7 @@
    "name": "Book of Love",
    "date": "2027-02-20",
    "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:40.585Z"
+   "checked": "2026-11-06T23:07:29.596Z"
   },
   "TW14896893": {
    "status": "available",
@@ -116,40 +106,29 @@
    "name": "Death From Above 1979",
    "date": "2027-03-31",
    "venue": "The Crocodile",
-   "checked": "2026-11-05T23:15:41.256Z"
-  },
-  "0F00648DA6968E56": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 108.25,
-   "note": "kept from 2026-11-05: this run unknown (no inventory call)",
-   "name": "Teddy Swims: The UGLY Tour",
-   "date": "2026-11-05",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T01:54:16.655Z"
+   "checked": "2026-11-06T23:07:30.362Z"
   },
   "0F0064AF79DC5465": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
-   "fromResale": 111.86,
-   "note": "40 resale listed on the page",
+   "fromResale": 121.9,
+   "note": "25 resale listed on the page",
    "name": "The Smashing Pumpkins: The Rats In A Cage Tour",
    "date": "2026-11-06",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:16:21.933Z"
+   "checked": "2026-11-06T23:07:50.901Z"
   },
   "0F0064C4A05AA27A": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
-   "fromResale": 96.8,
+   "fromResale": 112.53,
    "note": "40 resale listed on the page",
    "name": "Seattle Kraken vs. New York Rangers",
    "date": "2026-11-07",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:16:42.182Z"
+   "checked": "2026-11-06T23:08:10.995Z"
   },
   "0F006514BB51AC7E": {
    "status": "available",
@@ -160,18 +139,18 @@
    "name": "Ms Lauryn Hill & Wyclef Jean: Celebrating 30 Years of Fugees'The Score",
    "date": "2026-11-10",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:17:02.431Z"
+   "checked": "2026-11-06T23:08:31.048Z"
   },
   "0F0064A9D030C333": {
    "status": "soldout",
    "primary": 0,
-   "resale": 571,
+   "resale": 522,
    "fromPrimary": null,
-   "fromResale": 153,
+   "fromResale": 168,
    "name": "KATSEYE: THE WILDWORLD TOUR",
    "date": "2026-11-17",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:17:04.276Z"
+   "checked": "2026-11-06T23:08:34.275Z"
   },
   "0F0064C4A060A28A": {
    "status": "soldout",
@@ -182,18 +161,18 @@
    "name": "Seattle Kraken vs. Vancouver Canucks",
    "date": "2026-11-19",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:17:24.445Z"
+   "checked": "2026-11-06T23:08:54.309Z"
   },
   "0F0064C4A06BA2A4": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
-   "fromResale": 65.34,
+   "fromResale": 62.92,
    "note": "40 resale listed on the page",
    "name": "Seattle Kraken vs. Anaheim Ducks",
    "date": "2026-11-23",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:17:44.576Z"
+   "checked": "2026-11-06T23:09:14.353Z"
   },
   "0F0064C4A071A2AD": {
    "status": "soldout",
@@ -204,7 +183,7 @@
    "name": "Seattle Kraken vs. Chicago Blackhawks",
    "date": "2026-11-25",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:18:04.586Z"
+   "checked": "2026-11-06T23:09:34.547Z"
   },
   "0F0064C4A077A2BA": {
    "status": "soldout",
@@ -215,18 +194,18 @@
    "name": "Seattle Kraken vs. Edmonton Oilers",
    "date": "2026-11-28",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:18:24.724Z"
+   "checked": "2026-11-06T23:09:54.760Z"
   },
   "0F00650EA2EC8956": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 59,
-   "note": "22 box-office listed on the page, no count",
+   "note": "25 box-office listed on the page, no count",
    "name": "Trans-Siberian Orchestra - The Ghosts Of Christmas Eve",
    "date": "2026-11-29",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:18:44.846Z"
+   "checked": "2026-11-06T23:10:14.876Z"
   },
   "0F00650EA29F88DC": {
    "status": "available",
@@ -237,51 +216,51 @@
    "name": "Trans-Siberian Orchestra - The Ghosts Of Christmas Eve",
    "date": "2026-11-29",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:19:05.060Z"
+   "checked": "2026-11-06T23:10:34.994Z"
   },
   "0F0064C4A07DA2C0": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 65.54,
-   "note": "3 box-office listed on the page, no count",
+   "note": "1 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Dallas Stars",
    "date": "2026-12-01",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:19:25.069Z"
+   "checked": "2026-11-06T23:10:55.018Z"
   },
   "0F0064C4A082A2C8": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
-   "fromResale": 61.5,
+   "fromResale": 60.5,
    "note": "40 resale listed on the page",
    "name": "Seattle Kraken vs. Dallas Stars",
    "date": "2026-12-03",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:19:45.254Z"
+   "checked": "2026-11-06T23:11:15.037Z"
   },
   "0F00650D9D7768D8": {
    "status": "available",
-   "primary": 1457,
-   "resale": 565,
+   "primary": 1334,
+   "resale": 561,
    "fromPrimary": 49.95,
-   "fromResale": 50,
+   "fromResale": 65,
    "name": "Jonas Brothers: The Burning Up Tour All Over Again",
    "date": "2026-12-05",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:19:47.504Z"
+   "checked": "2026-11-06T23:11:17.025Z"
   },
   "0F0064C4A088A2D0": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 89.84,
-   "note": "10 box-office listed on the page, no count",
+   "note": "7 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Buffalo Sabres",
    "date": "2026-12-06",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:20:07.515Z"
+   "checked": "2026-11-06T23:11:37.255Z"
   },
   "0F00649DD1062FF0": {
    "status": "soldout",
@@ -291,7 +270,7 @@
    "name": "Olivia Rodrigo: The Unraveled Tour",
    "date": "2026-12-07",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:20:12.083Z"
+   "checked": "2026-11-06T23:11:41.529Z"
   },
   "0F00649DE731624A": {
    "status": "soldout",
@@ -301,18 +280,18 @@
    "name": "Olivia Rodrigo: The Unraveled Tour",
    "date": "2026-12-08",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:20:16.589Z"
+   "checked": "2026-11-06T23:11:45.591Z"
   },
   "0F0064C4A08EA2DD": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 70.69,
-   "note": "19 box-office listed on the page, no count",
+   "note": "21 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Washington Capitals",
    "date": "2026-12-10",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:20:36.616Z"
+   "checked": "2026-11-06T23:12:05.775Z"
   },
   "0F0064C4A094A2E8": {
    "status": "available",
@@ -323,7 +302,7 @@
    "name": "Seattle Kraken vs. Nashville Predators",
    "date": "2026-12-12",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:20:56.848Z"
+   "checked": "2026-11-06T23:12:25.891Z"
   },
   "0F0064DD9FEB8A18": {
    "status": "available",
@@ -334,29 +313,29 @@
    "name": "Seattle Holiday Classic: SU v WSU and UW v Baylor",
    "date": "2026-12-19",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:21:16.888Z"
+   "checked": "2026-11-06T23:12:46.141Z"
   },
   "0F006537D6A8D07B": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 41.9,
-   "note": "33 box-office listed on the page, no count",
+   "note": "34 box-office listed on the page, no count",
    "name": "Seattle Torrent vs. PWHL Las Vegas",
    "date": "2026-12-20",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:21:37.066Z"
+   "checked": "2026-11-06T23:13:06.234Z"
   },
   "0F0064C4A099A2F2": {
    "status": "available",
    "primary": null,
    "resale": 0,
-   "fromPrimary": 101.99,
-   "note": "5 box-office listed on the page, no count",
+   "fromPrimary": 119.24,
+   "note": "4 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. San Jose Sharks",
    "date": "2026-12-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:21:57.263Z"
+   "checked": "2026-11-06T23:13:26.253Z"
   },
   "0F00653DCD23C7D7": {
    "status": "available",
@@ -367,7 +346,7 @@
    "name": "Seattle Torrent vs. Boston Fleet",
    "date": "2026-12-23",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:22:17.344Z"
+   "checked": "2026-11-06T23:13:46.382Z"
   },
   "0F00653DCD26C7DB": {
    "status": "available",
@@ -378,7 +357,7 @@
    "name": "Seattle Torrent vs. Minnesota Frost",
    "date": "2026-12-27",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:22:37.393Z"
+   "checked": "2026-11-06T23:14:06.634Z"
   },
   "0F0064C4A09FA2FA": {
    "status": "available",
@@ -389,7 +368,7 @@
    "name": "Seattle Kraken vs. Philadelphia Flyers",
    "date": "2026-12-29",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:22:57.634Z"
+   "checked": "2026-11-06T23:14:26.756Z"
   },
   "0F00653DCD29C7E2": {
    "status": "available",
@@ -400,29 +379,29 @@
    "name": "Seattle Torrent vs. New York Sirens",
    "date": "2026-12-31",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:23:17.705Z"
+   "checked": "2026-11-06T23:14:46.898Z"
   },
   "0F0064C4A0A5A304": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 101.99,
-   "note": "20 box-office listed on the page, no count",
+   "note": "11 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. New York Islanders",
    "date": "2027-01-02",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:23:37.945Z"
+   "checked": "2026-11-06T23:15:07.064Z"
   },
   "0F0064C4A0AAA30B": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 131.34,
-   "note": "9 box-office listed on the page, no count",
+   "note": "40 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Vancouver Canucks",
    "date": "2027-01-03",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:23:58.123Z"
+   "checked": "2026-11-06T23:15:27.150Z"
   },
   "0F0064C4A0B0A312": {
    "status": "available",
@@ -433,7 +412,7 @@
    "name": "Seattle Kraken vs. Tampa Bay Lightning",
    "date": "2027-01-05",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:24:18.246Z"
+   "checked": "2026-11-06T23:15:47.254Z"
   },
   "0F00653DCD2CC7EA": {
    "status": "available",
@@ -444,40 +423,40 @@
    "name": "Seattle Torrent vs. Ottawa Charge",
    "date": "2027-01-08",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:24:38.390Z"
+   "checked": "2026-11-06T23:16:07.385Z"
   },
   "0F00653DCD2EC7F2": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 45,
-   "note": "40 box-office listed on the page, no count",
+   "note": "39 box-office listed on the page, no count",
    "name": "Seattle Torrent vs. Montréal Victoire",
    "date": "2027-01-10",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:24:58.607Z"
+   "checked": "2026-11-06T23:16:27.515Z"
   },
   "0F0064C4A0B6A31C": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 65.54,
-   "note": "17 box-office listed on the page, no count",
+   "note": "18 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Florida Panthers",
    "date": "2027-01-12",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:25:18.849Z"
+   "checked": "2026-11-06T23:16:47.597Z"
   },
   "0F00653DCD31C7F8": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 35.2,
-   "note": "38 box-office listed on the page, no count",
+   "note": "37 box-office listed on the page, no count",
    "name": "Seattle Torrent vs. PWHL Hamilton",
    "date": "2027-01-14",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:25:39.006Z"
+   "checked": "2026-11-06T23:17:07.668Z"
   },
   "0F0064C4A0BDA322": {
    "status": "available",
@@ -488,18 +467,18 @@
    "name": "Seattle Kraken vs. San Jose Sharks",
    "date": "2027-01-16",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:25:59.138Z"
+   "checked": "2026-11-06T23:17:27.915Z"
   },
   "0F0064C4A007A195": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 89.84,
-   "note": "17 box-office listed on the page, no count",
+   "note": "18 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Columbus Blue Jackets",
    "date": "2027-01-18",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:26:19.272Z"
+   "checked": "2026-11-06T23:17:48.089Z"
   },
   "0F006522A8949905": {
    "status": "available",
@@ -510,7 +489,7 @@
    "name": "Limited Edition Rivals Replica Game Ball From Spalding®",
    "date": "2027-01-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:26:21.045Z"
+   "checked": "2026-11-06T23:17:49.820Z"
   },
   "0F006529C189C484": {
    "status": "available",
@@ -521,7 +500,7 @@
    "name": "Ultimate Fan Pass: 30-min Exclusive On-court Access From 5:30pm-6:00pm",
    "date": "2027-01-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:26:22.964Z"
+   "checked": "2026-11-06T23:17:51.846Z"
   },
   "0F006529BE5FBF5F": {
    "status": "available",
@@ -532,7 +511,7 @@
    "name": "MVP Court Pass (check In By 6:30pm)",
    "date": "2027-01-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:26:25.093Z"
+   "checked": "2026-11-06T23:17:53.827Z"
   },
   "0F006528C6C4C6E8": {
    "status": "available",
@@ -543,51 +522,51 @@
    "name": "Harlem Globetrotters: Rivalry Tour Presented By Sprite",
    "date": "2027-01-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:26:45.278Z"
+   "checked": "2026-11-06T23:18:13.860Z"
   },
   "0F006537EA25EB2C": {
    "status": "available",
-   "primary": 4848,
+   "primary": 4844,
    "resale": 0,
    "fromPrimary": 10,
    "fromResale": null,
    "name": "Harlem Globetrotters - CPA Club Fee",
    "date": "2027-01-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:26:47.506Z"
+   "checked": "2026-11-06T23:18:15.951Z"
   },
   "0F0064AEAA9AA408": {
    "status": "available",
-   "primary": 3420,
-   "resale": 677,
+   "primary": 3415,
+   "resale": 676,
    "fromPrimary": 59.5,
-   "fromResale": 28,
+   "fromResale": 25,
    "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
    "date": "2027-01-26",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:26:49.502Z"
+   "checked": "2026-11-06T23:18:18.364Z"
   },
   "0F0064BBF94F49AA": {
    "status": "available",
-   "primary": 3122,
-   "resale": 676,
+   "primary": 3119,
+   "resale": 677,
    "fromPrimary": 59.5,
    "fromResale": 24,
    "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
    "date": "2027-01-27",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:26:51.127Z"
+   "checked": "2026-11-06T23:18:20.449Z"
   },
   "0F0064BBF95C49C8": {
    "status": "available",
-   "primary": 584,
-   "resale": 665,
+   "primary": 582,
+   "resale": 672,
    "fromPrimary": 79.5,
    "fromResale": 41,
    "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
    "date": "2027-01-29",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:26:53.075Z"
+   "checked": "2026-11-06T23:18:22.548Z"
   },
   "0F006531BB8DC2EC": {
    "status": "available",
@@ -598,29 +577,29 @@
    "name": "Battle In Seattle: Gonzaga vs. Oregon",
    "date": "2027-01-30",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:27:13.187Z"
+   "checked": "2026-11-06T23:18:42.670Z"
   },
   "0F0064C4A0C3A335": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 89.84,
-   "note": "24 box-office listed on the page, no count",
+   "note": "21 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. New Jersey Devils",
    "date": "2027-01-31",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:27:33.228Z"
+   "checked": "2026-11-06T23:19:02.825Z"
   },
   "0F00653DCD34C801": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 37.25,
-   "note": "39 box-office listed on the page, no count",
+   "note": "38 box-office listed on the page, no count",
    "name": "Seattle Torrent vs. Vancouver Goldeneyes",
    "date": "2027-02-04",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:27:53.349Z"
+   "checked": "2026-11-06T23:19:22.913Z"
   },
   "0F0064D566E22386": {
    "status": "available",
@@ -631,7 +610,7 @@
    "name": "Don Omar \"The Last King World Tour\"",
    "date": "2027-02-07",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:28:13.426Z"
+   "checked": "2026-11-06T23:19:43.152Z"
   },
   "0F00653DCD37C803": {
    "status": "available",
@@ -642,7 +621,7 @@
    "name": "Seattle Torrent vs. PWHL Detroit",
    "date": "2027-02-13",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:28:33.593Z"
+   "checked": "2026-11-06T23:20:03.378Z"
   },
   "0F0064C4A0D0A352": {
    "status": "available",
@@ -653,18 +632,18 @@
    "name": "Seattle Kraken vs. St. Louis Blues",
    "date": "2027-02-13",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:28:53.807Z"
+   "checked": "2026-11-06T23:20:23.635Z"
   },
   "0F0064C4A0D5A35B": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 155.54,
-   "note": "18 box-office listed on the page, no count",
+   "note": "19 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Pittsburgh Penguins",
    "date": "2027-02-15",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:29:13.909Z"
+   "checked": "2026-11-06T23:20:43.874Z"
   },
   "0F0064C4A0DBA369": {
    "status": "available",
@@ -675,40 +654,40 @@
    "name": "Seattle Kraken vs. Ottawa Senators",
    "date": "2027-02-17",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:29:34.112Z"
+   "checked": "2026-11-06T23:21:03.893Z"
   },
   "0F0064C4A00DA1AA": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 131.34,
-   "note": "21 box-office listed on the page, no count",
+   "note": "19 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Boston Bruins",
    "date": "2027-02-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:29:54.209Z"
+   "checked": "2026-11-06T23:21:24.016Z"
   },
   "0F0064C4A013A1BA": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 101.99,
-   "note": "13 box-office listed on the page, no count",
+   "note": "11 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Winnipeg Jets",
    "date": "2027-02-27",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:30:14.443Z"
+   "checked": "2026-11-06T23:21:44.023Z"
   },
   "0F00653DCD3AC80D": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 40.9,
-   "note": "38 box-office listed on the page, no count",
+   "note": "37 box-office listed on the page, no count",
    "name": "Seattle Torrent vs. PWHL Las Vegas",
    "date": "2027-02-28",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:30:34.619Z"
+   "checked": "2026-11-06T23:22:04.242Z"
   },
   "0F0064C4A019A1C3": {
    "status": "available",
@@ -719,7 +698,7 @@
    "name": "Seattle Kraken vs. Los Angeles Kings",
    "date": "2027-03-11",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:30:54.650Z"
+   "checked": "2026-11-06T23:22:24.396Z"
   },
   "0F0064C4A020A1E8": {
    "status": "available",
@@ -730,7 +709,7 @@
    "name": "Seattle Kraken vs. Edmonton Oilers",
    "date": "2027-03-13",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:31:14.705Z"
+   "checked": "2026-11-06T23:22:44.506Z"
   },
   "0F0064C4A0E1A372": {
    "status": "available",
@@ -741,18 +720,18 @@
    "name": "Seattle Kraken vs. St. Louis Blues",
    "date": "2027-03-15",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:31:34.928Z"
+   "checked": "2026-11-06T23:23:04.717Z"
   },
   "0F0064C4A066A29F": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 155.54,
-   "note": "22 box-office listed on the page, no count",
+   "note": "19 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Colorado Avalanche",
    "date": "2027-03-19",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:31:55.159Z"
+   "checked": "2026-11-06T23:23:24.914Z"
   },
   "0F0064C4A0E7A37D": {
    "status": "available",
@@ -763,18 +742,18 @@
    "name": "Seattle Kraken vs. Los Angeles Kings",
    "date": "2027-03-21",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:32:15.324Z"
+   "checked": "2026-11-06T23:23:45.086Z"
   },
   "0F006541D298D33B": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 93.8,
-   "note": "32 box-office listed on the page, no count",
+   "note": "29 box-office listed on the page, no count",
    "name": "Dancing with the Stars: Live! - 2027 Tour",
    "date": "2027-03-22",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:32:35.404Z"
+   "checked": "2026-11-06T23:24:05.196Z"
   },
   "0F0064C4A0ECA388": {
    "status": "available",
@@ -785,7 +764,7 @@
    "name": "Seattle Kraken vs. Vegas Golden Knights",
    "date": "2027-03-23",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:32:55.415Z"
+   "checked": "2026-11-06T23:24:25.218Z"
   },
   "0F00653DE1E2F0DB": {
    "status": "available",
@@ -796,7 +775,7 @@
    "name": "Greta Van Fleet - Into The Beginning",
    "date": "2027-03-24",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:33:15.634Z"
+   "checked": "2026-11-06T23:24:45.279Z"
   },
   "0F0064C4A0F3A396": {
    "status": "available",
@@ -807,18 +786,18 @@
    "name": "Seattle Kraken vs. Anaheim Ducks",
    "date": "2027-03-25",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:33:35.834Z"
+   "checked": "2026-11-06T23:25:05.476Z"
   },
   "0F00653DD76CDC06": {
    "status": "available",
-   "primary": 2581,
-   "resale": 535,
+   "primary": 2558,
+   "resale": 536,
    "fromPrimary": 40.5,
    "fromResale": 58,
    "name": "Staind: Break The Cycle 25th Anniversary Tour",
    "date": "2027-03-27",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:33:38.091Z"
+   "checked": "2026-11-06T23:25:07.644Z"
   },
   "0F0064C4A0F9A39D": {
    "status": "available",
@@ -829,7 +808,7 @@
    "name": "Seattle Kraken vs. Utah Mammoth",
    "date": "2027-03-30",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:33:58.246Z"
+   "checked": "2026-11-06T23:25:27.688Z"
   },
   "0F00653DCD3DC81A": {
    "status": "available",
@@ -840,7 +819,7 @@
    "name": "Seattle Torrent vs. Toronto Sceptres",
    "date": "2027-03-31",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:34:18.313Z"
+   "checked": "2026-11-06T23:25:47.738Z"
   },
   "0F00653091695C25": {
    "status": "available",
@@ -851,29 +830,29 @@
    "name": "Riley Green: That's Just Me Tour",
    "date": "2027-04-02",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:34:38.500Z"
+   "checked": "2026-11-06T23:26:07.946Z"
   },
   "0F0064C4A0FFA3A7": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 101.99,
-   "note": "26 box-office listed on the page, no count",
+   "note": "25 box-office listed on the page, no count",
    "name": "Seattle Kraken vs. Winnipeg Jets",
    "date": "2027-04-03",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:34:58.619Z"
+   "checked": "2026-11-06T23:26:27.962Z"
   },
   "0F00653DCD40C824": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 38.3,
-   "note": "39 box-office listed on the page, no count",
+   "note": "38 box-office listed on the page, no count",
    "name": "Seattle Torrent vs. Vancouver Goldeneyes",
    "date": "2027-04-06",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:35:18.853Z"
+   "checked": "2026-11-06T23:26:48.118Z"
   },
   "0F006529E2ABFCEB": {
    "status": "available",
@@ -884,7 +863,7 @@
    "name": "HANS ZIMMER LIVE - THE NEXT LEVEL",
    "date": "2027-04-09",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:35:39.062Z"
+   "checked": "2026-11-06T23:27:08.127Z"
   },
   "0F006542F75B398E": {
    "status": "available",
@@ -895,29 +874,29 @@
    "name": "Nickelback: Everything Under The Sun Tour",
    "date": "2027-04-10",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:35:59.284Z"
+   "checked": "2026-11-06T23:27:28.279Z"
   },
   "0F00653DCD43C82D": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 45,
-   "note": "39 box-office listed on the page, no count",
+   "note": "40 box-office listed on the page, no count",
    "name": "Seattle Torrent vs. PWHL San Jose",
    "date": "2027-04-17",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:36:19.372Z"
+   "checked": "2026-11-06T23:27:48.416Z"
   },
   "0F006554AA2D7170": {
    "status": "available",
-   "primary": 4273,
-   "resale": 215,
+   "primary": 4205,
+   "resale": 217,
    "fromPrimary": 39.5,
    "fromResale": 67,
    "name": "Queens of The Stone Age - PERFECTH WORLD TOUR",
    "date": "2027-05-07",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:36:21.608Z"
+   "checked": "2026-11-06T23:27:50.730Z"
   },
   "0F00654293525E5F": {
    "status": "available",
@@ -928,14 +907,14 @@
    "name": "Def Leppard and Goo Goo Dolls  ",
    "date": "2027-05-09",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:36:41.642Z"
+   "checked": "2026-11-06T23:28:10.973Z"
   },
   "0F0065499FD7760A": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
    "fromResale": 278.3,
-   "note": "40 resale listed on the page",
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)",
    "name": "Calvin Harris - North America Tour",
    "date": "2027-05-14",
    "venue": "Climate Pledge Arena",
@@ -946,7 +925,7 @@
    "primary": 0,
    "resale": 0,
    "fromResale": 307.05,
-   "note": "38 resale listed on the page",
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)",
    "name": "Calvin Harris - North America Tour",
    "date": "2027-05-15",
    "venue": "Climate Pledge Arena",
@@ -954,14 +933,14 @@
   },
   "0F0064A6DAB644A1": {
    "status": "available",
-   "primary": 2967,
+   "primary": 2963,
    "resale": 109,
    "fromPrimary": 59.5,
    "fromResale": 80,
    "name": "Niall Horan: Dinner Party Live On Tour",
    "date": "2027-05-27",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:37:23.982Z"
+   "checked": "2026-11-06T23:28:53.985Z"
   },
   "0F0065352E956033": {
    "status": "available",
@@ -972,40 +951,40 @@
    "name": "A Perfect Circle with special guest The Cult",
    "date": "2027-05-30",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:37:44.021Z"
+   "checked": "2026-11-06T23:29:14.113Z"
   },
   "0F00653207A196E3": {
    "status": "available",
-   "primary": 4529,
+   "primary": 4511,
    "resale": 0,
    "fromPrimary": 39.5,
    "fromResale": null,
    "name": "Lizzy McAlpine: The Over Country Tour",
    "date": "2027-07-17",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:37:45.632Z"
+   "checked": "2026-11-06T23:29:16.487Z"
   },
   "0F006546BF749849": {
    "status": "available",
-   "primary": 2873,
+   "primary": 2864,
    "resale": 0,
    "fromPrimary": 59.5,
    "fromResale": null,
    "name": "Leon Bridges Presents: The Happiness Anytime Tour",
    "date": "2027-08-13",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:37:47.289Z"
+   "checked": "2026-11-06T23:29:18.888Z"
   },
   "0F006482E68374A4": {
    "status": "available",
-   "primary": 57,
-   "resale": 3757,
-   "fromPrimary": 155,
-   "fromResale": 120,
+   "primary": 134,
+   "resale": 4210,
+   "fromPrimary": 120,
+   "fromResale": 105,
    "name": "Seattle Seahawks vs. Arizona Cardinals",
    "date": "2026-11-08",
    "venue": "Lumen Field",
-   "checked": "2026-11-05T23:37:49.725Z"
+   "checked": "2026-11-06T23:29:21.344Z"
   },
   "0F006482E68C74B1": {
    "status": "available",
@@ -1016,40 +995,41 @@
    "name": "Seattle Seahawks vs. Dallas Cowboys",
    "date": "2026-12-07",
    "venue": "Lumen Field",
-   "checked": "2026-11-05T23:37:51.967Z"
+   "checked": "2026-11-05T23:37:51.967Z",
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)"
   },
   "0F006482E69E74E3": {
    "status": "available",
-   "primary": 48,
-   "resale": 2281,
+   "primary": 44,
+   "resale": 2311,
    "fromPrimary": 220,
    "fromResale": 188,
    "name": "Seattle Seahawks vs. New York Giants",
    "date": "2026-12-13",
    "venue": "Lumen Field",
-   "checked": "2026-11-05T23:37:54.545Z"
+   "checked": "2026-11-06T23:29:44.391Z"
   },
   "0F006482E69A74E0": {
    "status": "available",
-   "primary": 71,
-   "resale": 4929,
+   "primary": 69,
+   "resale": 4963,
    "fromPrimary": 270,
-   "fromResale": 235,
+   "fromResale": 225,
    "name": "Seattle Seahawks vs. Los Angeles Rams",
    "date": "2026-12-25",
    "venue": "Lumen Field",
-   "checked": "2026-11-05T23:37:56.742Z"
+   "checked": "2026-11-06T23:29:47.036Z"
   },
   "0F00652CCB6EAB83": {
    "status": "available",
-   "primary": 21329,
-   "resale": 1467,
+   "primary": 21314,
+   "resale": 1475,
    "fromPrimary": 25,
    "fromResale": 54,
    "name": "Monster Energy AMA Supercross",
    "date": "2027-03-20",
    "venue": "Lumen Field",
-   "checked": "2026-11-05T23:37:58.940Z"
+   "checked": "2026-11-06T23:29:49.708Z"
   },
   "0F00654C3F7D1083": {
    "status": "available",
@@ -1060,73 +1040,62 @@
    "name": "Zach Bryan",
    "date": "2027-07-24",
    "venue": "Lumen Field",
-   "checked": "2026-11-05T23:38:19.143Z"
-  },
-  "0F0064E9B2C19116": {
-   "status": "available",
-   "primary": 1,
-   "resale": 14,
-   "fromPrimary": 250,
-   "fromResale": 112,
-   "name": "Oh, Mary! (Touring)",
-   "date": "2026-11-05",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:21.116Z"
+   "checked": "2026-11-06T23:30:09.939Z"
   },
   "0F0064E9B2C6911C": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 3,
-   "fromPrimary": null,
-   "fromResale": 154,
+   "status": "available",
+   "primary": 2,
+   "resale": 4,
+   "fromPrimary": 300,
+   "fromResale": 231.44,
    "name": "Oh, Mary! (Touring)",
    "date": "2026-11-06",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:23.522Z"
+   "checked": "2026-11-06T23:30:11.943Z"
   },
   "0F0064E9B2CA9123": {
    "status": "soldout",
    "primary": 0,
-   "resale": 58,
+   "resale": 44,
    "fromPrimary": null,
    "fromResale": 145.48,
    "name": "Oh, Mary! (Touring)",
    "date": "2026-11-07",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:25.889Z"
+   "checked": "2026-11-06T23:30:14.238Z"
   },
   "0F0064E9B2D0912E": {
-   "status": "available",
-   "primary": 4,
-   "resale": 24,
-   "fromPrimary": 100,
-   "fromResale": 114,
+   "status": "soldout",
+   "primary": 0,
+   "resale": 15,
+   "fromPrimary": null,
+   "fromResale": 100,
    "name": "Oh, Mary! (Touring)",
    "date": "2026-11-07",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:28.073Z"
+   "checked": "2026-11-06T23:30:16.531Z"
   },
   "0F0064E9B2D59138": {
    "status": "soldout",
    "primary": 0,
-   "resale": 12,
+   "resale": 8,
    "fromPrimary": null,
-   "fromResale": 180,
+   "fromResale": 175,
    "name": "Oh, Mary! (Touring)",
    "date": "2026-11-08",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:30.272Z"
+   "checked": "2026-11-06T23:30:18.914Z"
   },
   "0F0064E9B2DC9148": {
    "status": "available",
-   "primary": 14,
-   "resale": 8,
-   "fromPrimary": 130,
-   "fromResale": 150,
+   "primary": 9,
+   "resale": 12,
+   "fromPrimary": 300,
+   "fromResale": 178.54,
    "name": "Oh, Mary! (Touring)",
    "date": "2026-11-08",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:32.283Z"
+   "checked": "2026-11-06T23:30:21.540Z"
   },
   "0F006524C7B5EA35": {
    "status": "available",
@@ -1137,40 +1106,41 @@
    "name": "ISAIAH RASHAD: Lil Sunny's Awful Road Trip",
    "date": "2026-11-10",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:34.279Z"
+   "checked": "2026-11-05T23:38:34.279Z",
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)"
   },
   "0F006454C38B1B44": {
    "status": "available",
-   "primary": 869,
+   "primary": 840,
    "resale": 0,
    "fromPrimary": 32.5,
    "fromResale": null,
    "name": "World Ballet Company: Swan Lake with LIVE Orchestra",
    "date": "2026-11-13",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:36.692Z"
+   "checked": "2026-11-06T23:30:44.483Z"
   },
   "0F0064C4AE4ABBB2": {
    "status": "available",
-   "primary": 30,
-   "resale": 196,
+   "primary": 26,
+   "resale": 189,
    "fromPrimary": 65,
    "fromResale": 48.88,
    "name": "Underoath - Define the Great Line 20th Anniversary Tour",
    "date": "2026-11-16",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:39.057Z"
+   "checked": "2026-11-06T23:30:46.443Z"
   },
   "0F00655DBA7187E3": {
    "status": "available",
-   "primary": 1167,
+   "primary": 1120,
    "resale": 0,
    "fromPrimary": 39.5,
    "fromResale": null,
    "name": "TYLA - THE A*POP WORLD TOUR",
    "date": "2026-11-17",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:42.155Z"
+   "checked": "2026-11-06T23:30:49.178Z"
   },
   "0F0064ADCA81ECD3": {
    "status": "available",
@@ -1181,38 +1151,39 @@
    "name": "Straight No Chaser",
    "date": "2026-11-19",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:44.363Z"
+   "checked": "2026-11-05T23:38:44.363Z",
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)"
   },
   "0F00645BABCAB137": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
-   "note": "kept from 2026-11-05: this run none",
+   "note": "page says sold out",
    "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
    "date": "2026-11-20",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T02:18:00.629Z"
+   "checked": "2026-11-06T23:31:14.040Z"
   },
   "0F00645BABD0B13D": {
    "status": "available",
-   "primary": 474,
+   "primary": 463,
    "resale": 0,
    "fromPrimary": 54.99,
    "fromResale": null,
    "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
    "date": "2026-11-20",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:38:55.662Z"
+   "checked": "2026-11-06T23:31:15.708Z"
   },
   "0F00645BABDAB14A": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
-   "note": "kept from 2026-11-03: this run none",
+   "note": "page says sold out",
    "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
    "date": "2026-11-21",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-03T23:49:20.678Z"
+   "checked": "2026-11-06T23:31:20.119Z"
   },
   "0F0064861ECBE435": {
    "status": "available",
@@ -1223,7 +1194,7 @@
    "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
    "date": "2026-11-21",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:06.885Z"
+   "checked": "2026-11-06T23:31:22.390Z"
   },
   "0F00645BABD5B143": {
    "status": "soldout",
@@ -1233,7 +1204,7 @@
    "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
    "date": "2026-11-21",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:12.346Z"
+   "checked": "2026-11-06T23:31:26.597Z"
   },
   "0F0064BBAD73B4CA": {
    "status": "available",
@@ -1244,39 +1215,39 @@
    "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
    "date": "2026-11-22",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:14.521Z"
+   "checked": "2026-11-06T23:31:29.053Z"
   },
   "0F00645BABE0B152": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
-   "note": "kept from 2026-11-03: this run none",
+   "note": "page says sold out",
    "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
    "date": "2026-11-22",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-03T21:40:50.417Z"
+   "checked": "2026-11-06T23:31:32.991Z"
   },
   "0F00649ED359E61C": {
    "status": "available",
-   "primary": 1718,
+   "primary": 1716,
    "resale": 2,
    "fromPrimary": 39.5,
    "fromResale": 116.5,
    "name": "Scott Bradlee's Postmodern Jukebox",
    "date": "2026-11-24",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:26.131Z"
+   "checked": "2026-11-06T23:31:35.063Z"
   },
   "0F0064FDB1719934": {
    "status": "available",
-   "primary": 673,
+   "primary": 667,
    "resale": 55,
    "fromPrimary": 60,
-   "fromResale": 56,
+   "fromResale": 58,
    "name": "The Outsiders (Touring)",
    "date": "2026-11-27",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:28.571Z"
+   "checked": "2026-11-06T23:31:36.932Z"
   },
   "0F0064FDB177993F": {
    "status": "available",
@@ -1287,62 +1258,63 @@
    "name": "The Outsiders (Touring)",
    "date": "2026-11-28",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:30.706Z"
+   "checked": "2026-11-05T23:39:30.706Z",
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)"
   },
   "0F0064FDB17C9946": {
    "status": "available",
    "primary": 836,
-   "resale": 76,
+   "resale": 73,
    "fromPrimary": 60,
    "fromResale": 44,
    "name": "The Outsiders (Touring)",
    "date": "2026-11-28",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:32.904Z"
+   "checked": "2026-11-06T23:31:59.304Z"
   },
   "0F0064FDB1819948": {
    "status": "available",
-   "primary": 486,
-   "resale": 111,
+   "primary": 479,
+   "resale": 109,
    "fromPrimary": 60,
    "fromResale": 55,
    "name": "The Outsiders (Touring)",
    "date": "2026-11-29",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:35.105Z"
+   "checked": "2026-11-06T23:32:01.693Z"
   },
   "0F0064FDB186994F": {
    "status": "available",
-   "primary": 1298,
-   "resale": 15,
+   "primary": 1285,
+   "resale": 12,
    "fromPrimary": 60,
-   "fromResale": 55,
+   "fromResale": 57,
    "name": "The Outsiders (Touring)",
    "date": "2026-11-29",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:37.522Z"
+   "checked": "2026-11-06T23:32:03.693Z"
   },
   "0F0064FDB18C9969": {
    "status": "available",
-   "primary": 1523,
+   "primary": 1521,
    "resale": 8,
    "fromPrimary": 55,
    "fromResale": 54,
    "name": "The Outsiders (Touring)",
    "date": "2026-12-01",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:40.166Z"
+   "checked": "2026-11-06T23:32:07.050Z"
   },
   "0F0064FDB1919979": {
    "status": "available",
-   "primary": 1393,
-   "resale": 22,
+   "primary": 1386,
+   "resale": 20,
    "fromPrimary": 55,
    "fromResale": 58,
    "name": "The Outsiders (Touring)",
    "date": "2026-12-02",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:42.751Z"
+   "checked": "2026-11-06T23:32:09.681Z"
   },
   "0F0064FDB1979980": {
    "status": "available",
@@ -1353,75 +1325,74 @@
    "name": "The Outsiders (Touring)",
    "date": "2026-12-03",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:44.660Z"
+   "checked": "2026-11-05T23:39:44.660Z",
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)"
   },
   "0F0064FDB19E9987": {
    "status": "available",
-   "primary": 1680,
-   "resale": 12,
+   "primary": 1730,
+   "resale": 14,
    "fromPrimary": 55,
-   "fromResale": 108,
+   "fromResale": 120,
    "name": "The Outsiders (Touring)",
    "date": "2026-12-04",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T02:20:31.807Z",
-   "note": "kept from 2026-11-05: this run none"
+   "checked": "2026-11-06T23:32:31.917Z"
   },
   "0F0064FDB1A59990": {
    "status": "available",
-   "primary": 1432,
-   "resale": 21,
+   "primary": 1421,
+   "resale": 19,
    "fromPrimary": 60,
    "fromResale": 120,
    "name": "The Outsiders (Touring)",
    "date": "2026-12-05",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:39:56.899Z"
+   "checked": "2026-11-06T23:32:33.993Z"
   },
   "0F0064FDB1AB999C": {
    "status": "available",
-   "primary": 1950,
+   "primary": 1946,
    "resale": 47,
    "fromPrimary": 55,
    "fromResale": 85,
    "name": "The Outsiders (Touring)",
    "date": "2026-12-05",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T02:20:37.480Z",
-   "note": "kept from 2026-11-05: this run none"
+   "checked": "2026-11-06T23:32:36.484Z"
   },
   "0F0064FDB1B599AB": {
    "status": "available",
-   "primary": 1857,
+   "primary": 1847,
    "resale": 38,
    "fromPrimary": 60,
    "fromResale": 120,
    "name": "The Outsiders (Touring)",
    "date": "2026-12-06",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:40:09.573Z"
+   "checked": "2026-11-06T23:32:38.488Z"
   },
   "0F0064FDB1BB99B3": {
    "status": "available",
-   "primary": 1856,
+   "primary": 1869,
    "resale": 29,
    "fromPrimary": 55,
    "fromResale": 126,
    "name": "The Outsiders (Touring)",
    "date": "2026-12-06",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:40:12.842Z"
+   "checked": "2026-11-06T23:32:40.754Z"
   },
   "0F0064F0E52BE2E9": {
    "status": "available",
-   "primary": 1149,
+   "primary": 1130,
    "resale": 14,
    "fromPrimary": 54.5,
-   "fromResale": 79,
+   "fromResale": 73,
    "name": "TRIVIUM: CROWN IN THE GRAVE WORLD TOUR",
    "date": "2026-12-09",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:40:15.925Z"
+   "checked": "2026-11-06T23:32:42.795Z"
   },
   "0F0064D2A7049DB8": {
    "status": "soldout",
@@ -1431,51 +1402,51 @@
    "name": "Angine de Poitrine",
    "date": "2026-12-13",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:40:21.314Z"
+   "checked": "2026-11-06T23:32:48.231Z"
   },
   "0F00651CD99F3760": {
    "status": "available",
-   "primary": 191,
-   "resale": 145,
+   "primary": 189,
+   "resale": 142,
    "fromPrimary": 55,
    "fromResale": 96,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-22",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:40:23.478Z"
+   "checked": "2026-11-06T23:32:50.398Z"
   },
   "0F00651CD9A43774": {
    "status": "available",
-   "primary": 130,
+   "primary": 126,
    "resale": 166,
    "fromPrimary": 45,
    "fromResale": 107,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-23",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:40:26.199Z"
+   "checked": "2026-11-06T23:32:52.174Z"
   },
   "0F00651CD9A93787": {
    "status": "available",
-   "primary": 522,
-   "resale": 119,
+   "primary": 504,
+   "resale": 117,
    "fromPrimary": 55,
    "fromResale": 89,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-23",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:40:29.268Z"
+   "checked": "2026-11-06T23:32:54.375Z"
   },
   "0F00651CD9AD3792": {
    "status": "available",
-   "primary": 1237,
+   "primary": 1226,
    "resale": 58,
    "fromPrimary": 45,
    "fromResale": 72,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-24",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:40:31.426Z"
+   "checked": "2026-11-06T23:32:56.567Z"
   },
   "0F00651CD9B237A0": {
    "status": "available",
@@ -1486,18 +1457,19 @@
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-26",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:40:33.807Z"
+   "checked": "2026-11-05T23:40:33.807Z",
+   "note": "kept from 2026-11-05: this run none"
   },
   "0F00651CD9B737A7": {
    "status": "available",
-   "primary": 455,
+   "primary": 451,
    "resale": 176,
    "fromPrimary": 55,
    "fromResale": 58,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-26",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:40:38.203Z"
+   "checked": "2026-11-06T23:33:10.755Z"
   },
   "0F00651CD9BC37BD": {
    "status": "available",
@@ -1509,84 +1481,84 @@
    "date": "2026-12-27",
    "venue": "Paramount Theatre",
    "checked": "2026-11-05T02:21:32.898Z",
-   "note": "kept from 2026-11-05: this run unknown (no answer in 90 s)"
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)"
   },
   "0F00651CD9C137CA": {
    "status": "available",
-   "primary": 701,
+   "primary": 694,
    "resale": 37,
    "fromPrimary": 55,
    "fromResale": 90,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-27",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:10.381Z"
+   "checked": "2026-11-06T23:33:33.228Z"
   },
   "0F00651CD9C637DC": {
    "status": "available",
-   "primary": 1008,
-   "resale": 34,
+   "primary": 990,
+   "resale": 32,
    "fromPrimary": 55,
    "fromResale": 61,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-28",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:12.150Z"
+   "checked": "2026-11-06T23:33:35.226Z"
   },
   "0F00651CD9CB37EA": {
    "status": "available",
-   "primary": 330,
+   "primary": 310,
    "resale": 31,
    "fromPrimary": 50,
    "fromResale": 162,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-29",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:13.587Z"
+   "checked": "2026-11-06T23:33:38.102Z"
   },
   "0F00651CD9D13800": {
    "status": "available",
-   "primary": 1039,
-   "resale": 107,
+   "primary": 1034,
+   "resale": 109,
    "fromPrimary": 55,
    "fromResale": 62,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-29",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:15.442Z"
+   "checked": "2026-11-06T23:33:41.129Z"
   },
   "0F00651CD9D7380D": {
    "status": "available",
-   "primary": 1417,
+   "primary": 1435,
    "resale": 38,
    "fromPrimary": 50,
-   "fromResale": 79,
+   "fromResale": 76,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-30",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:17.206Z"
+   "checked": "2026-11-06T23:33:43.995Z"
   },
   "0F00651CD9DC3818": {
    "status": "available",
-   "primary": 1602,
+   "primary": 1582,
    "resale": 53,
    "fromPrimary": 45,
-   "fromResale": 51,
+   "fromResale": 45,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2026-12-31",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:19.220Z"
+   "checked": "2026-11-06T23:33:47.049Z"
   },
   "0F00651CD98F3722": {
    "status": "available",
-   "primary": 1157,
+   "primary": 1145,
    "resale": 63,
    "fromPrimary": 50,
    "fromResale": 85,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2027-01-02",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:21.242Z"
+   "checked": "2026-11-06T23:33:50.529Z"
   },
   "0F00651CD9943736": {
    "status": "available",
@@ -1597,24 +1569,24 @@
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2027-01-03",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:23.824Z"
+   "checked": "2026-11-06T23:33:54.263Z"
   },
   "0F00651CD9993752": {
    "status": "available",
-   "primary": 1597,
+   "primary": 1545,
    "resale": 54,
    "fromPrimary": 50,
    "fromResale": 119,
    "name": "Disney's Beauty and the Beast (Touring)",
    "date": "2027-01-03",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:25.960Z"
+   "checked": "2026-11-06T23:34:01.354Z"
   },
   "0F0065554C8382D8": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
-   "note": "page says sold out",
+   "note": "kept from 2026-11-05: this run unknown (no answer in 90 s)",
    "name": "Brandi Carlile: Burn The Setlist (The All Request Tour)",
    "date": "2027-01-05",
    "venue": "Paramount Theatre",
@@ -1628,18 +1600,18 @@
    "name": "Brandi Carlile: Burn The Setlist (The All Request Tour)",
    "date": "2027-01-06",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:34.143Z"
+   "checked": "2026-11-06T23:35:35.637Z"
   },
   "0F0064FFE1D63B4B": {
    "status": "available",
-   "primary": 75,
-   "resale": 98,
+   "primary": 73,
+   "resale": 96,
    "fromPrimary": 89.5,
    "fromResale": 131,
    "name": "An Evening with Lord Huron",
    "date": "2027-01-07",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:35.789Z"
+   "checked": "2026-11-06T23:35:37.676Z"
   },
   "0F0064FFE1DB3B5C": {
    "status": "available",
@@ -1650,7 +1622,7 @@
    "name": "An Evening with Lord Huron",
    "date": "2027-01-08",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:37.446Z"
+   "checked": "2026-11-06T23:35:39.767Z"
   },
   "0F0065554C8D82E9": {
    "status": "available",
@@ -1661,7 +1633,7 @@
    "name": "Brandi Carlile: Burn The Setlist (The All Request Tour)",
    "date": "2027-01-09",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:42:39.351Z"
+   "checked": "2026-11-06T23:35:42.207Z"
   },
   "0F0065554C9382F2": {
    "status": "available",
@@ -1672,8 +1644,7 @@
    "name": "Brandi Carlile: Burn The Setlist (The All Request Tour)",
    "date": "2027-01-10",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T02:23:11.485Z",
-   "note": "kept from 2026-11-05: this run none"
+   "checked": "2026-11-06T23:35:43.807Z"
   },
   "0F0064FBC229B74B": {
    "status": "available",
@@ -1684,121 +1655,117 @@
    "name": "Silent Movie Mondays - The Kid Brother (1927)",
    "date": "2027-01-11",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T02:23:13.727Z",
-   "note": "kept from 2026-11-05: this run none"
+   "checked": "2026-11-06T23:35:45.648Z"
   },
   "0F006537DC98D8F5": {
    "status": "available",
-   "primary": 1166,
-   "resale": 49,
+   "primary": 1155,
+   "resale": 47,
    "fromPrimary": 41,
    "fromResale": 105,
    "name": "Hadestown (Touring)",
    "date": "2027-01-19",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:43:00.436Z"
+   "checked": "2026-11-06T23:35:47.691Z"
   },
   "0F006537DC9ED8FF": {
    "status": "available",
-   "primary": 1101,
+   "primary": 1084,
    "resale": 33,
    "fromPrimary": 41,
    "fromResale": 70,
    "name": "Hadestown (Touring)",
    "date": "2027-01-20",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T02:23:18.914Z",
-   "note": "kept from 2026-11-05: this run none"
+   "checked": "2026-11-06T23:35:49.772Z"
   },
   "0F006537DCA3D90B": {
    "status": "available",
-   "primary": 816,
+   "primary": 795,
    "resale": 65,
    "fromPrimary": 41,
    "fromResale": 120,
    "name": "Hadestown (Touring)",
    "date": "2027-01-21",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:43:11.779Z"
+   "checked": "2026-11-06T23:35:52.145Z"
   },
   "0F006537DCA7D914": {
    "status": "available",
-   "primary": 357,
+   "primary": 349,
    "resale": 120,
    "fromPrimary": 41,
-   "fromResale": 98,
+   "fromResale": 89,
    "name": "Hadestown (Touring)",
    "date": "2027-01-22",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:43:13.926Z"
+   "checked": "2026-11-06T23:35:54.145Z"
   },
   "0F006537DCADD92B": {
    "status": "available",
    "primary": 112,
-   "resale": 137,
+   "resale": 133,
    "fromPrimary": 55,
    "fromResale": 96,
    "name": "Hadestown (Touring)",
    "date": "2027-01-23",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:43:15.807Z"
+   "checked": "2026-11-06T23:35:56.646Z"
   },
   "0F006537DCB2D936": {
    "status": "available",
    "primary": 351,
-   "resale": 120,
+   "resale": 129,
    "fromPrimary": 55,
-   "fromResale": 78,
+   "fromResale": 100,
    "name": "Hadestown (Touring)",
    "date": "2027-01-23",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:43:17.758Z"
+   "checked": "2026-11-06T23:35:58.654Z"
   },
   "0F006537DCB8D951": {
    "status": "available",
-   "primary": 283,
-   "resale": 219,
+   "primary": 330,
+   "resale": 215,
    "fromPrimary": 55,
    "fromResale": 102,
    "name": "Hadestown (Touring)",
    "date": "2027-01-24",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:43:19.430Z"
+   "checked": "2026-11-06T23:36:00.817Z"
   },
   "0F006537DCBDD961": {
    "status": "available",
-   "primary": 660,
+   "primary": 526,
    "resale": 71,
    "fromPrimary": 41,
    "fromResale": 88,
    "name": "Hadestown (Touring)",
    "date": "2027-01-24",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T02:23:37.184Z",
-   "note": "kept from 2026-11-05: this run none"
+   "checked": "2026-11-06T23:36:03.311Z"
   },
   "0F006521E725215D": {
    "status": "available",
-   "primary": 1010,
-   "resale": 139,
+   "primary": 1005,
+   "resale": 134,
    "fromPrimary": 50.5,
    "fromResale": 82,
    "name": "Yuridia - Cartas Sobre La Mesa Tour 2027",
    "date": "2027-02-04",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:43:30.609Z"
+   "checked": "2026-11-06T23:36:05.480Z"
   },
   "0F006537D51ACDF4": {
    "status": "available",
-   "primary": 1828,
+   "primary": 1813,
    "resale": 9,
    "fromPrimary": 54.5,
    "fromResale": 123,
    "name": "The Piano Guys",
    "date": "2027-02-06",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-03T23:54:46.957Z",
-   "note": "kept from 2026-11-03: this run none"
+   "checked": "2026-11-06T23:36:08.620Z"
   },
   "0F006537D51FCE02": {
    "status": "available",
@@ -1809,53 +1776,51 @@
    "name": "The Piano Guys",
    "date": "2027-02-06",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:43:42.541Z"
+   "checked": "2026-11-06T23:36:11.160Z"
   },
   "0F00652AB8E2AA34": {
    "status": "available",
-   "primary": 1592,
-   "resale": 0,
+   "primary": 1571,
+   "resale": 2,
    "fromPrimary": 39.5,
-   "fromResale": null,
+   "fromResale": 100,
    "name": "William Shakespeare's Romeo + Juliet Film in Concert",
    "date": "2027-02-13",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-03T23:54:52.304Z",
-   "note": "kept from 2026-11-03: this run none"
+   "checked": "2026-11-06T23:36:13.064Z"
   },
   "0F0064D6F207CCEC": {
    "status": "available",
-   "primary": 2167,
+   "primary": 2161,
    "resale": 2,
    "fromPrimary": 34.75,
    "fromResale": 170,
    "name": "Jazz At Lincoln Center Orchestra with Wynton Marsalis",
    "date": "2027-02-15",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:43:55.228Z"
+   "checked": "2026-11-06T23:36:15.761Z"
   },
   "0F006518AED0AB62": {
    "status": "available",
-   "primary": 1303,
-   "resale": 20,
+   "primary": 1295,
+   "resale": 18,
    "fromPrimary": 54.5,
    "fromResale": 75,
    "name": "Polyphia: BE NOT AFRAID World Tour ",
    "date": "2027-02-17",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T02:24:07.478Z",
-   "note": "kept from 2026-11-05: this run none"
+   "checked": "2026-11-06T23:36:18.236Z"
   },
   "0F0064C5CFEE0AA4": {
    "status": "available",
-   "primary": 543,
+   "primary": 540,
    "resale": 0,
    "fromPrimary": 51,
    "fromResale": null,
    "name": "Sylvan Esso",
    "date": "2027-02-19",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:44:06.652Z"
+   "checked": "2026-11-06T23:36:21.108Z"
   },
   "0F0064D7AFB596E7": {
    "status": "available",
@@ -1866,41 +1831,41 @@
    "name": "The Bald and the Beautiful LIVE: Very Bald, Very Beautiful",
    "date": "2027-02-21",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:44:08.651Z"
+   "checked": "2026-11-05T23:44:08.651Z",
+   "note": "kept from 2026-11-05: this run none"
   },
   "0F00652BBE75B99A": {
    "status": "available",
-   "primary": 2358,
+   "primary": 2347,
    "resale": 0,
    "fromPrimary": 64,
    "fromResale": null,
    "name": "Franco Escamilla - El Juicio Tour",
    "date": "2027-02-27",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-03T23:55:10.225Z",
-   "note": "kept from 2026-11-03: this run none"
+   "checked": "2026-11-06T23:36:33.037Z"
   },
   "0F006553DA6FA0BA": {
    "status": "available",
-   "primary": 4,
+   "primary": 18,
    "resale": 0,
-   "fromPrimary": 145.5,
+   "fromPrimary": 74,
    "fromResale": null,
    "name": "Ashe: The Girl of Your Dreams Tour",
    "date": "2027-02-28",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:44:19.846Z"
+   "checked": "2026-11-06T23:36:34.596Z"
   },
   "0F0064D7CF33BF39": {
    "status": "available",
-   "primary": 2442,
+   "primary": 2439,
    "resale": 0,
    "fromPrimary": 26.25,
    "fromResale": null,
    "name": "Kidd Pivot \"Assembly Hall\"",
    "date": "2027-03-05",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:44:22.218Z"
+   "checked": "2026-11-06T23:36:36.767Z"
   },
   "0F00654FCA2DA023": {
    "status": "soldout",
@@ -1921,64 +1886,62 @@
    "name": "The Who's Tommy (Touring)",
    "date": "2027-03-16",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:44:33.537Z"
+   "checked": "2026-11-06T23:36:48.952Z"
   },
   "0F006547AD887659": {
    "status": "available",
-   "primary": 1291,
+   "primary": 1289,
    "resale": 20,
    "fromPrimary": 45,
    "fromResale": 67,
    "name": "The Who's Tommy (Touring)",
    "date": "2027-03-17",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T02:24:47.264Z",
-   "note": "kept from 2026-11-05: this run unknown (no answer in 90 s)"
+   "checked": "2026-11-06T23:36:51.331Z"
   },
   "0F006547AD8D765C": {
    "status": "available",
-   "primary": 1123,
+   "primary": 1119,
    "resale": 12,
    "fromPrimary": 45,
-   "fromResale": 70,
+   "fromResale": 51,
    "name": "The Who's Tommy (Touring)",
    "date": "2027-03-18",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T02:24:49.463Z",
-   "note": "kept from 2026-11-05: this run unknown (no inventory call)"
+   "checked": "2026-11-06T23:36:53.549Z"
   },
   "0F006547AD927660": {
    "status": "available",
-   "primary": 1099,
+   "primary": 1097,
    "resale": 79,
    "fromPrimary": 45,
    "fromResale": 31,
    "name": "The Who's Tommy (Touring)",
    "date": "2027-03-19",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:49:46.560Z"
+   "checked": "2026-11-06T23:36:55.300Z"
   },
   "0F006547AD977669": {
    "status": "available",
    "primary": 395,
-   "resale": 55,
+   "resale": 57,
    "fromPrimary": 45,
    "fromResale": 31,
    "name": "The Who's Tommy (Touring)",
    "date": "2027-03-20",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:49:48.745Z"
+   "checked": "2026-11-06T23:36:56.856Z"
   },
   "0F006547AD9D7671": {
    "status": "available",
-   "primary": 839,
+   "primary": 837,
    "resale": 32,
    "fromPrimary": 45,
    "fromResale": 52,
    "name": "The Who's Tommy (Touring)",
    "date": "2027-03-20",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:49:50.654Z"
+   "checked": "2026-11-06T23:36:59.450Z"
   },
   "0F006547ADA27678": {
    "status": "available",
@@ -1989,7 +1952,8 @@
    "name": "The Who's Tommy (Touring)",
    "date": "2027-03-21",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:49:53.282Z"
+   "checked": "2026-11-05T23:49:53.282Z",
+   "note": "kept from 2026-11-05: this run none"
   },
   "0F006547ADA8767F": {
    "status": "available",
@@ -2000,35 +1964,35 @@
    "name": "The Who's Tommy (Touring)",
    "date": "2027-03-21",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:49:55.025Z"
+   "checked": "2026-11-06T23:37:11.472Z"
   },
   "0F006524AC6AB18F": {
    "status": "available",
-   "primary": 1705,
+   "primary": 1697,
    "resale": 22,
    "fromPrimary": 44.5,
    "fromResale": 106,
    "name": "Twilight In Concert",
    "date": "2027-03-27",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:49:57.192Z"
+   "checked": "2026-11-06T23:37:13.597Z"
   },
   "0F0064B5DDDB0C0D": {
    "status": "available",
-   "primary": 1640,
-   "resale": 44,
+   "primary": 1638,
+   "resale": 46,
    "fromPrimary": 39.5,
    "fromResale": 49,
    "name": "Nothing But Thieves: The Stray Dogs World Tour",
    "date": "2027-03-31",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:49:59.238Z"
+   "checked": "2026-11-06T23:37:15.444Z"
   },
   "0F006547B3E67EFE": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
-   "note": "page says sold out",
+   "note": "kept from 2026-11-05: this run none",
    "name": "Giggly Squad: The Gehls Gehl Tour",
    "date": "2027-04-09",
    "venue": "Paramount Theatre",
@@ -2043,18 +2007,18 @@
    "name": "Silent Movie Mondays - Sunrise: A Song of Two Humans (1927)",
    "date": "2027-04-12",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:50:05.182Z"
+   "checked": "2026-11-06T23:37:26.792Z"
   },
   "0F006556BC11D88F": {
    "status": "available",
-   "primary": 2379,
-   "resale": 30,
+   "primary": 2374,
+   "resale": 36,
    "fromPrimary": 39.5,
    "fromResale": 83,
    "name": "Jesse & Joy - El Amor De Mexico",
    "date": "2027-04-13",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:50:07.999Z"
+   "checked": "2026-11-06T23:37:28.625Z"
   },
   "0F006554D360C16D": {
    "status": "available",
@@ -2065,7 +2029,8 @@
    "name": "Meshuggah: The Forty-Year Anomaly w/ Testament & Blood Incantation",
    "date": "2027-04-17",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:50:10.211Z"
+   "checked": "2026-11-05T23:50:10.211Z",
+   "note": "kept from 2026-11-05: this run none"
   },
   "0F006532BC99C2A6": {
    "status": "available",
@@ -2076,18 +2041,18 @@
    "name": "Ha*Ash - No Me Hablen de Amor",
    "date": "2027-04-28",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:50:12.816Z"
+   "checked": "2026-11-06T23:37:40.358Z"
   },
   "0F006547E9ADB81E": {
    "status": "available",
-   "primary": 40,
+   "primary": 39,
    "resale": 0,
    "fromPrimary": 84.5,
    "fromResale": null,
    "name": "Jimmy O. Yang Has No Friends Tour",
    "date": "2027-05-08",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:50:15.540Z"
+   "checked": "2026-11-06T23:37:42.847Z"
   },
   "0F00654DD378A69B": {
    "status": "available",
@@ -2098,7 +2063,8 @@
    "name": "Jimmy O. Yang Has No Friends Tour",
    "date": "2027-05-08",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:50:17.195Z"
+   "checked": "2026-11-05T23:50:17.195Z",
+   "note": "kept from 2026-11-05: this run none"
   },
   "0F006519E6A27A0B": {
    "status": "available",
@@ -2109,7 +2075,7 @@
    "name": "SAINT LEVANT - AFANDI WORLD TOUR",
    "date": "2027-05-10",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:50:20.182Z"
+   "checked": "2026-11-06T23:37:53.944Z"
   },
   "0F006550CF20AF97": {
    "status": "available",
@@ -2120,18 +2086,19 @@
    "name": "TINASHE - THE SHOW MUST GO ON",
    "date": "2027-05-11",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:50:22.295Z"
+   "checked": "2026-11-05T23:50:22.295Z",
+   "note": "kept from 2026-11-05: this run none"
   },
   "0F006555A5BCAC9C": {
    "status": "available",
-   "primary": 861,
+   "primary": 850,
    "resale": 229,
    "fromPrimary": 69.95,
    "fromResale": 92.52,
    "name": "Two Door Cinema Club - Tourist History 15th Anniversary Tour",
    "date": "2027-05-17",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:50:24.564Z"
+   "checked": "2026-11-06T23:38:05.904Z"
   },
   "0F0064FBC236B76B": {
    "status": "available",
@@ -2142,46 +2109,46 @@
    "name": "Silent Movie Mondays - The Adventures of Prince Achmed (1926)",
    "date": "2027-07-26",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:50:26.744Z"
+   "checked": "2026-11-06T23:38:08.808Z"
   },
   "1C006463D0C2456D": {
    "status": "available",
-   "primary": 154,
-   "resale": 8423,
+   "primary": 167,
+   "resale": 8290,
    "fromPrimary": 278,
-   "fromResale": 225,
+   "fromResale": 240,
    "name": "San Francisco 49ers vs. Seattle Seahawks",
    "date": "2026-11-29",
    "venue": "Levi's® Stadium",
    "club": "seahawks",
    "away": true,
-   "checked": "2026-11-05T23:50:29.351Z"
+   "checked": "2026-11-06T23:38:10.429Z"
   },
   "0200646D962BA73A": {
    "status": "available",
    "primary": 1455,
-   "resale": 8247,
+   "resale": 8217,
    "fromPrimary": 180,
-   "fromResale": 64,
+   "fromResale": 65,
    "name": "Philadelphia Eagles vs. Seattle Seahawks",
    "date": "2026-12-19",
    "venue": "Lincoln Financial Field",
    "club": "seahawks",
    "away": true,
-   "checked": "2026-11-05T23:50:31.811Z"
+   "checked": "2026-11-06T23:38:12.420Z"
   },
   "1C0064E79AF79BD9": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
    "fromResale": 83.3,
-   "note": "21 resale listed on the page",
+   "note": "15 resale listed on the page",
    "name": "San Jose Sharks vs. Seattle Kraken",
    "date": "2026-11-21",
    "venue": "SAP Center at San Jose",
    "club": "kraken",
    "away": true,
-   "checked": "2026-11-05T23:50:51.916Z"
+   "checked": "2026-11-06T23:38:32.520Z"
   },
   "11006513A62BA4FB": {
    "status": "soldout",
@@ -2194,14 +2161,14 @@
    "venue": "Rogers Place",
    "club": "kraken",
    "away": true,
-   "checked": "2026-11-05T23:51:12.006Z"
+   "checked": "2026-11-06T23:38:52.583Z"
   },
   "1C0064E79B0A9C09": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
    "fromResale": 30,
-   "note": "5 resale listed on the page",
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)",
    "name": "San Jose Sharks vs. Seattle Kraken",
    "date": "2026-12-08",
    "venue": "SAP Center at San Jose",
@@ -2214,20 +2181,20 @@
    "primary": 0,
    "resale": 0,
    "fromResale": 26,
-   "note": "15 resale listed on the page",
+   "note": "18 resale listed on the page",
    "name": "Nashville Predators v Seattle Kraken - Wrestling Night",
    "date": "2026-12-15",
    "venue": "Bridgestone Arena",
    "club": "kraken",
    "away": true,
-   "checked": "2026-11-05T23:51:52.116Z"
+   "checked": "2026-11-06T23:39:32.809Z"
   },
   "160064EAF5BFB923": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
    "fromResale": 72,
-   "note": "2 resale listed on the page",
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)",
    "name": "Pittsburgh Penguins vs. Seattle Kraken",
    "date": "2026-12-18",
    "venue": "PPG Paints Arena",
@@ -2235,12 +2202,25 @@
    "away": true,
    "checked": "2026-11-05T23:52:12.360Z"
   },
+  "1E0064EEB2EC9F71": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 67.1,
+   "note": "40 box-office listed on the page, no count",
+   "name": "Colorado Avalanche v Seattle Kraken",
+   "date": "2026-12-20",
+   "venue": "Ball Arena",
+   "club": "kraken",
+   "away": true,
+   "checked": "2026-11-06T23:40:13.149Z"
+  },
   "1C006539D4CECC00": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
    "fromResale": 36.97,
-   "note": "1 resale listed on the page",
+   "note": "kept from 2026-11-05: this run unknown (no inventory call)",
    "name": "PWHL San Jose vs. Seattle Torrent",
    "date": "2026-12-09",
    "venue": "SAP Center at San Jose",
@@ -2259,140 +2239,168 @@
    "venue": "Autzen Stadium",
    "club": "huskies",
    "away": true,
-   "checked": "2026-11-05T23:52:52.441Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F0065634395F47C": {
    "status": "presale",
    "name": "WWE Monday Night RAW",
    "date": "2027-02-01",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F0064C4A0C8A341": {
    "status": "presale",
    "name": "Seattle Kraken vs. Montreal Canadiens",
    "date": "2027-02-03",
    "venue": "Climate Pledge Arena",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
+  },
+  "0F006564C16194A1": {
+   "status": "presale",
+   "name": "FEID - FERXXO - THE GREEN STAR Tour 2027",
+   "date": "2027-04-04",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-06T23:40:53.484Z"
+  },
+  "0F006562C4887F64": {
+   "status": "presale",
+   "name": "Kings of Leon",
+   "date": "2027-09-15",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006383C3AA8409": {
    "status": "presale",
    "name": "Seattle Sounders FC vs. Los Angeles Football Club",
    "date": "2026-11-07",
    "venue": "Lumen Field",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F0064A5987D8342": {
    "status": "presale",
    "name": "Not For Radio - A Summer In The Forest: North America Tour",
    "date": "2026-11-11",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F0064A59F478F79": {
    "status": "presale",
    "name": "Not For Radio - A Summer In The Forest: North America Tour",
    "date": "2026-11-12",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F0064861EBCE422": {
    "status": "presale",
    "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
    "date": "2026-11-20",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F0064861EC6E42E": {
    "status": "presale",
    "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
    "date": "2026-11-21",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F0064861ED0E440": {
    "status": "presale",
    "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
    "date": "2026-11-22",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006183A46A0D87": {
    "status": "presale",
    "name": "Christine D'Clario - La Novia Tour ",
    "date": "2027-01-30",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006383E1719405": {
    "status": "presale",
    "name": "The Bald and the Beautiful LIVE: Very Bald, Very Beautiful",
    "date": "2027-02-20",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006565A6CD6A5F": {
    "status": "presale",
    "name": "SIX (Touring)",
    "date": "2027-04-20",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006565A6D36A76": {
    "status": "presale",
    "name": "SIX (Touring)",
    "date": "2027-04-21",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006565A6D86A82": {
    "status": "presale",
    "name": "SIX (Touring)",
    "date": "2027-04-22",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006565A6DE6A93": {
    "status": "presale",
    "name": "SIX (Touring)",
    "date": "2027-04-23",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006565A6E36AA3": {
    "status": "presale",
    "name": "SIX (Touring)",
    "date": "2027-04-24",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006565A6E96AB0": {
    "status": "presale",
    "name": "SIX (Touring)",
    "date": "2027-04-24",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006565A6EF6AB6": {
    "status": "presale",
    "name": "SIX (Touring)",
    "date": "2027-04-25",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006565A6F56ABF": {
    "status": "presale",
    "name": "SIX (Touring)",
    "date": "2027-04-25",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
+  },
+  "0F006562DDF497B1": {
+   "status": "presale",
+   "name": "A.R. Rahman",
+   "date": "2027-05-14",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-06T23:40:53.484Z"
+  },
+  "0F006562DDFA97C6": {
+   "status": "presale",
+   "name": "A.R. Rahman",
+   "date": "2027-05-15",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "0F006556B05DB9C6": {
    "status": "presale",
    "name": "The Basement Yard Live",
    "date": "2027-05-20",
    "venue": "Paramount Theatre",
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   },
   "090064EA31098B51": {
    "status": "presale",
@@ -2401,7 +2409,7 @@
    "venue": "Honda Center",
    "club": "kraken",
    "away": true,
-   "checked": "2026-11-05T23:52:52.442Z"
+   "checked": "2026-11-06T23:40:53.484Z"
   }
  }
 }
