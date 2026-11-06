@@ -265,9 +265,9 @@
       type: 'concert',
       cssVar: '--v-lumen',
       color: '#8b8fe8',
-      url: 'https://www.lumenfield.com/',
+      url: 'https://www.lumenfield.com/events-tickets/event-calendar',
       icon: 'https://www.google.com/s2/favicons?domain=www.lumenfield.com&sz=128',
-      tm: { id: 'KovZpZAEknnA', match: 'lumen field', fallbackUrl: 'https://www.lumenfield.com/', exclude: /stadium tour|notification list/i },
+      tm: { id: 'KovZpZAEknnA', match: 'lumen field', fallbackUrl: 'https://www.lumenfield.com/events-tickets/event-calendar', exclude: /stadium tour|notification list/i },
       // the stadium's own calendar (Webflow: concerts, home games and multi-day lists on one page; the WAMU Theater's cards share it, kept out by `venues`), secondary behind Ticketmaster (2026-10-26)
       feed: { kind: 'cards', secondary: true, url: 'https://www.lumenfield.com/events-tickets/event-calendar', venues: /lumen field/i,
         item: /<div role="listitem" class="db-(?:ft-events|home-sports|ft-multi-day)-item w-dyn-item">/, title: /<a href="([^"]+)" class="ft-card[\s\S]*?(?:<h3 class="card-title-h3">|<div class="main-title-vs">)([\s\S]*?)<div class="ft-info-sup/, // a concert card's h3, or a home game's "Sounders FC / vs / Houston Dynamo FC" blocks read as one line
@@ -296,8 +296,8 @@
       tm: { id: 'KovZ917AcnU,KovZ917AYG5,KovZ917ALLe', match: '', fallbackUrl: 'https://seattlecc.com/upcoming-events/', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
     },
     'Starfire Stadium': {
-      url: 'https://www.starfiresports.com/',
-      tm: { id: 'KovZpapC8e,Za5ju3rKuqZyTRkCZhqk-tJouqkmkhqe', match: '', fallbackUrl: 'https://www.starfiresports.com/', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
+      url: 'https://www.starfiresports.com/events/',
+      tm: { id: 'KovZpapC8e,Za5ju3rKuqZyTRkCZhqk-tJouqkmkhqe', match: '', fallbackUrl: 'https://www.starfiresports.com/events/', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
       capacity: 4500,
       area: 'town',
     },
@@ -308,9 +308,9 @@
       type: 'concert',
       cssVar: '--v-paramount',
       color: '#e39a6e',
-      url: 'https://www.stgpresents.org/stg-venues/paramount-theatre/',
+      url: 'https://www.stgpresents.org/calendar/',
       icon: 'https://www.google.com/s2/favicons?domain=www.stgpresents.org&sz=128',
-      tm: { id: 'KovZpZAFkvEA', match: 'paramount', fallbackUrl: 'https://www.stgpresents.org/stg-venues/paramount-theatre/', exclude: /theatre tours?/i },
+      tm: { id: 'KovZpZAFkvEA', match: 'paramount', fallbackUrl: 'https://www.stgpresents.org/calendar/', exclude: /theatre tours?/i },
       feed: { kind: 'mec', secondary: true, url: 'https://www.stgpresents.org/events/', venues: /^the paramount theatre$/i, drop: /paramount tour|theatre tours?/i }, // STG's own listing (every venue it presents in; the Paramount's cards kept), secondary behind Ticketmaster (2026-10-26)
       soldOut: 'tm',
     },
