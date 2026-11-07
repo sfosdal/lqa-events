@@ -131,7 +131,7 @@
       cssVar: '--v-cpa',
       color: '#4da3f0',
       url: 'https://climatepledgearena.com/events/',
-      icon: 'https://www.google.com/s2/favicons?domain=climatepledgearena.com&sz=128',
+      icon: 'marks/venues/climatepledgearena.com.png',
       tm: { id: 'KovZ917Ahkk', match: 'climate pledge', fallbackUrl: 'https://climatepledgearena.com/events/', exclude: /climate pledge arena tours?|all access pass/i },
       feed: { kind: 'tribe', secondary: true, url: 'https://climatepledgearena.com/wp-json/tribe/events/v1/events', drop: /^private event/i }, // the arena's own calendar (The Events Calendar), filling what Ticketmaster lacks (2026-10-26)
       soldOut: 'tm',
@@ -144,7 +144,7 @@
       color: '#6a72e6',
       url: 'https://www.seattlecenter.com/events/event-calendar',
       tm: { id: 'KovZpZAFkktA,KovZpZAFFJeA,KovZpZAdAnkA,Z7r9jZaAZQ,KovZ917ANex,ZFr9jZekdA,KovZpZA1tJtA,KovZpZA1tnIA', match: '', fallbackUrl: 'https://www.seattlecenter.com/events/event-calendar', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
-      icon: 'https://www.seattlecenter.com/Dev/Logos/logobug.png',
+      icon: 'marks/venues/seattlecenter.com-logobug.png',
     },
     'McCaw Hall': {
       geo: [47.62398, -122.35039],
@@ -163,7 +163,7 @@
       color: '#f0827a',
       url: 'https://www.seattlerep.org/plays/calendar',
       tm: { id: 'KovZpZAaIAvA,KovZpZA7eJFA', match: '', fallbackUrl: 'https://www.seattlerep.org/plays/calendar', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
-      icon: 'https://www.google.com/s2/favicons?domain=www.seattlerep.org&sz=128',
+      icon: 'marks/venues/seattlerep.org.png',
     },
     MoPOP: {
       geo: [47.62146, -122.34818],
@@ -190,7 +190,7 @@
       color: '#3ecf97',
       url: 'https://www.seattlecenter.com/events/event-calendar?cats=173',
       tm: { id: 'KovZpaGjHe', match: 'cornish', fallbackUrl: 'https://www.seattlecenter.com/events/event-calendar?cats=173', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
-      icon: 'https://www.google.com/s2/favicons?domain=www.cornish.edu&sz=128',
+      icon: 'marks/venues/cornish.edu.png',
     },
     'SIFF Cinema Uptown': {
       geo: [47.62348, -122.35711],
@@ -199,7 +199,7 @@
       cssVar: '--v-siff',
       color: '#b596e0',
       url: 'https://www.siff.net/calendar',
-      icon: 'https://www.siff.net/images/SIFF_favicon_03.png',
+      icon: 'marks/venues/siff.net-siff_favicon_03.png',
     },
     'Pacific Science Center': {
       geo: [47.61941, -122.35078],
@@ -218,7 +218,7 @@
       color: '#a26be6',
       url: 'https://theveraproject.org/events/',
       tm: { id: 'KovZpZAFIaIA', match: 'vera', fallbackUrl: 'https://theveraproject.org/events/', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
-      icon: 'https://www.google.com/s2/favicons?domain=theveraproject.org&sz=128',
+      icon: 'marks/venues/theveraproject.org.png',
     },
     'On the Boards': {
       geo: [47.62583, -122.35819],
@@ -228,7 +228,7 @@
       color: '#e07ae0',
       url: 'https://ontheboards.org/events',
       tm: { id: 'KovZpZA1tnnA', match: 'boards', fallbackUrl: 'https://ontheboards.org/events', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
-      icon: 'https://www.google.com/s2/favicons?domain=ontheboards.org&sz=128',
+      icon: 'marks/venues/ontheboards.org.png',
     },
     KEXP: {
       geo: [47.62296, -122.35515],
@@ -253,7 +253,7 @@
       cssVar: '--v-tmobile',
       color: '#8ad8e0',
       url: 'https://www.mlb.com/mariners/ballpark/events',
-      icon: 'https://www.google.com/s2/favicons?domain=www.mlb.com&sz=128',
+      icon: 'marks/venues/mlb.com.png',
       tm: { id: 'KovZpZAEevAA', match: 't-mobile park', fallbackUrl: 'https://www.mlb.com/mariners', exclude: /ballpark tour|flex membership|gift card/i }, // gift cards slipped through as a 2026-10-21 row
       // the Mariners' own events page (mlb.com/mariners/tickets/events) is read by marinersEvents in fetch-events.mjs — Banana Ball's lottery tickets never reach Ticketmaster (Steve, 2026-10-26: "use ticketmaster AND the venues event site")
       soldOut: 'tm',
@@ -266,7 +266,7 @@
       cssVar: '--v-lumen',
       color: '#8b8fe8',
       url: 'https://www.lumenfield.com/events-tickets/event-calendar',
-      icon: 'https://www.google.com/s2/favicons?domain=www.lumenfield.com&sz=128',
+      icon: 'marks/venues/lumenfield.com.png',
       tm: { id: 'KovZpZAEknnA', match: 'lumen field', fallbackUrl: 'https://www.lumenfield.com/events-tickets/event-calendar', exclude: /stadium tour|notification list/i },
       // the stadium's own calendar (Webflow: concerts, home games and multi-day lists on one page; the WAMU Theater's cards share it, kept out by `venues`), secondary behind Ticketmaster (2026-10-26)
       feed: { kind: 'cards', secondary: true, url: 'https://www.lumenfield.com/events-tickets/event-calendar', venues: /lumen field/i,
@@ -283,7 +283,7 @@
       color: '#c4a0f0',
       url: 'https://gohuskies.com/sports/football/schedule',
       tm: { id: 'KovZpZAaIJtA', match: 'husky', fallbackUrl: 'https://gohuskies.com/sports/football/schedule', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
-      icon: 'https://www.google.com/s2/favicons?domain=gohuskies.com&sz=128',
+      icon: 'marks/venues/gohuskies.com.png',
     },
     'Convention Center': {
       geo: [47.61139, -122.33255],
@@ -309,7 +309,7 @@
       cssVar: '--v-paramount',
       color: '#e39a6e',
       url: 'https://www.stgpresents.org/calendar/',
-      icon: 'https://www.google.com/s2/favicons?domain=www.stgpresents.org&sz=128',
+      icon: 'marks/venues/stgpresents.org.png',
       tm: { id: 'KovZpZAFkvEA', match: 'paramount', fallbackUrl: 'https://www.stgpresents.org/calendar/', exclude: /theatre tours?/i },
       feed: { kind: 'mec', secondary: true, url: 'https://www.stgpresents.org/events/', venues: /^the paramount theatre$/i, drop: /paramount tour|theatre tours?/i }, // STG's own listing (every venue it presents in; the Paramount's cards kept), secondary behind Ticketmaster (2026-10-26)
       soldOut: 'tm',
@@ -323,7 +323,7 @@
       color: '#e8c45a',
       url: 'https://www.showboxpresents.com/events',
       tm: { id: 'KovZpZAEknlA', match: 'showbox', fallbackUrl: 'https://www.showboxpresents.com/events', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
-      icon: 'https://www.google.com/s2/favicons?domain=www.showboxpresents.com&sz=128',
+      icon: 'marks/venues/showboxpresents.com.png',
     },
     'Showbox SoDo': {
       geo: [47.58805, -122.33393],
@@ -334,7 +334,7 @@
       color: '#aab8d6',
       url: 'https://www.showboxpresents.com/events',
       tm: { id: 'KovZpa6Mee,KovZpZAE777A,KovZpZAJvEJA', match: '', fallbackUrl: 'https://www.showboxpresents.com/events', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
-      icon: 'https://www.google.com/s2/favicons?domain=www.showboxpresents.com&sz=128',
+      icon: 'marks/venues/showboxpresents.com.png',
     },
     'The Crocodile': {
       geo: [47.61465, -122.34907],
@@ -344,7 +344,7 @@
       cssVar: '--v-croc',
       color: '#7ed67f',
       url: 'https://calendar.thecrocodile.com/',
-      icon: 'https://www.google.com/s2/favicons?domain=www.thecrocodile.com&sz=128',
+      icon: 'marks/venues/thecrocodile.com.png',
       tm: { id: 'KovZpZA1vFtA', match: 'crocodile', fallbackUrl: 'https://calendar.thecrocodile.com/' },
       // the club's own calendar (Webflow: two cards a show — the TicketWeb link, then a hidden one with the clock and the show page, read here; its promotions at other clubs are kept out by `venues`), secondary behind Ticketmaster (2026-10-26)
       feed: { kind: 'cards', secondary: true, url: 'https://calendar.thecrocodile.com/', venues: /crocodile/i,
@@ -359,7 +359,7 @@
       cssVar: '--v-bumber',
       color: '#e8a35a',
       url: 'https://bumbershoot.com/schedule',
-      icon: 'https://www.google.com/s2/favicons?domain=bumbershoot.com&sz=128',
+      icon: 'marks/venues/bumbershoot.com.png',
     },
     'Northwest Folklife': {
       geo: [47.6208, -122.3498], // placed by hand
@@ -368,7 +368,7 @@
       cssVar: '--v-folklife',
       color: '#8fc26a',
       url: 'https://www.nwfolklife.org/festival/',
-      icon: 'https://www.google.com/s2/favicons?domain=nwfolklife.org&sz=128',
+      icon: 'marks/venues/nwfolklife.org.png',
     },
     PrideFest: {
       geo: [47.62, -122.3522], // placed by hand
@@ -377,7 +377,7 @@
       cssVar: '--v-pride',
       color: '#e07bb5',
       url: 'https://www.seattlepridefest.org/schedule',
-      icon: 'https://www.google.com/s2/favicons?domain=www.seattlepridefest.org&sz=128',
+      icon: 'marks/venues/seattlepridefest.org.png',
     },
     'Capitol Hill Block Party': {
       geo: [47.6142, -122.3185], // placed by hand
@@ -388,7 +388,7 @@
       color: '#a6b85a',
       url: 'https://www.capitolhillblockparty.com/artists',
       tm: { id: 'Z7r9jZadpj', match: '', fallbackUrl: 'https://www.capitolhillblockparty.com/artists', secondary: true }, // Ticketmaster, read behind the venue's own listing — every venue both ways (Steve, 2026-10-26)
-      icon: 'https://www.google.com/s2/favicons?domain=www.capitolhillblockparty.com&sz=128',
+      icon: 'marks/venues/capitolhillblockparty.com.png',
     },
   };
 
