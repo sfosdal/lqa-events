@@ -8907,6 +8907,210 @@
    "time": "22:00",
    "url": "https://calendar.thecrocodile.com/shows/hot-in-herre-2000-s-dance-party-06-nov",
    "type": "concert"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "A4LE LearningSCAPES 2026",
+   "date": "2026-11-07",
+   "time": "",
+   "url": "https://learningscapes.a4le.org/",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Emerald City Card Show 2026",
+   "date": "2026-11-07",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=67281",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Sea-Meow Convention",
+   "date": "2026-11-07",
+   "time": "10:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/sea-meow-convention",
+   "type": "expo"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "STFF Narrative Shorts 1",
+   "date": "2026-11-07",
+   "time": "11:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/seattle-turkish-film-festival-2026/stffshorts-narrative-selection-1",
+   "movie": true,
+   "end": "13:25:00"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Diwali: Lights of India",
+   "date": "2026-11-07",
+   "time": "12:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/diwali-lights-of-india",
+   "free": true,
+   "type": "community"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-07",
+   "time": "12:10:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "14:08:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-07",
+   "time": "12:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "15:24:00"
+  },
+  {
+   "venue": "Husky Stadium",
+   "title": "Washington Huskies vs Penn State Nittany Lions",
+   "date": "2026-11-07",
+   "time": "12:30:00",
+   "url": "https://gohuskies.com/sports/football/schedule",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "FS1"
+    ]
+   }
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "STFF Narrative Shorts 2",
+   "date": "2026-11-07",
+   "time": "13:35:00",
+   "url": "https://www.siff.net/cinema/in-theaters/seattle-turkish-film-festival-2026/stffshorts-narrative-selection-2",
+   "movie": true,
+   "end": "15:20:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Kraken vs. New York Rangers",
+   "date": "2026-11-07",
+   "time": "14:00:00",
+   "url": "https://www.ticketmaster.com/seattle-kraken-vs-new-york-rangers-seattle-washington-11-07-2026/event/0F0064C4A05AA27A",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Prime Video",
+     "KONG"
+    ]
+   }
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Oh, Mary! (Touring)",
+   "date": "2026-11-07",
+   "time": "14:00:00",
+   "url": "https://www.ticketmaster.com/oh-mary-touring-seattle-washington-11-07-2026/event/0F0064E9B2CA9123",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-11-07",
+   "time": "14:00:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts",
+   "soldOut": true
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Ghost Stories",
+   "date": "2026-11-07",
+   "time": "14:00:00",
+   "url": "https://www.mccawhall.com/events/detail/ghost-stories",
+   "type": "arts"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Sevda",
+   "date": "2026-11-07",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/seattle-turkish-film-festival-2026/sevda",
+   "movie": true,
+   "end": "17:25:00"
+  },
+  {
+   "venue": "Lumen Field",
+   "title": "Seattle Sounders FC vs. Los Angeles Football Club",
+   "date": "2026-11-07",
+   "time": "16:00:00",
+   "url": "https://www.ticketmaster.com/seattle-sounders-fc-vs-los-angeles-seattle-washington-11-07-2026/event/0F006383C3AA8409",
+   "type": "sports"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Yellow Letters Gala & Party",
+   "date": "2026-11-07",
+   "time": "18:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/seattle-turkish-film-festival-2026/seattle-turkish-film-festival-gala-film-party",
+   "movie": true,
+   "end": "20:00:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Jake Minch - Getting Big Tour",
+   "date": "2026-11-07",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/x39e423a5b49",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-11-07",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Ghost Stories",
+   "date": "2026-11-07",
+   "time": "19:30:00",
+   "url": "https://www.mccawhall.com/events/detail/ghost-stories",
+   "type": "arts"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "An Evening w/ Railroad Earth",
+   "date": "2026-11-07",
+   "time": "20:00",
+   "url": "https://calendar.thecrocodile.com/shows/an-evening-with-railroad-earth-07-nov",
+   "type": "concert"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Oh, Mary! (Touring)",
+   "date": "2026-11-07",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/oh-mary-touring-seattle-washington-11-07-2026/event/0F0064E9B2D0912E",
+   "type": "arts",
+   "tickets": {
+    "box": 0,
+    "resale": 5,
+    "checked": "2026-11-07T23:29:21.552Z",
+    "from": 200
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Dax with Navv",
+   "date": "2026-11-07",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1451267/dax-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
