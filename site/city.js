@@ -79,7 +79,7 @@
     { slug: 'seawolves', label: 'Seawolves', re: /seawolves/i, sport: 'rugby', venue: 'Starfire Stadium', colors: ['#003057', '#6cbe45'],
       season: { kind: 'seawolves' }, form: { kind: 'seawolves' },
       inject: { name: 'Seattle Seawolves', url: 'https://tickets.seawolves.rugby/events' }, // no ticket feed for Starfire: the home matches enter the listing from the schedule, linked to the club's ticket page
-      logo: 'https://www.seawolves.rugby/images/seawolves-logo.png', schedule: 'https://www.seawolves.rugby/schedule',
+      logo: 'marks/teams/seawolves.png', schedule: 'https://www.seawolves.rugby/schedule',
       club: 'Seattle Seawolves', opens: 'March', wiki: { title: 'Seattle Seawolves' },
       youtube: ['UCPcMc2KfvSO0YGfxzrbzy3w', 'UCIynwDVqRK7KTUy72_kSBhA'] }, // @seattleseawolvesrugby, @USMLR
     // Washington Huskies football (Big Ten), Husky Stadium on Montlake; ESPN's college-football feeds cover them like a pro club
