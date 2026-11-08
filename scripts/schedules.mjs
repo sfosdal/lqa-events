@@ -728,29 +728,47 @@ async function wikiSummary(title) {
   return { title, text: d.extract, url: d.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}` };
 }
 
-// The Seawolves' news page (Next.js, server-rendered): each post is an
-// <a href="/news/…"> holding a tag, "SEP 1, 2026", an <h2> headline and a
-// line of summary. The latest eight, newest first.
+// The Seawolves' news page (seawolves.rugby/news, on Envorso Sports since
+// 2026-11, server-rendered): each post is an <a … href="/news/…"> card
+// holding <time dateTime="…">Nov 4, 2026</time>, a tag, an <h2> headline and
+// a line of summary. The date is the page's own (the dateTime is UTC, a day
+// ahead for an evening post), the dateTime only when the text won't read.
+// The latest eight, newest first, one entry a link (the page lists some
+// posts twice).
+const NEWS_MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
 export function parseSeawolvesNews(html, n = 8) {
   const out = [];
-  for (const m of String(html).replace(/<!--\s*-->/g, '').matchAll(/<a href="(\/news\/[^"]+)">([\s\S]*?)<\/a>/g)) {
+  const clean = (x) => x.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#x27;|&#39;|’/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
+  for (const m of String(html).replace(/<!--[\s\S]*?-->/g, '').matchAll(/<a\b[^>]*\shref="(\/news\/[^"#?]+)"[^>]*>([\s\S]*?)<\/a>/g)) {
     const inner = m[2];
     const headline = (inner.match(/<h2[^>]*>([\s\S]*?)<\/h2>/) || [])[1];
-    const date = (inner.match(/>\s*([A-Z]{3} \d{1,2}, \d{4})\s*</) || [])[1];
+    if (!headline || out.some((o) => o.url.endsWith(m[1]))) continue;
+    const time = inner.match(/<time[^>]*dateTime="(\d{4}-\d{2}-\d{2})[^"]*"[^>]*>([^<]*)<\/time>/i);
+    const shown = time && time[2].trim().match(/^([A-Za-z]{3})[a-z]* (\d{1,2}), (\d{4})$/);
+    const date = shown && NEWS_MONTHS[shown[1].toLowerCase()] != null
+      ? `${shown[3]}-${String(NEWS_MONTHS[shown[1].toLowerCase()] + 1).padStart(2, '0')}-${String(shown[2]).padStart(2, '0')}`
+      : (time && time[1]) || '';
     const text = (inner.match(/<\/h2>\s*<p[^>]*>([\s\S]*?)<\/p>/) || [])[1] || '';
-    if (!headline) continue;
-    const d = date ? new Date(date.replace(/^(\w{3})/, (x) => x[0] + x.slice(1).toLowerCase()) + ' UTC') : null;
-    const clean = (x) => x.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&#x27;|&#39;|’/g, "'").replace(/\s+/g, ' ').trim();
-    if (out.some((o) => o.url.endsWith(m[1]))) continue;
-    out.push({ date: d && !isNaN(d) ? d.toISOString().slice(0, 10) : '', headline: clean(headline), text: clean(text), url: 'https://www.seawolves.rugby' + m[1], source: 'Seawolves' });
+    out.push({ date, headline: clean(headline), text: clean(text), url: 'https://seawolves.rugby' + m[1], source: 'Seawolves' });
   }
   return out.sort((a, b) => b.date.localeCompare(a.date)).slice(0, n);
 }
+// The club's name for the form block: the page's og:site_name ("Seattle
+// Seawolves Rugby") less "Rugby", else the old site's "Seattle Seawolves
+// Rugby Club | …" title; none when neither is there (the page title alone,
+// "News | Seawolves", is not a club name).
+export function seawolvesClubName(html) {
+  const h = String(html);
+  const site = (h.match(/<meta[^>]*property="og:site_name"[^>]*content="([^"]+)"/i) || h.match(/<meta[^>]*content="([^"]+)"[^>]*property="og:site_name"/i) || [])[1];
+  if (site) return site.replace(/&amp;/g, '&').replace(/\s+Rugby(\s+Club)?\s*$/i, '').trim();
+  const title = (h.match(/<title>([^<]*)<\/title>/i) || [])[1] || '';
+  const old = title.match(/^\s*([^|]+?)\s+Rugby Club\b/i);
+  return old ? old[1].trim() : '';
+}
 async function seawolvesForm() {
-  const r = await fetch('https://www.seawolves.rugby/news', { headers: { 'user-agent': UA, accept: 'text/html' } });
+  const r = await fetch('https://seawolves.rugby/news', { headers: { 'user-agent': UA, accept: 'text/html' } });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  const html = await r.text(), news = parseSeawolvesNews(html);
-  const title = (html.match(/<title>([^<|]+)/) || [])[1] || '', name = title.replace(/\s+Rugby Club.*$/i, '').trim(); // "Seattle Seawolves Rugby Club | …" → Seattle Seawolves
+  const html = await r.text(), news = parseSeawolvesNews(html), name = seawolvesClubName(html);
   return { ...(news.length ? { news } : {}), ...(name ? { club: { name } } : {}) };
 }
 

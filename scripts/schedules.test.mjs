@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseYoutube, matchYoutube, parseNflPage, titleDate } from './highlights.mjs';
-import { pickMoves, bigMove, shortMove, applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, htRegular, pwhlOdds, hockeytechForm, normalizeGamesheet, gamesheetForm, normalizeDigitalshift, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, parseFeed, mergeNews } from './schedules.mjs';
+import { pickMoves, bigMove, shortMove, applyScheduleFlags, pickBroadcasts, normalizeMlb, normalizeNhl, normalizeEspn, normalizePwhl, htRegular, pwhlOdds, hockeytechForm, normalizeGamesheet, gamesheetForm, normalizeDigitalshift, wikiTitle, pickNews, seasonStartYear, espnSeason, pickSplits, pickLeaders, divisionRecord, parseSeawolves, parseSeawolvesNews, seawolvesClubName, parseFeed, mergeNews } from './schedules.mjs';
 const TP = globalThis.LQACity.key === 'twinpeaks' ? false : 'Twin Peaks data (here-core) — a real city keeps its own in scripts/city.test.mjs'; // the city-dependent cases below run on here-core's made-up town
 // The fixtures' expected clocks are written in Seattle wall time; a sister
 // city in another zone (city.js `tz`) reads the same instant on its own clock.
@@ -312,11 +312,24 @@ test('Seawolves: a fixture not yet played has no result; no flags, no year headi
   assert.deepEqual(parseSeawolves('<h3>November 2026</h3><li class="grid overflow-hidden"><div><span>Other</span></div><p>Nov 23</p><span>Seawolves Thanksgiving Youth Rugby Camp</span></li>'), []);
 });
 
-test('Seawolves news: date, headline and summary per post, newest first, eight at most', () => {
-  const post = (h, d, t, p) => `<a href="/news/${h}"><div><div class="tag">news</div><div class="text-sm">${d}</div><h2 class="x">${t}</h2><p class="y">${p}</p></div></a>`;
-  const out = parseSeawolvesNews(post('old', 'JUL 21, 2026', 'Old', 'x') + post('bob', 'SEP 1, 2026', 'Battle of the Border', 'Rugby Day comes to Ferndale') + post('draft', 'AUG 27, 2026', 'Three prospects &amp; more', '') + post('camp', 'AUG 12, 2026', 'Camp', 'k'));
-  assert.deepEqual(out.map((a) => a.headline), ['Battle of the Border', 'Three prospects & more', 'Camp', 'Old']);
-  assert.deepEqual(out[0], { date: '2026-09-01', headline: 'Battle of the Border', text: 'Rugby Day comes to Ferndale', url: 'https://www.seawolves.rugby/news/bob', source: 'Seawolves' });
+test('Seawolves news (Envorso Sports page): date, headline and summary per post, newest first, eight at most, one entry a link', () => {
+  const post = (h, iso, d, t, p) => `<a class="group block overflow-hidden rounded-lg" href="/news/${h}"><div class="relative"><img alt="${t}" loading="lazy" src="/_next/image?url=x&amp;w=3840&amp;q=75"/></div><div class="p-4"><p class="text-xs"><time dateTime="${iso}">${d}</time><span aria-hidden="true">·</span><span>News</span></p><h2 class="font-heading">${t}</h2><p class="text-sm">${p}</p></div></a>`;
+  const html = post('old', '2026-07-21T18:00:00.000Z', 'Jul 21, 2026', 'Old', 'x') +
+    post('grosse', '2026-11-04T22:35:02.844Z', 'Nov 4, 2026', 'Seattle Seawolves Sign Back Row Collin Grosse for 2027', 'Washington native Collin Grosse returns home') +
+    post('pb', '2026-10-29T22:05:59.134Z', 'Oct 29, 2026', 'What’s Your PB? Club &amp; Community', 'Rugby&#x27;s personal bests') +
+    post('grosse', '2026-11-04T22:35:02.844Z', 'Nov 4, 2026', 'Seattle Seawolves Sign Back Row Collin Grosse for 2027', 'the same card again, from a second list') +
+    post('late', '2026-11-06T06:30:00.000Z', 'Nov 5, 2026', 'Posted late in the evening', 'y'); // UTC is the next day; the page's own date wins
+  const out = parseSeawolvesNews(html);
+  assert.deepEqual(out.map((a) => a.date), ['2026-11-05', '2026-11-04', '2026-10-29', '2026-07-21']);
+  assert.deepEqual(out[1], { date: '2026-11-04', headline: 'Seattle Seawolves Sign Back Row Collin Grosse for 2027', text: 'Washington native Collin Grosse returns home', url: 'https://seawolves.rugby/news/grosse', source: 'Seawolves' });
+  assert.deepEqual([out[2].headline, out[2].text], ["What's Your PB? Club & Community", "Rugby's personal bests"]);
+  assert.equal(parseSeawolvesNews(html.repeat(3).replace(/news\/old/g, 'news/o'), 2).length, 2);
+});
+
+test('Seawolves club name: og:site_name less " Rugby", else the old "… Rugby Club |" title, else none', () => {
+  assert.equal(seawolvesClubName('<title>News | Seawolves</title><meta property="og:site_name" content="Seattle Seawolves Rugby"/>'), 'Seattle Seawolves');
+  assert.equal(seawolvesClubName('<title>Seattle Seawolves Rugby Club | News</title>'), 'Seattle Seawolves');
+  assert.equal(seawolvesClubName('<title>News | Seawolves</title>'), '');
 });
 
 test('RSS and Atom feeds: title, link, Seattle day, one line of summary, the source; utm stripped', () => {
