@@ -271,24 +271,45 @@ test('seasonStartYear: summer leagues take the calendar year; hockey and footbal
 });
 
 
-test('Seawolves: fixtures from Upcoming, results from Previous by date, home = Seawolves first, preseason round 0 kept and flagged', () => {
-  const card = (round, a, b, ground, date, time, extra = '') => `<div class=" relative mb-4 p-4 shadow-sm rounded-md bg-blue-50 "><span>Round <!-- -->${round}</span><img title="${a}" src="/images/teams/${a[0]}.png" alt="${a}" class="w-16"/><p class="mr-2">VS.</p><img title="${b}" src="/images/teams/${b[0]}.png" alt="${b}"/><span class="font-semibold">${ground}</span><span class="font-semibold">${date}</span><span>${time}<!-- --> PT</span>${extra}</div>`;
-  const html = '<h1 class="text-3xl font-bold">2026<!-- --> <!-- -->Seawolves<!-- --> Schedule</h1><h2>Upcoming Matches</h2>' +
-    card(0, 'Seattle Seawolves', 'Hartford Harpooners', 'Starfire Stadium', 'Sat, Mar 28', '4:00 PM') +
-    card(1, 'Seattle Seawolves', 'Old Glory DC', 'Starfire Stadium', 'Fri, Apr 3', '7:30 PM') +
-    card(2, 'Anthem Rugby Carolina', 'Seattle Seawolves', 'Away', 'Sun, Apr 12', '1:00 PM') +
-    '<h2>Previous Matches</h2>' +
-    card(2, 'Seattle Seawolves', 'Old Glory DC', 'Starfire Stadium', 'Fri, Apr 3', '7:30 PM', '<p class="s">31 - 20</p><span>Win</span>') +
-    card(3, 'Anthem RC', 'Seattle Seawolves', 'American Legion Memorial Stadium', 'Sun, Apr 12', '1:00 PM', '<p>27 - 24</p><span>Loss</span>') +
-    card(12, 'Seattle Seawolves', 'California Legion', 'Starfire Stadium', 'Sun, Jun 14', '7:30 PM', '<p>34 - 43</p><span>Loss</span>') + // a playoff: only in the results
-    '<h2>Upcoming Matches</h2>' + card(1, 'Seattle Seawolves', 'Old Glory DC', 'Starfire Stadium', 'Fri, Apr 3', '7:30 PM'); // the hydration copy: not a second fixture
-  let g = parseSeawolves(html);
-  assert.equal(g.length, 4);
-  assert.deepEqual({ date: g[0].date, pre: g[0].pre, opp: g[0].opp.name }, { date: '2026-03-28', pre: true, opp: 'Hartford Harpooners' });
-  g = g.slice(1); // the season proper
-  assert.deepEqual({ date: g[2].date, playoff: g[2].playoff, res: g[2].res, opp: g[2].opp.name }, { date: '2026-06-14', playoff: true, res: { us: 34, them: 43, won: false }, opp: 'California Legion' });
-  assert.deepEqual(g[0], { date: '2026-04-03', time: '19:30:00', tbd: false, home: true, opp: { name: 'Old Glory DC', short: 'Old Glory', abbrev: 'DC', logo: 'https://www.seawolves.rugby/images/teams/O.png', site: 'https://oldglorydc.com/' }, venue: 'Starfire Stadium', city: 'Tukwila, WA', res: { us: 31, them: 20, won: true } });
-  assert.equal(g[1].home, false); assert.equal(g[1].venue, 'Anthem Rugby Carolina'); assert.deepEqual(g[1].res, { us: 24, them: 27, won: false });
+// The card markup of seawolves.rugby since the club moved to Envorso Sports
+// (2026-11): a Home/Away badge, the day, the clock, the ground, each side's
+// crest + name (the home side first), "Round N" and "34 – 25" on a played
+// match. A home match is listed twice — a ticket card ("Result to come", no
+// round) and the match card. Month headings ("April 2026") carry the year.
+const swCard = ({ side, day, time, ground, a, b, round, score, status = 'Result to come' }) => {
+  const crest = (t) => `<div class="flex"><div class="c"><img alt="" loading="lazy" src="${t.logo}"/></div><span class="font-heading">${t.name}</span>${score ? `<span class="tabular-nums">${score[t === a ? 0 : 1]}</span>` : ''}</div>`;
+  return `<li class="grid overflow-hidden rounded-lg"><div><span>${side}</span></div><div><div><span>${side}</span><span class="text-primary">${status}</span></div><p>Sunday</p><div><p class="font-display">${day}</p><p class="text-base">${time}</p></div><div><p><svg viewBox="0 0 24 24"><path d="M1 1"></path></svg>${ground}</p></div></div><div>${crest(a)}${crest(b)}${round != null ? `<p>Round <!-- -->${round}</p>` : ''}${score ? `<div><p>${score[0]}<!-- --> – <!-- -->${score[1]}</p><p>${status}</p></div>` : ''}</div></li>`;
+};
+const SW = { name: 'Seattle Seawolves Rugby', logo: 'https://storage.googleapis.com/content-public-staging/tenant/x/pages/y/seawolves-logo-1.webp' };
+const LEGION = { name: 'California Legion', logo: 'https://storage.googleapis.com/inventory-production/tenant/1/team-profiles/2/logo-5e6f829a.png' };
+const LEGION_TIX = { ...LEGION, name: 'California Legion Rugby' };
+const ANTHEM = { name: 'Anthem RC', logo: 'https://storage.googleapis.com/inventory-production/tenants/2/team-profiles/1/logo.webp' };
+const HARTFORD = { name: 'Hartford Harpooners', logo: 'https://storage.googleapis.com/inventory-production/tenants/2/team-profiles/11/logo.webp' };
+const swMonth = (m) => `<h3 class="mb-3 font-heading text-xl">${m}</h3>`;
+
+test('Seawolves: one game a date from the ticket + match cards, Home/Away from the badge, results, crests, ground; community events skipped', () => {
+  const html = swMonth('June 2026') +
+    swCard({ side: 'Home', day: 'Jun 14', time: '7:30 PM PDT', ground: 'Starfire Sports Complex', a: SW, b: LEGION_TIX }) +
+    swCard({ side: 'Home', day: 'Jun 14', time: '7:30 PM PDT', ground: 'Starfire Stadium', a: SW, b: LEGION, round: 12, score: [34, 43], status: 'Final · Loss' }) +
+    '<li class="grid overflow-hidden rounded-lg"><div><span>Regular Season</span></div><div><p>Jun 9</p><p>7:00 PM PDT</p><p>Starfire Sports Complex</p></div><div><span>USA Military vs British Army</span></div></li>' +
+    swMonth('April 2026') +
+    swCard({ side: 'Away', day: 'Apr 12', time: '1:00 PM PDT', ground: 'American Legion Memorial Stadium', a: ANTHEM, b: SW, round: 3, score: [34, 25], status: 'Final · Loss' }) +
+    swMonth('March 2026') +
+    swCard({ side: 'Home', day: 'Mar 28', time: '7:42 PM PDT', ground: 'Starfire Sports Complex', a: SW, b: HARTFORD }) +
+    '<li class="grid overflow-hidden rounded-lg"><div><span>Community</span></div><div><p>Mar 2</p><p>9:00 AM PST</p><p>Starfire Sports Complex</p></div><div><img alt="" src="' + SW.logo + '"/><span>Seawolves Youth Rugby Camp</span></div></li>';
+  const g = parseSeawolves(html, { pre: new Set(['2026-03-28']), playoff: new Set(['2026-06-14']) });
+  assert.deepEqual(g.map((x) => x.date), ['2026-03-28', '2026-04-12', '2026-06-14']);
+  assert.deepEqual(g[0], { date: '2026-03-28', time: '19:42:00', tbd: false, home: true, pre: true, opp: { name: 'Hartford Harpooners', short: 'Harpooners', abbrev: 'HH', logo: HARTFORD.logo }, venue: 'Starfire Stadium', city: 'Tukwila, WA' });
+  assert.deepEqual(g[1], { date: '2026-04-12', time: '13:00:00', tbd: false, home: false, opp: { name: 'Anthem Rugby Carolina', short: 'Anthem', abbrev: 'ANT', logo: 'marks/mlr/anthem.png', site: 'https://anthemrc.com/' }, venue: 'American Legion Memorial Stadium', res: { us: 25, them: 34, won: false } });
+  assert.deepEqual({ playoff: g[2].playoff, res: g[2].res, opp: g[2].opp.name, logo: g[2].opp.logo, venue: g[2].venue }, { playoff: true, res: { us: 34, them: 43, won: false }, opp: 'California Legion', logo: 'marks/mlr/legion.png', venue: 'Starfire Stadium' });
+});
+
+test('Seawolves: a fixture not yet played has no result; no flags, no year heading and a /_next/image crest still read', () => {
+  const nx = '/_next/image?url=' + encodeURIComponent('https://storage.googleapis.com/inventory-production/tenant/1/team-profiles/99/logo-new.png') + '&amp;w=640&amp;q=75';
+  const g = parseSeawolves(swMonth('March 2027') + swCard({ side: 'Away', day: 'Mar 6', time: '4:00 PM PST', ground: 'SeatGeek Stadium', a: { name: 'Expansion FC', logo: nx }, b: SW, round: 1 }));
+  assert.equal(g.length, 1);
+  assert.deepEqual(g[0], { date: '2027-03-06', time: '16:00:00', tbd: false, home: false, opp: { name: 'Expansion FC', short: 'Expansion FC', abbrev: 'EF', logo: 'https://storage.googleapis.com/inventory-production/tenant/1/team-profiles/99/logo-new.png' }, venue: 'SeatGeek Stadium' });
+  assert.deepEqual(parseSeawolves('<h3>November 2026</h3><li class="grid overflow-hidden"><div><span>Other</span></div><p>Nov 23</p><span>Seawolves Thanksgiving Youth Rugby Camp</span></li>'), []);
 });
 
 test('Seawolves news: date, headline and summary per post, newest first, eight at most', () => {
