@@ -9112,6 +9112,138 @@
    "date": "2026-11-07",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1451267/dax-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Emerald City Card Show 2026",
+   "date": "2026-11-08",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=67281",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Sea-Meow Convention",
+   "date": "2026-11-08",
+   "time": "10:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/sea-meow-convention-x47197",
+   "type": "expo"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-08",
+   "time": "12:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "15:24:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Oh, Mary! (Touring)",
+   "date": "2026-11-08",
+   "time": "13:00:00",
+   "url": "https://www.ticketmaster.com/oh-mary-touring-seattle-washington-11-08-2026/event/0F0064E9B2D59138",
+   "type": "arts",
+   "capacity": 3016
+  },
+  {
+   "venue": "Lumen Field",
+   "title": "Seattle Seahawks vs. Arizona Cardinals",
+   "date": "2026-11-08",
+   "time": "13:25:00",
+   "url": "https://www.ticketmaster.com/seattle-seahawks-vs-arizona-cardinals-seattle-washington-11-08-2026/event/0F006482E68374A4",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Fox"
+    ]
+   },
+   "capacity": 66335
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Dump of Untitled Pieces",
+   "date": "2026-11-08",
+   "time": "13:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/seattle-turkish-film-festival-2026/seattle-turkish-film-festival-dump-of-untitled-pieces",
+   "movie": true,
+   "end": "15:15:00"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-11-08",
+   "time": "14:00:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Those Who Whistle After Dark",
+   "date": "2026-11-08",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/seattle-turkish-film-festival-2026/seattle-turkish-film-festival-those-who-whistle-after-dark",
+   "movie": true,
+   "end": "17:32:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-08",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "18:28:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Salvation",
+   "date": "2026-11-08",
+   "time": "18:00:00",
+   "url": "https://www.siff.net/festival/salvation",
+   "end": "19:57:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Oh, Mary! (Touring)",
+   "date": "2026-11-08",
+   "time": "18:30:00",
+   "url": "https://www.ticketmaster.com/oh-mary-touring-seattle-washington-11-08-2026/event/0F0064E9B2DC9148",
+   "type": "arts",
+   "capacity": 3016,
+   "tickets": {
+    "box": 0,
+    "resale": 11,
+    "checked": "2026-11-08T23:29:03.651Z",
+    "from": 160
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Roman Candle",
+   "date": "2026-11-08",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/C421301c8504",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "INOHA",
+   "date": "2026-11-08",
+   "time": "19:30",
+   "url": "https://calendar.thecrocodile.com/shows/inoha-08-nov",
+   "type": "concert"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "The Black Angels with GHOSTWOMAN",
+   "date": "2026-11-08",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1408464/the-black-angels-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
