@@ -9245,6 +9245,72 @@
    "date": "2026-11-08",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1408464/the-black-angels-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Genesis Owusu Live on KEXP (Open To The Public)",
+   "date": "2026-11-09",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/genesis-owusu-live-on-kexp-kexp_505797/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-09",
+   "time": "15:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "17:28:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-09",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "18:39:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wicker",
+   "date": "2026-11-09",
+   "time": "16:20:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wicker",
+   "movie": true,
+   "end": "18:05:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The Discreet Charm of the Bourgeoisie",
+   "date": "2026-11-09",
+   "time": "18:30:00",
+   "url": "https://www.siff.net/programs-and-events/siff-movie-club/the-discreet-charm-of-the-bourgeoisie",
+   "end": "20:12:00"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Guess What? Trivia!",
+   "date": "2026-11-09",
+   "time": "19:00:00"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Lucy Bedroque with pinponpanpon",
+   "date": "2026-11-09",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1572733/lucy-bedroque-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Derek Hough Dance For The Holidays",
+   "date": "2026-11-09",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/derek-hough-dance-for-the-holidays-seattle-washington-11-09-2026/event/0F0064F1D82AD6D3",
+   "type": "arts"
   }
  ]
 }
