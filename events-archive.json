@@ -9223,6 +9223,14 @@
    "soldOut": true
   },
   {
+   "venue": "Paramount Theatre",
+   "title": "Jimmy Carr",
+   "date": "2026-11-08",
+   "time": "19:00",
+   "url": "https://www.stgpresents.org/events/jimmy-carr/",
+   "type": "concert"
+  },
+  {
    "venue": "The Vera Project",
    "title": "Roman Candle",
    "date": "2026-11-08",
@@ -9311,6 +9319,128 @@
    "time": "20:00:00",
    "url": "https://www.ticketmaster.com/derek-hough-dance-for-the-holidays-seattle-washington-11-09-2026/event/0F0064F1D82AD6D3",
    "type": "arts"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "AMP 2026 Annual Meeting & Expo",
+   "date": "2026-11-10",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=36236",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Allison Russell Live on KEXP (Open To The Public)",
+   "date": "2026-11-10",
+   "time": "15:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/allison-russell-live-on-kexp-kexp_521452/",
+   "end": "15:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-10",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "18:39:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Screen Printing Open Session",
+   "date": "2026-11-10",
+   "time": "16:00:00",
+   "url": "https://link.dice.fm/F024f1b76898",
+   "type": "community",
+   "end": "20:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-10",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "17:58:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wicker",
+   "date": "2026-11-10",
+   "time": "16:20:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wicker",
+   "movie": true,
+   "end": "18:05:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Oso Oso",
+   "date": "2026-11-10",
+   "time": "18:30:00",
+   "url": "https://link.dice.fm/r6edaf8f48f2",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Pierrot le Fou",
+   "date": "2026-11-10",
+   "time": "19:30:00",
+   "url": "https://www.siff.net/programs-and-events/nouvelles-femmes/pierrot-le-fou",
+   "end": "21:20:00"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Ms Lauryn Hill & Wyclef Jean: Celebrating 30 Years of Fugees'The Score",
+   "date": "2026-11-10",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/ms-lauryn-hill-wyclef-jean-celebrating-seattle-washington-11-10-2026/event/0F006514BB51AC7E",
+   "type": "concert",
+   "capacity": 16260,
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-10T22:53:32.859Z",
+    "from": 74.5
+   }
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Isaiah Rashad: Lil Sunny's Awful Road Trip",
+   "date": "2026-11-10",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/isaiah-rashad-lil-sunnys-awful-road-seattle-washington-11-10-2026/event/0F006524C7B5EA35",
+   "type": "concert",
+   "capacity": 3259,
+   "tickets": {
+    "box": 234,
+    "resale": 44,
+    "checked": "2026-11-10T23:15:48.653Z",
+    "from": 39.5
+   }
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "Tank and The Bangas - The Last Balloon Tour 2026 w/ Ariel J. & Zeus",
+   "date": "2026-11-10",
+   "time": "20:00:00",
+   "url": "https://www.ticketweb.com/event/tank-and-the-bangas-the-crocodile-tickets/14795943",
+   "type": "concert",
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-10T22:53:04.745Z",
+    "from": 52.45
+   }
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "L7 with Nobro",
+   "date": "2026-11-10",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1435102/l7-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
