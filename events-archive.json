@@ -9831,6 +9831,172 @@
    "date": "2026-11-13",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1617000/nimino-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "AMP 2026 Annual Meeting & Expo",
+   "date": "2026-11-14",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=36236",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Chief Seattle Club Gala 2026",
+   "date": "2026-11-14",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=37677",
+   "type": "community",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "Pacific Science Center",
+   "title": "Sensory-Friendly Hours",
+   "date": "2026-11-14",
+   "time": "",
+   "url": "https://pacificsciencecenter.org/events/sensory-hours/"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Seattle Hmong New Year",
+   "date": "2026-11-14",
+   "time": "10:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/seattle-hmong-new-year",
+   "free": true,
+   "type": "community"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-14",
+   "time": "12:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "15:09:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Kontinental '25",
+   "date": "2026-11-14",
+   "time": "13:50:00",
+   "url": "https://www.siff.net/cinema/in-theaters/romanian-film-festival-seattle-13th-edition/kontinental-25",
+   "movie": true,
+   "end": "15:39:00"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-11-14",
+   "time": "14:00:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts",
+   "soldOut": true
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Ghost Stories",
+   "date": "2026-11-14",
+   "time": "14:00:00",
+   "url": "https://www.mccawhall.com/events/detail/ghost-stories",
+   "type": "arts"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Traffic",
+   "date": "2026-11-14",
+   "time": "16:10:00",
+   "url": "https://www.siff.net/cinema/in-theaters/romanian-film-festival-seattle-13th-edition/traffic",
+   "movie": true,
+   "end": "18:09:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-14",
+   "time": "16:20:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "18:18:00"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Kingdom of Giants",
+   "date": "2026-11-14",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/sfd2a4e0bb38",
+   "type": "concert",
+   "end": "22:00:00"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "Stephen Day Presents: The Self Titled Tour",
+   "date": "2026-11-14",
+   "time": "19:00:00",
+   "url": "https://www.ticketweb.com/event/stephen-day-presents-the-self-the-crocodile-tickets/14970773",
+   "type": "concert",
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-14T18:27:28.566Z",
+    "from": 42.09
+   }
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "R.M.N.",
+   "date": "2026-11-14",
+   "time": "19:05:00",
+   "url": "https://www.siff.net/cinema/in-theaters/romanian-film-festival-seattle-13th-edition/rmn",
+   "movie": true,
+   "end": "21:13:00"
+  },
+  {
+   "venue": "On the Boards",
+   "title": "Alex Tatarsky",
+   "date": "2026-11-14",
+   "time": "19:30:00",
+   "url": "https://ontheboards.org/events/26-27/sad-boys-in-harpy-land"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day: Selling Fast!",
+   "date": "2026-11-14",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts"
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Ghost Stories",
+   "date": "2026-11-14",
+   "time": "19:30:00",
+   "url": "https://www.mccawhall.com/events/detail/ghost-stories",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Eureka Day",
+   "date": "2026-11-14",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/plays/202627-season/eureka-day",
+   "type": "arts",
+   "soldOut": true
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Garth Brooks - Blame It All On My Roots Arena Tour",
+   "date": "2026-11-14",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/garth-brooks-blame-it-all-on-seattle-washington-11-14-2026/event/0F00654D7C6A2D6B",
+   "type": "concert"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "GorillaT with Gensuo",
+   "date": "2026-11-14",
+   "time": "21:00:00",
+   "url": "https://www.axs.com/events/1538054/gorillat-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
