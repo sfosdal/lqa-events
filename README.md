@@ -73,10 +73,10 @@ The same codes carry the view into the two things that leave the page (2026-10-2
 - **Calendar subscriptions.** GitHub Pages serves only the feeds the build wrote, so *Add To
   My Calendar* offers a pre-built file where one matches (the no-movies default, one hidden
   team, "only" one venue) and otherwise the live feed `https://cal.here.events/?site=<host>&f=<code>[&s=…][&so=1]`
-  — `lambda/index.mjs`, one AWS Lambda for every city: it fetches that site's `events.json`,
+  — `lambda/index.mjs` in sfosdal/here-core, one AWS Lambda for every city: it fetches that site's `events.json`,
   `city.js` and `filter.js`, runs the site's own rule in a VM context per site and writes the
-  calendar with `scripts/ics.mjs` (`icsBuilder(city)`), cached an hour. Tests in
-  `lambda/handler.test.mjs`; `CAL_SERVER` in `app.js` names the server (empty = static files only).
+  calendar with `scripts/ics.mjs` (`icsBuilder(city)`), cached an hour. Its tests run in
+  here-core; `CAL_SERVER` in `app.js` names the server (empty = static files only).
 
 ## Layout
 

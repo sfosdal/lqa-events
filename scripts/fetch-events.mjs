@@ -383,6 +383,7 @@ await build({
   feedUrlOld: 'https://lqa.here.events/events.json',
   archiveUrl: 'https://raw.githubusercontent.com/sfosdal/lqa-events/archive/events-archive.json',
   church: false,
+  soldoutUrl: '', // this repo's own scripts/data/soldout.json (scripts/soldout-run.sh), which also carries the clubs' away games
   // Dedicated per-venue sources run first (better times and ticket links): the Ticketmaster venues (city.js `tm`), in
   // the city's order, the venues' own calendars (city.js `feed`), then the readers above. Every venue is read from
   // Ticketmaster AND its own events site (Steve, 2026-10-26); one of the two leads and the other is SECONDARY (city.js
