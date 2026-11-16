@@ -63,6 +63,8 @@ jobs:
         run: node scripts/fetch-events.mjs
       - name: The rest of the city for the Map view (seattle.here.events' feed → site/city-map.json; never fails the build)
         run: node scripts/city-map.mjs
+      - name: Full history of this branch (each page's Last revised date is the day git last saw it change)
+        run: git fetch --unshallow --no-tags origin "$GITHUB_REF" || true
       - name: Sitemap, robots.txt and event structured data
         run: node scripts/seo.mjs
       - name: Keep the archive branch (every past event ever published)
