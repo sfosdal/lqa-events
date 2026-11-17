@@ -10131,6 +10131,71 @@
    "date": "2026-11-15",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1497540/russian-circles-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-16",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "18:39:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Paper Tiger [35mm]",
+   "date": "2026-11-16",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/paper-tiger-(35mm)",
+   "movie": true,
+   "end": "17:54:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-16",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "18:13:00"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Arch Enemy & The Black Dahlia Murder with Septicflesh, Crypta, and Thrown Into Exile",
+   "date": "2026-11-16",
+   "time": "18:00:00",
+   "url": "https://www.axs.com/events/1451139/arch-enemy-the-black-dahlia-murder-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Underoath - Define the Great Line 20th Anniversary Tour",
+   "date": "2026-11-16",
+   "time": "18:30:00",
+   "url": "https://www.ticketmaster.com/underoath-define-the-great-line-20th-seattle-washington-11-16-2026/event/0F0064C4AE4ABBB2",
+   "type": "concert",
+   "capacity": 3259,
+   "tickets": {
+    "box": 0,
+    "resale": 0,
+    "checked": "2026-11-14T18:30:15.324Z",
+    "from": 65.13
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Story of the Year & Silverstein with Stand Atlantic and Footballhead",
+   "date": "2026-11-16",
+   "time": "19:00:00",
+   "url": "https://www.axs.com/events/1534964/story-of-the-year-silverstein-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Guess What? Trivia!",
+   "date": "2026-11-16",
+   "time": "19:00:00"
   }
  ]
 }
