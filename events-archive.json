@@ -10291,6 +10291,71 @@
    "date": "2026-11-17",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1479406/bonobo-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "2026 ABRCMS",
+   "date": "2026-11-18",
+   "time": "",
+   "url": "https://abrcms.org/",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "Pacific Science Center",
+   "title": "King Gizzard & the Lizard Wizard",
+   "date": "2026-11-18",
+   "time": "",
+   "url": "https://pacificsciencecenter.org/events/kinggizzard/"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-18",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "18:39:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-18",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "17:58:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Sweetheart",
+   "date": "2026-11-18",
+   "time": "18:00:00",
+   "url": "https://www.siff.net/programs-and-events/cinema-italian-style-2026/sweetheart",
+   "end": "19:32:00"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "State Champs with Cartel, Taylor Acorn, and Like Roses",
+   "date": "2026-11-18",
+   "time": "19:00:00",
+   "url": "https://www.axs.com/events/1484026/state-champs-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "AAA Fest: Veracity Presents",
+   "date": "2026-11-18",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/K37d29285d4d",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "KINO",
+   "date": "2026-11-18",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1405847/kino-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
