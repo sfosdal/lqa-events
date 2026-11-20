@@ -10356,6 +10356,164 @@
    "date": "2026-11-18",
    "time": "20:00:00",
    "url": "https://www.axs.com/events/1405847/kino-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "2026 ABRCMS",
+   "date": "2026-11-19",
+   "time": "",
+   "url": "https://abrcms.org/",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Pacific Marine Expo 2026",
+   "date": "2026-11-19",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=37476",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Heart of Washington Food Donation Drive",
+   "date": "2026-11-19",
+   "time": "",
+   "url": "https://www.sct.org/onstage/productions/heart-of-washington-food-donation-drive-2/",
+   "type": "community"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Hockey Happy Hour",
+   "date": "2026-11-19",
+   "time": ""
+  },
+  {
+   "venue": "KEXP",
+   "title": "Julien Baker Live on KEXP (Open To The Public)",
+   "date": "2026-11-19",
+   "time": "11:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/julien-baker-live-on-kexp-kexp_526831/",
+   "end": "11:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-19",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "18:39:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-19",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "17:58:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Elisa",
+   "date": "2026-11-19",
+   "time": "17:30:00",
+   "url": "https://www.siff.net/programs-and-events/cinema-italian-style-2026/elisa",
+   "end": "19:15:00"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Chicka Chicka Boom Boom: The Holiday Show",
+   "date": "2026-11-19",
+   "time": "18:00:00",
+   "url": "https://www.sct.org/onstage/productions/chicka-chicka-boom-boom-holiday-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Chicka Chicka Boom Boom: The Holiday Show: Preview Performance",
+   "date": "2026-11-19",
+   "time": "18:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/chicka-chicka-boom-boom-the-holiday-show-preview-performance"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Kraken vs. Vancouver Canucks",
+   "date": "2026-11-19",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-kraken-vs-vancouver-canucks-seattle-washington-11-19-2026/event/0F0064C4A060A28A",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Prime Video",
+     "KONG"
+    ]
+   },
+   "capacity": 16061,
+   "tickets": {
+    "box": 0,
+    "resale": 0,
+    "checked": "2026-11-12T23:07:49.200Z",
+    "from": 78.65
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "Lumen Field",
+   "title": "Seattle Sounders FC vs. Real Salt Lake",
+   "date": "2026-11-19",
+   "time": "19:00:00",
+   "url": "https://www.ticketmaster.com/seattle-sounders-fc-vs-real-salt-seattle-washington-11-19-2026/event/0F00654770402879",
+   "type": "sports",
+   "capacity": 70024,
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-14T18:28:14.580Z",
+    "from": 48.4
+   }
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Straight No Chaser",
+   "date": "2026-11-19",
+   "time": "19:30:00",
+   "url": "https://www.ticketmaster.com/straight-no-chaser-seattle-washington-11-19-2026/event/0F0064ADCA81ECD3",
+   "type": "concert",
+   "capacity": 3015,
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-14T18:30:55.798Z",
+    "from": 37.1
+   }
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "The Traveling Goat Presents: Cyd Smith & Friends",
+   "date": "2026-11-19",
+   "time": "19:30:00"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Lil Tracy performing live! with special guests",
+   "date": "2026-11-19",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1644690/lil-tracy-performing-live-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "A Year of School",
+   "date": "2026-11-19",
+   "time": "20:00:00",
+   "url": "https://www.siff.net/programs-and-events/cinema-italian-style-2026/a-year-of-school",
+   "end": "21:42:00"
   }
  ]
 }
