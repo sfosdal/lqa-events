@@ -10514,6 +10514,189 @@
    "time": "20:00:00",
    "url": "https://www.siff.net/programs-and-events/cinema-italian-style-2026/a-year-of-school",
    "end": "21:42:00"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "2026 ABRCMS",
+   "date": "2026-11-20",
+   "time": "",
+   "url": "https://abrcms.org/",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Pacific Marine Expo 2026",
+   "date": "2026-11-20",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=37476",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "International Gem & Jewelry Show",
+   "date": "2026-11-20",
+   "time": "12:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/international-gem-and-jewelry-show-x50669",
+   "type": "expo"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-20",
+   "time": "13:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "15:28:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Brunello: The Gracious Visionary",
+   "date": "2026-11-20",
+   "time": "15:00:00",
+   "url": "https://www.siff.net/programs-and-events/cinema-italian-style-2026/brunello-the-gracious-visionary",
+   "end": "17:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-20",
+   "time": "15:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "18:24:00"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "2026 Seattle Christmas Market",
+   "date": "2026-11-20",
+   "time": "16:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/2026-seattle-christmas-market-x50296"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Club Kid",
+   "date": "2026-11-20",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/club-kid",
+   "movie": true,
+   "end": "18:31:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Gioia",
+   "date": "2026-11-20",
+   "time": "17:30:00",
+   "url": "https://www.siff.net/programs-and-events/cinema-italian-style-2026/gioia",
+   "end": "19:18:00"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "Jamila Woods: 10 Years of Heavn",
+   "date": "2026-11-20",
+   "time": "18:00",
+   "url": "https://calendar.thecrocodile.com/shows/jamila-woods-10-years-of-heavn-20-nov",
+   "type": "concert"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "Lenny Voter Record Release & Peren Votolato Photo Show",
+   "date": "2026-11-20",
+   "time": "18:00",
+   "url": "https://calendar.thecrocodile.com/shows/lenny-voter-record-release-peren-votolato-photo-show-20-nov",
+   "type": "concert"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "AAA Fest: Deerhoof, Sol, Iron Lung, J.R.C.G.",
+   "date": "2026-11-20",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/jb2c2934f2d0",
+   "type": "concert",
+   "end": "22:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Chicka Chicka Boom Boom: The Holiday Show",
+   "date": "2026-11-20",
+   "time": "18:00:00",
+   "url": "https://www.sct.org/onstage/productions/chicka-chicka-boom-boom-holiday-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Chicka Chicka Boom Boom: The Holiday Show: Opening Night",
+   "date": "2026-11-20",
+   "time": "18:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/chicka-chicka-boom-boom-the-holiday-show-opening-night"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Josh Johnson's Comedy Band Camp",
+   "date": "2026-11-20",
+   "time": "19:00:00",
+   "url": "https://www.ticketmaster.com/josh-johnsons-comedy-band-camp-seattle-washington-11-20-2026/event/0F00645BABCAB137",
+   "type": "arts",
+   "tickets": {
+    "box": 1,
+    "resale": 0,
+    "checked": "2026-11-21T00:53:15.303Z",
+    "from": 84.99
+   }
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Comedy Band Camp Essentials Upgrade",
+   "date": "2026-11-20",
+   "time": "19:00:00",
+   "url": "https://www.ticketmaster.com/comedy-band-camp-essentials-upgrade-seattle-washington-11-20-2026/event/0F0064861EBCE422"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Raise the Red Lantern",
+   "date": "2026-11-20",
+   "time": "19:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/raise-the-red-lantern",
+   "movie": true,
+   "end": "21:07:00"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "Thundercat with fera",
+   "date": "2026-11-20",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1516580/thundercat-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Baby Smoove Live!",
+   "date": "2026-11-20",
+   "time": "20:00:00",
+   "url": "https://www.axs.com/events/1610757/baby-smoove-live-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The Last One for the Road",
+   "date": "2026-11-20",
+   "time": "20:00:00",
+   "url": "https://www.siff.net/programs-and-events/cinema-italian-style-2026/the-last-one-for-the-road",
+   "end": "21:38:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Josh Johnson's Comedy Band Camp",
+   "date": "2026-11-20",
+   "time": "22:00:00",
+   "url": "https://www.ticketmaster.com/josh-johnsons-comedy-band-camp-seattle-washington-11-20-2026/event/0F00645BABD0B13D",
+   "type": "arts",
+   "tickets": {
+    "box": 107,
+    "resale": 0,
+    "checked": "2026-11-21T00:53:17.383Z",
+    "from": 54.99
+   }
   }
  ]
 }
