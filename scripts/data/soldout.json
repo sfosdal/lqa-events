@@ -1,18 +1,7 @@
 {
- "generated": "2026-11-14T19:04:19.511Z",
+ "generated": "2026-11-21T01:10:59.972Z",
  "_": "scripts/soldout-check.mjs (a local run — Ticketmaster inventory as a real Chrome sees it, TicketWeb pages (TW… keys, the Crocodile) by plain fetch; committed by scripts/soldout-run.sh). status: available = box-office tickets on sale; soldout = only resale left; none = the inventory call and the page both showed nothing (not treated as sold out); presale = public sale not started; unknown = the page gave no answer; a none/unknown run keeps the last real answer, its own checked time, note says so.",
  "events": {
-  "TW14970773": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 42.09,
-   "note": "2 of 2 ticket types on sale, availability M/H, no count",
-   "name": "Stephen Day Presents: The Self Titled Tour",
-   "date": "2026-11-14",
-   "venue": "The Crocodile",
-   "checked": "2026-11-14T18:27:28.566Z"
-  },
   "TW14866603": {
    "status": "available",
    "primary": null,
@@ -22,7 +11,7 @@
    "name": "Nite Wave present: The Cure, Depeche Mode & New Order Tribute Night",
    "date": "2026-11-27",
    "venue": "The Crocodile",
-   "checked": "2026-11-14T18:27:29.479Z"
+   "checked": "2026-11-21T00:22:59.736Z"
   },
   "TW14171594": {
    "status": "available",
@@ -33,7 +22,7 @@
    "name": "Buck Meek, Kisser",
    "date": "2026-12-02",
    "venue": "The Crocodile",
-   "checked": "2026-11-14T18:27:30.522Z"
+   "checked": "2026-11-21T00:23:01.685Z"
   },
   "TW14768543": {
    "status": "available",
@@ -44,7 +33,7 @@
    "name": "Mohanad Elshieky: Green Books",
    "date": "2026-12-17",
    "venue": "The Crocodile",
-   "checked": "2026-11-14T18:27:31.325Z"
+   "checked": "2026-11-21T00:23:02.457Z"
   },
   "TW15033413": {
    "status": "unknown",
@@ -52,7 +41,7 @@
    "name": "Book of Love",
    "date": "2027-02-20",
    "venue": "The Crocodile",
-   "checked": "2026-11-14T18:27:32.745Z"
+   "checked": "2026-11-21T00:23:03.663Z"
   },
   "TW14896893": {
    "status": "available",
@@ -63,7 +52,875 @@
    "name": "Death From Above 1979",
    "date": "2027-03-31",
    "venue": "The Crocodile",
-   "checked": "2026-11-14T18:27:33.630Z"
+   "checked": "2026-11-21T00:23:04.468Z"
+  },
+  "0F0064C4A06BA2A4": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 89.84,
+   "note": "8 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Anaheim Ducks",
+   "date": "2026-11-23",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:23:24.988Z"
+  },
+  "0F0064C4A071A2AD": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 97.17,
+   "note": "40 resale listed on the page",
+   "name": "Seattle Kraken vs. Chicago Blackhawks",
+   "date": "2026-11-25",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:23:45.115Z"
+  },
+  "0F0064C4A077A2BA": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 113.74,
+   "note": "40 resale listed on the page",
+   "name": "Seattle Kraken vs. Edmonton Oilers",
+   "date": "2026-11-28",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:24:05.350Z"
+  },
+  "0F00650EA2EC8956": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 99,
+   "note": "38 box-office listed on the page, no count",
+   "name": "Trans-Siberian Orchestra - The Ghosts Of Christmas Eve",
+   "date": "2026-11-29",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:24:25.369Z"
+  },
+  "0F00650EA29F88DC": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 10,
+   "note": "62 box-office listed on the page, no count",
+   "name": "Trans-Siberian Orchestra - The Ghosts Of Christmas Eve",
+   "date": "2026-11-29",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:24:45.421Z"
+  },
+  "0F0064C4A07DA2C0": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 44.77,
+   "note": "40 resale listed on the page",
+   "name": "Seattle Kraken vs. Dallas Stars",
+   "date": "2026-12-01",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:25:05.586Z"
+  },
+  "0F0064C4A082A2C8": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 63.96,
+   "note": "40 resale listed on the page",
+   "name": "Seattle Kraken vs. Dallas Stars",
+   "date": "2026-12-03",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:25:25.804Z"
+  },
+  "0F00650D9D7768D8": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 75,
+   "note": "18 box-office listed on the page, no count",
+   "name": "Jonas Brothers: The Burning Up Tour All Over Again",
+   "date": "2026-12-05",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:25:45.918Z"
+  },
+  "0F0064C4A088A2D0": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 71.39,
+   "note": "40 resale listed on the page",
+   "name": "Seattle Kraken vs. Buffalo Sabres",
+   "date": "2026-12-06",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:26:05.980Z"
+  },
+  "0F00649DD1062FF0": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "note": "page says sold out",
+   "name": "Olivia Rodrigo: The Unraveled Tour",
+   "date": "2026-12-07",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:26:10.997Z"
+  },
+  "0F00649DE731624A": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "note": "page says sold out",
+   "name": "Olivia Rodrigo: The Unraveled Tour",
+   "date": "2026-12-08",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:26:15.465Z"
+  },
+  "0F0064C4A08EA2DD": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 70.69,
+   "note": "25 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Washington Capitals",
+   "date": "2026-12-10",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:26:35.573Z"
+  },
+  "0F0064C4A094A2E8": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 101.99,
+   "note": "5 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Nashville Predators",
+   "date": "2026-12-12",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:26:55.741Z"
+  },
+  "0F0064DD9FEB8A18": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 77.25,
+   "note": "40 box-office listed on the page, no count",
+   "name": "Seattle Holiday Classic: SU v WSU and UW v Baylor",
+   "date": "2026-12-19",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:27:15.899Z"
+  },
+  "0F006537D6A8D07B": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 49.1,
+   "note": "39 box-office listed on the page, no count",
+   "name": "Seattle Torrent vs. Vegas Vanguards",
+   "date": "2026-12-20",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:27:35.943Z"
+  },
+  "0F0064C4A099A2F2": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 119.24,
+   "note": "19 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. San Jose Sharks",
+   "date": "2026-12-22",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:27:56.177Z"
+  },
+  "0F00653DCD23C7D7": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 34.2,
+   "note": "32 box-office listed on the page, no count",
+   "name": "Seattle Torrent vs. Boston Fleet",
+   "date": "2026-12-23",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:28:16.273Z"
+  },
+  "0F00653DCD26C7DB": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 38.3,
+   "note": "40 box-office listed on the page, no count",
+   "name": "Seattle Torrent vs. Minnesota Frost",
+   "date": "2026-12-27",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:28:36.456Z"
+  },
+  "0F0064C4A09FA2FA": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 82.41,
+   "note": "40 resale listed on the page",
+   "name": "Seattle Kraken vs. Philadelphia Flyers",
+   "date": "2026-12-29",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:28:56.635Z"
+  },
+  "0F00653DCD29C7E2": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 38.3,
+   "note": "40 box-office listed on the page, no count",
+   "name": "Seattle Torrent vs. New York Sirens",
+   "date": "2026-12-31",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:29:16.679Z"
+  },
+  "0F0064C4A0A5A304": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 101.99,
+   "note": "40 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. New York Islanders",
+   "date": "2027-01-02",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:29:36.880Z"
+  },
+  "0F0064C4A0AAA30B": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 88.56,
+   "note": "40 resale listed on the page",
+   "name": "Seattle Kraken vs. Vancouver Canucks",
+   "date": "2027-01-03",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:29:57.004Z"
+  },
+  "0F0064C4A0B0A312": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 65.54,
+   "note": "11 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Tampa Bay Lightning",
+   "date": "2027-01-05",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:30:17.218Z"
+  },
+  "0F00653DCD2CC7EA": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 40.9,
+   "note": "40 box-office listed on the page, no count",
+   "name": "Seattle Torrent vs. Ottawa Charge",
+   "date": "2027-01-08",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:30:37.286Z"
+  },
+  "0F00653DCD2EC7F2": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 41.9,
+   "note": "33 box-office listed on the page, no count",
+   "name": "Seattle Torrent vs. Montréal Victoire",
+   "date": "2027-01-10",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:30:57.403Z"
+  },
+  "0F0064C4A0B6A31C": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 65.54,
+   "note": "8 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Florida Panthers",
+   "date": "2027-01-12",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:31:17.566Z"
+  },
+  "0F00653DCD31C7F8": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 35.2,
+   "note": "36 box-office listed on the page, no count",
+   "name": "Seattle Torrent vs. Hamilton Havoc",
+   "date": "2027-01-14",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:31:37.635Z"
+  },
+  "0F0064C4A0BDA322": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 98.01,
+   "note": "40 resale listed on the page",
+   "name": "Seattle Kraken vs. San Jose Sharks",
+   "date": "2027-01-16",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:31:57.832Z"
+  },
+  "0F0064C4A007A195": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 89.84,
+   "note": "5 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Columbus Blue Jackets",
+   "date": "2027-01-18",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:32:18.010Z"
+  },
+  "0F006522A8949905": {
+   "status": "available",
+   "primary": 19,
+   "resale": 0,
+   "fromPrimary": 75,
+   "fromResale": null,
+   "name": "Limited Edition Rivals Replica Game Ball From Spalding®",
+   "date": "2027-01-22",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:32:20.702Z"
+  },
+  "0F006529C189C484": {
+   "status": "available",
+   "primary": 142,
+   "resale": 0,
+   "fromPrimary": 60,
+   "fromResale": null,
+   "name": "Ultimate Fan Pass: 30-min Exclusive On-court Access From 5:30pm-6:00pm",
+   "date": "2027-01-22",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:32:23.589Z"
+  },
+  "0F006529BE5FBF5F": {
+   "status": "available",
+   "primary": 13,
+   "resale": 0,
+   "fromPrimary": 100,
+   "fromResale": null,
+   "name": "MVP Court Pass (check In By 6:30pm)",
+   "date": "2027-01-22",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:32:26.054Z"
+  },
+  "0F006528C6C4C6E8": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 38.3,
+   "note": "37 box-office listed on the page, no count",
+   "name": "Harlem Globetrotters: Rivalry Tour Presented By Sprite",
+   "date": "2027-01-22",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:32:46.070Z"
+  },
+  "0F006537EA25EB2C": {
+   "status": "available",
+   "primary": 4794,
+   "resale": 0,
+   "fromPrimary": 10,
+   "fromResale": null,
+   "name": "Harlem Globetrotters - CPA Club Fee",
+   "date": "2027-01-22",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:32:48.921Z"
+  },
+  "0F0064AEAA9AA408": {
+   "status": "available",
+   "primary": 3331,
+   "resale": 678,
+   "fromPrimary": 59.5,
+   "fromResale": 25,
+   "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
+   "date": "2027-01-26",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:32:52.367Z"
+  },
+  "0F0064BBF94F49AA": {
+   "status": "available",
+   "primary": 3053,
+   "resale": 675,
+   "fromPrimary": 59.5,
+   "fromResale": 21,
+   "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
+   "date": "2027-01-27",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:32:55.112Z"
+  },
+  "0F0064BBF95C49C8": {
+   "status": "available",
+   "primary": 691,
+   "resale": 663,
+   "fromPrimary": 79.5,
+   "fromResale": 46,
+   "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
+   "date": "2027-01-29",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:32:57.899Z"
+  },
+  "0F006531BB8DC2EC": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 69.9,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Battle In Seattle: Gonzaga vs. Oregon",
+   "date": "2027-01-30",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:17:38.421Z"
+  },
+  "0F0064C4A0C3A335": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 89.84,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Seattle Kraken vs. New Jersey Devils",
+   "date": "2027-01-31",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:17:58.559Z"
+  },
+  "0F0065634395F47C": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 94.7,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "WWE Monday Night RAW",
+   "date": "2027-02-01",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:18:18.727Z"
+  },
+  "0F0064C4A0C8A341": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 101.99,
+   "note": "12 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Montreal Canadiens",
+   "date": "2027-02-03",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:34:18.239Z"
+  },
+  "0F00653DCD34C801": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 37.25,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Seattle Torrent vs. Vancouver Goldeneyes",
+   "date": "2027-02-04",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:18:38.976Z"
+  },
+  "0F0064D566E22386": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 89.5,
+   "note": "40 box-office listed on the page, no count",
+   "name": "Don Omar \"The Last King World Tour\"",
+   "date": "2027-02-07",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:34:58.283Z"
+  },
+  "0F00653DCD37C803": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 41.9,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Seattle Torrent vs. Detroit Clutch",
+   "date": "2027-02-13",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T18:17:09.824Z"
+  },
+  "0F0064C4A0D0A352": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 87.12,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Seattle Kraken vs. St. Louis Blues",
+   "date": "2027-02-13",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:23:42.450Z"
+  },
+  "0F0064C4A0D5A35B": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 155.54,
+   "note": "40 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Pittsburgh Penguins",
+   "date": "2027-02-15",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:35:58.726Z"
+  },
+  "0F0064C4A0DBA369": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 65.54,
+   "note": "39 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Ottawa Senators",
+   "date": "2027-02-17",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:36:18.772Z"
+  },
+  "0F0064C4A00DA1AA": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 131.34,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Seattle Kraken vs. Boston Bruins",
+   "date": "2027-02-22",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:24:42.983Z"
+  },
+  "0F0064C4A013A1BA": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 101.99,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Seattle Kraken vs. Winnipeg Jets",
+   "date": "2027-02-27",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:25:03.002Z"
+  },
+  "0F00653DCD3AC80D": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 40.9,
+   "note": "kept from 2026-11-12: this run unknown (no answer in 90 s)",
+   "name": "Seattle Torrent vs. Vegas Vanguards",
+   "date": "2027-02-28",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:25:23.178Z"
+  },
+  "0F0064C4A019A1C3": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 63.96,
+   "note": "40 resale listed on the page",
+   "name": "Seattle Kraken vs. Los Angeles Kings",
+   "date": "2027-03-11",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:42:02.359Z"
+  },
+  "0F0064C4A020A1E8": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 155.54,
+   "note": "4 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Edmonton Oilers",
+   "date": "2027-03-13",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:42:22.526Z"
+  },
+  "0F0064C4A0E1A372": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 53.24,
+   "note": "40 resale listed on the page",
+   "name": "Seattle Kraken vs. St. Louis Blues",
+   "date": "2027-03-15",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:42:42.623Z"
+  },
+  "0F0064C4A066A29F": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 155.54,
+   "note": "24 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Colorado Avalanche",
+   "date": "2027-03-19",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:43:02.806Z"
+  },
+  "0F0064C4A0E7A37D": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 101.99,
+   "note": "22 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Los Angeles Kings",
+   "date": "2027-03-21",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:43:22.843Z"
+  },
+  "0F006541D298D33B": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 98.85,
+   "note": "26 box-office listed on the page, no count",
+   "name": "Dancing with the Stars: Live! - 2027 Tour",
+   "date": "2027-03-22",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:43:43.067Z"
+  },
+  "0F0064C4A0ECA388": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 89.84,
+   "note": "18 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Vegas Golden Knights",
+   "date": "2027-03-23",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:44:03.243Z"
+  },
+  "0F00653DE1E2F0DB": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 50.15,
+   "note": "28 box-office listed on the page, no count",
+   "name": "Greta Van Fleet - Into The Beginning",
+   "date": "2027-03-24",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:44:23.325Z"
+  },
+  "0F0064C4A0F3A396": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 65.54,
+   "note": "35 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Anaheim Ducks",
+   "date": "2027-03-25",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:44:43.581Z"
+  },
+  "0F00653DD76CDC06": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 77.25,
+   "note": "23 box-office listed on the page, no count",
+   "name": "Staind: Break The Cycle 25th Anniversary Tour",
+   "date": "2027-03-27",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:45:03.615Z"
+  },
+  "0F0064C4A0F9A39D": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 89.84,
+   "note": "18 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Utah Mammoth",
+   "date": "2027-03-30",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:45:23.628Z"
+  },
+  "0F00653DCD3DC81A": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 37.25,
+   "note": "37 box-office listed on the page, no count",
+   "name": "Seattle Torrent vs. Toronto Sceptres",
+   "date": "2027-03-31",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:45:43.682Z"
+  },
+  "0F00653091695C25": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 85.5,
+   "note": "33 box-office listed on the page, no count",
+   "name": "Riley Green: That's Just Me Tour",
+   "date": "2027-04-02",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:46:03.724Z"
+  },
+  "0F0064C4A0FFA3A7": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 101.99,
+   "note": "25 box-office listed on the page, no count",
+   "name": "Seattle Kraken vs. Winnipeg Jets",
+   "date": "2027-04-03",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:46:23.793Z"
+  },
+  "0F006564C16194A1": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 70.4,
+   "note": "23 box-office listed on the page, no count",
+   "name": "FEID - FERXXO - THE GREEN STAR Tour 2027",
+   "date": "2027-04-04",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:46:43.972Z"
+  },
+  "0F00653DCD40C824": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 38.3,
+   "note": "35 box-office listed on the page, no count",
+   "name": "Seattle Torrent vs. Vancouver Goldeneyes",
+   "date": "2027-04-06",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:47:04.221Z"
+  },
+  "0F006529E2ABFCEB": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 144.7,
+   "note": "7 box-office listed on the page, no count",
+   "name": "HANS ZIMMER LIVE - THE NEXT LEVEL",
+   "date": "2027-04-09",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:47:24.469Z"
+  },
+  "0F006542F75B398E": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 248.4,
+   "note": "3 box-office listed on the page, no count",
+   "name": "Nickelback: Everything Under The Sun Tour",
+   "date": "2027-04-10",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:47:44.679Z"
+  },
+  "0F00653DCD43C82D": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 45,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Seattle Torrent vs. San Jose Sea Lions",
+   "date": "2027-04-17",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:31:11.037Z"
+  },
+  "0F006554AA2D7170": {
+   "status": "available",
+   "primary": 3159,
+   "resale": 198,
+   "fromPrimary": 39.5,
+   "fromResale": 67,
+   "name": "Queens of The Stone Age - PERFECTH WORLD TOUR",
+   "date": "2027-05-07",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:48:07.975Z"
+  },
+  "0F00654293525E5F": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 94.2,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Def Leppard and Goo Goo Dolls  ",
+   "date": "2027-05-09",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:31:33.291Z"
+  },
+  "0F00656DC4109AB2": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 84.75,
+   "note": "30 box-office listed on the page, no count",
+   "name": "Jhené Aiko Presents: Ark to Agartha - A Westside Whimsy Experience",
+   "date": "2027-05-13",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:48:48.345Z"
+  },
+  "0F0065499FD7760A": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 266.8,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Calvin Harris - North America Tour",
+   "date": "2027-05-14",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:31:53.322Z"
+  },
+  "0F0065540E4935CE": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 245.14,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Calvin Harris - North America Tour",
+   "date": "2027-05-15",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:32:13.395Z"
+  },
+  "0F0064A6DAB644A1": {
+   "status": "available",
+   "primary": 2949,
+   "resale": 113,
+   "fromPrimary": 59.5,
+   "fromResale": 80,
+   "name": "Niall Horan: Dinner Party Live On Tour",
+   "date": "2027-05-27",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:32:15.349Z",
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)"
+  },
+  "0F0065352E956033": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 62.35,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "A Perfect Circle with special guest The Cult",
+   "date": "2027-05-30",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-12T23:32:35.450Z"
+  },
+  "0F00653207A196E3": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 50.15,
+   "note": "28 box-office listed on the page, no count",
+   "name": "Lizzy McAlpine: The Over Country Tour",
+   "date": "2027-07-17",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:50:29.057Z"
+  },
+  "0F006546BF749849": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 76.6,
+   "note": "37 box-office listed on the page, no count",
+   "name": "Leon Bridges Presents: The Happiness Anytime Tour",
+   "date": "2027-08-13",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:50:49.202Z"
+  },
+  "0F006562C4887F64": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 50.15,
+   "note": "15 box-office listed on the page, no count",
+   "name": "Kings of Leon",
+   "date": "2027-09-15",
+   "venue": "Climate Pledge Arena",
+   "checked": "2026-11-21T00:51:09.251Z"
   },
   "0F006562C8D9835E": {
    "status": "available",
@@ -77,23 +934,12 @@
    "checked": "2026-11-12T23:32:41.674Z",
    "note": "kept from 2026-11-12: this run unknown (no inventory call)"
   },
-  "0F00654770402879": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 48.4,
-   "note": "31 box-office listed on the page, no count",
-   "name": "Seattle Sounders FC vs. Real Salt Lake",
-   "date": "2026-11-19",
-   "venue": "Lumen Field",
-   "checked": "2026-11-14T18:28:14.580Z"
-  },
   "0F006482E68C74B1": {
    "status": "soldout",
    "primary": 0,
    "resale": 0,
    "fromResale": 267.75,
-   "note": "30 resale listed on the page",
+   "note": "kept from 2026-11-14: this run unknown (no inventory call)",
    "name": "Seattle Seahawks vs. Dallas Cowboys",
    "date": "2026-12-07",
    "venue": "Lumen Field",
@@ -104,7 +950,7 @@
    "primary": 0,
    "resale": 0,
    "fromResale": 248.04,
-   "note": "40 resale listed on the page",
+   "note": "kept from 2026-11-14: this run unknown (no inventory call)",
    "name": "Seattle Seahawks vs. New York Giants",
    "date": "2026-12-13",
    "venue": "Lumen Field",
@@ -114,23 +960,34 @@
    "status": "soldout",
    "primary": 0,
    "resale": 0,
-   "fromResale": 285.6,
-   "note": "37 resale listed on the page",
+   "fromResale": 291.33,
+   "note": "39 resale listed on the page",
    "name": "Seattle Seahawks vs. Los Angeles Rams",
    "date": "2026-12-25",
    "venue": "Lumen Field",
-   "checked": "2026-11-14T18:29:15.039Z"
+   "checked": "2026-11-21T00:52:29.681Z"
   },
   "0F00652CCB6EAB83": {
    "status": "available",
    "primary": null,
    "resale": 0,
    "fromPrimary": 37.8,
-   "note": "40 box-office listed on the page, no count",
+   "note": "9 box-office listed on the page, no count",
    "name": "Monster Energy AMA Supercross",
    "date": "2027-03-20",
    "venue": "Lumen Field",
-   "checked": "2026-11-14T18:29:35.180Z"
+   "checked": "2026-11-21T00:52:49.709Z"
+  },
+  "0F00656215B2C500": {
+   "status": "available",
+   "primary": 13517,
+   "resale": 824,
+   "fromPrimary": 59.5,
+   "fromResale": 67,
+   "name": "Stray Kids World Tour [RUN IT SEATTLE]",
+   "date": "2027-05-16",
+   "venue": "Lumen Field",
+   "checked": "2026-11-21T00:52:52.791Z"
   },
   "0F00654C3F7D1083": {
    "status": "available",
@@ -141,7 +998,1560 @@
    "name": "Zach Bryan",
    "date": "2027-07-24",
    "venue": "Lumen Field",
-   "checked": "2026-11-14T18:29:55.206Z"
+   "checked": "2026-11-21T00:53:13.031Z"
+  },
+  "0F00645BABCAB137": {
+   "status": "available",
+   "primary": 1,
+   "resale": 0,
+   "fromPrimary": 84.99,
+   "fromResale": null,
+   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
+   "date": "2026-11-20",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:53:15.303Z"
+  },
+  "0F00645BABD0B13D": {
+   "status": "available",
+   "primary": 107,
+   "resale": 0,
+   "fromPrimary": 54.99,
+   "fromResale": null,
+   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
+   "date": "2026-11-20",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:53:17.383Z"
+  },
+  "0F00645BABDAB14A": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 103.59,
+   "note": "1 box-office listed on the page, no count",
+   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
+   "date": "2026-11-21",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:53:37.402Z"
+  },
+  "0F0064861ECBE435": {
+   "status": "available",
+   "primary": 256,
+   "resale": 0,
+   "fromPrimary": 80.25,
+   "fromResale": null,
+   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
+   "date": "2026-11-21",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:53:39.947Z"
+  },
+  "0F00645BABD5B143": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 103.59,
+   "note": "1 box-office listed on the page, no count",
+   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
+   "date": "2026-11-21",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:54:00.169Z"
+  },
+  "0F0064BBAD73B4CA": {
+   "status": "available",
+   "primary": 3,
+   "resale": 0,
+   "fromPrimary": 54.99,
+   "fromResale": null,
+   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
+   "date": "2026-11-22",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-12T23:34:38.075Z",
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)"
+  },
+  "0F00645BABE0B152": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
+   "date": "2026-11-22",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-12T23:34:42.715Z"
+  },
+  "0F00649ED359E61C": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 49.1,
+   "note": "39 box-office listed on the page, no count",
+   "name": "Scott Bradlee's Postmodern Jukebox",
+   "date": "2026-11-24",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:55:00.540Z"
+  },
+  "0F0064FDB1719934": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 73.6,
+   "note": "38 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-11-27",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:55:20.614Z"
+  },
+  "0F0064FDB177993F": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 73.6,
+   "note": "21 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-11-28",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:55:40.717Z"
+  },
+  "0F0064FDB17C9946": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 73.6,
+   "note": "34 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-11-28",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:56:00.743Z"
+  },
+  "0F0064FDB1819948": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 73.6,
+   "note": "kept from 2026-11-14: this run unknown (no inventory call)",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-11-29",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-14T18:34:39.534Z"
+  },
+  "0F0064FDB186994F": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 73.6,
+   "note": "40 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-11-29",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:56:40.993Z"
+  },
+  "0F0064FDB18C9969": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 67.6,
+   "note": "40 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-12-01",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:57:01.176Z"
+  },
+  "0F0064FDB1919979": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 67.6,
+   "note": "kept from 2026-11-14: this run unknown (no inventory call)",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-12-02",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-14T18:35:39.920Z"
+  },
+  "0F0064FDB1979980": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 67.6,
+   "note": "39 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-12-03",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:57:41.385Z"
+  },
+  "0F0064FDB19E9987": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 67.6,
+   "note": "40 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-12-04",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:58:01.404Z"
+  },
+  "0F0064FDB1A59990": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 73.6,
+   "note": "40 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-12-05",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:58:21.563Z"
+  },
+  "0F0064FDB1AB999C": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 67.6,
+   "note": "39 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-12-05",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:58:41.667Z"
+  },
+  "0F0064FDB1B599AB": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 73.6,
+   "note": "40 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-12-06",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:59:01.777Z"
+  },
+  "0F0064FDB1BB99B3": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 67.6,
+   "note": "40 box-office listed on the page, no count",
+   "name": "The Outsiders (Touring)",
+   "date": "2026-12-06",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:59:21.884Z"
+  },
+  "0F0064F0E52BE2E9": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 79.1,
+   "note": "40 box-office listed on the page, no count",
+   "name": "TRIVIUM: CROWN IN THE GRAVE WORLD TOUR",
+   "date": "2026-12-09",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T00:59:41.934Z"
+  },
+  "0F0064D2A7049DB8": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
+   "name": "Angine de Poitrine",
+   "date": "2026-12-13",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-12T18:29:32.824Z"
+  },
+  "0F00656ADC9AD2F0": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 67.6,
+   "note": "36 box-office listed on the page, no count",
+   "name": "Victoria Monét: Frequency Of Love Tour",
+   "date": "2026-12-14",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:00:22.191Z"
+  },
+  "0F00651CD99F3760": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 143.6,
+   "note": "2 box-office listed on the page, no count",
+   "name": "Disney's Beauty and the Beast (Touring)",
+   "date": "2026-12-22",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:00:42.295Z"
+  },
+  "0F00651CD9A43774": {
+   "status": "soldout",
+   "primary": 0,
+   "resale": 0,
+   "fromResale": 130.9,
+   "note": "kept from 2026-11-14: this run unknown (no inventory call)",
+   "name": "Disney's Beauty and the Beast (Touring)",
+   "date": "2026-12-23",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-14T18:39:21.085Z"
+  },
+  "0F00651CD9A93787": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 67.6,
+   "note": "kept from 2026-11-14: this run unknown (no answer in 90 s)",
+   "name": "Disney's Beauty and the Beast (Touring)",
+   "date": "2026-12-23",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-14T18:39:41.125Z"
+  },
+  "0F00651CD9AD3792": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 55.6,
+   "note": "kept from 2026-11-14: this run unknown (no answer in 90 s)",
+   "name": "Disney's Beauty and the Beast (Touring)",
+   "date": "2026-12-24",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-14T18:40:01.163Z"
+  },
+  "0F00651CD9B237A0": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 126.6,
+   "note": "kept from 2026-11-14: this run unknown (no answer in 90 s)",
+   "name": "Disney's Beauty and the Beast (Touring)",
+   "date": "2026-12-26",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-14T18:40:21.370Z"
+  },
+  "0F006563E7969E7F": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Boston Red Sox",
+   "date": "2027-03-25",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E79F9E8B": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Boston Red Sox",
+   "date": "2027-03-26",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E0DEF63C": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-03-26",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7A69E96": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Boston Red Sox",
+   "date": "2027-03-27",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E0E3F643": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-03-27",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7AD9E9C": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Boston Red Sox",
+   "date": "2027-03-28",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E0E7F64A": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-03-28",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7B39E9F": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Texas Rangers",
+   "date": "2027-03-29",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E0ECF651": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-03-29",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7BB9EA5": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Texas Rangers",
+   "date": "2027-03-30",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E0F1F65C": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-03-30",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7C19EAD": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Texas Rangers",
+   "date": "2027-03-31",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E0F6F663": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-03-31",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7C89EB8": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Colorado Rockies",
+   "date": "2027-04-09",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E0FAF66F": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-04-09",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7CE9EC1": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Colorado Rockies",
+   "date": "2027-04-10",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E0FFF679": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-04-10",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7D59EC9": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Colorado Rockies",
+   "date": "2027-04-11",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E104F67D": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-04-11",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7DC9ECD": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Chicago White Sox",
+   "date": "2027-04-13",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E109F684": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-04-13",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7E29ED6": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Chicago White Sox",
+   "date": "2027-04-14",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E10EF68C": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-04-14",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7E99EDD": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Chicago White Sox",
+   "date": "2027-04-15",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E113F691": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-04-15",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7F09EE5": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Houston Astros",
+   "date": "2027-04-16",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E118F698": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-04-16",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7F69EEC": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Houston Astros",
+   "date": "2027-04-17",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E11DF6A0": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-04-17",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E7FD9EEF": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Houston Astros",
+   "date": "2027-04-18",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E122F6A7": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-04-18",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8039EF5": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Minnesota Twins",
+   "date": "2027-04-30",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E127F6AD": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-04-30",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E80A9EFB": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Minnesota Twins",
+   "date": "2027-05-01",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E12CF6B6": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-01",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8119F0A": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Minnesota Twins",
+   "date": "2027-05-02",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E131F6BD": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-02",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8189F14": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Los Angeles Dodgers",
+   "date": "2027-05-03",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E136F6C4": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-03",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E81F9F23": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Los Angeles Dodgers",
+   "date": "2027-05-04",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E13AF6CC": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-04",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8269F2A": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Los Angeles Dodgers",
+   "date": "2027-05-05",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E140F6D8": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-05",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E82D9F33": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Pittsburgh Pirates",
+   "date": "2027-05-14",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E145F6E3": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-14",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8339F3D": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Pittsburgh Pirates",
+   "date": "2027-05-15",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E149F6EC": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-15",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E83A9F47": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Pittsburgh Pirates",
+   "date": "2027-05-16",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8419F4C": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Tampa Bay Rays",
+   "date": "2027-05-21",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E153F6FE": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-21",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8479F53": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Tampa Bay Rays",
+   "date": "2027-05-22",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E157F706": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-22",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E84E9F5B": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Tampa Bay Rays",
+   "date": "2027-05-23",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E15CF714": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-23",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8559F61": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Athletics",
+   "date": "2027-05-24",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E161F71B": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-24",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E85B9F6D": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Athletics",
+   "date": "2027-05-25",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E166F724": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-25",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8629F78": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Athletics",
+   "date": "2027-05-26",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E16AF72D": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-05-26",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8699F7C": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Washington Nationals",
+   "date": "2027-06-04",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E16FF738": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-04",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8709F8C": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Washington Nationals",
+   "date": "2027-06-05",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E174F73F": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-05",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8769F91": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Washington Nationals",
+   "date": "2027-06-06",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E178F749": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-06",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E87D9F9E": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. St. Louis Cardinals",
+   "date": "2027-06-07",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E17DF752": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-07",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8849FA9": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. St. Louis Cardinals",
+   "date": "2027-06-08",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E182F755": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tour",
+   "date": "2027-06-08",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E88A9FAC": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. St. Louis Cardinals",
+   "date": "2027-06-09",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E187F760": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-09",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8919FB1": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Los Angeles Angels",
+   "date": "2027-06-17",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E18CF769": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-17",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8989FB6": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Los Angeles Angels",
+   "date": "2027-06-18",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E191F772": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-18",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E89F9FC2": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Los Angeles Angels",
+   "date": "2027-06-19",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E195F77F": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-19",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8A59FC8": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Los Angeles Angels",
+   "date": "2027-06-20",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E19AF788": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-20",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8AC9FD2": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Miami Marlins",
+   "date": "2027-06-21",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E19FF790": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-21",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8B39FD9": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Miami Marlins",
+   "date": "2027-06-22",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1A3F7A1": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-22",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8B99FE6": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Miami Marlins",
+   "date": "2027-06-23",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1A8F7AC": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-06-23",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8C09FEC": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. San Diego Padres",
+   "date": "2027-07-06",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1ADF7B5": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-06",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8C79FEF": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. San Diego Padres",
+   "date": "2027-07-07",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1B1F7C3": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-07",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8CD9FFC": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. San Diego Padres",
+   "date": "2027-07-08",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1B6F7CB": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-08",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8D4A003": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Kansas City Royals",
+   "date": "2027-07-09",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1BBF7D9": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-09",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8DBA006": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Kansas City Royals",
+   "date": "2027-07-10",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1C0F7E2": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-10",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8E2A00C": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Kansas City Royals",
+   "date": "2027-07-11",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1C4F7F4": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-11",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8E8A014": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. New York Yankees",
+   "date": "2027-07-23",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1C9F7FC": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-23",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8EFA017": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. New York Yankees",
+   "date": "2027-07-24",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1CEF804": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-24",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8F6A01D": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. New York Yankees",
+   "date": "2027-07-25",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1D3F81D": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-25",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E8FCA021": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Milwaukee Brewers",
+   "date": "2027-07-27",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1D8F822": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-27",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E903A02F": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Milwaukee Brewers",
+   "date": "2027-07-28",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1DCF828": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-28",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E90AA036": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Milwaukee Brewers",
+   "date": "2027-07-29",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1E2F83C": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-29",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E910A039": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Baltimore Orioles",
+   "date": "2027-07-30",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1E6F844": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-30",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E917A042": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Baltimore Orioles",
+   "date": "2027-07-31",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1EBF84B": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-07-31",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E91EA044": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Baltimore Orioles",
+   "date": "2027-08-01",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1F0F852": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-01",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E924A049": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Cleveland Guardians",
+   "date": "2027-08-09",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1F5F857": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-09",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E92BA04F": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Cleveland Guardians",
+   "date": "2027-08-10",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1FAF866": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-10",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E932A058": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Cleveland Guardians",
+   "date": "2027-08-11",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E1FFF86E": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-11",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E938A061": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Detroit Tigers",
+   "date": "2027-08-13",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E204F87A": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-13",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E940A069": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Detroit Tigers",
+   "date": "2027-08-14",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E209F87D": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-14",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E947A06F": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Detroit Tigers",
+   "date": "2027-08-15",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E20DF882": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-15",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E94DA072": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Los Angeles Angels",
+   "date": "2027-08-16",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E212F888": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-16",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E954A077": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Los Angeles Angels",
+   "date": "2027-08-17",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E217F88F": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-17",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E95BA081": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Los Angeles Angels",
+   "date": "2027-08-18",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E21CF898": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-18",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E962A095": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Houston Astros",
+   "date": "2027-08-27",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E221F8A3": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-27",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E969A09A": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Houston Astros",
+   "date": "2027-08-28",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E226F8AB": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-28",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E96FA0A5": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Houston Astros",
+   "date": "2027-08-29",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E22BF8C7": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-29",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E976A0AF": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Athletics",
+   "date": "2027-08-30",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E230F8DB": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-30",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E97DA0B3": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Athletics",
+   "date": "2027-08-31",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E235F8EF": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-08-31",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E984A0BC": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Athletics",
+   "date": "2027-09-01",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E239F900": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-09-01",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E98AA0C2": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Texas Rangers",
+   "date": "2027-09-13",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E23EF905": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-09-13",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E991A0C6": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Texas Rangers",
+   "date": "2027-09-14",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E243F90C": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-09-14",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E998A0CB": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Texas Rangers",
+   "date": "2027-09-15",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E248F911": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-09-15",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E99FA0D5": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Texas Rangers",
+   "date": "2027-09-16",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E24DF915": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-09-16",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E9A6A0DE": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Toronto Blue Jays",
+   "date": "2027-09-17",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E253F91D": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-09-17",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E9AFA0E3": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Toronto Blue Jays",
+   "date": "2027-09-18",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006557E258F92D": {
+   "status": "presale",
+   "name": "Seattle Mariners Gameday/Pregame Tours",
+   "date": "2027-09-18",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006563E9B7A0EC": {
+   "status": "presale",
+   "name": "Seattle Mariners vs. Toronto Blue Jays",
+   "date": "2027-09-19",
+   "venue": "T-Mobile Park",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F0064861EBCE422": {
+   "status": "presale",
+   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
+   "date": "2026-11-20",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F0064861EC6E42E": {
+   "status": "presale",
+   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
+   "date": "2026-11-21",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F0064861ED0E440": {
+   "status": "presale",
+   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
+   "date": "2026-11-22",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006183A46A0D87": {
+   "status": "presale",
+   "name": "Christine D'Clario - La Novia Tour ",
+   "date": "2027-01-30",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006383E1719405": {
+   "status": "presale",
+   "name": "The Bald and the Beautiful LIVE: Very Bald, Very Beautiful",
+   "date": "2027-02-20",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006572C7499A36": {
+   "status": "presale",
+   "name": "The Sound of Music (Touring)",
+   "date": "2027-06-01",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006572C74F9A46": {
+   "status": "presale",
+   "name": "The Sound of Music (Touring)",
+   "date": "2027-06-02",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006572C7549A5B": {
+   "status": "presale",
+   "name": "The Sound of Music (Touring)",
+   "date": "2027-06-03",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006572C7599A63": {
+   "status": "presale",
+   "name": "The Sound of Music (Touring)",
+   "date": "2027-06-04",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006572C75E9A6A": {
+   "status": "presale",
+   "name": "The Sound of Music (Touring)",
+   "date": "2027-06-05",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006572C7649A7C": {
+   "status": "presale",
+   "name": "The Sound of Music (Touring)",
+   "date": "2027-06-05",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006572C7699A86": {
+   "status": "presale",
+   "name": "The Sound of Music (Touring)",
+   "date": "2027-06-06",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "0F006572C76F9A91": {
+   "status": "presale",
+   "name": "The Sound of Music (Touring)",
+   "date": "2027-06-06",
+   "venue": "Paramount Theatre",
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "090064EA31098B51": {
+   "status": "presale",
+   "name": "Anaheim Ducks v Seattle Kraken",
+   "date": "2026-12-04",
+   "venue": "Honda Center",
+   "club": "kraken",
+   "away": true,
+   "checked": "2026-11-21T01:10:59.971Z"
+  },
+  "TW14970773": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 42.09,
+   "note": "2 of 2 ticket types on sale, availability M/H, no count",
+   "name": "Stephen Day Presents: The Self Titled Tour",
+   "date": "2026-11-14",
+   "venue": "The Crocodile",
+   "checked": "2026-11-14T18:27:28.566Z"
+  },
+  "0F00654770402879": {
+   "status": "available",
+   "primary": null,
+   "resale": 0,
+   "fromPrimary": 48.4,
+   "note": "31 box-office listed on the page, no count",
+   "name": "Seattle Sounders FC vs. Real Salt Lake",
+   "date": "2026-11-19",
+   "venue": "Lumen Field",
+   "checked": "2026-11-14T18:28:14.580Z"
   },
   "0F0064C4AE4ABBB2": {
    "status": "soldout",
@@ -175,321 +2585,6 @@
    "date": "2026-11-19",
    "venue": "Paramount Theatre",
    "checked": "2026-11-14T18:30:55.798Z"
-  },
-  "0F00645BABCAB137": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
-   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
-   "date": "2026-11-20",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-12T23:34:21.693Z"
-  },
-  "0F00645BABD0B13D": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 79.59,
-   "note": "34 box-office listed on the page, no count",
-   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
-   "date": "2026-11-20",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:31:36.005Z"
-  },
-  "0F00645BABDAB14A": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
-   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
-   "date": "2026-11-21",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-12T23:34:28.922Z"
-  },
-  "0F0064861ECBE435": {
-   "status": "available",
-   "primary": 256,
-   "resale": 0,
-   "fromPrimary": 80.25,
-   "fromResale": null,
-   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
-   "date": "2026-11-21",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:31:58.175Z"
-  },
-  "0F00645BABD5B143": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
-   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
-   "date": "2026-11-21",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-12T23:34:35.599Z"
-  },
-  "0F0064BBAD73B4CA": {
-   "status": "available",
-   "primary": 3,
-   "resale": 0,
-   "fromPrimary": 54.99,
-   "fromResale": null,
-   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
-   "date": "2026-11-22",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-12T23:34:38.075Z",
-   "note": "kept from 2026-11-12: this run unknown (no inventory call)"
-  },
-  "0F00645BABE0B152": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
-   "name": "JOSH JOHNSON'S COMEDY BAND CAMP",
-   "date": "2026-11-22",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-12T23:34:42.715Z"
-  },
-  "0F00649ED359E61C": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 49.1,
-   "note": "40 box-office listed on the page, no count",
-   "name": "Scott Bradlee's Postmodern Jukebox",
-   "date": "2026-11-24",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:33:19.015Z"
-  },
-  "0F0064FDB1719934": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 73.6,
-   "note": "38 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-11-27",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:33:39.089Z"
-  },
-  "0F0064FDB177993F": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 73.6,
-   "note": "11 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-11-28",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:33:59.227Z"
-  },
-  "0F0064FDB17C9946": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 73.6,
-   "note": "35 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-11-28",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:34:19.398Z"
-  },
-  "0F0064FDB1819948": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 73.6,
-   "note": "31 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-11-29",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:34:39.534Z"
-  },
-  "0F0064FDB186994F": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 73.6,
-   "note": "39 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-11-29",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:34:59.673Z"
-  },
-  "0F0064FDB18C9969": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 67.6,
-   "note": "39 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-12-01",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:35:19.812Z"
-  },
-  "0F0064FDB1919979": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 67.6,
-   "note": "37 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-12-02",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:35:39.920Z"
-  },
-  "0F0064FDB1979980": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 67.6,
-   "note": "39 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-12-03",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:36:00.037Z"
-  },
-  "0F0064FDB19E9987": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 67.6,
-   "note": "40 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-12-04",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:36:20.209Z"
-  },
-  "0F0064FDB1A59990": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 73.6,
-   "note": "40 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-12-05",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:36:40.381Z"
-  },
-  "0F0064FDB1AB999C": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 67.6,
-   "note": "39 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-12-05",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:37:00.409Z"
-  },
-  "0F0064FDB1B599AB": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 73.6,
-   "note": "40 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-12-06",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:37:20.485Z"
-  },
-  "0F0064FDB1BB99B3": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 67.6,
-   "note": "40 box-office listed on the page, no count",
-   "name": "The Outsiders (Touring)",
-   "date": "2026-12-06",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:37:40.553Z"
-  },
-  "0F0064F0E52BE2E9": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 79.1,
-   "note": "40 box-office listed on the page, no count",
-   "name": "TRIVIUM: CROWN IN THE GRAVE WORLD TOUR",
-   "date": "2026-12-09",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:38:00.577Z"
-  },
-  "0F0064D2A7049DB8": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "note": "kept from 2026-11-12: this run unknown (no inventory call)",
-   "name": "Angine de Poitrine",
-   "date": "2026-12-13",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-12T18:29:32.824Z"
-  },
-  "0F00656ADC9AD2F0": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 67.6,
-   "note": "34 box-office listed on the page, no count",
-   "name": "Victoria Monét: Frequency Of Love Tour",
-   "date": "2026-12-14",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:38:40.805Z"
-  },
-  "0F00651CD99F3760": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 103.6,
-   "note": "11 box-office listed on the page, no count",
-   "name": "Disney's Beauty and the Beast (Touring)",
-   "date": "2026-12-22",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:39:01.022Z"
-  },
-  "0F00651CD9A43774": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "fromResale": 130.9,
-   "note": "31 resale listed on the page",
-   "name": "Disney's Beauty and the Beast (Touring)",
-   "date": "2026-12-23",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:39:21.085Z"
-  },
-  "0F00651CD9A93787": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 67.6,
-   "note": "23 box-office listed on the page, no count",
-   "name": "Disney's Beauty and the Beast (Touring)",
-   "date": "2026-12-23",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:39:41.125Z"
-  },
-  "0F00651CD9AD3792": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 55.6,
-   "note": "40 box-office listed on the page, no count",
-   "name": "Disney's Beauty and the Beast (Touring)",
-   "date": "2026-12-24",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:40:01.163Z"
-  },
-  "0F00651CD9B237A0": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 126.6,
-   "note": "8 box-office listed on the page, no count",
-   "name": "Disney's Beauty and the Beast (Touring)",
-   "date": "2026-12-26",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T18:40:21.370Z"
   },
   "0F00651CD9B737A7": {
    "status": "available",
@@ -1329,48 +3424,6 @@
    "away": true,
    "checked": "2026-11-14T19:04:19.509Z"
   },
-  "0F00656215B2C500": {
-   "status": "presale",
-   "name": "Stray Kids World Tour [RUN IT SEATTLE]",
-   "date": "2027-05-16",
-   "venue": "Lumen Field",
-   "checked": "2026-11-14T19:04:19.510Z"
-  },
-  "0F0064861EBCE422": {
-   "status": "presale",
-   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
-   "date": "2026-11-20",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T19:04:19.510Z"
-  },
-  "0F0064861EC6E42E": {
-   "status": "presale",
-   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
-   "date": "2026-11-21",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T19:04:19.510Z"
-  },
-  "0F0064861ED0E440": {
-   "status": "presale",
-   "name": "COMEDY BAND CAMP ESSENTIALS UPGRADE",
-   "date": "2026-11-22",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T19:04:19.510Z"
-  },
-  "0F006183A46A0D87": {
-   "status": "presale",
-   "name": "Christine D'Clario - La Novia Tour ",
-   "date": "2027-01-30",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T19:04:19.510Z"
-  },
-  "0F006383E1719405": {
-   "status": "presale",
-   "name": "The Bald and the Beautiful LIVE: Very Bald, Very Beautiful",
-   "date": "2027-02-20",
-   "venue": "Paramount Theatre",
-   "checked": "2026-11-14T19:04:19.510Z"
-  },
   "0F006565A6CD6A5F": {
    "status": "presale",
    "name": "SIX (Touring)",
@@ -1427,15 +3480,6 @@
    "venue": "Paramount Theatre",
    "checked": "2026-11-14T19:04:19.510Z"
   },
-  "090064EA31098B51": {
-   "status": "presale",
-   "name": "Anaheim Ducks v Seattle Kraken",
-   "date": "2026-12-04",
-   "venue": "Honda Center",
-   "club": "kraken",
-   "away": true,
-   "checked": "2026-11-14T19:04:19.510Z"
-  },
   "TW14978383": {
    "status": "available",
    "primary": null,
@@ -1479,840 +3523,6 @@
    "venue": "Climate Pledge Arena",
    "checked": "2026-11-12T23:07:49.200Z"
   },
-  "0F0064C4A06BA2A4": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 70.69,
-   "note": "1 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Anaheim Ducks",
-   "date": "2026-11-23",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:08:09.306Z"
-  },
-  "0F0064C4A071A2AD": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "fromResale": 97.17,
-   "note": "40 resale listed on the page",
-   "name": "Seattle Kraken vs. Chicago Blackhawks",
-   "date": "2026-11-25",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:08:29.510Z"
-  },
-  "0F0064C4A077A2BA": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "fromResale": 113.16,
-   "note": "40 resale listed on the page",
-   "name": "Seattle Kraken vs. Edmonton Oilers",
-   "date": "2026-11-28",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:08:49.643Z"
-  },
-  "0F00650EA2EC8956": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 76,
-   "note": "36 box-office listed on the page, no count",
-   "name": "Trans-Siberian Orchestra - The Ghosts Of Christmas Eve",
-   "date": "2026-11-29",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:09:09.820Z"
-  },
-  "0F00650EA29F88DC": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 10,
-   "note": "62 box-office listed on the page, no count",
-   "name": "Trans-Siberian Orchestra - The Ghosts Of Christmas Eve",
-   "date": "2026-11-29",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:09:30.013Z"
-  },
-  "0F0064C4A07DA2C0": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 65.54,
-   "note": "16 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Dallas Stars",
-   "date": "2026-12-01",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:09:50.083Z"
-  },
-  "0F0064C4A082A2C8": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "fromResale": 61.5,
-   "note": "40 resale listed on the page",
-   "name": "Seattle Kraken vs. Dallas Stars",
-   "date": "2026-12-03",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:10:10.114Z"
-  },
-  "0F00650D9D7768D8": {
-   "status": "available",
-   "primary": 1106,
-   "resale": 549,
-   "fromPrimary": 39.95,
-   "fromResale": 65,
-   "name": "Jonas Brothers: The Burning Up Tour All Over Again",
-   "date": "2026-12-05",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:10:12.226Z"
-  },
-  "0F0064C4A088A2D0": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 89.84,
-   "note": "4 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Buffalo Sabres",
-   "date": "2026-12-06",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:10:32.449Z"
-  },
-  "0F00649DD1062FF0": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "note": "page says sold out",
-   "name": "Olivia Rodrigo: The Unraveled Tour",
-   "date": "2026-12-07",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:10:36.851Z"
-  },
-  "0F00649DE731624A": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "note": "page says sold out",
-   "name": "Olivia Rodrigo: The Unraveled Tour",
-   "date": "2026-12-08",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:10:41.035Z"
-  },
-  "0F0064C4A08EA2DD": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 70.69,
-   "note": "6 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Washington Capitals",
-   "date": "2026-12-10",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:11:01.080Z"
-  },
-  "0F0064C4A094A2E8": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 101.99,
-   "note": "13 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Nashville Predators",
-   "date": "2026-12-12",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:11:21.264Z"
-  },
-  "0F0064DD9FEB8A18": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 77.25,
-   "note": "40 box-office listed on the page, no count",
-   "name": "Seattle Holiday Classic: SU v WSU and UW v Baylor",
-   "date": "2026-12-19",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:11:41.513Z"
-  },
-  "0F006537D6A8D07B": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 49.1,
-   "note": "36 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. PWHL Las Vegas",
-   "date": "2026-12-20",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:12:01.631Z"
-  },
-  "0F0064C4A099A2F2": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 119.24,
-   "note": "4 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. San Jose Sharks",
-   "date": "2026-12-22",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:12:21.817Z"
-  },
-  "0F00653DCD23C7D7": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 34.2,
-   "note": "37 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. Boston Fleet",
-   "date": "2026-12-23",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:12:41.920Z"
-  },
-  "0F00653DCD26C7DB": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 38.3,
-   "note": "40 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. Minnesota Frost",
-   "date": "2026-12-27",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:13:01.946Z"
-  },
-  "0F0064C4A09FA2FA": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 101.99,
-   "note": "4 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Philadelphia Flyers",
-   "date": "2026-12-29",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:13:22.190Z"
-  },
-  "0F00653DCD29C7E2": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 38.3,
-   "note": "40 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. New York Sirens",
-   "date": "2026-12-31",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:13:42.308Z"
-  },
-  "0F0064C4A0A5A304": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 101.99,
-   "note": "8 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. New York Islanders",
-   "date": "2027-01-02",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:14:02.335Z"
-  },
-  "0F0064C4A0AAA30B": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "fromResale": 88.56,
-   "note": "40 resale listed on the page",
-   "name": "Seattle Kraken vs. Vancouver Canucks",
-   "date": "2027-01-03",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:14:22.353Z"
-  },
-  "0F0064C4A0B0A312": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 65.54,
-   "note": "8 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Tampa Bay Lightning",
-   "date": "2027-01-05",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:14:42.576Z"
-  },
-  "0F00653DCD2CC7EA": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 40.9,
-   "note": "37 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. Ottawa Charge",
-   "date": "2027-01-08",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:15:02.636Z"
-  },
-  "0F00653DCD2EC7F2": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 45,
-   "note": "37 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. Montréal Victoire",
-   "date": "2027-01-10",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:15:22.759Z"
-  },
-  "0F0064C4A0B6A31C": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 65.54,
-   "note": "4 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Florida Panthers",
-   "date": "2027-01-12",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:15:42.834Z"
-  },
-  "0F00653DCD31C7F8": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 35.2,
-   "note": "36 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. Hamilton Havoc",
-   "date": "2027-01-14",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:16:02.842Z"
-  },
-  "0F0064C4A0BDA322": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 131.34,
-   "note": "1 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. San Jose Sharks",
-   "date": "2027-01-16",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:16:22.965Z"
-  },
-  "0F0064C4A007A195": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 89.84,
-   "note": "7 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Columbus Blue Jackets",
-   "date": "2027-01-18",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:16:43.012Z"
-  },
-  "0F006522A8949905": {
-   "status": "available",
-   "primary": 20,
-   "resale": 0,
-   "fromPrimary": 75,
-   "fromResale": null,
-   "name": "Limited Edition Rivals Replica Game Ball From Spalding®",
-   "date": "2027-01-22",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:16:45.546Z"
-  },
-  "0F006529C189C484": {
-   "status": "available",
-   "primary": 144,
-   "resale": 0,
-   "fromPrimary": 60,
-   "fromResale": null,
-   "name": "Ultimate Fan Pass: 30-min Exclusive On-court Access From 5:30pm-6:00pm",
-   "date": "2027-01-22",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:16:47.221Z"
-  },
-  "0F006529BE5FBF5F": {
-   "status": "available",
-   "primary": 16,
-   "resale": 0,
-   "fromPrimary": 100,
-   "fromResale": null,
-   "name": "MVP Court Pass (check In By 6:30pm)",
-   "date": "2027-01-22",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:16:49.279Z"
-  },
-  "0F006528C6C4C6E8": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 38.3,
-   "note": "36 box-office listed on the page, no count",
-   "name": "Harlem Globetrotters: Rivalry Tour Presented By Sprite",
-   "date": "2027-01-22",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:17:09.536Z"
-  },
-  "0F006537EA25EB2C": {
-   "status": "available",
-   "primary": 4828,
-   "resale": 0,
-   "fromPrimary": 10,
-   "fromResale": null,
-   "name": "Harlem Globetrotters - CPA Club Fee",
-   "date": "2027-01-22",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:17:11.812Z"
-  },
-  "0F0064AEAA9AA408": {
-   "status": "available",
-   "primary": 3551,
-   "resale": 674,
-   "fromPrimary": 59.5,
-   "fromResale": 24,
-   "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
-   "date": "2027-01-26",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:17:14.194Z"
-  },
-  "0F0064BBF94F49AA": {
-   "status": "available",
-   "primary": 3242,
-   "resale": 675,
-   "fromPrimary": 59.5,
-   "fromResale": 22,
-   "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
-   "date": "2027-01-27",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:17:16.287Z"
-  },
-  "0F0064BBF95C49C8": {
-   "status": "available",
-   "primary": 709,
-   "resale": 669,
-   "fromPrimary": 79.5,
-   "fromResale": 38,
-   "name": "Gracie Abrams: The Look at My Life Tour presented by Capital One",
-   "date": "2027-01-29",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:17:18.243Z"
-  },
-  "0F006531BB8DC2EC": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 69.9,
-   "note": "40 box-office listed on the page, no count",
-   "name": "Battle In Seattle: Gonzaga vs. Oregon",
-   "date": "2027-01-30",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:17:38.421Z"
-  },
-  "0F0064C4A0C3A335": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 89.84,
-   "note": "14 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. New Jersey Devils",
-   "date": "2027-01-31",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:17:58.559Z"
-  },
-  "0F0065634395F47C": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 94.7,
-   "note": "28 box-office listed on the page, no count",
-   "name": "WWE Monday Night RAW",
-   "date": "2027-02-01",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:18:18.727Z"
-  },
-  "0F00653DCD34C801": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 37.25,
-   "note": "37 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. Vancouver Goldeneyes",
-   "date": "2027-02-04",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:18:38.976Z"
-  },
-  "0F0064D566E22386": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 89.5,
-   "note": "21 box-office listed on the page, no count",
-   "name": "Don Omar \"The Last King World Tour\"",
-   "date": "2027-02-07",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:18:59.082Z"
-  },
-  "0F00653DCD37C803": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 41.9,
-   "note": "kept from 2026-11-12: this run unknown (no answer in 90 s)",
-   "name": "Seattle Torrent vs. Detroit Clutch",
-   "date": "2027-02-13",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T18:17:09.824Z"
-  },
-  "0F0064C4A0D0A352": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "fromResale": 87.12,
-   "note": "40 resale listed on the page",
-   "name": "Seattle Kraken vs. St. Louis Blues",
-   "date": "2027-02-13",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:23:42.450Z"
-  },
-  "0F0064C4A0D5A35B": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "fromResale": 111.32,
-   "note": "40 resale listed on the page",
-   "name": "Seattle Kraken vs. Pittsburgh Penguins",
-   "date": "2027-02-15",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:24:02.685Z"
-  },
-  "0F0064C4A0DBA369": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 65.54,
-   "note": "12 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Ottawa Senators",
-   "date": "2027-02-17",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:24:22.760Z"
-  },
-  "0F0064C4A00DA1AA": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 131.34,
-   "note": "5 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Boston Bruins",
-   "date": "2027-02-22",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:24:42.983Z"
-  },
-  "0F0064C4A013A1BA": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 101.99,
-   "note": "8 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Winnipeg Jets",
-   "date": "2027-02-27",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:25:03.002Z"
-  },
-  "0F00653DCD3AC80D": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 40.9,
-   "note": "39 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. Vegas Vanguards",
-   "date": "2027-02-28",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:25:23.178Z"
-  },
-  "0F0064C4A019A1C3": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 89.84,
-   "note": "25 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Los Angeles Kings",
-   "date": "2027-03-11",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:25:43.314Z"
-  },
-  "0F0064C4A020A1E8": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 155.54,
-   "note": "24 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Edmonton Oilers",
-   "date": "2027-03-13",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:26:03.533Z"
-  },
-  "0F0064C4A0E1A372": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 101.99,
-   "note": "4 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. St. Louis Blues",
-   "date": "2027-03-15",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:26:23.755Z"
-  },
-  "0F0064C4A066A29F": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 155.54,
-   "note": "20 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Colorado Avalanche",
-   "date": "2027-03-19",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:26:43.872Z"
-  },
-  "0F0064C4A0E7A37D": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 101.99,
-   "note": "22 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Los Angeles Kings",
-   "date": "2027-03-21",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:27:04.073Z"
-  },
-  "0F006541D298D33B": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 98.85,
-   "note": "29 box-office listed on the page, no count",
-   "name": "Dancing with the Stars: Live! - 2027 Tour",
-   "date": "2027-03-22",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:27:24.289Z"
-  },
-  "0F0064C4A0ECA388": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 89.84,
-   "note": "23 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Vegas Golden Knights",
-   "date": "2027-03-23",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:27:44.436Z"
-  },
-  "0F00653DE1E2F0DB": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 50.15,
-   "note": "28 box-office listed on the page, no count",
-   "name": "Greta Van Fleet - Into The Beginning",
-   "date": "2027-03-24",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:28:04.548Z"
-  },
-  "0F0064C4A0F3A396": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 65.54,
-   "note": "33 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Anaheim Ducks",
-   "date": "2027-03-25",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:28:24.591Z"
-  },
-  "0F00653DD76CDC06": {
-   "status": "available",
-   "primary": 2293,
-   "resale": 524,
-   "fromPrimary": 40.5,
-   "fromResale": 58,
-   "name": "Staind: Break The Cycle 25th Anniversary Tour",
-   "date": "2027-03-27",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:28:27.141Z"
-  },
-  "0F0064C4A0F9A39D": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 89.84,
-   "note": "18 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Utah Mammoth",
-   "date": "2027-03-30",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:28:47.366Z"
-  },
-  "0F00653DCD3DC81A": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 37.25,
-   "note": "39 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. Toronto Sceptres",
-   "date": "2027-03-31",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:29:07.585Z"
-  },
-  "0F00653091695C25": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 85.5,
-   "note": "30 box-office listed on the page, no count",
-   "name": "Riley Green: That's Just Me Tour",
-   "date": "2027-04-02",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:29:27.808Z"
-  },
-  "0F0064C4A0FFA3A7": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 101.99,
-   "note": "25 box-office listed on the page, no count",
-   "name": "Seattle Kraken vs. Winnipeg Jets",
-   "date": "2027-04-03",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:29:47.814Z"
-  },
-  "0F006564C16194A1": {
-   "status": "available",
-   "primary": 8365,
-   "resale": 35,
-   "fromPrimary": 55.5,
-   "fromResale": 96,
-   "name": "FEID - FERXXO - THE GREEN STAR Tour 2027",
-   "date": "2027-04-04",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:29:50.177Z"
-  },
-  "0F00653DCD40C824": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 38.3,
-   "note": "38 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. Vancouver Goldeneyes",
-   "date": "2027-04-06",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:30:10.423Z"
-  },
-  "0F006529E2ABFCEB": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 144.7,
-   "note": "8 box-office listed on the page, no count",
-   "name": "HANS ZIMMER LIVE - THE NEXT LEVEL",
-   "date": "2027-04-09",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:30:30.649Z"
-  },
-  "0F006542F75B398E": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 248.7,
-   "note": "2 box-office listed on the page, no count",
-   "name": "Nickelback: Everything Under The Sun Tour",
-   "date": "2027-04-10",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:30:50.813Z"
-  },
-  "0F00653DCD43C82D": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 45,
-   "note": "37 box-office listed on the page, no count",
-   "name": "Seattle Torrent vs. San Jose Sea Lions",
-   "date": "2027-04-17",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:31:11.037Z"
-  },
-  "0F006554AA2D7170": {
-   "status": "available",
-   "primary": 3859,
-   "resale": 178,
-   "fromPrimary": 39.5,
-   "fromResale": 67,
-   "name": "Queens of The Stone Age - PERFECTH WORLD TOUR",
-   "date": "2027-05-07",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:31:13.191Z"
-  },
-  "0F00654293525E5F": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 94.2,
-   "note": "27 box-office listed on the page, no count",
-   "name": "Def Leppard and Goo Goo Dolls  ",
-   "date": "2027-05-09",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:31:33.291Z"
-  },
-  "0F0065499FD7760A": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "fromResale": 266.8,
-   "note": "40 resale listed on the page",
-   "name": "Calvin Harris - North America Tour",
-   "date": "2027-05-14",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:31:53.322Z"
-  },
-  "0F0065540E4935CE": {
-   "status": "soldout",
-   "primary": 0,
-   "resale": 0,
-   "fromResale": 245.14,
-   "note": "38 resale listed on the page",
-   "name": "Calvin Harris - North America Tour",
-   "date": "2027-05-15",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:32:13.395Z"
-  },
-  "0F0064A6DAB644A1": {
-   "status": "available",
-   "primary": 2949,
-   "resale": 113,
-   "fromPrimary": 59.5,
-   "fromResale": 80,
-   "name": "Niall Horan: Dinner Party Live On Tour",
-   "date": "2027-05-27",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:32:15.349Z"
-  },
-  "0F0065352E956033": {
-   "status": "available",
-   "primary": null,
-   "resale": 0,
-   "fromPrimary": 62.35,
-   "note": "27 box-office listed on the page, no count",
-   "name": "A Perfect Circle with special guest The Cult",
-   "date": "2027-05-30",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:32:35.450Z"
-  },
-  "0F00653207A196E3": {
-   "status": "available",
-   "primary": 4421,
-   "resale": 0,
-   "fromPrimary": 39.5,
-   "fromResale": null,
-   "name": "Lizzy McAlpine: The Over Country Tour",
-   "date": "2027-07-17",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:32:37.118Z"
-  },
-  "0F006546BF749849": {
-   "status": "available",
-   "primary": 2969,
-   "resale": 0,
-   "fromPrimary": 59.5,
-   "fromResale": null,
-   "name": "Leon Bridges Presents: The Happiness Anytime Tour",
-   "date": "2027-08-13",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:32:39.082Z"
-  },
   "0F006454C38B1B44": {
    "status": "available",
    "primary": 606,
@@ -2323,20 +3533,6 @@
    "date": "2026-11-13",
    "venue": "Paramount Theatre",
    "checked": "2026-11-12T23:34:09.438Z"
-  },
-  "0F0064C4A0C8A341": {
-   "status": "presale",
-   "name": "Seattle Kraken vs. Montreal Canadiens",
-   "date": "2027-02-03",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:44:18.665Z"
-  },
-  "0F006562C4887F64": {
-   "status": "presale",
-   "name": "Kings of Leon",
-   "date": "2027-09-15",
-   "venue": "Climate Pledge Arena",
-   "checked": "2026-11-12T23:44:18.665Z"
   },
   "0F0064A59F478F79": {
    "status": "presale",
