@@ -10697,6 +10697,269 @@
     "checked": "2026-11-21T00:53:17.383Z",
     "from": 54.99
    }
+  },
+  {
+   "venue": "Convention Center",
+   "title": "2026 ABRCMS",
+   "date": "2026-11-21",
+   "time": "",
+   "url": "https://abrcms.org/",
+   "type": "expo",
+   "building": "Summit Building"
+  },
+  {
+   "venue": "Convention Center",
+   "title": "Pacific Marine Expo 2026",
+   "date": "2026-11-21",
+   "time": "",
+   "url": "https://seattlecc.com/upcoming-events/?eventid=37476",
+   "type": "expo",
+   "building": "Arch Building"
+  },
+  {
+   "venue": "Pacific Science Center",
+   "title": "Brewology",
+   "date": "2026-11-21",
+   "time": "",
+   "url": "https://pacificsciencecenter.org/events/brewology/"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "2026 Seattle Christmas Market",
+   "date": "2026-11-21",
+   "time": "",
+   "url": "https://www.seattlecenter.com/events/event-calendar/2026-seattle-christmas-market-x43753"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "International Gem & Jewelry Show",
+   "date": "2026-11-21",
+   "time": "10:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/international-gem-and-jewelry-show-x47819",
+   "type": "expo"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Gem Arbogast & 12 Page Apology",
+   "date": "2026-11-21",
+   "time": "11:00:00",
+   "url": "https://link.dice.fm/Q491d6bee824",
+   "type": "concert",
+   "end": "14:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-21",
+   "time": "12:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "15:24:00"
+  },
+  {
+   "venue": "Husky Stadium",
+   "title": "Washington Huskies Football vs. Indiana Hoosiers Football",
+   "date": "2026-11-21",
+   "time": "12:30:00",
+   "url": "https://gohuskies.com/sports/football/schedule",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Peacock"
+    ]
+   }
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Page and Play: Story Time | Chicka Chicka Boom Boom: The Holiday Show",
+   "date": "2026-11-21",
+   "time": "13:00:00",
+   "url": "https://www.sct.org/onstage/productions/page-and-play-story-time-chicka-chicka-boom-boom-the-holiday-show/",
+   "type": "community"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Club Kid",
+   "date": "2026-11-21",
+   "time": "13:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/club-kid",
+   "movie": true,
+   "end": "15:31:00"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Chicka Chicka Boom Boom: The Holiday Show",
+   "date": "2026-11-21",
+   "time": "14:00:00",
+   "url": "https://www.sct.org/onstage/productions/chicka-chicka-boom-boom-holiday-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Chicka Chicka Boom Boom: The Holiday Show",
+   "date": "2026-11-21",
+   "time": "14:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/chicka-chicka-boom-boom-the-holiday-show-x51738"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Where is the Fiesta?",
+   "date": "2026-11-21",
+   "time": "15:00:00",
+   "url": "https://www.siff.net/programs-and-events/cinema-italian-style-2026/where-is-the-fiesta",
+   "end": "16:42:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Raise the Red Lantern",
+   "date": "2026-11-21",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/raise-the-red-lantern",
+   "movie": true,
+   "end": "18:22:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Josh Johnson's Comedy Band Camp",
+   "date": "2026-11-21",
+   "time": "17:00:00",
+   "url": "https://www.ticketmaster.com/josh-johnsons-comedy-band-camp-seattle-washington-11-21-2026/event/0F00645BABDAB14A",
+   "type": "arts",
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-21T00:53:37.402Z",
+    "from": 103.59
+   }
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Comedy Band Camp Essentials Upgrade",
+   "date": "2026-11-21",
+   "time": "17:00:00",
+   "url": "https://www.ticketmaster.com/comedy-band-camp-essentials-upgrade-seattle-washington-11-21-2026/event/0F0064861ECBE435",
+   "tickets": {
+    "box": 256,
+    "resale": 0,
+    "checked": "2026-11-21T00:53:39.947Z",
+    "from": 80.25
+   }
+  },
+  {
+   "venue": "KEXP",
+   "title": "Audioasis Live",
+   "date": "2026-11-21",
+   "time": "17:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/audioasis-live-4-2026/",
+   "end": "21:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "The Kidnapping of Arabella",
+   "date": "2026-11-21",
+   "time": "17:30:00",
+   "url": "https://www.siff.net/programs-and-events/cinema-italian-style-2026/the-kidnapping-of-arabella",
+   "end": "19:17:00"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "2Dead Boyz x The Underachievers: “NO1LIVESFOREVER Tour",
+   "date": "2026-11-21",
+   "time": "18:00",
+   "url": "https://calendar.thecrocodile.com/shows/2dead-boyz-x-the-underachievers-no1livesforever-tour-21-nov",
+   "type": "concert"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Aaa Fest: Ajj, Kimya Dawson, Foot Ox, carter c",
+   "date": "2026-11-21",
+   "time": "18:00:00",
+   "url": "https://link.dice.fm/w574c9b3d691",
+   "type": "concert",
+   "end": "22:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Chicka Chicka Boom Boom: The Holiday Show",
+   "date": "2026-11-21",
+   "time": "18:00:00",
+   "url": "https://www.sct.org/onstage/productions/chicka-chicka-boom-boom-holiday-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Chicka Chicka Boom Boom: The Holiday Show",
+   "date": "2026-11-21",
+   "time": "18:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/chicka-chicka-boom-boom-the-holiday-show-x51739"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-21",
+   "time": "19:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "21:13:00"
+  },
+  {
+   "venue": "McCaw Hall",
+   "title": "Warren Miller \"Days Off\" - ft. Katie Burrell LIVE",
+   "date": "2026-11-21",
+   "time": "19:30:00",
+   "url": "https://www.ticketmaster.com/warren-miller-days-off-ft-katie-seattle-washington-11-21-2026/event/0F0065288165451C",
+   "type": "movie",
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-17T01:08:48.452Z",
+    "from": 38.2
+   }
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Love Fits Everything",
+   "date": "2026-11-21",
+   "time": "20:00:00",
+   "url": "https://www.siff.net/programs-and-events/cinema-italian-style-2026/love-fits-everything",
+   "end": "21:36:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Josh Johnson's Comedy Band Camp",
+   "date": "2026-11-21",
+   "time": "20:30:00",
+   "url": "https://www.ticketmaster.com/josh-johnsons-comedy-band-camp-seattle-washington-11-21-2026/event/0F00645BABD5B143",
+   "type": "arts",
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-21T00:54:00.169Z",
+    "from": 103.59
+   }
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Comedy Band Camp Essentials Upgrade",
+   "date": "2026-11-21",
+   "time": "20:30:00",
+   "url": "https://www.ticketmaster.com/comedy-band-camp-essentials-upgrade-seattle-washington-11-21-2026/event/0F0064861EC6E42E"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Jai Wolf with Conrad.",
+   "date": "2026-11-21",
+   "time": "21:00:00",
+   "url": "https://www.axs.com/events/1495149/jai-wolf-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "The Crocodile",
+   "title": "Gimme Gimme Disco - 21+",
+   "date": "2026-11-21",
+   "time": "22:00:00",
+   "url": "https://www.thecrocodile.com",
+   "type": "concert"
   }
  ]
 }
