@@ -11127,6 +11127,101 @@
    "date": "2026-11-22",
    "time": "20:30:00",
    "url": "https://www.ticketmaster.com/comedy-band-camp-essentials-upgrade-seattle-washington-11-22-2026/event/0F0064861ED0E440"
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Hockey Happy Hour",
+   "date": "2026-11-23",
+   "time": ""
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-23",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "18:39:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-23",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "17:58:00"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "2026 Seattle Christmas Market",
+   "date": "2026-11-23",
+   "time": "16:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/2026-seattle-christmas-market-x43756"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Club Kid",
+   "date": "2026-11-23",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/club-kid",
+   "movie": true,
+   "end": "18:31:00"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Artists at The Center: Rainier Breakers",
+   "date": "2026-11-23",
+   "time": "18:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/artists-at-the-center-rainier-breakers",
+   "free": true
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Kraken vs. Anaheim Ducks",
+   "date": "2026-11-23",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-kraken-vs-anaheim-ducks-seattle-washington-11-23-2026/event/0F0064C4A06BA2A4",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Prime Video",
+     "KONG"
+    ]
+   },
+   "capacity": 16061,
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-21T00:23:24.988Z",
+    "from": 89.84
+   }
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Guess What? Trivia!",
+   "date": "2026-11-23",
+   "time": "19:00:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Raise the Red Lantern",
+   "date": "2026-11-23",
+   "time": "19:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/raise-the-red-lantern",
+   "movie": true,
+   "end": "21:22:00"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "GWAR with Midnight, Mac Sabbath, Nailed Shut",
+   "date": "2026-11-23",
+   "time": "19:45:00",
+   "url": "https://www.axs.com/events/1423219/gwar-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
   }
  ]
 }
