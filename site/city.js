@@ -253,7 +253,7 @@
       cssVar: '--v-tmobile',
       color: '#8ad8e0',
       url: 'https://www.mlb.com/mariners/ballpark/events',
-      icon: 'marks/venues/mlb.com.png',
+      icon: 'marks/venues/mariners.png',
       tm: { id: 'KovZpZAEevAA', match: 't-mobile park', fallbackUrl: 'https://www.mlb.com/mariners', exclude: /ballpark tour|flex membership|gift card/i }, // gift cards slipped through as a 2026-10-21 row
       // the Mariners' own events page (mlb.com/mariners/tickets/events) is read by marinersEvents in fetch-events.mjs — Banana Ball's lottery tickets never reach Ticketmaster (Steve, 2026-10-26: "use ticketmaster AND the venues event site")
       soldOut: 'tm',
