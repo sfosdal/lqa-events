@@ -11222,6 +11222,88 @@
    "date": "2026-11-23",
    "time": "19:45:00",
    "url": "https://www.axs.com/events/1423219/gwar-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "KEXP",
+   "title": "Emma Ruth Rundle Live on KEXP (Open To The Public)",
+   "date": "2026-11-24",
+   "time": "12:00:00",
+   "url": "https://www.kexp.org/events/kexp-events/emma-ruth-rundle-live-on-kexp-kexp_526854/",
+   "end": "12:30:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-24",
+   "time": "15:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "17:43:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Raise the Red Lantern",
+   "date": "2026-11-24",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/raise-the-red-lantern",
+   "movie": true,
+   "end": "17:52:00"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "2026 Seattle Christmas Market",
+   "date": "2026-11-24",
+   "time": "16:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/2026-seattle-christmas-market-x43757"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Club Kid",
+   "date": "2026-11-24",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/club-kid",
+   "movie": true,
+   "end": "18:31:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-24",
+   "time": "18:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "21:39:00"
+  },
+  {
+   "venue": "Showbox SoDo",
+   "title": "SAOSIN with Silent Planet, Like Moths to Flames, and Save Us",
+   "date": "2026-11-24",
+   "time": "19:00:00",
+   "url": "https://www.axs.com/events/1433012/saosin-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Babe Haven",
+   "date": "2026-11-24",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/J11750e6a081",
+   "type": "concert",
+   "end": "23:00:00"
+  },
+  {
+   "venue": "Paramount Theatre",
+   "title": "Scott Bradlee's Postmodern Jukebox",
+   "date": "2026-11-24",
+   "time": "20:00:00",
+   "url": "https://www.ticketmaster.com/scott-bradlees-postmodern-jukebox-seattle-washington-11-24-2026/event/0F00649ED359E61C",
+   "type": "concert",
+   "capacity": 3015,
+   "tickets": {
+    "box": null,
+    "resale": 0,
+    "checked": "2026-11-21T00:55:00.540Z",
+    "from": 49.1
+   }
   }
  ]
 }
