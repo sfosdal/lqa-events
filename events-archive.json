@@ -11304,6 +11304,119 @@
     "checked": "2026-11-21T00:55:00.540Z",
     "from": 49.1
    }
+  },
+  {
+   "venue": "The Traveling Goat",
+   "type": "bar",
+   "url": "https://www.travelinggoatseattle.com/events",
+   "title": "Hockey Happy Hour",
+   "date": "2026-11-25",
+   "time": ""
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-25",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "17:58:00"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "2026 Seattle Christmas Market",
+   "date": "2026-11-25",
+   "time": "16:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/2026-seattle-christmas-market-x43758"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Paper Tiger",
+   "date": "2026-11-25",
+   "time": "16:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/paper-tiger",
+   "movie": true,
+   "end": "18:09:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Club Kid",
+   "date": "2026-11-25",
+   "time": "16:30:00",
+   "url": "https://www.siff.net/cinema/in-theaters/club-kid",
+   "movie": true,
+   "end": "18:31:00"
+  },
+  {
+   "venue": "Children's Theatre",
+   "title": "Chicka Chicka Boom Boom: The Holiday Show",
+   "date": "2026-11-25",
+   "time": "17:00:00",
+   "url": "https://www.sct.org/onstage/productions/chicka-chicka-boom-boom-holiday-2026/",
+   "type": "arts"
+  },
+  {
+   "venue": "Seattle Center",
+   "title": "Chicka Chicka Boom Boom: The Holiday Show",
+   "date": "2026-11-25",
+   "time": "17:00:00",
+   "url": "https://www.seattlecenter.com/events/event-calendar/chicka-chicka-boom-boom-the-holiday-show-x51742"
+  },
+  {
+   "venue": "Climate Pledge Arena",
+   "title": "Seattle Kraken vs. Chicago Blackhawks",
+   "date": "2026-11-25",
+   "time": "18:40:00",
+   "url": "https://www.ticketmaster.com/seattle-kraken-vs-chicago-blackhawks-seattle-washington-11-25-2026/event/0F0064C4A071A2AD",
+   "type": "sports",
+   "watch": {
+    "tv": [
+     "Prime Video",
+     "KING",
+     "KONG"
+    ]
+   },
+   "tickets": {
+    "box": 0,
+    "resale": 0,
+    "checked": "2026-11-21T00:23:45.115Z",
+    "from": 97.17
+   },
+   "soldOut": true
+  },
+  {
+   "venue": "The Vera Project",
+   "title": "Spanish Love Songs",
+   "date": "2026-11-25",
+   "time": "19:00:00",
+   "url": "https://link.dice.fm/bdd219facbd0",
+   "type": "concert",
+   "end": "23:00:00",
+   "soldOut": true
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-25",
+   "time": "19:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "21:54:00"
+  },
+  {
+   "venue": "Showbox at the Market",
+   "title": "Boston Manor with Ben Quad, Super Sometimes",
+   "date": "2026-11-25",
+   "time": "19:30:00",
+   "url": "https://www.axs.com/events/1462887/boston-manor-tickets?skin=showboxpresents&src=AEGLIVE_WSHBXSEA030115VEN001"
+  },
+  {
+   "venue": "Seattle Rep",
+   "title": "Technical Dress Rehearsal",
+   "date": "2026-11-25",
+   "time": "19:30:00",
+   "url": "https://www.seattlerep.org/support/donor-events-scroller/technical-dress-rehearsal-for-peter-pan-goes-wrong",
+   "type": "arts"
   }
  ]
 }
