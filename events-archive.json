@@ -11417,6 +11417,42 @@
    "time": "19:30:00",
    "url": "https://www.seattlerep.org/support/donor-events-scroller/technical-dress-rehearsal-for-peter-pan-goes-wrong",
    "type": "arts"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Club Kid",
+   "date": "2026-11-26",
+   "time": "12:45:00",
+   "url": "https://www.siff.net/cinema/in-theaters/club-kid",
+   "movie": true,
+   "end": "14:46:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Wild Horse Nine",
+   "date": "2026-11-26",
+   "time": "13:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/wild-horse-nine",
+   "movie": true,
+   "end": "14:58:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "Paper Tiger",
+   "date": "2026-11-26",
+   "time": "13:15:00",
+   "url": "https://www.siff.net/cinema/in-theaters/paper-tiger",
+   "movie": true,
+   "end": "15:09:00"
+  },
+  {
+   "venue": "SIFF Cinema Uptown",
+   "title": "You Can See Everything",
+   "date": "2026-11-26",
+   "time": "16:00:00",
+   "url": "https://www.siff.net/cinema/in-theaters/you-can-see-everything",
+   "movie": true,
+   "end": "18:54:00"
   }
  ]
 }
